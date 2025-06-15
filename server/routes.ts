@@ -91,9 +91,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { email } = z.object({ email: z.string().email() }).parse(req.body);
       
       // Find user by email
-      const targetUser = await storage.getUser(email); // This would need to be implemented
+      const targetUser = await storage.getUserByEmail(email);
       if (!targetUser) {
-        return res.status(404).json({ message: "User not found" });
+        return res.status(404).json({ message: "User not found. They need to sign up first." });
+      }
+      
+      // Check if connection already exists
+      const existingMembers = await storage.getFamilyMembers(userId);
+      if (existingMembers.some(member => member.id === targetUser.id)) {
+        return res.status(400).json({ message: "User is already in your family" });
       }
       
       const connection = await storage.addFamilyMember({
@@ -200,12 +206,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     ws.on('close', () => {
       // Remove client from map
-      for (const [userId, client] of clients.entries()) {
+      clients.forEach((client, userId) => {
         if (client === ws) {
           clients.delete(userId);
-          break;
         }
-      }
+      });
       console.log('WebSocket client disconnected');
     });
   });
