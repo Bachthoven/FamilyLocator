@@ -1,0 +1,215 @@
+import { useState } from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
+import BottomNavigation from '@/components/BottomNavigation';
+import PrivacySettings from '@/components/PrivacySettings';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { 
+  Settings as SettingsIcon, 
+  User, 
+  Shield, 
+  Bell, 
+  HelpCircle, 
+  LogOut,
+  MapPin,
+  Users,
+  Bookmark
+} from 'lucide-react';
+
+export default function Settings() {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [privacySettingsOpen, setPrivacySettingsOpen] = useState(false);
+
+  const handleLogout = () => {
+    if (confirm('Are you sure you want to log out?')) {
+      window.location.href = '/api/logout';
+    }
+  };
+
+  const settingsGroups = [
+    {
+      title: 'Account',
+      items: [
+        {
+          icon: User,
+          label: 'Profile Information',
+          description: 'Update your personal details',
+          action: () => toast({ title: 'Coming soon', description: 'Profile editing will be available soon.' }),
+        },
+        {
+          icon: Shield,
+          label: 'Privacy Settings',
+          description: 'Control your location sharing and data privacy',
+          action: () => setPrivacySettingsOpen(true),
+        },
+        {
+          icon: Bell,
+          label: 'Notifications',
+          description: 'Manage your notification preferences',
+          action: () => toast({ title: 'Coming soon', description: 'Notification settings will be available soon.' }),
+        },
+      ],
+    },
+    {
+      title: 'App Features',
+      items: [
+        {
+          icon: MapPin,
+          label: 'Location Services',
+          description: 'Manage location accuracy and permissions',
+          action: () => toast({ title: 'Coming soon', description: 'Location service settings will be available soon.' }),
+        },
+        {
+          icon: Users,
+          label: 'Family Management',
+          description: 'Manage your family connections',
+          action: () => window.location.href = '/family',
+        },
+        {
+          icon: Bookmark,
+          label: 'Saved Places',
+          description: 'View and manage your saved places',
+          action: () => window.location.href = '/places',
+        },
+      ],
+    },
+    {
+      title: 'Support',
+      items: [
+        {
+          icon: HelpCircle,
+          label: 'Help & Support',
+          description: 'Get help and contact support',
+          action: () => toast({ title: 'Coming soon', description: 'Help center will be available soon.' }),
+        },
+      ],
+    },
+  ];
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 rounded-full bg-muted animate-pulse mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background pb-20">
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold flex items-center mb-2">
+            <SettingsIcon className="w-6 h-6 mr-2" />
+            Settings
+          </h1>
+          <p className="text-muted-foreground">
+            Manage your account and app preferences
+          </p>
+        </div>
+
+        {/* User Profile Card */}
+        <Card className="mb-8">
+          <CardHeader>
+            <div className="flex items-center space-x-4">
+              <Avatar className="w-16 h-16">
+                <AvatarImage 
+                  src={user.profileImageUrl || undefined} 
+                  alt={`${user.firstName || user.email}'s profile`}
+                />
+                <AvatarFallback className="text-lg">
+                  {user.firstName ? user.firstName[0].toUpperCase() : user.email?.[0].toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              
+              <div className="flex-1">
+                <CardTitle className="text-xl">
+                  {user.firstName && user.lastName 
+                    ? `${user.firstName} ${user.lastName}`
+                    : user.firstName || user.email
+                  }
+                </CardTitle>
+                <p className="text-muted-foreground">{user.email}</p>
+                <div className="flex items-center space-x-2 mt-2">
+                  <Badge variant={user.locationSharingEnabled ? "default" : "secondary"}>
+                    {user.locationSharingEnabled ? "Location Sharing On" : "Location Sharing Off"}
+                  </Badge>
+                </div>
+              </div>
+            </div>
+          </CardHeader>
+        </Card>
+
+        {/* Settings Groups */}
+        <div className="space-y-6">
+          {settingsGroups.map((group) => (
+            <div key={group.title}>
+              <h2 className="text-lg font-semibold mb-4">{group.title}</h2>
+              <div className="space-y-2">
+                {group.items.map((item) => {
+                  const Icon = item.icon;
+                  return (
+                    <Card key={item.label} className="hover:shadow-md transition-shadow cursor-pointer" onClick={item.action}>
+                      <CardContent className="p-4">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                            <Icon className="w-5 h-5 text-primary" />
+                          </div>
+                          <div className="flex-1">
+                            <div className="font-medium">{item.label}</div>
+                            <div className="text-sm text-muted-foreground">{item.description}</div>
+                          </div>
+                          <div className="text-muted-foreground">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Logout Button */}
+        <div className="mt-8">
+          <Button
+            variant="destructive"
+            onClick={handleLogout}
+            className="w-full"
+          >
+            <LogOut className="w-4 h-4 mr-2" />
+            Log Out
+          </Button>
+        </div>
+
+        {/* App Info */}
+        <div className="mt-8 text-center text-sm text-muted-foreground">
+          <p>FamilyLocator v1.0.0</p>
+          <p className="mt-1">Stay connected, stay safe</p>
+        </div>
+      </div>
+
+      {/* Privacy Settings Modal */}
+      {user && (
+        <PrivacySettings
+          open={privacySettingsOpen}
+          onOpenChange={setPrivacySettingsOpen}
+          user={user}
+        />
+      )}
+
+      <BottomNavigation />
+    </div>
+  );
+}
