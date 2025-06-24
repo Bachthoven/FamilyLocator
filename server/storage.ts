@@ -214,4 +214,156 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
-export const storage = new DatabaseStorage();
+// Temporary in-memory storage implementation for development
+class MemoryStorage implements IStorage {
+  private users = new Map<string, User>();
+  private locations = new Map<string, Location[]>();
+  private places = new Map<string, Place[]>();
+  private familyConnections = new Map<string, FamilyConnection[]>();
+  private nextId = 1;
+
+  async getUser(id: string): Promise<User | undefined> {
+    return this.users.get(id);
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    for (const user of this.users.values()) {
+      if (user.email === email) return user;
+    }
+    return undefined;
+  }
+
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    const now = new Date();
+    const user: User = {
+      ...userData,
+      locationSharingEnabled: userData.locationSharingEnabled ?? true,
+      locationHistoryEnabled: userData.locationHistoryEnabled ?? true,
+      notificationsEnabled: userData.notificationsEnabled ?? true,
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.users.set(user.id, user);
+    return user;
+  }
+
+  async updateUserSettings(userId: string, settings: Partial<User>): Promise<User> {
+    const user = this.users.get(userId);
+    if (!user) throw new Error('User not found');
+    
+    const updatedUser = { ...user, ...settings, updatedAt: new Date() };
+    this.users.set(userId, updatedUser);
+    return updatedUser;
+  }
+
+  async saveLocation(location: InsertLocation): Promise<Location> {
+    const newLocation: Location = {
+      id: this.nextId++,
+      ...location,
+      timestamp: new Date(),
+    };
+    
+    const userLocations = this.locations.get(location.userId) || [];
+    userLocations.push(newLocation);
+    this.locations.set(location.userId, userLocations);
+    
+    return newLocation;
+  }
+
+  async getUserLatestLocation(userId: string): Promise<Location | undefined> {
+    const userLocations = this.locations.get(userId) || [];
+    return userLocations[userLocations.length - 1];
+  }
+
+  async getFamilyMembersLocations(userId: string): Promise<Array<Location & { user: User }>> {
+    const connections = this.familyConnections.get(userId) || [];
+    const acceptedConnections = connections.filter(c => c.status === 'accepted');
+    
+    const result: Array<Location & { user: User }> = [];
+    
+    for (const connection of acceptedConnections) {
+      const familyMemberId = connection.familyMemberId;
+      const user = this.users.get(familyMemberId);
+      const location = await this.getUserLatestLocation(familyMemberId);
+      
+      if (user && location && user.locationSharingEnabled) {
+        result.push({ ...location, user });
+      }
+    }
+    
+    return result;
+  }
+
+  async getFamilyMembers(userId: string): Promise<Array<User>> {
+    const connections = this.familyConnections.get(userId) || [];
+    const acceptedConnections = connections.filter(c => c.status === 'accepted');
+    
+    const members: User[] = [];
+    for (const connection of acceptedConnections) {
+      const user = this.users.get(connection.familyMemberId);
+      if (user) members.push(user);
+    }
+    
+    return members;
+  }
+
+  async addFamilyMember(connection: InsertFamilyConnection): Promise<FamilyConnection> {
+    const newConnection: FamilyConnection = {
+      id: this.nextId++,
+      ...connection,
+      createdAt: new Date(),
+    };
+    
+    const userConnections = this.familyConnections.get(connection.userId) || [];
+    userConnections.push(newConnection);
+    this.familyConnections.set(connection.userId, userConnections);
+    
+    return newConnection;
+  }
+
+  async acceptFamilyConnection(userId: string, familyMemberId: string): Promise<FamilyConnection> {
+    const connections = this.familyConnections.get(userId) || [];
+    const connection = connections.find(c => c.familyMemberId === familyMemberId);
+    
+    if (!connection) throw new Error('Connection not found');
+    
+    connection.status = 'accepted';
+    return connection;
+  }
+
+  async removeFamilyMember(userId: string, familyMemberId: string): Promise<void> {
+    const connections = this.familyConnections.get(userId) || [];
+    const filteredConnections = connections.filter(c => c.familyMemberId !== familyMemberId);
+    this.familyConnections.set(userId, filteredConnections);
+  }
+
+  async getUserPlaces(userId: string): Promise<Place[]> {
+    return this.places.get(userId) || [];
+  }
+
+  async savePlace(place: InsertPlace): Promise<Place> {
+    const newPlace: Place = {
+      id: this.nextId++,
+      ...place,
+      createdAt: new Date(),
+    };
+    
+    const userPlaces = this.places.get(place.userId) || [];
+    userPlaces.push(newPlace);
+    this.places.set(place.userId, userPlaces);
+    
+    return newPlace;
+  }
+
+  async deletePlace(userId: string, placeId: number): Promise<void> {
+    const userPlaces = this.places.get(userId) || [];
+    const filteredPlaces = userPlaces.filter(p => p.id !== placeId);
+    this.places.set(userId, filteredPlaces);
+  }
+}
+
+// Use memory storage temporarily while database issues are resolved
+export const storage = new MemoryStorage();
+
+// Keep database storage class for when database is fixed
+export const databaseStorage = new DatabaseStorage();
