@@ -4,6 +4,7 @@ import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertLocationSchema, insertPlaceSchema, insertFamilyConnectionSchema } from "@shared/schema";
+import { locationLogger } from "./locationLogger";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -34,6 +35,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const settings = settingsSchema.parse(req.body);
       const user = await storage.updateUserSettings(userId, settings);
+      
+      // Start or stop hourly logging based on location history setting
+      if (settings.locationHistoryEnabled !== undefined) {
+        if (settings.locationHistoryEnabled) {
+          locationLogger.startHourlyLogging(userId);
+        } else {
+          locationLogger.stopHourlyLogging(userId);
+        }
+      }
+      
       res.json(user);
     } catch (error) {
       console.error("Error updating settings:", error);
@@ -182,6 +193,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Hourly location logging control routes
+  app.post('/api/location-logging/start', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      locationLogger.startHourlyLogging(userId);
+      res.json({ message: "Hourly location logging started", success: true });
+    } catch (error) {
+      console.error("Error starting location logging:", error);
+      res.status(500).json({ message: "Failed to start location logging" });
+    }
+  });
+
+  app.post('/api/location-logging/stop', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      locationLogger.stopHourlyLogging(userId);
+      res.json({ message: "Hourly location logging stopped", success: true });
+    } catch (error) {
+      console.error("Error stopping location logging:", error);
+      res.status(500).json({ message: "Failed to stop location logging" });
+    }
+  });
+
+  app.get('/api/location-logging/status', isAuthenticated, async (req: any, res) => {
+    try {
+      const activeSessions = locationLogger.getActiveSessions();
+      res.json({ activeSessions });
+    } catch (error) {
+      console.error("Error getting logging status:", error);
+      res.status(500).json({ message: "Failed to get logging status" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   // WebSocket server for real-time location updates
@@ -198,6 +242,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (data.type === 'auth' && data.userId) {
           clients.set(data.userId, ws);
           console.log(`User ${data.userId} registered for WebSocket updates`);
+          
+          // Auto-start hourly location logging for users with location history enabled
+          storage.getUser(data.userId).then(user => {
+            if (user && user.locationHistoryEnabled) {
+              locationLogger.startHourlyLogging(data.userId);
+            }
+          }).catch(error => {
+            console.error(`Error checking user settings for ${data.userId}:`, error);
+          });
         }
       } catch (error) {
         console.error('WebSocket message error:', error);
@@ -205,10 +258,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
 
     ws.on('close', () => {
-      // Remove client from map
+      // Remove client from map and stop location logging
       clients.forEach((client, userId) => {
         if (client === ws) {
           clients.delete(userId);
+          // Stop hourly logging when user disconnects
+          locationLogger.stopHourlyLogging(userId);
         }
       });
       console.log('WebSocket client disconnected');

@@ -3,6 +3,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import BottomNavigation from '@/components/BottomNavigation';
 import PrivacySettings from '@/components/PrivacySettings';
+import LocationLogger from '@/components/LocationLogger';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -179,6 +180,11 @@ export default function Settings() {
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Location Logger Section */}
+        <div className="mb-8">
+          <LocationLogger />
         </div>
 
         {/* Logout Button */}

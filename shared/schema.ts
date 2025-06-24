@@ -56,6 +56,7 @@ export const locations = pgTable("locations", {
   longitude: real("longitude").notNull(),
   accuracy: real("accuracy"),
   address: text("address"),
+  type: varchar("type").notNull().default("manual"), // manual, automatic_hourly
   timestamp: timestamp("timestamp").defaultNow(),
 });
 

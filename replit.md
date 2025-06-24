@@ -121,6 +121,14 @@ FamilyLocator is a modern web application that enables families to share their r
 
 ## Changelog
 
+- June 24, 2025. Added automatic hourly location logging feature:
+  - Background service that logs user location data every hour
+  - Configurable through user privacy settings (location history enabled/disabled)
+  - Auto-start/stop based on WebSocket connections and user preferences
+  - Manual control through Settings page with LocationLogger component
+  - Enhanced location schema with type field (manual vs automatic_hourly)
+  - Temporary in-memory storage implementation to resolve database connection issues
+
 - June 15, 2025. Created comprehensive cross-platform family locator application with:
   - Real-time location tracking using geolocation API and WebSocket connections
   - Interactive map interface with Leaflet for visualizing family member locations

@@ -260,6 +260,7 @@ class MemoryStorage implements IStorage {
     const newLocation: Location = {
       id: this.nextId++,
       ...location,
+      type: location.type || "manual",
       timestamp: new Date(),
     };
     

@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
-import { useGeolocation } from '@/hooks/useGeolocation';
+import { useLocationLogger } from '@/hooks/useLocationLogger';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { useToast } from '@/hooks/use-toast';
-import { apiRequest } from '@/lib/queryClient';
 import { isUnauthorizedError } from '@/lib/authUtils';
 import Map from '@/components/Map';
 import BottomSheet from '@/components/BottomSheet';
@@ -105,7 +104,7 @@ export default function Home() {
   useEffect(() => {
     if (locationError) {
       toast({
-        title: "Location Error",
+        title: "Location Error", 
         description: locationError,
         variant: "destructive",
       });
