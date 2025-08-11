@@ -218,17 +218,11 @@ export default function Home() {
       
       {/* Bottom Sheet Panel */}
       <BottomSheet>
-        <div className="flex items-center justify-between mb-4">
+        <div className="mb-4">
           <h3 className="text-lg font-semibold">Family Members</h3>
-          <Link href="/family">
-            <Button variant="ghost" size="sm" className="text-primary">
-              <Plus className="w-4 h-4 mr-1" />
-              Add
-            </Button>
-          </Link>
         </div>
         
-        <div className="space-y-3 max-h-64 overflow-y-auto">
+        <div className="space-y-3 max-h-80 overflow-y-auto pb-safe">
           {locationsLoading ? (
             // Loading skeletons
             Array.from({ length: 3 }).map((_, i) => (
