@@ -35,52 +35,27 @@ export default function Home() {
     }
   }, [isAuthenticated, authLoading, toast]);
 
-  // Geolocation hook
-  const { location: currentLocation, error: locationError } = useGeolocation({
-    watch: true,
-    enableHighAccuracy: true,
-  });
+  // Use the location logger hook for automatic location tracking
+  const { 
+    currentLocation, 
+    locationError, 
+    isLoggingLocation 
+  } = useLocationLogger();
 
   // WebSocket for real-time updates
-  const { lastMessage } = useWebSocket();
+  const { lastMessage, sendMessage } = useWebSocket();
 
-  // Send location updates to server
-  const saveLocationMutation = useMutation({
-    mutationFn: async (locationData: any) => {
-      await apiRequest('POST', '/api/locations', locationData);
-    },
-    onError: (error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
-      console.error('Failed to save location:', error);
-    },
-  });
-
-  // Send location to server when it changes
+  // Connect to WebSocket when user is authenticated
   useEffect(() => {
-    if (currentLocation && user?.locationSharingEnabled) {
-      saveLocationMutation.mutate({
-        latitude: currentLocation.latitude,
-        longitude: currentLocation.longitude,
-        accuracy: currentLocation.accuracy,
-      });
+    if (user && sendMessage) {
+      sendMessage({ type: 'auth', userId: user.id });
     }
-  }, [currentLocation, user?.locationSharingEnabled]);
+  }, [user, sendMessage]);
 
-  // Fetch family members and their locations
-  const { data: familyLocations = [], isLoading: locationsLoading } = useQuery({
+  // Get family locations
+  const { data: familyLocations = [], isLoading: locationsLoading } = useQuery<Array<Location & { user: User }>>({
     queryKey: ['/api/locations/family'],
-    enabled: !!user,
-    refetchInterval: 30000, // Refetch every 30 seconds
+    refetchInterval: 30000, // Refresh every 30 seconds
   });
 
   // Handle WebSocket messages
