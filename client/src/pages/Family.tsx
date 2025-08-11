@@ -37,6 +37,10 @@ export default function Family() {
   const inviteMutation = useMutation({
     mutationFn: async (email: string) => {
       const response = await apiRequest('POST', '/api/family/invite', { email });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to send invitation');
+      }
       return response.json();
     },
     onSuccess: () => {
@@ -48,7 +52,7 @@ export default function Family() {
       setInviteEmail('');
       queryClient.invalidateQueries({ queryKey: ['/api/family'] });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       if (isUnauthorizedError(error)) {
         toast({
           title: "Unauthorized",
@@ -60,9 +64,22 @@ export default function Family() {
         }, 500);
         return;
       }
+      
+      // Handle specific error messages from server
+      let errorMessage = "Failed to send invitation. Please try again.";
+      if (error?.message) {
+        if (error.message.includes("User not found")) {
+          errorMessage = `The person with that email hasn't signed up for FamilyLocator yet. Please ask them to create an account first, then try inviting them again.`;
+        } else if (error.message.includes("already in your family")) {
+          errorMessage = "This person is already in your family.";
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
       toast({
-        title: "Error",
-        description: "Failed to send invitation. Please try again.",
+        title: "Cannot Send Invitation",
+        description: errorMessage,
         variant: "destructive",
       });
     },
@@ -155,6 +172,10 @@ export default function Family() {
                     value={inviteEmail}
                     onChange={(e) => setInviteEmail(e.target.value)}
                   />
+                  <div className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg mt-2">
+                    <strong>Important:</strong> The person you're inviting must already have a FamilyLocator account. 
+                    Ask them to sign up at this website first, then you can add them to your family.
+                  </div>
                 </div>
                 <div className="flex justify-end space-x-2">
                   <Button
