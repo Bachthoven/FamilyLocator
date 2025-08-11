@@ -104,3 +104,16 @@
 .animate-pulse-slow {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
+
+/* Fix map controls positioning to avoid header overlap */
+.leaflet-control-container {
+  z-index: 10;
+}
+
+.leaflet-top.leaflet-left {
+  top: 100px; /* Push down below header */
+}
+
+.leaflet-control-zoom {
+  margin-left: 10px !important;
+}
