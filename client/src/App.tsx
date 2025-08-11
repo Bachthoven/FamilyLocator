@@ -9,7 +9,6 @@ import Home from "@/pages/Home";
 import Family from "@/pages/Family";
 import Places from "@/pages/Places";
 import Settings from "@/pages/Settings";
-import WorldMapPage from "@/pages/WorldMap";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -24,7 +23,6 @@ function Router() {
           <Route path="/" component={Home} />
           <Route path="/family" component={Family} />
           <Route path="/places" component={Places} />
-          <Route path="/world-map" component={WorldMapPage} />
           <Route path="/settings" component={Settings} />
         </>
       )}
