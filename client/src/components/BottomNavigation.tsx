@@ -43,13 +43,13 @@ export default function BottomNavigation() {
             
             return (
               <Link key={item.path} href={item.path}>
-                <a className={cn(
+                <div className={cn(
                   "flex flex-col items-center py-2 px-3 transition-colors",
                   isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
                 )}>
                   <Icon className="w-5 h-5 mb-1" />
                   <span className="text-xs font-medium">{item.label}</span>
-                </a>
+                </div>
               </Link>
             );
           })}

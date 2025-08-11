@@ -22,13 +22,13 @@ export default function Family() {
   const [inviteEmail, setInviteEmail] = useState('');
 
   // Fetch family members
-  const { data: familyMembers = [], isLoading } = useQuery({
+  const { data: familyMembers = [], isLoading } = useQuery<User[]>({
     queryKey: ['/api/family'],
     enabled: !!user,
   });
 
   // Fetch family locations for status
-  const { data: familyLocations = [] } = useQuery({
+  const { data: familyLocations = [] } = useQuery<Array<{ user: User; latitude: number; longitude: number; timestamp: Date | null; }>>({
     queryKey: ['/api/locations/family'],
     enabled: !!user,
   });

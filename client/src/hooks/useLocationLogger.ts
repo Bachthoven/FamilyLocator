@@ -25,11 +25,7 @@ export function useLocationLogger() {
 
   const saveLocationMutation = useMutation({
     mutationFn: (locationData: LocationData) => 
-      apiRequest('/api/locations', {
-        method: 'POST',
-        body: JSON.stringify(locationData),
-        headers: { 'Content-Type': 'application/json' },
-      }),
+      apiRequest('POST', '/api/locations', locationData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/locations/family'] });
     },
@@ -42,7 +38,8 @@ export function useLocationLogger() {
   useEffect(() => {
     if (
       isAuthenticated && 
-      user?.locationSharingEnabled && 
+      user && 
+      (user as any).locationSharingEnabled !== false && 
       location && 
       !error
     ) {
@@ -53,7 +50,7 @@ export function useLocationLogger() {
         type: 'manual',
       });
     }
-  }, [location, error, isAuthenticated, user?.locationSharingEnabled]);
+  }, [location, error, isAuthenticated, user]);
 
   // Handle location errors
   useEffect(() => {
