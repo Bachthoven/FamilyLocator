@@ -75,6 +75,22 @@
   padding-bottom: env(safe-area-inset-bottom);
 }
 
+/* Cross-platform safe area handling */
+.pb-safe {
+  padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0));
+}
+
+/* Fix for Windows touch/click issues */
+.cursor-pointer {
+  cursor: pointer;
+}
+
+@media (pointer: coarse) {
+  .cursor-pointer {
+    cursor: default;
+  }
+}
+
 /* Pulse animation for location markers */
 @keyframes pulse {
   0%, 100% {

@@ -65,18 +65,38 @@ function MapBoundsController({ locations }: { locations: FamilyLocation[] }) {
   const map = useMap();
 
   useEffect(() => {
-    if (locations.length > 0) {
-      const bounds = L.latLngBounds(
-        locations.map(loc => [loc.latitude, loc.longitude])
-      );
-      
-      // Add padding and fit bounds
-      map.fitBounds(bounds, { 
-        padding: [50, 50],
-        maxZoom: 10 
-      });
-    } else {
-      // Default world view
+    try {
+      if (locations && locations.length > 0) {
+        const validLocations = locations.filter(loc => 
+          loc && !isNaN(loc.latitude) && !isNaN(loc.longitude)
+        );
+        
+        if (validLocations.length > 0) {
+          const bounds = L.latLngBounds(
+            validLocations.map(loc => [loc.latitude, loc.longitude])
+          );
+          
+          // Add padding and fit bounds safely
+          setTimeout(() => {
+            try {
+              map.fitBounds(bounds, { 
+                padding: [50, 50],
+                maxZoom: 10 
+              });
+            } catch (e) {
+              console.warn('Failed to fit bounds:', e);
+              map.setView([20, 0], 2);
+            }
+          }, 100);
+        } else {
+          map.setView([20, 0], 2);
+        }
+      } else {
+        // Default world view
+        map.setView([20, 0], 2);
+      }
+    } catch (e) {
+      console.warn('MapBoundsController error:', e);
       map.setView([20, 0], 2);
     }
   }, [map, locations]);
@@ -135,16 +155,27 @@ export default function WorldMap() {
   });
 
   // Filter and validate locations to prevent crashes
-  const allLocations: FamilyLocation[] = familyLocations.filter(location => 
-    location && 
-    location.user && 
-    location.latitude && 
-    location.longitude &&
-    !isNaN(location.latitude) &&
-    !isNaN(location.longitude)
-  );
+  const allLocations: FamilyLocation[] = (familyLocations || []).filter(location => {
+    try {
+      return location && 
+        typeof location === 'object' &&
+        location.user && 
+        typeof location.user === 'object' &&
+        location.user.id &&
+        typeof location.latitude === 'number' && 
+        typeof location.longitude === 'number' &&
+        !isNaN(location.latitude) &&
+        !isNaN(location.longitude) &&
+        Math.abs(location.latitude) <= 90 &&
+        Math.abs(location.longitude) <= 180;
+    } catch (e) {
+      console.warn('Invalid location data:', location);
+      return false;
+    }
+  });
 
-  const getMarkerColor = (userId: string) => {
+  const getMarkerColor = (userId: string | undefined) => {
+    if (!userId) return '#6B7280'; // Gray for unknown users
     if (userId === user?.id) return '#10B981'; // Green for current user
     const colors = ['#3B82F6', '#8B5CF6', '#F59E0B', '#EF4444', '#6366F1', '#EC4899'];
     const index = userId.charCodeAt(0) % colors.length;
@@ -235,6 +266,9 @@ export default function WorldMap() {
         zoom={2}
         style={{ height: '100%', width: '100%' }}
         className="z-0"
+        whenCreated={(mapInstance) => {
+          mapRef.current = mapInstance;
+        }}
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -248,23 +282,24 @@ export default function WorldMap() {
         <MapControls />
 
         {/* Family member markers */}
-        {allLocations.map((location) => {
-          const isCurrentUser = location.user.id === user?.id;
-          const displayName = isCurrentUser ? 'You' : 
-            (location.user.firstName || location.user.email?.split('@')[0] || 'Unknown');
-          
-          return (
-            <Marker
-              key={`${location.user.id}-${location.timestamp || Date.now()}`}
-              position={[location.latitude, location.longitude]}
-              icon={createCustomIcon(
-                location.user.profileImageUrl || displayName[0]?.toUpperCase(),
-                getMarkerColor(location.user.id)
-              )}
-              eventHandlers={{
-                click: () => setSelectedMember(location),
-              }}
-            >
+        {allLocations.map((location, index) => {
+          try {
+            const isCurrentUser = location.user?.id === user?.id;
+            const displayName = isCurrentUser ? 'You' : 
+              (location.user?.firstName || location.user?.email?.split('@')[0] || 'Unknown');
+            
+            return (
+              <Marker
+                key={`${location.user?.id || index}-${location.timestamp || Date.now()}`}
+                position={[location.latitude, location.longitude]}
+                icon={createCustomIcon(
+                  location.user?.profileImageUrl || displayName[0]?.toUpperCase(),
+                  getMarkerColor(location.user?.id)
+                )}
+                eventHandlers={{
+                  click: () => setSelectedMember(location),
+                }}
+              >
               <Popup>
                 <div className="p-2 min-w-48">
                   <div className="flex items-center gap-3 mb-3">
@@ -317,8 +352,12 @@ export default function WorldMap() {
               </Popup>
             </Marker>
           );
-        })}
-      </MapContainer>
+        } catch (e) {
+          console.warn('Error rendering marker:', e, location);
+          return null;
+        }
+      })}
+    </MapContainer>
 
       {/* Empty state */}
       {allLocations.length === 0 && (
