@@ -174,7 +174,11 @@ export default function Family() {
                   />
                   <div className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg mt-2">
                     <strong>Important:</strong> The person you're inviting must already have a FamilyLocator account. 
-                    Ask them to sign up at this website first, then you can add them to your family.
+                    <br /><br />
+                    <strong>How to help them sign up:</strong>
+                    <br />1. Send them this website link: <code className="text-xs">{window.location.origin}</code>
+                    <br />2. Ask them to click "Create Your Free Account" 
+                    <br />3. Once they have an account, you can invite them here
                   </div>
                 </div>
                 <div className="flex justify-end space-x-2">

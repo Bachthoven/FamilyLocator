@@ -121,11 +121,14 @@ FamilyLocator is a modern web application that enables families to share their r
 
 ## Changelog
 
-- August 11, 2025. Improved cross-platform compatibility:
+- August 11, 2025. Improved cross-platform compatibility and user experience:
   - Fixed bottom navigation issues on Windows with better CSS positioning and cursor handling
   - Enhanced touch device support across platforms
   - Removed World Map feature due to stability issues across different browsers
   - Simplified navigation to focus on core family location sharing features
+  - Completely redesigned landing page with clear account creation instructions
+  - Improved invitation system with step-by-step guidance for new users
+  - Added better error messages explaining why invitations require existing accounts
 
 - June 24, 2025. Added automatic hourly location logging feature:
   - Background service that logs user location data every hour
