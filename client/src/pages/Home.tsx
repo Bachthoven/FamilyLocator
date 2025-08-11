@@ -24,6 +24,7 @@ export default function Home() {
   const [selectedLocation, setSelectedLocation] = useState<(Location & { user: User }) | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isFamilyPanelExpanded, setIsFamilyPanelExpanded] = useState(false);
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -216,55 +217,83 @@ export default function Home() {
         </div>
       </div>
       
-      {/* Bottom Sheet Panel */}
-      <BottomSheet>
-        <div className="mb-4">
-          <h3 className="text-lg font-semibold">Family Members</h3>
+      {/* Expandable Family Panel Button */}
+      {!isFamilyPanelExpanded && (
+        <div className="absolute bottom-4 left-4 right-4 z-40">
+          <Button
+            onClick={() => setIsFamilyPanelExpanded(true)}
+            className="w-full bg-background/90 backdrop-blur-sm border border-border text-foreground hover:bg-background/95"
+            variant="outline"
+          >
+            <Users className="w-4 h-4 mr-2" />
+            View Family Members ({familyLocations.length})
+          </Button>
         </div>
-        
-        <div className="space-y-3 max-h-96 overflow-y-auto">
-          {locationsLoading ? (
-            // Loading skeletons
-            Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="flex items-center space-x-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
-                <Skeleton className="w-12 h-12 rounded-full" />
-                <div className="flex-1">
-                  <Skeleton className="w-32 h-4 mb-2" />
-                  <Skeleton className="w-24 h-3" />
+      )}
+
+      {/* Expandable Bottom Sheet Panel */}
+      {isFamilyPanelExpanded && (
+        <div className="absolute bottom-0 left-0 right-0 z-40 bg-background rounded-t-3xl shadow-lg border-t border-border">
+          {/* Handle and Header */}
+          <div className="flex items-center justify-between p-4 border-b border-border">
+            <h3 className="text-lg font-semibold">Family Members</h3>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsFamilyPanelExpanded(false)}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              ✕
+            </Button>
+          </div>
+          
+          {/* Content */}
+          <div className="px-4 pb-20 max-h-96 overflow-y-auto">
+            <div className="space-y-3 pt-4">
+              {locationsLoading ? (
+                // Loading skeletons
+                Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="flex items-center space-x-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                    <Skeleton className="w-12 h-12 rounded-full" />
+                    <div className="flex-1">
+                      <Skeleton className="w-32 h-4 mb-2" />
+                      <Skeleton className="w-24 h-3" />
+                    </div>
+                    <Skeleton className="w-16 h-8" />
+                  </div>
+                ))
+              ) : filteredFamilyLocations.length === 0 && searchQuery ? (
+                <div className="text-center py-8">
+                  <Search className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-muted-foreground">No results found for "{searchQuery}"</p>
+                  <Button variant="outline" className="mt-2" onClick={() => setSearchQuery('')}>
+                    Clear Search
+                  </Button>
                 </div>
-                <Skeleton className="w-16 h-8" />
-              </div>
-            ))
-          ) : filteredFamilyLocations.length === 0 && searchQuery ? (
-            <div className="text-center py-8">
-              <Search className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground">No results found for "{searchQuery}"</p>
-              <Button variant="outline" className="mt-2" onClick={() => setSearchQuery('')}>
-                Clear Search
-              </Button>
+              ) : filteredFamilyLocations.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">No family members added yet</p>
+                  <Link href="/family">
+                    <Button variant="outline" className="mt-2">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Family Member
+                    </Button>
+                  </Link>
+                </div>
+              ) : (
+                filteredFamilyLocations.map((location) => (
+                  <FamilyMemberCard
+                    key={location.id}
+                    user={location.user}
+                    location={location}
+                    onViewLocation={() => handleLocationClick(location)}
+                  />
+                ))
+              )}
             </div>
-          ) : filteredFamilyLocations.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-muted-foreground">No family members added yet</p>
-              <Link href="/family">
-                <Button variant="outline" className="mt-2">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Family Member
-                </Button>
-              </Link>
-            </div>
-          ) : (
-            filteredFamilyLocations.map((location) => (
-              <FamilyMemberCard
-                key={location.id}
-                user={location.user}
-                location={location}
-                onViewLocation={() => handleLocationClick(location)}
-              />
-            ))
-          )}
+          </div>
         </div>
-      </BottomSheet>
+      )}
       
       {/* Bottom Navigation */}
       <BottomNavigation />
