@@ -68,7 +68,7 @@ export default function Landing() {
             
             <Card className="text-center p-6 relative">
               <CardContent className="pt-6">
-                <div className="bg-blue-500 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-6 shadow-lg">
+                <div className="bg-red-500 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-6 shadow-lg">
                   <Heart className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="text-xl font-bold mb-3">2. Share with Family</h3>
