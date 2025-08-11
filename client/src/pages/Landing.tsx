@@ -18,7 +18,7 @@ export default function Landing() {
             </p>
           </div>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
             <Button 
               size="lg" 
               onClick={() => window.location.href = '/api/login'} 
@@ -27,12 +27,25 @@ export default function Landing() {
               <UserPlus className="w-5 h-5 mr-2" />
               Create Your Free Account
             </Button>
+            <Button 
+              size="lg" 
+              variant="outline"
+              onClick={() => window.location.href = '/api/login'} 
+              className="text-lg px-8 py-4 h-auto"
+            >
+              <ArrowRight className="w-5 h-5 mr-2" />
+              Sign In to Your Account
+            </Button>
           </div>
           
-          <div className="text-sm text-muted-foreground max-w-md mx-auto">
+          <div className="text-sm text-muted-foreground max-w-md mx-auto mb-4">
             <p className="mb-2">✓ No credit card required</p>
             <p className="mb-2">✓ Set up in under 30 seconds</p>
             <p>✓ Uses secure Replit authentication</p>
+          </div>
+          
+          <div className="text-xs text-muted-foreground max-w-lg mx-auto p-4 bg-muted/50 rounded-lg">
+            <strong>New or existing user?</strong> Both buttons work the same way - Replit will automatically detect if you have an account and either sign you in or help you create one.
           </div>
         </div>
 
@@ -45,12 +58,12 @@ export default function Landing() {
                 <div className="bg-primary rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-6 shadow-lg">
                   <UserPlus className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-xl font-bold mb-3">1. You Create Account</h3>
+                <h3 className="text-xl font-bold mb-3">1. Sign Up or Sign In</h3>
                 <p className="text-muted-foreground mb-4">
-                  Click the button above to create your free FamilyLocator account. It takes less than 30 seconds using secure Replit login.
+                  Click either button above - if you're new, you'll create an account; if you already have one, you'll sign right in. Takes seconds with secure Replit authentication.
                 </p>
                 <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg text-sm">
-                  <strong>That's it!</strong> You're instantly ready to use the app.
+                  <strong>That's it!</strong> New or returning, you're instantly ready to use the app.
                 </div>
               </CardContent>
             </Card>
@@ -143,14 +156,25 @@ export default function Landing() {
             <p className="text-muted-foreground mb-6">
               Join families worldwide who trust FamilyLocator for safe, secure location sharing.
             </p>
-            <Button 
-              size="lg"
-              onClick={() => window.location.href = '/api/login'}
-              className="text-lg px-8 py-4 h-auto"
-            >
-              <ArrowRight className="w-5 h-5 mr-2" />
-              Get Started Now - It's Free
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Button 
+                size="lg"
+                onClick={() => window.location.href = '/api/login'}
+                className="text-lg px-6 py-3 h-auto"
+              >
+                <UserPlus className="w-4 h-4 mr-2" />
+                Create Account
+              </Button>
+              <Button 
+                size="lg"
+                variant="outline"
+                onClick={() => window.location.href = '/api/login'}
+                className="text-lg px-6 py-3 h-auto"
+              >
+                <ArrowRight className="w-4 h-4 mr-2" />
+                Sign In
+              </Button>
+            </div>
             <p className="text-xs text-muted-foreground mt-4">
               By creating an account, you agree to keep your family's location data private and secure.
             </p>

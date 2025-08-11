@@ -127,6 +127,7 @@ FamilyLocator is a modern web application that enables families to share their r
   - Removed World Map feature due to stability issues across different browsers
   - Simplified navigation to focus on core family location sharing features
   - Completely redesigned landing page with clear account creation instructions
+  - Added both "Create Account" and "Sign In" options for new and existing users
   - Improved invitation system with step-by-step guidance for new users
   - Added better error messages explaining why invitations require existing accounts
 
