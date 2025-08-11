@@ -117,3 +117,9 @@
 .leaflet-control-zoom {
   margin-left: 10px !important;
 }
+
+/* Fix for text clipping in large headings with bg-clip-text */
+.bg-clip-text {
+  padding-top: 0.1em;
+  padding-bottom: 0.1em;
+}

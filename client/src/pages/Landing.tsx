@@ -10,7 +10,7 @@ export default function Landing() {
         <div className="text-center mb-16">
           <div className="mb-8">
             <MapPin className="w-16 h-16 text-primary mx-auto mb-4" />
-            <h1 className="text-4xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
+            <h1 className="text-4xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent leading-tight py-2">
               FamilyLocator
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
