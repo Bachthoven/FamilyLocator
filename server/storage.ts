@@ -29,6 +29,7 @@ export interface IStorage {
   
   // Family connection operations
   getFamilyMembers(userId: string): Promise<Array<User>>;
+  getPendingInvitations(userId: string): Promise<Array<FamilyConnection & { user: User }>>;
   addFamilyMember(connection: InsertFamilyConnection): Promise<FamilyConnection>;
   acceptFamilyConnection(userId: string, familyMemberId: string): Promise<FamilyConnection>;
   removeFamilyMember(userId: string, familyMemberId: string): Promise<void>;
@@ -143,6 +144,28 @@ export class DatabaseStorage implements IStorage {
       );
     
     return result.map(r => r.user);
+  }
+
+  async getPendingInvitations(userId: string): Promise<Array<FamilyConnection & { user: User }>> {
+    const result = await db
+      .select({
+        id: familyConnections.id,
+        userId: familyConnections.userId,
+        familyMemberId: familyConnections.familyMemberId,
+        status: familyConnections.status,
+        createdAt: familyConnections.createdAt,
+        user: users,
+      })
+      .from(familyConnections)
+      .innerJoin(users, eq(familyConnections.userId, users.id))
+      .where(
+        and(
+          eq(familyConnections.familyMemberId, userId),
+          eq(familyConnections.status, "pending")
+        )
+      );
+    
+    return result;
   }
 
   async addFamilyMember(connection: InsertFamilyConnection): Promise<FamilyConnection> {
@@ -308,6 +331,26 @@ class MemoryStorage implements IStorage {
     return members;
   }
 
+  async getPendingInvitations(userId: string): Promise<Array<FamilyConnection & { user: User }>> {
+    const result: Array<FamilyConnection & { user: User }> = [];
+    
+    // Check all connections to find invitations where this user is the target
+    for (const [inviterId, connections] of this.familyConnections) {
+      const pendingConnection = connections.find(c => 
+        c.familyMemberId === userId && c.status === 'pending'
+      );
+      
+      if (pendingConnection) {
+        const inviterUser = this.users.get(inviterId);
+        if (inviterUser) {
+          result.push({ ...pendingConnection, user: inviterUser });
+        }
+      }
+    }
+    
+    return result;
+  }
+
   async addFamilyMember(connection: InsertFamilyConnection): Promise<FamilyConnection> {
     const newConnection: FamilyConnection = {
       id: this.nextId++,
@@ -363,8 +406,5 @@ class MemoryStorage implements IStorage {
   }
 }
 
-// Use memory storage temporarily while database issues are resolved
-export const storage = new MemoryStorage();
-
-// Keep database storage class for when database is fixed
-export const databaseStorage = new DatabaseStorage();
+// Use database storage now that database is available
+export const storage = new DatabaseStorage();

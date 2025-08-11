@@ -110,6 +110,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get pending invitations received by this user
+  app.get('/api/family/invitations', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const invitations = await storage.getPendingInvitations(userId);
+      res.json(invitations);
+    } catch (error) {
+      console.error("Error fetching invitations:", error);
+      res.status(500).json({ message: "Failed to fetch invitations" });
+    }
+  });
+
   app.post('/api/family/invite', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;

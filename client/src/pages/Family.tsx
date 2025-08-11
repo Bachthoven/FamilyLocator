@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, Users } from 'lucide-react';
+import { Plus, Users, Check, X, Mail } from 'lucide-react';
 import { User } from '@shared/schema';
 
 export default function Family() {
@@ -24,6 +24,12 @@ export default function Family() {
   // Fetch family members
   const { data: familyMembers = [], isLoading } = useQuery<User[]>({
     queryKey: ['/api/family'],
+    enabled: !!user,
+  });
+
+  // Fetch pending invitations
+  const { data: pendingInvitations = [] } = useQuery<Array<{ id: number; user: User; createdAt: Date }>>({
+    queryKey: ['/api/family/invitations'],
     enabled: !!user,
   });
 
@@ -80,6 +86,39 @@ export default function Family() {
       toast({
         title: "Cannot Send Invitation",
         description: errorMessage,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Accept invitation mutation
+  const acceptMutation = useMutation({
+    mutationFn: async (inviterId: string) => {
+      await apiRequest('POST', `/api/family/accept/${inviterId}`);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Invitation accepted",
+        description: "You have joined the family successfully.",
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/family'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/family/invitations'] });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: "Failed to accept invitation. Please try again.",
         variant: "destructive",
       });
     },
@@ -215,16 +254,69 @@ export default function Family() {
               </div>
             ))
           ) : familyMembers.length === 0 ? (
-            <div className="text-center py-16">
-              <Users className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium mb-2">No family members yet</h3>
-              <p className="text-muted-foreground mb-6">
-                Start by inviting your family members to join FamilyLocator
-              </p>
-              <Button onClick={() => setInviteDialogOpen(true)}>
-                <Plus className="w-4 h-4 mr-2" />
-                Add Your First Member
-              </Button>
+            <div className="space-y-6">
+              {/* Pending Invitations Section */}
+              {pendingInvitations.length > 0 && (
+                <div className="bg-muted/50 p-4 rounded-lg">
+                  <h3 className="flex items-center gap-2 text-lg font-medium mb-3">
+                    <Mail className="h-5 w-5 text-primary" />
+                    Pending Invitations ({pendingInvitations.length})
+                  </h3>
+                  <div className="space-y-2">
+                    {pendingInvitations.map((invitation) => (
+                      <div key={invitation.id} className="flex items-center justify-between bg-background p-3 rounded border">
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={invitation.user.profileImageUrl || '/default-avatar.png'}
+                            alt={invitation.user.firstName || 'User'}
+                            className="h-8 w-8 rounded-full object-cover"
+                          />
+                          <div>
+                            <p className="font-medium">
+                              {invitation.user.firstName} {invitation.user.lastName}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {invitation.user.email}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            onClick={() => acceptMutation.mutate(invitation.user.id)}
+                            disabled={acceptMutation.isPending}
+                          >
+                            <Check className="h-4 w-4 mr-1" />
+                            Accept
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => removeMutation.mutate(invitation.user.id)}
+                            disabled={removeMutation.isPending}
+                          >
+                            <X className="h-4 w-4 mr-1" />
+                            Decline
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Empty State */}
+              <div className="text-center py-16">
+                <Users className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-medium mb-2">No family members yet</h3>
+                <p className="text-muted-foreground mb-6">
+                  Start by inviting your family members to join FamilyLocator
+                </p>
+                <Button onClick={() => setInviteDialogOpen(true)}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Your First Member
+                </Button>
+              </div>
             </div>
           ) : (
             familyMembers.map((member: User) => {
