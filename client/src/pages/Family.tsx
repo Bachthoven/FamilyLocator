@@ -228,7 +228,7 @@ export default function Family() {
             </div>
           ) : (
             familyMembers.map((member: User) => {
-              const locationData = familyLocations.find((loc: any) => loc.userId === member.id);
+              const locationData = familyLocations.find((loc: any) => loc.user?.id === member.id);
               // Transform location data to match expected format
               const location = locationData ? {
                 id: locationData.id || 0,

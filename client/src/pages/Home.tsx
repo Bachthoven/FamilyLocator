@@ -10,15 +10,20 @@ import BottomSheet from '@/components/BottomSheet';
 import FamilyMemberCard from '@/components/FamilyMemberCard';
 import BottomNavigation from '@/components/BottomNavigation';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Menu, Search, Plus } from 'lucide-react';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Menu, Search, Plus, Settings, Users, MapPin } from 'lucide-react';
 import { User, Location } from '@shared/schema';
+import { Link } from 'wouter';
 
 export default function Home() {
   const { user, isLoading: authLoading, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [selectedLocation, setSelectedLocation] = useState<(Location & { user: User }) | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -91,6 +96,19 @@ export default function Home() {
     // Center map on selected location would be handled by Map component
   };
 
+  // Filter family locations based on search query
+  const filteredFamilyLocations = familyLocations.filter(location => {
+    if (!searchQuery) return true;
+    const user = location.user;
+    const searchLower = searchQuery.toLowerCase();
+    return (
+      user?.firstName?.toLowerCase().includes(searchLower) ||
+      user?.lastName?.toLowerCase().includes(searchLower) ||
+      user?.email?.toLowerCase().includes(searchLower) ||
+      location.address?.toLowerCase().includes(searchLower)
+    );
+  });
+
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -119,9 +137,51 @@ export default function Home() {
         {/* Top Header */}
         <div className="absolute top-0 left-0 right-0 z-20 p-4 pt-12">
           <div className="flex items-center justify-between">
-            <Button variant="secondary" size="icon" className="rounded-full">
-              <Menu className="w-5 h-5" />
-            </Button>
+            {/* Hamburger Menu */}
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="secondary" size="icon" className="rounded-full">
+                  <Menu className="w-5 h-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-80">
+                <SheetHeader>
+                  <SheetTitle className="flex items-center">
+                    <MapPin className="w-5 h-5 mr-2" />
+                    FamilyLocator
+                  </SheetTitle>
+                  <SheetDescription>
+                    Navigate to different sections of the app
+                  </SheetDescription>
+                </SheetHeader>
+                <div className="mt-6 space-y-4">
+                  <Link href="/">
+                    <Button variant="ghost" className="w-full justify-start">
+                      <MapPin className="w-4 h-4 mr-2" />
+                      Map
+                    </Button>
+                  </Link>
+                  <Link href="/family">
+                    <Button variant="ghost" className="w-full justify-start">
+                      <Users className="w-4 h-4 mr-2" />
+                      Family Members
+                    </Button>
+                  </Link>
+                  <Link href="/places">
+                    <Button variant="ghost" className="w-full justify-start">
+                      <MapPin className="w-4 h-4 mr-2" />
+                      Places
+                    </Button>
+                  </Link>
+                  <Link href="/settings">
+                    <Button variant="ghost" className="w-full justify-start">
+                      <Settings className="w-4 h-4 mr-2" />
+                      Settings
+                    </Button>
+                  </Link>
+                </div>
+              </SheetContent>
+            </Sheet>
             
             <div className="bg-background/80 backdrop-blur-sm rounded-full px-4 py-2 flex items-center space-x-2">
               <div className="w-2 h-2 bg-green-500 rounded-full"></div>
@@ -130,10 +190,29 @@ export default function Home() {
               </span>
             </div>
             
-            <Button variant="secondary" size="icon" className="rounded-full">
+            {/* Search Button */}
+            <Button 
+              variant="secondary" 
+              size="icon" 
+              className="rounded-full"
+              onClick={() => setIsSearchOpen(!isSearchOpen)}
+            >
               <Search className="w-5 h-5" />
             </Button>
           </div>
+          
+          {/* Search Bar */}
+          {isSearchOpen && (
+            <div className="mt-4">
+              <Input
+                placeholder="Search family members or places..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="bg-background/90 backdrop-blur-sm border-border"
+                autoFocus
+              />
+            </div>
+          )}
         </div>
       </div>
       
@@ -141,10 +220,12 @@ export default function Home() {
       <BottomSheet>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold">Family Members</h3>
-          <Button variant="ghost" size="sm" className="text-primary">
-            <Plus className="w-4 h-4 mr-1" />
-            Add
-          </Button>
+          <Link href="/family">
+            <Button variant="ghost" size="sm" className="text-primary">
+              <Plus className="w-4 h-4 mr-1" />
+              Add
+            </Button>
+          </Link>
         </div>
         
         <div className="space-y-3 max-h-64 overflow-y-auto">
@@ -160,16 +241,26 @@ export default function Home() {
                 <Skeleton className="w-16 h-8" />
               </div>
             ))
-          ) : familyLocations.length === 0 ? (
+          ) : filteredFamilyLocations.length === 0 && searchQuery ? (
             <div className="text-center py-8">
-              <p className="text-muted-foreground">No family members added yet</p>
-              <Button variant="outline" className="mt-2">
-                <Plus className="w-4 h-4 mr-2" />
-                Add Family Member
+              <Search className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground">No results found for "{searchQuery}"</p>
+              <Button variant="outline" className="mt-2" onClick={() => setSearchQuery('')}>
+                Clear Search
               </Button>
             </div>
+          ) : filteredFamilyLocations.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">No family members added yet</p>
+              <Link href="/family">
+                <Button variant="outline" className="mt-2">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Family Member
+                </Button>
+              </Link>
+            </div>
           ) : (
-            familyLocations.map((location) => (
+            filteredFamilyLocations.map((location) => (
               <FamilyMemberCard
                 key={location.id}
                 user={location.user}
