@@ -73,6 +73,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/locations/current', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const currentLocation = await storage.getUserLatestLocation(userId);
+      if (!currentLocation) {
+        return res.status(404).json({ message: "No location data found" });
+      }
+      res.json(currentLocation);
+    } catch (error) {
+      console.error("Error fetching current location:", error);
+      res.status(500).json({ message: "Failed to fetch current location" });
+    }
+  });
+
   app.get('/api/locations/family', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;

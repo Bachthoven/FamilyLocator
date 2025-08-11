@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'wouter';
-import { Map, Users, Bookmark, Settings } from 'lucide-react';
+import { Map, Users, Bookmark, Settings, Globe } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navItems = [
@@ -7,6 +7,11 @@ const navItems = [
     path: '/',
     icon: Map,
     label: 'Map',
+  },
+  {
+    path: '/world-map',
+    icon: Globe,
+    label: 'World',
   },
   {
     path: '/family',
