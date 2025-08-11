@@ -44,9 +44,7 @@ export default function Landing() {
             <p>✓ Uses secure Replit authentication</p>
           </div>
           
-          <div className="text-xs text-muted-foreground max-w-lg mx-auto p-4 bg-muted/50 rounded-lg">
-            <strong>New or existing user?</strong> Both buttons work the same way - Replit will automatically detect if you have an account and either sign you in or help you create one.
-          </div>
+
         </div>
 
         {/* How it Works Section */}
