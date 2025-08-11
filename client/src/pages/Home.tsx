@@ -222,7 +222,7 @@ export default function Home() {
           <h3 className="text-lg font-semibold">Family Members</h3>
         </div>
         
-        <div className="space-y-3 max-h-80 overflow-y-auto pb-safe">
+        <div className="space-y-3 max-h-96 overflow-y-auto">
           {locationsLoading ? (
             // Loading skeletons
             Array.from({ length: 3 }).map((_, i) => (

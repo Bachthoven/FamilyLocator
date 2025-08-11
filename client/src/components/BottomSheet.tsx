@@ -32,7 +32,7 @@ export default function BottomSheet({
         </div>
         
         {/* Content */}
-        <div className="px-6 pb-6">
+        <div className="px-6 pb-20">
           {children}
         </div>
       </div>
