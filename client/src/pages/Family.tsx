@@ -203,7 +203,19 @@ export default function Family() {
             </div>
           ) : (
             familyMembers.map((member: User) => {
-              const location = familyLocations.find((loc: any) => loc.userId === member.id);
+              const locationData = familyLocations.find((loc: any) => loc.userId === member.id);
+              // Transform location data to match expected format
+              const location = locationData ? {
+                id: locationData.id || 0,
+                userId: member.id,
+                latitude: locationData.latitude,
+                longitude: locationData.longitude,
+                accuracy: locationData.accuracy || null,
+                address: locationData.address || null,
+                type: locationData.type || 'manual',
+                timestamp: locationData.timestamp || null,
+              } : undefined;
+              
               return (
                 <FamilyMemberCard
                   key={member.id}

@@ -11,7 +11,15 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { User, Location } from '@shared/schema';
 
-interface FamilyLocation extends Location {
+interface FamilyLocation {
+  id: number;
+  userId: string;
+  latitude: number;
+  longitude: number;
+  accuracy: number | null;
+  address: string | null;
+  type: string;
+  timestamp: Date | null;
   user: User;
 }
 
@@ -126,8 +134,15 @@ export default function WorldMap() {
     refetchInterval: 60000, // Refresh every minute for world map
   });
 
-  // Use only family locations from the API (includes current user if location sharing is enabled)
-  const allLocations: FamilyLocation[] = familyLocations;
+  // Filter and validate locations to prevent crashes
+  const allLocations: FamilyLocation[] = familyLocations.filter(location => 
+    location && 
+    location.user && 
+    location.latitude && 
+    location.longitude &&
+    !isNaN(location.latitude) &&
+    !isNaN(location.longitude)
+  );
 
   const getMarkerColor = (userId: string) => {
     if (userId === user?.id) return '#10B981'; // Green for current user
@@ -188,27 +203,29 @@ export default function WorldMap() {
         </p>
         
         {/* Legend */}
-        <div className="mt-3 space-y-2">
-          {allLocations.slice(0, 5).map((location) => (
-            <div key={location.user?.id || location.id} className="flex items-center gap-2 text-xs">
-              <div 
-                className="w-3 h-3 rounded-full"
-                style={{ backgroundColor: getMarkerColor(location.user?.id || 'default') }}
-              />
-              <span className="font-medium">
-                {location.user?.id === user?.id ? 'You' : (location.user?.firstName || location.user?.email || 'Unknown')}
-              </span>
-              <Badge variant="outline" className="text-xs">
-                {formatLastSeen(location.timestamp)}
-              </Badge>
-            </div>
-          ))}
-          {allLocations.length > 5 && (
-            <div className="text-xs text-muted-foreground">
-              +{allLocations.length - 5} more
-            </div>
-          )}
-        </div>
+        {allLocations.length > 0 && (
+          <div className="mt-3 space-y-2">
+            {allLocations.slice(0, 5).map((location) => (
+              <div key={location.user.id} className="flex items-center gap-2 text-xs">
+                <div 
+                  className="w-3 h-3 rounded-full"
+                  style={{ backgroundColor: getMarkerColor(location.user.id) }}
+                />
+                <span className="font-medium">
+                  {location.user.id === user?.id ? 'You' : (location.user.firstName || location.user.email || 'Unknown')}
+                </span>
+                <Badge variant="outline" className="text-xs">
+                  {formatLastSeen(location.timestamp)}
+                </Badge>
+              </div>
+            ))}
+            {allLocations.length > 5 && (
+              <div className="text-xs text-muted-foreground">
+                +{allLocations.length - 5} more
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Map Container */}
@@ -232,17 +249,17 @@ export default function WorldMap() {
 
         {/* Family member markers */}
         {allLocations.map((location) => {
-          const isCurrentUser = location.user?.id === user?.id;
+          const isCurrentUser = location.user.id === user?.id;
           const displayName = isCurrentUser ? 'You' : 
-            (location.user?.firstName || location.user?.email?.split('@')[0] || 'Unknown');
+            (location.user.firstName || location.user.email?.split('@')[0] || 'Unknown');
           
           return (
             <Marker
-              key={`${location.user?.id || location.id}-${location.timestamp || Date.now()}`}
+              key={`${location.user.id}-${location.timestamp || Date.now()}`}
               position={[location.latitude, location.longitude]}
               icon={createCustomIcon(
-                location.user?.profileImageUrl || displayName[0]?.toUpperCase(),
-                getMarkerColor(location.user?.id || 'default')
+                location.user.profileImageUrl || displayName[0]?.toUpperCase(),
+                getMarkerColor(location.user.id)
               )}
               eventHandlers={{
                 click: () => setSelectedMember(location),
@@ -253,17 +270,17 @@ export default function WorldMap() {
                   <div className="flex items-center gap-3 mb-3">
                     <Avatar className="w-10 h-10">
                       <AvatarImage 
-                        src={location.user?.profileImageUrl || undefined}
+                        src={location.user.profileImageUrl || undefined}
                         alt={displayName}
                       />
                       <AvatarFallback>
-                        {displayName?.[0]?.toUpperCase() || 'U'}
+                        {displayName[0]?.toUpperCase() || 'U'}
                       </AvatarFallback>
                     </Avatar>
                     <div>
                       <h3 className="font-semibold">{displayName}</h3>
                       <p className="text-sm text-muted-foreground">
-                        {location.user?.email || 'Unknown'}
+                        {location.user.email || 'Unknown'}
                       </p>
                     </div>
                   </div>
