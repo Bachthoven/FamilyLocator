@@ -15,9 +15,7 @@ import {
   Bell, 
   HelpCircle, 
   LogOut,
-  MapPin,
-  Users,
-  Bookmark
+  MapPin
 } from 'lucide-react';
 
 export default function Settings() {
@@ -63,18 +61,6 @@ export default function Settings() {
           label: 'Location Services',
           description: 'Manage location accuracy and permissions',
           action: () => toast({ title: 'Coming soon', description: 'Location service settings will be available soon.' }),
-        },
-        {
-          icon: Users,
-          label: 'Family Management',
-          description: 'Manage your family connections',
-          action: () => window.location.href = '/family',
-        },
-        {
-          icon: Bookmark,
-          label: 'Saved Places',
-          description: 'View and manage your saved places',
-          action: () => window.location.href = '/places',
         },
       ],
     },
