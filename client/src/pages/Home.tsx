@@ -18,7 +18,7 @@ import { User, Location } from '@shared/schema';
 import { Link } from 'wouter';
 
 export default function Home() {
-  const { user, isLoading: authLoading, isAuthenticated } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [selectedLocation, setSelectedLocation] = useState<(Location & { user: User }) | null>(null);
@@ -26,20 +26,7 @@ export default function Home() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isFamilyPanelExpanded, setIsFamilyPanelExpanded] = useState(false);
 
-  // Redirect to login if not authenticated
-  useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
-      return;
-    }
-  }, [isAuthenticated, authLoading, toast]);
+  // User is guaranteed to exist due to ProtectedRoute
 
   // Use the location logger hook for automatic location tracking
   const { 
@@ -110,20 +97,7 @@ export default function Home() {
     );
   });
 
-  if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <Skeleton className="w-12 h-12 rounded-full mx-auto mb-4" />
-          <Skeleton className="w-32 h-4" />
-        </div>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return null; // Will redirect via useEffect
-  }
+  // Protected route ensures user is authenticated
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
