@@ -16,14 +16,14 @@ export function useWebSocket() {
     if (!user) return;
 
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const wsUrl = `${protocol}//${window.location.host}/api/ws`;
+    const wsUrl = `${protocol}//${window.location.host}/ws`;
 
     ws.current = new WebSocket(wsUrl);
 
     ws.current.onopen = () => {
       setIsConnected(true);
       // Authenticate the WebSocket connection
-      if (ws.current && user?.id) {
+      if (ws.current) {
         ws.current.send(JSON.stringify({
           type: 'auth',
           userId: user.id,

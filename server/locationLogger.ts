@@ -2,16 +2,16 @@ import { storage } from "./storage";
 import { log } from "./vite";
 
 interface UserLocationSession {
-  userId: number;
+  userId: string;
   lastLogTime: Date;
   intervalId: NodeJS.Timeout;
 }
 
 class LocationLogger {
-  private activeSessions = new Map<number, UserLocationSession>();
+  private activeSessions = new Map<string, UserLocationSession>();
   private readonly HOUR_IN_MS = 60 * 60 * 1000; // 1 hour
 
-  startHourlyLogging(userId: number) {
+  startHourlyLogging(userId: string) {
     // Don't start if already active
     if (this.activeSessions.has(userId)) {
       return;
@@ -34,7 +34,7 @@ class LocationLogger {
     });
   }
 
-  stopHourlyLogging(userId: number) {
+  stopHourlyLogging(userId: string) {
     const session = this.activeSessions.get(userId);
     if (session) {
       clearInterval(session.intervalId);
@@ -43,7 +43,7 @@ class LocationLogger {
     }
   }
 
-  private async logUserLocation(userId: number) {
+  private async logUserLocation(userId: string) {
     try {
       // Get user's current settings
       const user = await storage.getUser(userId);
