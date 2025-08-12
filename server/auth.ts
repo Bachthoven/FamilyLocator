@@ -10,7 +10,16 @@ import MemoryStore from "memorystore";
 
 declare global {
   namespace Express {
-    interface User extends User {}
+    interface User {
+      id: number;
+      email: string;
+      firstName: string | null;
+      lastName: string | null;
+      profileImageUrl: string | null;
+      locationSharingEnabled: boolean | null;
+      locationHistoryEnabled: boolean | null;
+      notificationsEnabled: boolean | null;
+    }
   }
 }
 
@@ -124,9 +133,9 @@ export function setupAuth(app: Express) {
           firstName: user.firstName,
           lastName: user.lastName,
           profileImageUrl: user.profileImageUrl,
-          locationSharingEnabled: user.locationSharingEnabled,
-          locationHistoryEnabled: user.locationHistoryEnabled,
-          notificationsEnabled: user.notificationsEnabled,
+          locationSharingEnabled: user.locationSharingEnabled ?? true,
+          locationHistoryEnabled: user.locationHistoryEnabled ?? true,
+          notificationsEnabled: user.notificationsEnabled ?? true,
         });
       });
     } catch (error) {
@@ -145,17 +154,21 @@ export function setupAuth(app: Express) {
       }
       req.login(user, (err) => {
         if (err) {
+          console.error("Login error:", err);
           return next(err);
         }
+        console.log("User logged in successfully:", user.email);
+        console.log("Session after login:", req.session);
+        console.log("Session ID after login:", req.sessionID);
         res.status(200).json({
           id: user.id,
           email: user.email,
           firstName: user.firstName,
           lastName: user.lastName,
           profileImageUrl: user.profileImageUrl,
-          locationSharingEnabled: user.locationSharingEnabled,
-          locationHistoryEnabled: user.locationHistoryEnabled,
-          notificationsEnabled: user.notificationsEnabled,
+          locationSharingEnabled: user.locationSharingEnabled ?? true,
+          locationHistoryEnabled: user.locationHistoryEnabled ?? true,
+          notificationsEnabled: user.notificationsEnabled ?? true,
         });
       });
     })(req, res, next);
@@ -169,6 +182,11 @@ export function setupAuth(app: Express) {
   });
 
   app.get("/api/user", (req, res) => {
+    console.log("Session data:", req.session);
+    console.log("Session ID:", req.sessionID);
+    console.log("Is authenticated:", req.isAuthenticated());
+    console.log("User in session:", req.user);
+    
     if (!req.isAuthenticated() || !req.user) {
       return res.status(401).json({ message: "Unauthorized" });
     }
@@ -178,9 +196,9 @@ export function setupAuth(app: Express) {
       firstName: req.user.firstName,
       lastName: req.user.lastName,
       profileImageUrl: req.user.profileImageUrl,
-      locationSharingEnabled: req.user.locationSharingEnabled,
-      locationHistoryEnabled: req.user.locationHistoryEnabled,
-      notificationsEnabled: req.user.notificationsEnabled,
+      locationSharingEnabled: req.user.locationSharingEnabled ?? true,
+      locationHistoryEnabled: req.user.locationHistoryEnabled ?? true,
+      notificationsEnabled: req.user.notificationsEnabled ?? true,
     });
   });
 }
