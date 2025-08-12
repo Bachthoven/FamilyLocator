@@ -2,31 +2,48 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupAuth } from "./auth";
 import { insertLocationSchema, insertPlaceSchema, insertFamilyConnectionSchema } from "@shared/schema";
 import { locationLogger } from "./locationLogger";
 import { z } from "zod";
 
-export async function registerRoutes(app: Express): Promise<Server> {
-  // Auth middleware
-  await setupAuth(app);
+// WebSocket management
+const clients = new Map<number, WebSocket[]>();
 
-  // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      res.json(user);
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
-    }
+function broadcastLocationUpdate(userId: number, location: any) {
+  // Broadcast to family members
+  storage.getFamilyMembers(userId).then(familyMembers => {
+    familyMembers.forEach(member => {
+      const memberClients = clients.get(member.id) || [];
+      memberClients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify({
+            type: 'locationUpdate',
+            userId,
+            location
+          }));
+        }
+      });
+    });
   });
+}
+
+// Auth middleware for protected routes
+function requireAuth(req: any, res: any, next: any) {
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+  next();
+}
+
+export function registerRoutes(app: Express): Server {
+  // Setup authentication
+  setupAuth(app);
 
   // User settings
-  app.patch('/api/user/settings', isAuthenticated, async (req: any, res) => {
+  app.patch('/api/user/settings', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const settingsSchema = z.object({
         locationSharingEnabled: z.boolean().optional(),
         locationHistoryEnabled: z.boolean().optional(),
@@ -53,9 +70,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Location routes
-  app.post('/api/locations', isAuthenticated, async (req: any, res) => {
+  app.post('/api/locations', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const locationData = insertLocationSchema.parse({
         ...req.body,
         userId,
@@ -73,35 +90,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/locations/current', isAuthenticated, async (req: any, res) => {
+  app.get('/api/locations/family', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const currentLocation = await storage.getUserLatestLocation(userId);
-      if (!currentLocation) {
-        return res.status(404).json({ message: "No location data found" });
-      }
-      res.json(currentLocation);
-    } catch (error) {
-      console.error("Error fetching current location:", error);
-      res.status(500).json({ message: "Failed to fetch current location" });
-    }
-  });
-
-  app.get('/api/locations/family', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const locations = await storage.getFamilyMembersLocations(userId);
-      res.json(locations);
+      const userId = req.user.id;
+      const familyLocations = await storage.getFamilyMembersLocations(userId);
+      res.json(familyLocations);
     } catch (error) {
       console.error("Error fetching family locations:", error);
       res.status(500).json({ message: "Failed to fetch family locations" });
     }
   });
 
-  // Family member routes
-  app.get('/api/family', isAuthenticated, async (req: any, res) => {
+  // Family routes
+  app.get('/api/family', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const familyMembers = await storage.getFamilyMembers(userId);
       res.json(familyMembers);
     } catch (error) {
@@ -110,10 +113,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get pending invitations received by this user
-  app.get('/api/family/invitations', isAuthenticated, async (req: any, res) => {
+  app.get('/api/family/invitations', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const invitations = await storage.getPendingInvitations(userId);
       res.json(invitations);
     } catch (error) {
@@ -122,56 +124,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/family/invite', isAuthenticated, async (req: any, res) => {
+  app.post('/api/family/invite', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const { email } = z.object({ email: z.string().email() }).parse(req.body);
+      const userId = req.user.id;
+      const { email } = req.body;
       
       // Find user by email
-      const targetUser = await storage.getUserByEmail(email);
-      if (!targetUser) {
-        return res.status(404).json({ message: "User not found. They need to sign up first." });
+      const familyMember = await storage.getUserByEmail(email);
+      if (!familyMember) {
+        return res.status(404).json({ message: "User not found" });
       }
       
-      // Check if connection already exists
-      const existingMembers = await storage.getFamilyMembers(userId);
-      if (existingMembers.some(member => member.id === targetUser.id)) {
-        return res.status(400).json({ message: "User is already in your family" });
-      }
-      
-      const connection = await storage.addFamilyMember({
+      const connectionData = insertFamilyConnectionSchema.parse({
         userId,
-        familyMemberId: targetUser.id,
+        familyMemberId: familyMember.id,
         status: "pending",
       });
       
+      const connection = await storage.addFamilyMember(connectionData);
       res.json(connection);
     } catch (error) {
-      console.error("Error inviting family member:", error);
-      res.status(500).json({ message: "Failed to invite family member" });
+      console.error("Error sending invitation:", error);
+      res.status(500).json({ message: "Failed to send invitation" });
     }
   });
 
-  app.post('/api/family/accept/:memberId', isAuthenticated, async (req: any, res) => {
+  app.post('/api/family/accept', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const { memberId } = req.params;
+      const userId = req.user.id;
+      const { familyMemberId } = req.body;
       
-      const connection = await storage.acceptFamilyConnection(userId, memberId);
+      const connection = await storage.acceptFamilyConnection(userId, familyMemberId);
       res.json(connection);
     } catch (error) {
-      console.error("Error accepting family connection:", error);
-      res.status(500).json({ message: "Failed to accept family connection" });
+      console.error("Error accepting invitation:", error);
+      res.status(500).json({ message: "Failed to accept invitation" });
     }
   });
 
-  app.delete('/api/family/:memberId', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/family/:memberId', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const { memberId } = req.params;
+      const userId = req.user.id;
+      const memberId = parseInt(req.params.memberId);
       
       await storage.removeFamilyMember(userId, memberId);
-      res.json({ success: true });
+      res.sendStatus(200);
     } catch (error) {
       console.error("Error removing family member:", error);
       res.status(500).json({ message: "Failed to remove family member" });
@@ -179,9 +176,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Places routes
-  app.get('/api/places', isAuthenticated, async (req: any, res) => {
+  app.get('/api/places', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const places = await storage.getUserPlaces(userId);
       res.json(places);
     } catch (error) {
@@ -190,9 +187,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/places', isAuthenticated, async (req: any, res) => {
+  app.post('/api/places', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const placeData = insertPlaceSchema.parse({
         ...req.body,
         userId,
@@ -206,112 +203,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/places/:placeId', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/places/:id', requireAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const placeId = parseInt(req.params.placeId);
+      const userId = req.user.id;
+      const placeId = parseInt(req.params.id);
       
       await storage.deletePlace(userId, placeId);
-      res.json({ success: true });
+      res.sendStatus(200);
     } catch (error) {
       console.error("Error deleting place:", error);
       res.status(500).json({ message: "Failed to delete place" });
     }
   });
 
-  // Hourly location logging control routes
-  app.post('/api/location-logging/start', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      locationLogger.startHourlyLogging(userId);
-      res.json({ message: "Hourly location logging started", success: true });
-    } catch (error) {
-      console.error("Error starting location logging:", error);
-      res.status(500).json({ message: "Failed to start location logging" });
-    }
-  });
-
-  app.post('/api/location-logging/stop', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      locationLogger.stopHourlyLogging(userId);
-      res.json({ message: "Hourly location logging stopped", success: true });
-    } catch (error) {
-      console.error("Error stopping location logging:", error);
-      res.status(500).json({ message: "Failed to stop location logging" });
-    }
-  });
-
-  app.get('/api/location-logging/status', isAuthenticated, async (req: any, res) => {
-    try {
-      const activeSessions = locationLogger.getActiveSessions();
-      res.json({ activeSessions });
-    } catch (error) {
-      console.error("Error getting logging status:", error);
-      res.status(500).json({ message: "Failed to get logging status" });
-    }
-  });
-
   const httpServer = createServer(app);
 
-  // WebSocket server for real-time location updates
-  const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
-  const clients = new Map<string, WebSocket>();
+  // Setup WebSocket server on a specific path to avoid conflicts with Vite
+  const wss = new WebSocketServer({ 
+    server: httpServer, 
+    path: '/api/ws' 
+  });
 
-  wss.on('connection', (ws, req) => {
-    console.log('WebSocket client connected');
-    
-    ws.on('message', (message) => {
+  wss.on('connection', (ws: WebSocket, request) => {
+    console.log('WebSocket client connected to /api/ws');
+
+    ws.on('message', async (message: any) => {
       try {
         const data = JSON.parse(message.toString());
         
         if (data.type === 'auth' && data.userId) {
-          clients.set(data.userId, ws);
-          console.log(`User ${data.userId} registered for WebSocket updates`);
+          const userId = parseInt(data.userId);
+          console.log(`User ${userId} registered for WebSocket updates`);
           
-          // Auto-start hourly location logging for users with location history enabled
-          storage.getUser(data.userId).then(user => {
-            if (user && user.locationHistoryEnabled) {
-              locationLogger.startHourlyLogging(data.userId);
-            }
-          }).catch(error => {
-            console.error(`Error checking user settings for ${data.userId}:`, error);
-          });
+          // Add client to user's connection list
+          if (!clients.has(userId)) {
+            clients.set(userId, []);
+          }
+          clients.get(userId)!.push(ws);
+
+          // Start hourly location logging if user has it enabled
+          const user = await storage.getUser(userId);
+          if (user?.locationHistoryEnabled) {
+            console.log(`Starting hourly location logging for user ${userId}`);
+            locationLogger.startHourlyLogging(userId);
+          }
         }
       } catch (error) {
-        console.error('WebSocket message error:', error);
+        console.error('Error handling WebSocket message:', error);
       }
     });
 
     ws.on('close', () => {
-      // Remove client from map and stop location logging
-      clients.forEach((client, userId) => {
-        if (client === ws) {
-          clients.delete(userId);
-          // Stop hourly logging when user disconnects
-          locationLogger.stopHourlyLogging(userId);
-        }
-      });
       console.log('WebSocket client disconnected');
+      
+      // Remove client from all user lists
+      for (const [userId, userClients] of clients.entries()) {
+        const index = userClients.indexOf(ws);
+        if (index !== -1) {
+          userClients.splice(index, 1);
+          
+          // Stop hourly logging if no more clients for this user
+          if (userClients.length === 0) {
+            console.log(`Stopped hourly location logging for user ${userId}`);
+            locationLogger.stopHourlyLogging(userId);
+            clients.delete(userId);
+          }
+          break;
+        }
+      }
     });
   });
-
-  // Function to broadcast location updates
-  function broadcastLocationUpdate(userId: string, location: any) {
-    // Get family members of this user and send update
-    storage.getFamilyMembers(userId).then(familyMembers => {
-      familyMembers.forEach(member => {
-        const client = clients.get(member.id);
-        if (client && client.readyState === WebSocket.OPEN) {
-          client.send(JSON.stringify({
-            type: 'locationUpdate',
-            userId,
-            location,
-          }));
-        }
-      });
-    });
-  }
 
   return httpServer;
 }
