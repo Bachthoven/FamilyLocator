@@ -1,8 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { MapPin, Users, Shield, ArrowRight, CheckCircle, UserPlus, Heart, Smartphone } from "lucide-react";
+import { useLocation } from "wouter";
 
 export default function Landing() {
+  const [, navigate] = useLocation();
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-blue-950 dark:to-background">
       <div className="container mx-auto px-4 py-16">
@@ -21,7 +24,7 @@ export default function Landing() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
             <Button 
               size="lg" 
-              onClick={() => window.location.href = '/api/login'} 
+              onClick={() => navigate('/auth')} 
               className="text-lg px-8 py-4 h-auto"
             >
               <UserPlus className="w-5 h-5 mr-2" />
@@ -30,7 +33,7 @@ export default function Landing() {
             <Button 
               size="lg" 
               variant="outline"
-              onClick={() => window.location.href = '/api/login'} 
+              onClick={() => navigate('/auth')} 
               className="text-lg px-8 py-4 h-auto"
             >
               <ArrowRight className="w-5 h-5 mr-2" />
@@ -41,7 +44,7 @@ export default function Landing() {
           <div className="text-sm text-muted-foreground max-w-md mx-auto mb-4">
             <p className="mb-2">✓ No credit card required</p>
             <p className="mb-2">✓ Set up in under 30 seconds</p>
-            <p>✓ Uses secure Replit authentication</p>
+            <p>✓ Uses secure email authentication</p>
           </div>
           
 
@@ -58,7 +61,7 @@ export default function Landing() {
                 </div>
                 <h3 className="text-xl font-bold mb-3">1. Sign Up or Sign In</h3>
                 <p className="text-muted-foreground mb-4">
-                  Click either button above - if you're new, you'll create an account; if you already have one, you'll sign right in. Takes seconds with secure Replit authentication.
+                  Click either button above - if you're new, you'll create an account; if you already have one, you'll sign right in. Takes seconds with secure email authentication.
                 </p>
                 <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg text-sm">
                   <strong>That's it!</strong> New or returning, you're instantly ready to use the app.
@@ -157,7 +160,7 @@ export default function Landing() {
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Button 
                 size="lg"
-                onClick={() => window.location.href = '/api/login'}
+                onClick={() => navigate('/auth')}
                 className="text-lg px-6 py-3 h-auto"
               >
                 <UserPlus className="w-4 h-4 mr-2" />
@@ -166,7 +169,7 @@ export default function Landing() {
               <Button 
                 size="lg"
                 variant="outline"
-                onClick={() => window.location.href = '/api/login'}
+                onClick={() => navigate('/auth')}
                 className="text-lg px-6 py-3 h-auto"
               >
                 <ArrowRight className="w-4 h-4 mr-2" />
