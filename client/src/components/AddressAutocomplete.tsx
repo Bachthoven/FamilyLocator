@@ -32,8 +32,32 @@ export default function AddressAutocomplete({
   const [isLoading, setIsLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout>();
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Get user's current location for biasing results
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lon: position.coords.longitude,
+          });
+        },
+        (error) => {
+          console.log('Location access denied or unavailable:', error);
+          // Fallback to no location bias
+        },
+        {
+          enableHighAccuracy: false,
+          timeout: 10000,
+          maximumAge: 300000, // 5 minutes
+        }
+      );
+    }
+  }, []);
 
   const fetchSuggestions = async (query: string) => {
     if (query.length < 3) {
@@ -44,23 +68,59 @@ export default function AddressAutocomplete({
 
     try {
       setIsLoading(true);
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-          query
-        )}&limit=5&addressdetails=1&extratags=1`,
-        {
-          headers: {
-            'User-Agent': 'FamilyLocator-App',
-          },
-        }
-      );
+      
+      // Build the API URL with location biasing if user location is available
+      let apiUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+        query
+      )}&limit=8&addressdetails=1&extratags=1`;
+      
+      // Add viewbox parameter to bias results toward user's location
+      if (userLocation) {
+        // Create a bounding box around user's location (~20km radius)
+        const latDelta = 0.18; // roughly 20km
+        const lonDelta = 0.18;
+        const viewbox = [
+          userLocation.lon - lonDelta, // left
+          userLocation.lat + latDelta, // top
+          userLocation.lon + lonDelta, // right
+          userLocation.lat - latDelta  // bottom
+        ].join(',');
+        
+        apiUrl += `&viewbox=${viewbox}&bounded=1`;
+      }
+
+      const response = await fetch(apiUrl, {
+        headers: {
+          'User-Agent': 'FamilyLocator-App',
+        },
+      });
 
       if (!response.ok) {
         throw new Error('Failed to fetch suggestions');
       }
 
-      const data: AddressSuggestion[] = await response.json();
-      setSuggestions(data);
+      let data: AddressSuggestion[] = await response.json();
+      
+      // If user location is available, sort by distance from user
+      if (userLocation && data.length > 0) {
+        data = data.sort((a, b) => {
+          const distanceA = calculateDistance(
+            userLocation.lat, 
+            userLocation.lon, 
+            parseFloat(a.lat), 
+            parseFloat(a.lon)
+          );
+          const distanceB = calculateDistance(
+            userLocation.lat, 
+            userLocation.lon, 
+            parseFloat(b.lat), 
+            parseFloat(b.lon)
+          );
+          return distanceA - distanceB;
+        });
+      }
+      
+      setSuggestions(data.slice(0, 5)); // Show top 5 results
       setShowSuggestions(true);
       setSelectedIndex(-1);
     } catch (error) {
@@ -69,6 +129,19 @@ export default function AddressAutocomplete({
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Calculate distance between two points using Haversine formula
+  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+    const R = 6371; // Earth's radius in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+      Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
   };
 
   useEffect(() => {
@@ -156,6 +229,16 @@ export default function AddressAutocomplete({
     return displayName;
   };
 
+  const formatDistance = (distance: number) => {
+    if (distance < 1) {
+      return `${Math.round(distance * 1000)}m`;
+    } else if (distance < 100) {
+      return `${distance.toFixed(1)}km`;
+    } else {
+      return `${Math.round(distance)}km`;
+    }
+  };
+
   return (
     <div className="relative w-full">
       <div className="relative">
@@ -195,8 +278,20 @@ export default function AddressAutocomplete({
                       <div className="text-sm font-medium truncate">
                         {formatDisplayName(suggestion.display_name)}
                       </div>
-                      <div className="text-xs text-muted-foreground capitalize">
-                        {suggestion.type?.replace('_', ' ') || 'Location'}
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-muted-foreground capitalize">
+                          {suggestion.type?.replace('_', ' ') || 'Location'}
+                        </span>
+                        {userLocation && (
+                          <span className="text-xs text-muted-foreground">
+                            {formatDistance(calculateDistance(
+                              userLocation.lat,
+                              userLocation.lon,
+                              parseFloat(suggestion.lat),
+                              parseFloat(suggestion.lon)
+                            ))}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </CommandItem>
