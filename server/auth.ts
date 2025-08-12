@@ -32,22 +32,30 @@ async function comparePasswords(supplied: string, stored: string) {
 export function setupAuth(app: Express) {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
   
-  // Use memory store for sessions
+  // Use memory store for sessions with better persistence settings
   const MemStore = MemoryStore(session);
   const sessionStore = new MemStore({
     checkPeriod: sessionTtl,
+    max: 10000, // Maximum number of sessions to store
+    ttl: sessionTtl, // Time to live for sessions
+    dispose: (key: string, val: any) => {
+      // Optional cleanup when session expires
+    },
   });
 
   const sessionSettings: session.SessionOptions = {
-    secret: process.env.SESSION_SECRET || "fallback-secret-key-for-development",
+    secret: process.env.SESSION_SECRET || "fallback-secret-key-for-development-very-long-key",
     resave: false,
     saveUninitialized: false,
     store: sessionStore,
+    rolling: true, // Reset maxAge on every request
     cookie: {
       httpOnly: true,
       secure: false, // Set to false for development
       maxAge: sessionTtl,
+      sameSite: 'lax', // Allow cross-site requests but maintain security
     },
+    name: 'familylocator.sid', // Custom session name
   };
 
   app.set("trust proxy", 1);
