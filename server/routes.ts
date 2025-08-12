@@ -40,6 +40,11 @@ export function registerRoutes(app: Express): Server {
   // Setup authentication
   setupAuth(app);
 
+  // Test route for debugging
+  app.get('/api/test', (req, res) => {
+    res.json({ message: 'API is working', timestamp: new Date() });
+  });
+
   // User settings
   app.patch('/api/user/settings', requireAuth, async (req: any, res) => {
     try {

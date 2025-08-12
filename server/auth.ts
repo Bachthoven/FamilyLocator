@@ -5,9 +5,8 @@ import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
-import { User as SelectUser, InsertUser, loginUserSchema } from "@shared/schema";
-import connectPg from "connect-pg-simple";
-import { pool } from "./db";
+import { User as SelectUser, InsertUser, insertUserSchema, loginUserSchema } from "@shared/schema";
+import MemoryStore from "memorystore";
 
 declare global {
   namespace Express {
@@ -31,15 +30,14 @@ async function comparePasswords(supplied: string, stored: string) {
 }
 
 export function setupAuth(app: Express) {
-  const PostgresSessionStore = connectPg(session);
+  const MemorySessionStore = MemoryStore(session);
   
   const sessionSettings: session.SessionOptions = {
     secret: process.env.SESSION_SECRET || "your-secret-key-change-in-production",
     resave: false,
     saveUninitialized: false,
-    store: new PostgresSessionStore({ 
-      pool, 
-      createTableIfMissing: true 
+    store: new MemorySessionStore({
+      checkPeriod: 86400000,
     }),
     cookie: {
       httpOnly: true,
@@ -103,8 +101,9 @@ export function setupAuth(app: Express) {
           lastName: user.lastName 
         });
       });
-    } catch (error) {
-      res.status(400).json({ message: "Invalid registration data" });
+    } catch (error: any) {
+      console.error("Registration error:", error);
+      res.status(400).json({ message: "Invalid registration data", error: error.message });
     }
   });
 
