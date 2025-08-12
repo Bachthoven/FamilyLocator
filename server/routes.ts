@@ -2,31 +2,19 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupAuth, isAuthenticated } from "./auth";
 import { insertLocationSchema, insertPlaceSchema, insertFamilyConnectionSchema } from "@shared/schema";
 import { locationLogger } from "./locationLogger";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
-  await setupAuth(app);
-
-  // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      res.json(user);
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
-    }
-  });
+  setupAuth(app);
 
   // User settings
   app.patch('/api/user/settings', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const settingsSchema = z.object({
         locationSharingEnabled: z.boolean().optional(),
         locationHistoryEnabled: z.boolean().optional(),
@@ -39,9 +27,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Start or stop hourly logging based on location history setting
       if (settings.locationHistoryEnabled !== undefined) {
         if (settings.locationHistoryEnabled) {
-          locationLogger.startHourlyLogging(userId);
+          locationLogger.startHourlyLogging(userId.toString());
         } else {
-          locationLogger.stopHourlyLogging(userId);
+          locationLogger.stopHourlyLogging(userId.toString());
         }
       }
       
@@ -55,7 +43,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Location routes
   app.post('/api/locations', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const locationData = insertLocationSchema.parse({
         ...req.body,
         userId,
@@ -64,7 +52,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const location = await storage.saveLocation(locationData);
       
       // Broadcast location update to family members via WebSocket
-      broadcastLocationUpdate(userId, location);
+      broadcastLocationUpdate(userId.toString(), location);
       
       res.json(location);
     } catch (error) {
@@ -75,7 +63,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/locations/current', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const currentLocation = await storage.getUserLatestLocation(userId);
       if (!currentLocation) {
         return res.status(404).json({ message: "No location data found" });
@@ -89,7 +77,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/locations/family', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const locations = await storage.getFamilyMembersLocations(userId);
       res.json(locations);
     } catch (error) {
@@ -101,7 +89,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Family member routes
   app.get('/api/family', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const familyMembers = await storage.getFamilyMembers(userId);
       res.json(familyMembers);
     } catch (error) {
@@ -113,7 +101,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get pending invitations received by this user
   app.get('/api/family/invitations', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const invitations = await storage.getPendingInvitations(userId);
       res.json(invitations);
     } catch (error) {
@@ -124,7 +112,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/family/invite', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const { email } = z.object({ email: z.string().email() }).parse(req.body);
       
       // Find user by email
@@ -154,10 +142,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/family/accept/:memberId', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const { memberId } = req.params;
       
-      const connection = await storage.acceptFamilyConnection(userId, memberId);
+      const connection = await storage.acceptFamilyConnection(userId, parseInt(memberId));
       res.json(connection);
     } catch (error) {
       console.error("Error accepting family connection:", error);
@@ -167,10 +155,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/family/:memberId', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const { memberId } = req.params;
       
-      await storage.removeFamilyMember(userId, memberId);
+      await storage.removeFamilyMember(userId, parseInt(memberId));
       res.json({ success: true });
     } catch (error) {
       console.error("Error removing family member:", error);
@@ -181,7 +169,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Places routes
   app.get('/api/places', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const places = await storage.getUserPlaces(userId);
       res.json(places);
     } catch (error) {
@@ -192,7 +180,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/places', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const placeData = insertPlaceSchema.parse({
         ...req.body,
         userId,
@@ -208,7 +196,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/places/:placeId', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const placeId = parseInt(req.params.placeId);
       
       await storage.deletePlace(userId, placeId);
@@ -222,8 +210,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Hourly location logging control routes
   app.post('/api/location-logging/start', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      locationLogger.startHourlyLogging(userId);
+      const userId = req.user.id;
+      locationLogger.startHourlyLogging(userId.toString());
       res.json({ message: "Hourly location logging started", success: true });
     } catch (error) {
       console.error("Error starting location logging:", error);
@@ -233,8 +221,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/location-logging/stop', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      locationLogger.stopHourlyLogging(userId);
+      const userId = req.user.id;
+      locationLogger.stopHourlyLogging(userId.toString());
       res.json({ message: "Hourly location logging stopped", success: true });
     } catch (error) {
       console.error("Error stopping location logging:", error);
@@ -266,13 +254,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const data = JSON.parse(message.toString());
         
         if (data.type === 'auth' && data.userId) {
-          clients.set(data.userId, ws);
+          clients.set(data.userId.toString(), ws);
           console.log(`User ${data.userId} registered for WebSocket updates`);
           
           // Auto-start hourly location logging for users with location history enabled
-          storage.getUser(data.userId).then(user => {
+          storage.getUser(parseInt(data.userId)).then(user => {
             if (user && user.locationHistoryEnabled) {
-              locationLogger.startHourlyLogging(data.userId);
+              locationLogger.startHourlyLogging(data.userId.toString());
             }
           }).catch(error => {
             console.error(`Error checking user settings for ${data.userId}:`, error);
@@ -299,9 +287,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Function to broadcast location updates
   function broadcastLocationUpdate(userId: string, location: any) {
     // Get family members of this user and send update
-    storage.getFamilyMembers(userId).then(familyMembers => {
+    storage.getFamilyMembers(parseInt(userId)).then(familyMembers => {
       familyMembers.forEach(member => {
-        const client = clients.get(member.id);
+        const client = clients.get(member.id.toString());
         if (client && client.readyState === WebSocket.OPEN) {
           client.send(JSON.stringify({
             type: 'locationUpdate',

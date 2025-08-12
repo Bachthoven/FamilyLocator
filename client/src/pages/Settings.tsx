@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
 import BottomNavigation from '@/components/BottomNavigation';
 import PrivacySettings from '@/components/PrivacySettings';
@@ -21,13 +21,13 @@ import {
 } from 'lucide-react';
 
 export default function Settings() {
-  const { user } = useAuth();
+  const { user, logoutMutation } = useAuth();
   const { toast } = useToast();
   const [privacySettingsOpen, setPrivacySettingsOpen] = useState(false);
 
   const handleLogout = () => {
     if (confirm('Are you sure you want to log out?')) {
-      window.location.href = '/api/logout';
+      logoutMutation.mutate();
     }
   };
 

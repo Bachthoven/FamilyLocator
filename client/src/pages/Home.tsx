@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/use-auth';
 import { useLocationLogger } from '@/hooks/useLocationLogger';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { useToast } from '@/hooks/use-toast';
@@ -18,7 +18,7 @@ import { User, Location } from '@shared/schema';
 import { Link } from 'wouter';
 
 export default function Home() {
-  const { user, isLoading: authLoading, isAuthenticated } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [selectedLocation, setSelectedLocation] = useState<(Location & { user: User }) | null>(null);
@@ -26,20 +26,8 @@ export default function Home() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isFamilyPanelExpanded, setIsFamilyPanelExpanded] = useState(false);
 
-  // Redirect to login if not authenticated
-  useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
-      return;
-    }
-  }, [isAuthenticated, authLoading, toast]);
+  // This component is now protected by authentication in App.tsx
+  // No need for manual redirect logic
 
   // Use the location logger hook for automatic location tracking
   const { 
@@ -121,8 +109,8 @@ export default function Home() {
     );
   }
 
-  if (!isAuthenticated) {
-    return null; // Will redirect via useEffect
+  if (!user) {
+    return null; // Protected by authentication in App.tsx
   }
 
   return (

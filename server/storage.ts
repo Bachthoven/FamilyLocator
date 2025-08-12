@@ -4,7 +4,7 @@ import {
   places,
   familyConnections,
   type User,
-  type UpsertUser,
+  type InsertUser,
   type Location,
   type InsertLocation,
   type Place,
@@ -16,33 +16,33 @@ import { db } from "./db";
 import { eq, and, desc, or } from "drizzle-orm";
 
 export interface IStorage {
-  // User operations (mandatory for Replit Auth)
-  getUser(id: string): Promise<User | undefined>;
+  // User operations
+  getUser(id: number): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
-  upsertUser(user: UpsertUser): Promise<User>;
-  updateUserSettings(userId: string, settings: Partial<User>): Promise<User>;
+  createUser(user: InsertUser): Promise<User>;
+  updateUserSettings(userId: number, settings: Partial<User>): Promise<User>;
   
   // Location operations
   saveLocation(location: InsertLocation): Promise<Location>;
-  getUserLatestLocation(userId: string): Promise<Location | undefined>;
-  getFamilyMembersLocations(userId: string): Promise<Array<Location & { user: User }>>;
+  getUserLatestLocation(userId: number): Promise<Location | undefined>;
+  getFamilyMembersLocations(userId: number): Promise<Array<Location & { user: User }>>;
   
   // Family connection operations
-  getFamilyMembers(userId: string): Promise<Array<User>>;
-  getPendingInvitations(userId: string): Promise<Array<FamilyConnection & { user: User }>>;
+  getFamilyMembers(userId: number): Promise<Array<User>>;
+  getPendingInvitations(userId: number): Promise<Array<FamilyConnection & { user: User }>>;
   addFamilyMember(connection: InsertFamilyConnection): Promise<FamilyConnection>;
-  acceptFamilyConnection(userId: string, familyMemberId: string): Promise<FamilyConnection>;
-  removeFamilyMember(userId: string, familyMemberId: string): Promise<void>;
+  acceptFamilyConnection(userId: number, familyMemberId: number): Promise<FamilyConnection>;
+  removeFamilyMember(userId: number, familyMemberId: number): Promise<void>;
   
   // Places operations
-  getUserPlaces(userId: string): Promise<Place[]>;
+  getUserPlaces(userId: number): Promise<Place[]>;
   savePlace(place: InsertPlace): Promise<Place>;
-  deletePlace(userId: string, placeId: number): Promise<void>;
+  deletePlace(userId: number, placeId: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
   // User operations
-  async getUser(id: string): Promise<User | undefined> {
+  async getUser(id: number): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
     return user;
   }
@@ -52,22 +52,15 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async upsertUser(userData: UpsertUser): Promise<User> {
+  async createUser(userData: InsertUser): Promise<User> {
     const [user] = await db
       .insert(users)
       .values(userData)
-      .onConflictDoUpdate({
-        target: users.id,
-        set: {
-          ...userData,
-          updatedAt: new Date(),
-        },
-      })
       .returning();
     return user;
   }
 
-  async updateUserSettings(userId: string, settings: Partial<User>): Promise<User> {
+  async updateUserSettings(userId: number, settings: Partial<User>): Promise<User> {
     const [user] = await db
       .update(users)
       .set({ ...settings, updatedAt: new Date() })
@@ -85,7 +78,7 @@ export class DatabaseStorage implements IStorage {
     return savedLocation;
   }
 
-  async getUserLatestLocation(userId: string): Promise<Location | undefined> {
+  async getUserLatestLocation(userId: number): Promise<Location | undefined> {
     const [location] = await db
       .select()
       .from(locations)
@@ -95,7 +88,7 @@ export class DatabaseStorage implements IStorage {
     return location;
   }
 
-  async getFamilyMembersLocations(userId: string): Promise<Array<Location & { user: User }>> {
+  async getFamilyMembersLocations(userId: number): Promise<Array<Location & { user: User }>> {
     const result = await db
       .select({
         id: locations.id,
@@ -104,6 +97,7 @@ export class DatabaseStorage implements IStorage {
         longitude: locations.longitude,
         accuracy: locations.accuracy,
         address: locations.address,
+        type: locations.type,
         timestamp: locations.timestamp,
         user: users,
       })
@@ -131,7 +125,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Family connection operations
-  async getFamilyMembers(userId: string): Promise<Array<User>> {
+  async getFamilyMembers(userId: number): Promise<Array<User>> {
     const result = await db
       .select({ user: users })
       .from(familyConnections)
@@ -146,7 +140,7 @@ export class DatabaseStorage implements IStorage {
     return result.map(r => r.user);
   }
 
-  async getPendingInvitations(userId: string): Promise<Array<FamilyConnection & { user: User }>> {
+  async getPendingInvitations(userId: number): Promise<Array<FamilyConnection & { user: User }>> {
     const result = await db
       .select({
         id: familyConnections.id,
@@ -176,7 +170,7 @@ export class DatabaseStorage implements IStorage {
     return familyConnection;
   }
 
-  async acceptFamilyConnection(userId: string, familyMemberId: string): Promise<FamilyConnection> {
+  async acceptFamilyConnection(userId: number, familyMemberId: number): Promise<FamilyConnection> {
     const [connection] = await db
       .update(familyConnections)
       .set({ status: "accepted" })
@@ -191,7 +185,7 @@ export class DatabaseStorage implements IStorage {
     return connection;
   }
 
-  async removeFamilyMember(userId: string, familyMemberId: string): Promise<void> {
+  async removeFamilyMember(userId: number, familyMemberId: number): Promise<void> {
     await db
       .delete(familyConnections)
       .where(
@@ -209,7 +203,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Places operations
-  async getUserPlaces(userId: string): Promise<Place[]> {
+  async getUserPlaces(userId: number): Promise<Place[]> {
     return await db
       .select()
       .from(places)
@@ -225,7 +219,7 @@ export class DatabaseStorage implements IStorage {
     return savedPlace;
   }
 
-  async deletePlace(userId: string, placeId: number): Promise<void> {
+  async deletePlace(userId: number, placeId: number): Promise<void> {
     await db
       .delete(places)
       .where(
@@ -237,174 +231,4 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
-// Temporary in-memory storage implementation for development
-class MemoryStorage implements IStorage {
-  private users = new Map<string, User>();
-  private locations = new Map<string, Location[]>();
-  private places = new Map<string, Place[]>();
-  private familyConnections = new Map<string, FamilyConnection[]>();
-  private nextId = 1;
-
-  async getUser(id: string): Promise<User | undefined> {
-    return this.users.get(id);
-  }
-
-  async getUserByEmail(email: string): Promise<User | undefined> {
-    for (const user of this.users.values()) {
-      if (user.email === email) return user;
-    }
-    return undefined;
-  }
-
-  async upsertUser(userData: UpsertUser): Promise<User> {
-    const now = new Date();
-    const user: User = {
-      ...userData,
-      locationSharingEnabled: userData.locationSharingEnabled ?? true,
-      locationHistoryEnabled: userData.locationHistoryEnabled ?? true,
-      notificationsEnabled: userData.notificationsEnabled ?? true,
-      createdAt: now,
-      updatedAt: now,
-    };
-    this.users.set(user.id, user);
-    return user;
-  }
-
-  async updateUserSettings(userId: string, settings: Partial<User>): Promise<User> {
-    const user = this.users.get(userId);
-    if (!user) throw new Error('User not found');
-    
-    const updatedUser = { ...user, ...settings, updatedAt: new Date() };
-    this.users.set(userId, updatedUser);
-    return updatedUser;
-  }
-
-  async saveLocation(location: InsertLocation): Promise<Location> {
-    const newLocation: Location = {
-      id: this.nextId++,
-      ...location,
-      type: location.type || "manual",
-      timestamp: new Date(),
-    };
-    
-    const userLocations = this.locations.get(location.userId) || [];
-    userLocations.push(newLocation);
-    this.locations.set(location.userId, userLocations);
-    
-    return newLocation;
-  }
-
-  async getUserLatestLocation(userId: string): Promise<Location | undefined> {
-    const userLocations = this.locations.get(userId) || [];
-    return userLocations[userLocations.length - 1];
-  }
-
-  async getFamilyMembersLocations(userId: string): Promise<Array<Location & { user: User }>> {
-    const connections = this.familyConnections.get(userId) || [];
-    const acceptedConnections = connections.filter(c => c.status === 'accepted');
-    
-    const result: Array<Location & { user: User }> = [];
-    
-    for (const connection of acceptedConnections) {
-      const familyMemberId = connection.familyMemberId;
-      const user = this.users.get(familyMemberId);
-      const location = await this.getUserLatestLocation(familyMemberId);
-      
-      if (user && location && user.locationSharingEnabled) {
-        result.push({ ...location, user });
-      }
-    }
-    
-    return result;
-  }
-
-  async getFamilyMembers(userId: string): Promise<Array<User>> {
-    const connections = this.familyConnections.get(userId) || [];
-    const acceptedConnections = connections.filter(c => c.status === 'accepted');
-    
-    const members: User[] = [];
-    for (const connection of acceptedConnections) {
-      const user = this.users.get(connection.familyMemberId);
-      if (user) members.push(user);
-    }
-    
-    return members;
-  }
-
-  async getPendingInvitations(userId: string): Promise<Array<FamilyConnection & { user: User }>> {
-    const result: Array<FamilyConnection & { user: User }> = [];
-    
-    // Check all connections to find invitations where this user is the target
-    for (const [inviterId, connections] of this.familyConnections) {
-      const pendingConnection = connections.find(c => 
-        c.familyMemberId === userId && c.status === 'pending'
-      );
-      
-      if (pendingConnection) {
-        const inviterUser = this.users.get(inviterId);
-        if (inviterUser) {
-          result.push({ ...pendingConnection, user: inviterUser });
-        }
-      }
-    }
-    
-    return result;
-  }
-
-  async addFamilyMember(connection: InsertFamilyConnection): Promise<FamilyConnection> {
-    const newConnection: FamilyConnection = {
-      id: this.nextId++,
-      ...connection,
-      createdAt: new Date(),
-    };
-    
-    const userConnections = this.familyConnections.get(connection.userId) || [];
-    userConnections.push(newConnection);
-    this.familyConnections.set(connection.userId, userConnections);
-    
-    return newConnection;
-  }
-
-  async acceptFamilyConnection(userId: string, familyMemberId: string): Promise<FamilyConnection> {
-    const connections = this.familyConnections.get(userId) || [];
-    const connection = connections.find(c => c.familyMemberId === familyMemberId);
-    
-    if (!connection) throw new Error('Connection not found');
-    
-    connection.status = 'accepted';
-    return connection;
-  }
-
-  async removeFamilyMember(userId: string, familyMemberId: string): Promise<void> {
-    const connections = this.familyConnections.get(userId) || [];
-    const filteredConnections = connections.filter(c => c.familyMemberId !== familyMemberId);
-    this.familyConnections.set(userId, filteredConnections);
-  }
-
-  async getUserPlaces(userId: string): Promise<Place[]> {
-    return this.places.get(userId) || [];
-  }
-
-  async savePlace(place: InsertPlace): Promise<Place> {
-    const newPlace: Place = {
-      id: this.nextId++,
-      ...place,
-      createdAt: new Date(),
-    };
-    
-    const userPlaces = this.places.get(place.userId) || [];
-    userPlaces.push(newPlace);
-    this.places.set(place.userId, userPlaces);
-    
-    return newPlace;
-  }
-
-  async deletePlace(userId: string, placeId: number): Promise<void> {
-    const userPlaces = this.places.get(userId) || [];
-    const filteredPlaces = userPlaces.filter(p => p.id !== placeId);
-    this.places.set(userId, filteredPlaces);
-  }
-}
-
-// Use database storage now that database is available
 export const storage = new DatabaseStorage();
