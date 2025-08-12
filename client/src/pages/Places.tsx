@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { isUnauthorizedError } from '@/lib/authUtils';
 import BottomNavigation from '@/components/BottomNavigation';
+import AddressAutocomplete from '@/components/AddressAutocomplete';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -131,15 +132,17 @@ export default function Places() {
       return;
     }
     
-    // For demo purposes, we'll use random coordinates
-    // In a real app, you'd geocode the address
-    const place = {
-      ...newPlace,
-      latitude: 40.7128 + (Math.random() - 0.5) * 0.1,
-      longitude: -74.0060 + (Math.random() - 0.5) * 0.1,
-    };
+    // Check if coordinates were set by autocomplete
+    if (newPlace.latitude === 0 && newPlace.longitude === 0) {
+      toast({
+        title: "Location Not Found",
+        description: "Please select an address from the suggestions to get precise coordinates.",
+        variant: "destructive",
+      });
+      return;
+    }
     
-    addPlaceMutation.mutate(place);
+    addPlaceMutation.mutate(newPlace);
   };
 
   const handleDeletePlace = (placeId: number) => {
@@ -193,11 +196,16 @@ export default function Places() {
                 </div>
                 <div>
                   <Label htmlFor="address">Address *</Label>
-                  <Input
-                    id="address"
-                    placeholder="Enter the full address"
+                  <AddressAutocomplete
                     value={newPlace.address}
-                    onChange={(e) => setNewPlace(prev => ({ ...prev, address: e.target.value }))}
+                    onValueChange={(address) => setNewPlace(prev => ({ ...prev, address }))}
+                    onLocationSelect={(location) => setNewPlace(prev => ({
+                      ...prev,
+                      address: location.address,
+                      latitude: location.latitude,
+                      longitude: location.longitude,
+                    }))}
+                    placeholder="Start typing an address..."
                   />
                 </div>
                 <div>
