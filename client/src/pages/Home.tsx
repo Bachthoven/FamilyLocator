@@ -52,6 +52,12 @@ export default function Home() {
     refetchInterval: 30000, // Refresh every 30 seconds
   });
 
+  // Get user places
+  const { data: places = [], isLoading: placesLoading } = useQuery({
+    queryKey: ['/api/places'],
+    enabled: !!user,
+  });
+
   // Handle WebSocket messages
   useEffect(() => {
     if (lastMessage?.type === 'locationUpdate') {
@@ -83,6 +89,13 @@ export default function Home() {
   const handleLocationClick = (location: Location & { user: User }) => {
     setSelectedLocation(location);
     // Center map on selected location would be handled by Map component
+  };
+
+  const handlePlaceClick = (place: any) => {
+    toast({
+      title: "Saved Place",
+      description: `${place.name} - ${place.address}`,
+    });
   };
 
   // Filter family locations based on search query
@@ -120,7 +133,9 @@ export default function Home() {
         <Map
           currentLocation={currentLocation}
           familyLocations={familyLocations}
+          places={places}
           onLocationClick={handleLocationClick}
+          onPlaceClick={handlePlaceClick}
         />
         
         {/* Top Header */}

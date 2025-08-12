@@ -69,6 +69,13 @@ export default function Places() {
         category: 'other',
       });
       queryClient.invalidateQueries({ queryKey: ['/api/places'] });
+      // Trigger a toast to indicate the place was added to the map
+      setTimeout(() => {
+        toast({
+          title: "Place Added to Map",
+          description: "Your new place is now visible on the map!",
+        });
+      }, 500);
     },
     onError: (error) => {
       if (isUnauthorizedError(error)) {

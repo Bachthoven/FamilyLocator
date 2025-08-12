@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { User, Location } from '@shared/schema';
+import { User, Location, Place } from '@shared/schema';
 
 // Fix for default markers in react-leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -28,10 +28,37 @@ const createUserIcon = (color: string) => new L.DivIcon({
 const currentUserIcon = createUserIcon('blue');
 const familyMemberIcon = createUserIcon('green');
 
+// Create place marker icons based on category
+const createPlaceIcon = (category: string) => {
+  const categoryColors = {
+    home: 'purple',
+    work: 'orange', 
+    school: 'yellow',
+    other: 'gray'
+  };
+  
+  const color = categoryColors[category as keyof typeof categoryColors] || 'gray';
+  
+  return new L.DivIcon({
+    html: `
+      <div class="relative">
+        <div class="w-6 h-6 bg-${color}-500 rounded-lg border-2 border-white shadow-lg flex items-center justify-center">
+          <div class="w-2 h-2 bg-white rounded-full"></div>
+        </div>
+      </div>
+    `,
+    className: 'custom-place-marker',
+    iconSize: [24, 24],
+    iconAnchor: [12, 12],
+  });
+};
+
 interface MapProps {
   currentLocation: { latitude: number; longitude: number } | null;
   familyLocations: Array<Location & { user: User }>;
+  places: Place[];
   onLocationClick?: (location: Location & { user: User }) => void;
+  onPlaceClick?: (place: Place) => void;
 }
 
 function MapCenter({ center }: { center: [number, number] }) {
@@ -44,7 +71,7 @@ function MapCenter({ center }: { center: [number, number] }) {
   return null;
 }
 
-export default function Map({ currentLocation, familyLocations, onLocationClick }: MapProps) {
+export default function Map({ currentLocation, familyLocations, places, onLocationClick, onPlaceClick }: MapProps) {
   const mapRef = useRef<L.Map | null>(null);
   const [mapCenter, setMapCenter] = useState<[number, number]>([40.7128, -74.0060]); // Default to NYC
 
@@ -110,6 +137,30 @@ export default function Map({ currentLocation, familyLocations, onLocationClick 
                 </div>
                 <div className="text-xs text-gray-400">
                   {new Date(location.timestamp!).toLocaleTimeString()}
+                </div>
+              </div>
+            </Popup>
+          </Marker>
+        ))}
+
+        {/* Saved places */}
+        {places.map((place) => (
+          <Marker
+            key={`place-${place.id}`}
+            position={[place.latitude, place.longitude]}
+            icon={createPlaceIcon(place.category)}
+            eventHandlers={{
+              click: () => onPlaceClick?.(place),
+            }}
+          >
+            <Popup>
+              <div className="text-center">
+                <div className="font-medium">{place.name}</div>
+                <div className="text-sm text-gray-500 capitalize">
+                  {place.category} • Saved Place
+                </div>
+                <div className="text-xs text-gray-400">
+                  {place.address}
                 </div>
               </div>
             </Popup>
