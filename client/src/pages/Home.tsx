@@ -58,6 +58,30 @@ export default function Home() {
     enabled: !!user,
   });
 
+  // Helper functions for last seen indicator
+  const isLocationRecent = (timestamp: string | Date) => {
+    const locationTime = new Date(timestamp).getTime();
+    const now = new Date().getTime();
+    const fifteenMinutes = 15 * 60 * 1000; // 15 minutes in milliseconds
+    return (now - locationTime) < fifteenMinutes;
+  };
+
+  const formatTimeSince = (timestamp: string | Date) => {
+    const locationTime = new Date(timestamp).getTime();
+    const now = new Date().getTime();
+    const diffMinutes = Math.floor((now - locationTime) / (1000 * 60));
+    
+    if (diffMinutes < 60) {
+      return `${diffMinutes}m ago`;
+    } else if (diffMinutes < 1440) { // Less than 24 hours
+      const hours = Math.floor(diffMinutes / 60);
+      return `${hours}h ago`;
+    } else {
+      const days = Math.floor(diffMinutes / 1440);
+      return `${days}d ago`;
+    }
+  };
+
   // Handle WebSocket messages
   useEffect(() => {
     if (lastMessage?.type === 'locationUpdate') {
@@ -284,14 +308,19 @@ export default function Home() {
                   </Link>
                 </div>
               ) : (
-                filteredFamilyLocations.map((location) => (
-                  <FamilyMemberCard
-                    key={location.id}
-                    user={location.user}
-                    location={location}
-                    onViewLocation={() => handleLocationClick(location)}
-                  />
-                ))
+                filteredFamilyLocations.map((location) => {
+                  const isRecent = isLocationRecent(location.timestamp!);
+                  return (
+                    <FamilyMemberCard
+                      key={location.id}
+                      user={location.user}
+                      location={location}
+                      isRecent={isRecent}
+                      lastSeen={isRecent ? null : formatTimeSince(location.timestamp!)}
+                      onViewLocation={() => handleLocationClick(location)}
+                    />
+                  );
+                })
               )}
             </div>
           </div>

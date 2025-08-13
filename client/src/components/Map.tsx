@@ -13,11 +13,12 @@ L.Icon.Default.mergeOptions({
 });
 
 // Custom marker icons
-const createUserIcon = (color: string) => new L.DivIcon({
+const createUserIcon = (color: string, isRecent: boolean = true) => new L.DivIcon({
   html: `
     <div class="relative">
-      <div class="w-4 h-4 bg-${color}-500 rounded-full border-2 border-white shadow-lg"></div>
-      <div class="absolute inset-0 w-4 h-4 bg-${color}-500 rounded-full animate-ping opacity-75"></div>
+      <div class="w-4 h-4 bg-${color}-500 rounded-full border-2 border-white shadow-lg ${isRecent ? '' : 'opacity-60'}"></div>
+      ${isRecent ? `<div class="absolute inset-0 w-4 h-4 bg-${color}-500 rounded-full animate-ping opacity-75"></div>` : ''}
+      ${!isRecent ? '<div class="absolute -top-1 -right-1 w-2 h-2 bg-gray-400 rounded-full border border-white"></div>' : ''}
     </div>
   `,
   className: 'custom-marker',
@@ -26,7 +27,31 @@ const createUserIcon = (color: string) => new L.DivIcon({
 });
 
 const currentUserIcon = createUserIcon('blue');
-const familyMemberIcon = createUserIcon('green');
+
+// Helper function to check if location is recent (within last 15 minutes)
+const isLocationRecent = (timestamp: string | Date) => {
+  const locationTime = new Date(timestamp).getTime();
+  const now = new Date().getTime();
+  const fifteenMinutes = 15 * 60 * 1000; // 15 minutes in milliseconds
+  return (now - locationTime) < fifteenMinutes;
+};
+
+// Helper function to format time since last seen
+const formatTimeSince = (timestamp: string | Date) => {
+  const locationTime = new Date(timestamp).getTime();
+  const now = new Date().getTime();
+  const diffMinutes = Math.floor((now - locationTime) / (1000 * 60));
+  
+  if (diffMinutes < 60) {
+    return `${diffMinutes}m ago`;
+  } else if (diffMinutes < 1440) { // Less than 24 hours
+    const hours = Math.floor(diffMinutes / 60);
+    return `${hours}h ago`;
+  } else {
+    const days = Math.floor(diffMinutes / 1440);
+    return `${days}d ago`;
+  }
+};
 
 // Create place marker icons based on category
 const createPlaceIcon = (category: string) => {
@@ -133,30 +158,39 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
         )}
         
         {/* Family member locations */}
-        {familyLocations.map((location) => (
-          <Marker
-            key={location.id}
-            position={[location.latitude, location.longitude]}
-            icon={familyMemberIcon}
-            eventHandlers={{
-              click: () => onLocationClick?.(location),
-            }}
-          >
-            <Popup>
-              <div className="text-center">
-                <div className="font-medium">
-                  {location.user.firstName || location.user.email}
+        {familyLocations.map((location) => {
+          const isRecent = isLocationRecent(location.timestamp!);
+          const familyMemberIcon = createUserIcon('green', isRecent);
+          
+          return (
+            <Marker
+              key={location.id}
+              position={[location.latitude, location.longitude]}
+              icon={familyMemberIcon}
+              eventHandlers={{
+                click: () => onLocationClick?.(location),
+              }}
+            >
+              <Popup>
+                <div className="text-center">
+                  <div className="font-medium">
+                    {location.user.firstName || location.user.email}
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    {location.address || 'Unknown location'}
+                  </div>
+                  <div className="text-xs text-gray-400">
+                    {isRecent ? (
+                      <>Active now • {new Date(location.timestamp!).toLocaleTimeString()}</>
+                    ) : (
+                      <>Last seen {formatTimeSince(location.timestamp!)}</>
+                    )}
+                  </div>
                 </div>
-                <div className="text-sm text-gray-500">
-                  {location.address || 'Unknown location'}
-                </div>
-                <div className="text-xs text-gray-400">
-                  {new Date(location.timestamp!).toLocaleTimeString()}
-                </div>
-              </div>
-            </Popup>
-          </Marker>
-        ))}
+              </Popup>
+            </Marker>
+          );
+        })}
 
         {/* Saved places */}
         {places.map((place) => (

@@ -6,6 +6,8 @@ import { MapPin, Eye, EyeOff } from 'lucide-react';
 interface FamilyMemberCardProps {
   user: User;
   location?: Location;
+  isRecent?: boolean;
+  lastSeen?: string | null;
   onViewLocation?: () => void;
   onRemove?: () => void;
 }
@@ -40,6 +42,8 @@ function getStatusColor(location?: Location, user?: User): string {
 export default function FamilyMemberCard({
   user,
   location,
+  isRecent = true,
+  lastSeen,
   onViewLocation,
   onRemove,
 }: FamilyMemberCardProps) {
@@ -67,21 +71,27 @@ export default function FamilyMemberCard({
             }
           </div>
           <div className="text-sm text-muted-foreground flex items-center">
-            <div className={`w-2 h-2 ${statusColor} rounded-full mr-2`}></div>
+            <div className={`w-2 h-2 ${statusColor} rounded-full mr-2 ${!isRecent ? 'opacity-60' : ''}`}></div>
             {canViewLocation ? (
               location.address || 'Unknown location'
             ) : (
               'Location sharing off'
             )}
           </div>
+          {canViewLocation && lastSeen && (
+            <div className="text-xs text-muted-foreground">
+              Last seen {lastSeen}
+            </div>
+          )}
+          {canViewLocation && isRecent && (
+            <div className="text-xs text-green-600 dark:text-green-400">
+              Active now
+            </div>
+          )}
         </div>
       </div>
       
       <div className="text-right flex items-center space-x-2">
-        <div className="text-sm text-muted-foreground">
-          {location ? getTimeAgo(new Date(location.timestamp!)) : 'Offline'}
-        </div>
-        
         {canViewLocation ? (
           <Button
             variant="ghost"
