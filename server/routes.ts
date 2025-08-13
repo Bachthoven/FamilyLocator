@@ -110,33 +110,104 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/family/invite', isAuthenticated, async (req: any, res) => {
+  // Generate invitation code
+  app.post('/api/family/generate-code', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      const { email } = z.object({ email: z.string().email() }).parse(req.body);
       
-      // Find user by email
-      const targetUser = await storage.getUserByEmail(email);
-      if (!targetUser) {
-        return res.status(404).json({ message: "User not found. They need to sign up first." });
+      // Generate random 6-character code
+      const generateCode = () => Math.random().toString(36).substring(2, 8).toUpperCase();
+      let code = generateCode();
+      
+      // Ensure code is unique
+      let existingCode = await storage.getInvitationByCode(code);
+      while (existingCode) {
+        code = generateCode();
+        existingCode = await storage.getInvitationByCode(code);
+      }
+      
+      // Set expiration to 24 hours from now
+      const expiresAt = new Date();
+      expiresAt.setHours(expiresAt.getHours() + 24);
+      
+      const invitationCode = await storage.createInvitationCode({
+        code,
+        userId,
+        expiresAt,
+      });
+      
+      res.json(invitationCode);
+    } catch (error) {
+      console.error("Error generating invitation code:", error);
+      res.status(500).json({ message: "Failed to generate invitation code" });
+    }
+  });
+
+  // Join family using invitation code
+  app.post('/api/family/join', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { code } = z.object({ code: z.string().length(6) }).parse(req.body);
+      
+      // Find the invitation code
+      const invitation = await storage.getInvitationByCode(code.toUpperCase());
+      if (!invitation) {
+        return res.status(404).json({ message: "Invalid invitation code" });
+      }
+      
+      // Check if code has expired
+      if (new Date() > invitation.expiresAt) {
+        return res.status(400).json({ message: "Invitation code has expired" });
+      }
+      
+      // Check if code has been used
+      if (invitation.usedAt) {
+        return res.status(400).json({ message: "Invitation code has already been used" });
+      }
+      
+      // Check if user is trying to join their own family
+      if (invitation.userId === userId) {
+        return res.status(400).json({ message: "You cannot use your own invitation code" });
       }
       
       // Check if connection already exists
       const existingMembers = await storage.getFamilyMembers(userId);
-      if (existingMembers.some(member => member.id === targetUser.id)) {
-        return res.status(400).json({ message: "User is already in your family" });
+      if (existingMembers.some(member => member.id === invitation.userId)) {
+        return res.status(400).json({ message: "You are already connected to this family member" });
       }
       
-      const connection = await storage.addFamilyMember({
-        userId,
-        familyMemberId: targetUser.id,
-        status: "pending",
+      // Create bidirectional family connection
+      await storage.addFamilyMember({
+        userId: invitation.userId,
+        familyMemberId: userId,
+        status: "accepted",
       });
       
-      res.json(connection);
+      await storage.addFamilyMember({
+        userId: userId,
+        familyMemberId: invitation.userId,
+        status: "accepted",
+      });
+      
+      // Mark invitation code as used
+      await storage.useInvitationCode(code.toUpperCase(), userId);
+      
+      res.json({ success: true, message: "Successfully joined family!" });
     } catch (error) {
-      console.error("Error inviting family member:", error);
-      res.status(500).json({ message: "Failed to invite family member" });
+      console.error("Error joining family:", error);
+      res.status(500).json({ message: "Failed to join family" });
+    }
+  });
+
+  // Get user's active invitation codes
+  app.get('/api/family/codes', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const codes = await storage.getUserActiveCodes(userId);
+      res.json(codes);
+    } catch (error) {
+      console.error("Error fetching invitation codes:", error);
+      res.status(500).json({ message: "Failed to fetch invitation codes" });
     }
   });
 

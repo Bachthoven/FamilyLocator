@@ -121,6 +121,16 @@ FamilyLocator is a modern web application that enables families to share their r
 
 ## Changelog
 
+- August 13, 2025. Replaced email invitation system with invitation codes:
+  - Replaced email-based family invitations with 6-character invitation codes
+  - Users can now generate invitation codes that expire after 24 hours
+  - Family members join using codes instead of email addresses
+  - Added invitation codes table to database schema with expiration tracking
+  - Simplified family joining process - no need for email verification
+  - Codes automatically marked as used when someone joins the family
+  - Added copy-to-clipboard functionality for easy code sharing
+  - Updated Family page UI to show active codes and join options
+
 - August 11, 2025. Improved cross-platform compatibility and user experience:
   - Fixed bottom navigation issues on Windows with better CSS positioning and cursor handling
   - Enhanced touch device support across platforms

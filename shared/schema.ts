@@ -73,12 +73,24 @@ export const places = pgTable("places", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Invitation codes table for family invitations
+export const invitationCodes = pgTable("invitation_codes", {
+  id: serial("id").primaryKey(),
+  code: varchar("code", { length: 6 }).unique().notNull(), // 6-character code
+  userId: serial("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  expiresAt: timestamp("expires_at").notNull(), // Codes expire after 24 hours
+  usedAt: timestamp("used_at"),
+  usedById: serial("used_by_id").references(() => users.id, { onDelete: "set null" }),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   locations: many(locations),
   places: many(places),
   familyConnections: many(familyConnections, { relationName: "userConnections" }),
   familyMemberConnections: many(familyConnections, { relationName: "memberConnections" }),
+  invitationCodes: many(invitationCodes),
 }));
 
 export const familyConnectionsRelations = relations(familyConnections, ({ one }) => ({
@@ -108,6 +120,19 @@ export const placesRelations = relations(places, ({ one }) => ({
   }),
 }));
 
+export const invitationCodesRelations = relations(invitationCodes, ({ one }) => ({
+  user: one(users, {
+    fields: [invitationCodes.userId],
+    references: [users.id],
+    relationName: "invitationCreator",
+  }),
+  usedBy: one(users, {
+    fields: [invitationCodes.usedById],
+    references: [users.id],
+    relationName: "invitationUser",
+  }),
+}));
+
 // Schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -130,7 +155,14 @@ export const insertFamilyConnectionSchema = createInsertSchema(familyConnections
   createdAt: true,
 });
 
-// Types
+export const insertInvitationCodeSchema = createInsertSchema(invitationCodes).omit({
+  id: true,
+  createdAt: true,
+  usedAt: true,
+  usedById: true,
+});
+
+// Type exports
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type Location = typeof locations.$inferSelect;
@@ -139,13 +171,5 @@ export type Place = typeof places.$inferSelect;
 export type InsertPlace = z.infer<typeof insertPlaceSchema>;
 export type FamilyConnection = typeof familyConnections.$inferSelect;
 export type InsertFamilyConnection = z.infer<typeof insertFamilyConnectionSchema>;
-
-// Types
-export type UpsertUser = typeof users.$inferInsert;
-export type User = typeof users.$inferSelect;
-export type Location = typeof locations.$inferSelect;
-export type InsertLocation = z.infer<typeof insertLocationSchema>;
-export type Place = typeof places.$inferSelect;
-export type InsertPlace = z.infer<typeof insertPlaceSchema>;
-export type FamilyConnection = typeof familyConnections.$inferSelect;
-export type InsertFamilyConnection = z.infer<typeof insertFamilyConnectionSchema>;
+export type InvitationCode = typeof invitationCodes.$inferSelect;
+export type InsertInvitationCode = z.infer<typeof insertInvitationCodeSchema>;

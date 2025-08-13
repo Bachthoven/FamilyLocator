@@ -11,15 +11,16 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, Users, Check, X, Mail } from 'lucide-react';
-import { User } from '@shared/schema';
+import { Plus, Users, Copy, QrCode, KeyRound } from 'lucide-react';
+import { User, InvitationCode } from '@shared/schema';
 
 export default function Family() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
-  const [inviteEmail, setInviteEmail] = useState('');
+
+  const [joinDialogOpen, setJoinDialogOpen] = useState(false);
+  const [joinCode, setJoinCode] = useState('');
 
   // Fetch family members
   const { data: familyMembers = [], isLoading } = useQuery<User[]>({
@@ -27,9 +28,9 @@ export default function Family() {
     enabled: !!user,
   });
 
-  // Fetch pending invitations
-  const { data: pendingInvitations = [] } = useQuery<Array<{ id: number; user: User; createdAt: Date }>>({
-    queryKey: ['/api/family/invitations'],
+  // Fetch invitation codes
+  const { data: invitationCodes = [] } = useQuery<InvitationCode[]>({
+    queryKey: ['/api/family/codes'],
     enabled: !!user,
   });
 
@@ -39,24 +40,22 @@ export default function Family() {
     enabled: !!user,
   });
 
-  // Invite family member mutation
-  const inviteMutation = useMutation({
-    mutationFn: async (email: string) => {
-      const response = await apiRequest('POST', '/api/family/invite', { email });
+  // Generate invitation code mutation
+  const generateCodeMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest('POST', '/api/family/generate-code');
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to send invitation');
+        throw new Error(errorData.message || 'Failed to generate invitation code');
       }
       return response.json();
     },
     onSuccess: () => {
       toast({
-        title: "Invitation sent",
-        description: "Family member invitation has been sent successfully.",
+        title: "Invitation code generated",
+        description: "Your family invitation code is ready to share.",
       });
-      setInviteDialogOpen(false);
-      setInviteEmail('');
-      queryClient.invalidateQueries({ queryKey: ['/api/family'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/family/codes'] });
     },
     onError: (error: any) => {
       if (isUnauthorizedError(error)) {
@@ -71,8 +70,11 @@ export default function Family() {
         return;
       }
       
-      // Handle specific error messages from server
-      let errorMessage = "Failed to send invitation. Please try again.";
+      toast({
+        title: "Error",
+        description: "Failed to generate invitation code. Please try again.",
+        variant: "destructive",
+      });
       if (error?.message) {
         if (error.message.includes("User not found")) {
           errorMessage = `The person with that email hasn't signed up for FamilyLocator yet. Please ask them to create an account first, then try inviting them again.`;
@@ -91,38 +93,25 @@ export default function Family() {
     },
   });
 
-  // Accept invitation mutation
-  const acceptMutation = useMutation({
-    mutationFn: async (inviterId: string) => {
-      await apiRequest('POST', `/api/family/accept/${inviterId}`);
-    },
-    onSuccess: () => {
+  // Helper functions
+  const copyToClipboard = (code: string) => {
+    navigator.clipboard.writeText(code).then(() => {
       toast({
-        title: "Invitation accepted",
-        description: "You have joined the family successfully.",
+        title: "Copied!",
+        description: "Invitation code copied to clipboard.",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/family'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/family/invitations'] });
-    },
-    onError: (error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/auth";
-        }, 500);
-        return;
-      }
-      toast({
-        title: "Error",
-        description: "Failed to accept invitation. Please try again.",
-        variant: "destructive",
-      });
-    },
-  });
+    });
+  };
+
+  const formatExpiration = (expiresAt: Date) => {
+    const now = new Date();
+    const expiry = new Date(expiresAt);
+    const hoursLeft = Math.ceil((expiry.getTime() - now.getTime()) / (1000 * 60 * 60));
+    
+    if (hoursLeft <= 0) return "Expired";
+    if (hoursLeft === 1) return "Expires in 1 hour";
+    return `Expires in ${hoursLeft} hours`;
+  };
 
   // Remove family member mutation
   const removeMutation = useMutation({
@@ -157,16 +146,16 @@ export default function Family() {
     },
   });
 
-  const handleInvite = () => {
-    if (!inviteEmail.trim()) {
+  const handleJoinFamily = () => {
+    if (!joinCode.trim()) {
       toast({
         title: "Error",
-        description: "Please enter an email address.",
+        description: "Please enter an invitation code.",
         variant: "destructive",
       });
       return;
     }
-    inviteMutation.mutate(inviteEmail.trim());
+    joinFamilyMutation.mutate(joinCode.trim());
   };
 
   const handleRemove = (memberId: string) => {
@@ -190,54 +179,88 @@ export default function Family() {
             </p>
           </div>
           
-          <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="w-4 h-4 mr-2" />
-                Add Member
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Invite Family Member</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="email">Email Address</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="Enter family member's email"
-                    value={inviteEmail}
-                    onChange={(e) => setInviteEmail(e.target.value)}
-                  />
-                  <div className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg mt-2">
-                    <strong>Important:</strong> The person you're inviting must already have a FamilyLocator account. 
-                    <br /><br />
-                    <strong>How to help them sign up:</strong>
-                    <br />1. Send them this website link: <code className="text-xs">{window.location.origin}</code>
-                    <br />2. Ask them to click "Create Your Free Account" 
-                    <br />3. Once they have an account, you can invite them here
+          <div className="flex gap-2">
+            <Button onClick={() => generateCodeMutation.mutate()} className="gap-2">
+              <QrCode className="w-4 h-4" />
+              Generate Code
+            </Button>
+            <Dialog open={joinDialogOpen} onOpenChange={setJoinDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="gap-2">
+                  <KeyRound className="w-4 h-4" />
+                  Join Family
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2">
+                    <KeyRound className="w-5 h-5" />
+                    Join Family with Code
+                  </DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="code">Invitation Code</Label>
+                    <Input
+                      id="code"
+                      placeholder="Enter 6-character code"
+                      value={joinCode}
+                      onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+                      maxLength={6}
+                    />
+                  </div>
+                  <div className="flex justify-end space-x-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => setJoinDialogOpen(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={handleJoinFamily}
+                      disabled={joinFamilyMutation.isPending}
+                    >
+                      {joinFamilyMutation.isPending ? "Joining..." : "Join Family"}
+                    </Button>
                   </div>
                 </div>
-                <div className="flex justify-end space-x-2">
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
+
+        {/* Invitation Codes Section */}
+        {invitationCodes.length > 0 && (
+          <div className="bg-card rounded-xl border p-4 mb-6">
+            <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
+              <QrCode className="w-5 h-5" />
+              Your Invitation Codes
+            </h2>
+            <div className="space-y-2">
+              {invitationCodes.map((invitation) => (
+                <div key={invitation.id} className="flex items-center justify-between bg-background p-3 rounded-lg border">
+                  <div>
+                    <div className="font-mono text-lg font-bold text-primary">
+                      {invitation.code}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      {formatExpiration(invitation.expiresAt)}
+                    </div>
+                  </div>
                   <Button
                     variant="outline"
-                    onClick={() => setInviteDialogOpen(false)}
+                    size="sm"
+                    onClick={() => copyToClipboard(invitation.code)}
+                    className="gap-2"
                   >
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={handleInvite}
-                    disabled={inviteMutation.isPending}
-                  >
-                    {inviteMutation.isPending ? 'Sending...' : 'Send Invitation'}
+                    <Copy className="w-4 h-4" />
+                    Copy
                   </Button>
                 </div>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Family Members List */}
         <div className="space-y-4">
@@ -254,67 +277,24 @@ export default function Family() {
               </div>
             ))
           ) : familyMembers.length === 0 ? (
-            <div className="space-y-6">
-              {/* Pending Invitations Section */}
-              {pendingInvitations.length > 0 && (
-                <div className="bg-muted/50 p-4 rounded-lg">
-                  <h3 className="flex items-center gap-2 text-lg font-medium mb-3">
-                    <Mail className="h-5 w-5 text-primary" />
-                    Pending Invitations ({pendingInvitations.length})
-                  </h3>
-                  <div className="space-y-2">
-                    {pendingInvitations.map((invitation) => (
-                      <div key={invitation.id} className="flex items-center justify-between bg-background p-3 rounded border">
-                        <div className="flex items-center gap-3">
-                          <img
-                            src={invitation.user.profileImageUrl || '/default-avatar.png'}
-                            alt={invitation.user.firstName || 'User'}
-                            className="h-8 w-8 rounded-full object-cover"
-                          />
-                          <div>
-                            <p className="font-medium">
-                              {invitation.user.firstName} {invitation.user.lastName}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              {invitation.user.email}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            onClick={() => acceptMutation.mutate(invitation.user.id)}
-                            disabled={acceptMutation.isPending}
-                          >
-                            <Check className="h-4 w-4 mr-1" />
-                            Accept
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => removeMutation.mutate(invitation.user.id)}
-                            disabled={removeMutation.isPending}
-                          >
-                            <X className="h-4 w-4 mr-1" />
-                            Decline
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Empty State */}
-              <div className="text-center py-16">
-                <Users className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-medium mb-2">No family members yet</h3>
-                <p className="text-muted-foreground mb-6">
-                  Start by inviting your family members to join FamilyLocator
-                </p>
-                <Button onClick={() => setInviteDialogOpen(true)}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Your First Member
+            <div className="text-center py-16">
+              <Users className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-medium mb-2">No family members yet</h3>
+              <p className="text-muted-foreground mb-6">
+                Generate an invitation code to invite family members, or join using someone else's code.
+              </p>
+              <div className="flex gap-2 justify-center">
+                <Button onClick={() => generateCodeMutation.mutate()} className="gap-2">
+                  <QrCode className="w-4 h-4" />
+                  Generate Code
+                </Button>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setJoinDialogOpen(true)}
+                  className="gap-2"
+                >
+                  <KeyRound className="w-4 h-4" />
+                  Join Family
                 </Button>
               </div>
             </div>

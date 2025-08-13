@@ -3,6 +3,7 @@ import {
   locations,
   places,
   familyConnections,
+  invitationCodes,
   type User,
   type InsertUser,
   type Location,
@@ -11,9 +12,11 @@ import {
   type InsertPlace,
   type FamilyConnection,
   type InsertFamilyConnection,
+  type InvitationCode,
+  type InsertInvitationCode,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, or } from "drizzle-orm";
+import { eq, and, desc, or, sql } from "drizzle-orm";
 
 export interface IStorage {
   // User operations
@@ -38,6 +41,12 @@ export interface IStorage {
   getUserPlaces(userId: number): Promise<Place[]>;
   savePlace(place: InsertPlace): Promise<Place>;
   deletePlace(userId: number, placeId: number): Promise<void>;
+  
+  // Invitation code operations
+  createInvitationCode(invitation: InsertInvitationCode): Promise<InvitationCode>;
+  getInvitationByCode(code: string): Promise<InvitationCode | undefined>;
+  useInvitationCode(code: string, userId: number): Promise<InvitationCode>;
+  getUserActiveCodes(userId: number): Promise<InvitationCode[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -226,6 +235,48 @@ export class DatabaseStorage implements IStorage {
         and(
           eq(places.id, placeId),
           eq(places.userId, userId)
+        )
+      );
+  }
+  
+  // Invitation code operations
+  async createInvitationCode(invitation: InsertInvitationCode): Promise<InvitationCode> {
+    const [code] = await db
+      .insert(invitationCodes)
+      .values(invitation)
+      .returning();
+    return code;
+  }
+  
+  async getInvitationByCode(code: string): Promise<InvitationCode | undefined> {
+    const [invitation] = await db
+      .select()
+      .from(invitationCodes)
+      .where(eq(invitationCodes.code, code));
+    return invitation;
+  }
+  
+  async useInvitationCode(code: string, userId: number): Promise<InvitationCode> {
+    const [usedCode] = await db
+      .update(invitationCodes)
+      .set({ 
+        usedAt: new Date(),
+        usedById: userId 
+      })
+      .where(eq(invitationCodes.code, code))
+      .returning();
+    return usedCode;
+  }
+  
+  async getUserActiveCodes(userId: number): Promise<InvitationCode[]> {
+    return await db
+      .select()
+      .from(invitationCodes)
+      .where(
+        and(
+          eq(invitationCodes.userId, userId),
+          sql`${invitationCodes.usedAt} IS NULL`,
+          sql`${invitationCodes.expiresAt} > NOW()`
         )
       );
   }
