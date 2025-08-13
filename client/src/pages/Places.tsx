@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, Bookmark, MapPin, Home, Briefcase, GraduationCap, MoreHorizontal } from 'lucide-react';
+import { Plus, Bookmark, MapPin, Home, Briefcase, GraduationCap, Trash2 } from 'lucide-react';
 import { Place } from '@shared/schema';
 
 const categoryIcons = {
@@ -321,9 +321,9 @@ export default function Places() {
                               variant="ghost"
                               size="icon"
                               onClick={() => handleDeletePlace(place.id)}
-                              className="text-muted-foreground hover:text-destructive"
+                              className="text-red-500 hover:text-red-700 hover:bg-red-50"
                             >
-                              <MoreHorizontal className="w-4 h-4" />
+                              <Trash2 className="w-4 h-4" />
                             </Button>
                           </div>
                         </CardHeader>

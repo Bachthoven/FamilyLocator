@@ -154,12 +154,8 @@ export function setupAuth(app: Express) {
       }
       req.login(user, (err) => {
         if (err) {
-          console.error("Login error:", err);
           return next(err);
         }
-        console.log("User logged in successfully:", user.email);
-        console.log("Session after login:", req.session);
-        console.log("Session ID after login:", req.sessionID);
         res.status(200).json({
           id: user.id,
           email: user.email,
@@ -182,11 +178,6 @@ export function setupAuth(app: Express) {
   });
 
   app.get("/api/user", (req, res) => {
-    console.log("Session data:", req.session);
-    console.log("Session ID:", req.sessionID);
-    console.log("Is authenticated:", req.isAuthenticated());
-    console.log("User in session:", req.user);
-    
     if (!req.isAuthenticated() || !req.user) {
       return res.status(401).json({ message: "Unauthorized" });
     }
