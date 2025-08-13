@@ -24,18 +24,39 @@ export function useLocationLogger() {
   const queryClient = useQueryClient();
 
   const saveLocationMutation = useMutation({
-    mutationFn: (locationData: LocationData) => 
-      apiRequest('POST', '/api/locations', locationData),
-    onSuccess: () => {
+    mutationFn: async (locationData: LocationData) => {
+      console.log('🔄 Attempting to save location:', locationData);
+      console.log('🔐 User authenticated:', isAuthenticated);
+      console.log('👤 User data:', user);
+      const response = await apiRequest('POST', '/api/locations', locationData);
+      console.log('✅ Location save response:', response);
+      return response;
+    },
+    onSuccess: (data) => {
+      console.log('🎉 Location saved successfully:', data);
       queryClient.invalidateQueries({ queryKey: ['/api/locations/family'] });
     },
     onError: (error: any) => {
-      console.error('Failed to save location:', error);
+      console.error('❌ Failed to save location:', error);
+      toast({
+        title: "Location Save Failed",
+        description: error.message || "Unable to save location. Please try logging in again.",
+        variant: "destructive",
+      });
     },
   });
 
   // Auto-save location when it changes (for real-time updates)
   useEffect(() => {
+    console.log('🗺️ Location change detected:', {
+      isAuthenticated,
+      hasUser: !!user,
+      locationSharingEnabled: (user as any)?.locationSharingEnabled,
+      hasLocation: !!location,
+      hasError: !!error,
+      locationData: location
+    });
+    
     if (
       isAuthenticated && 
       user && 
@@ -43,11 +64,20 @@ export function useLocationLogger() {
       location && 
       !error
     ) {
+      console.log('📍 All conditions met, saving location...');
       saveLocationMutation.mutate({
         latitude: location.latitude,
         longitude: location.longitude,
         accuracy: location.accuracy,
         type: 'manual',
+      });
+    } else {
+      console.log('❌ Location save conditions not met:', {
+        authenticated: isAuthenticated,
+        user: !!user,
+        sharingEnabled: (user as any)?.locationSharingEnabled,
+        location: !!location,
+        error: error
       });
     }
   }, [location, error, isAuthenticated, user]);
