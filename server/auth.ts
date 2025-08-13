@@ -192,6 +192,23 @@ export function setupAuth(app: Express) {
       notificationsEnabled: req.user.notificationsEnabled ?? true,
     });
   });
+
+  // Alias for compatibility with frontend useAuth hook
+  app.get("/api/auth/user", (req, res) => {
+    if (!req.isAuthenticated() || !req.user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    res.json({
+      id: req.user.id,
+      email: req.user.email,
+      firstName: req.user.firstName,
+      lastName: req.user.lastName,
+      profileImageUrl: req.user.profileImageUrl,
+      locationSharingEnabled: req.user.locationSharingEnabled ?? true,
+      locationHistoryEnabled: req.user.locationHistoryEnabled ?? true,
+      notificationsEnabled: req.user.notificationsEnabled ?? true,
+    });
+  });
 }
 
 export function isAuthenticated(req: any, res: any, next: any) {

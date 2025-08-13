@@ -6,6 +6,8 @@ export function useAuth() {
     retry: false,
   });
 
+  console.log('useAuth hook state:', { user: !!user, isLoading });
+
   return {
     user,
     isLoading,
