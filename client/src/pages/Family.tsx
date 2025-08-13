@@ -75,19 +75,44 @@ export default function Family() {
         description: "Failed to generate invitation code. Please try again.",
         variant: "destructive",
       });
-      if (error?.message) {
-        if (error.message.includes("User not found")) {
-          errorMessage = `The person with that email hasn't signed up for FamilyLocator yet. Please ask them to create an account first, then try inviting them again.`;
-        } else if (error.message.includes("already in your family")) {
-          errorMessage = "This person is already in your family.";
-        } else {
-          errorMessage = error.message;
-        }
+    },
+  });
+
+  // Join family mutation
+  const joinFamilyMutation = useMutation({
+    mutationFn: async (code: string) => {
+      const response = await apiRequest('POST', '/api/family/join', { code });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to join family');
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success!",
+        description: "You have successfully joined the family.",
+      });
+      setJoinDialogOpen(false);
+      setJoinCode('');
+      queryClient.invalidateQueries({ queryKey: ['/api/family'] });
+    },
+    onError: (error: any) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/auth";
+        }, 500);
+        return;
       }
       
       toast({
-        title: "Cannot Send Invitation",
-        description: errorMessage,
+        title: "Error",
+        description: error.message || "Failed to join family. Please try again.",
         variant: "destructive",
       });
     },
@@ -303,13 +328,13 @@ export default function Family() {
               const locationData = familyLocations.find((loc: any) => loc.user?.id === member.id);
               // Transform location data to match expected format
               const location = locationData ? {
-                id: locationData.id || 0,
+                id: 0,
                 userId: member.id,
                 latitude: locationData.latitude,
                 longitude: locationData.longitude,
-                accuracy: locationData.accuracy || null,
-                address: locationData.address || null,
-                type: locationData.type || 'manual',
+                accuracy: null,
+                address: null,
+                type: 'manual' as const,
                 timestamp: locationData.timestamp || null,
               } : undefined;
               
@@ -318,7 +343,7 @@ export default function Family() {
                   key={member.id}
                   user={member}
                   location={location}
-                  onRemove={() => handleRemove(member.id)}
+                  onRemove={() => handleRemove(member.id.toString())}
                 />
               );
             })
