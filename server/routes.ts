@@ -6,6 +6,7 @@ import { setupAuth, isAuthenticated } from "./auth";
 import { insertLocationSchema, insertPlaceSchema, insertFamilyConnectionSchema } from "@shared/schema";
 import { locationLogger } from "./locationLogger";
 import { z } from "zod";
+import { checkGeofenceTransitions } from "./geofencing";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -52,6 +53,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const location = await storage.saveLocation(locationData);
       console.log('Saved location successfully:', location);
+      
+      // Check for geofence transitions
+      await checkGeofenceTransitions(userId, location.latitude, location.longitude);
       
       // Broadcast location update to family members via WebSocket
       broadcastLocationUpdate(userId.toString(), location);
@@ -393,6 +397,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     });
   }
+
+  // Function to broadcast notifications (for geofencing)
+  global.broadcastNotification = function(notification: any) {
+    clients.forEach((client, userId) => {
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(JSON.stringify({
+          type: 'notification',
+          geofenceType: notification.type,
+          ...notification,
+        }));
+      }
+    });
+  };
 
   return httpServer;
 }

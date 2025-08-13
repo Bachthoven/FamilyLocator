@@ -16,7 +16,7 @@ import {
   type InsertInvitationCode,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc, or, sql } from "drizzle-orm";
+import { eq, and, desc, or, sql, inArray } from "drizzle-orm";
 
 export interface IStorage {
   // User operations
@@ -95,6 +95,43 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(locations.timestamp))
       .limit(1);
     return location;
+  }
+
+  async getUserPreviousLocation(userId: number): Promise<Location | undefined> {
+    const [location] = await db
+      .select()
+      .from(locations)
+      .where(eq(locations.userId, userId))
+      .orderBy(desc(locations.timestamp))
+      .limit(1)
+      .offset(1);
+    return location;
+  }
+
+  async getAllFamilyPlaces(userId: number): Promise<Place[]> {
+    // Get all places from family members (including user's own places)
+    const familyMembers = await db
+      .select({ familyMemberId: familyConnections.familyMemberId })
+      .from(familyConnections)
+      .where(and(
+        eq(familyConnections.userId, userId),
+        eq(familyConnections.status, 'accepted')
+      ));
+
+    const familyMemberIds = [userId, ...familyMembers.map(fm => fm.familyMemberId)];
+    
+    if (familyMemberIds.length === 1) {
+      // Only user's own places
+      return await db
+        .select()
+        .from(places)
+        .where(eq(places.userId, userId));
+    }
+    
+    return await db
+      .select()
+      .from(places)
+      .where(inArray(places.userId, familyMemberIds));
   }
 
   async getFamilyMembersLocations(userId: number): Promise<Array<Location & { user: User }>> {
