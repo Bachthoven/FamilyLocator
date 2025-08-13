@@ -74,6 +74,7 @@ function MapCenter({ center }: { center: [number, number] }) {
 export default function Map({ currentLocation, familyLocations, places, onLocationClick, onPlaceClick }: MapProps) {
   const mapRef = useRef<L.Map | null>(null);
   const [mapCenter, setMapCenter] = useState<[number, number]>([40.7128, -74.0060]); // Default to NYC
+  const [mapType, setMapType] = useState<'street' | 'satellite'>('street');
 
   useEffect(() => {
     if (currentLocation) {
@@ -91,14 +92,28 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
     <div className="relative h-full w-full">
       <MapContainer
         center={mapCenter}
-        zoom={13}
+        zoom={15}
+        minZoom={1}
+        maxZoom={22}
         className="h-full w-full"
         ref={mapRef}
+        zoomControl={false}
       >
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        />
+        {mapType === 'street' ? (
+          <TileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            maxZoom={22}
+            maxNativeZoom={19}
+          />
+        ) : (
+          <TileLayer
+            url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+            attribution='&copy; <a href="https://www.arcgis.com/">ArcGIS</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            maxZoom={22}
+            maxNativeZoom={21}
+          />
+        )}
         
         <MapCenter center={mapCenter} />
         
@@ -168,27 +183,70 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
         ))}
       </MapContainer>
       
-      {/* Center on user button */}
-      {currentLocation && (
+      {/* Map Controls */}
+      <div className="absolute bottom-32 right-4 z-[1000] flex flex-col space-y-2">
+        {/* Map Type Toggle */}
         <button
-          onClick={centerOnUser}
-          className="absolute bottom-32 right-4 z-[1000] w-14 h-14 bg-primary rounded-full shadow-lg flex items-center justify-center text-white hover:bg-primary/90 transition-colors"
+          onClick={() => setMapType(mapType === 'street' ? 'satellite' : 'street')}
+          className="w-14 h-14 bg-white border border-gray-300 rounded-lg shadow-lg flex items-center justify-center hover:bg-gray-50 transition-colors"
+          title={mapType === 'street' ? 'Switch to satellite view' : 'Switch to street view'}
         >
-          <svg
-            className="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-            />
+          {mapType === 'street' ? (
+            <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          ) : (
+            <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+            </svg>
+          )}
+        </button>
+
+        {/* Zoom In Button */}
+        <button
+          onClick={() => {
+            const map = mapRef.current;
+            if (map) {
+              map.zoomIn();
+            }
+          }}
+          className="w-14 h-14 bg-white border border-gray-300 rounded-lg shadow-lg flex items-center justify-center hover:bg-gray-50 transition-colors"
+          title="Zoom in"
+        >
+          <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
         </button>
-      )}
+
+        {/* Zoom Out Button */}
+        <button
+          onClick={() => {
+            const map = mapRef.current;
+            if (map) {
+              map.zoomOut();
+            }
+          }}
+          className="w-14 h-14 bg-white border border-gray-300 rounded-lg shadow-lg flex items-center justify-center hover:bg-gray-50 transition-colors"
+          title="Zoom out"
+        >
+          <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+          </svg>
+        </button>
+
+        {/* Center on user button */}
+        {currentLocation && (
+          <button
+            onClick={centerOnUser}
+            className="w-14 h-14 bg-primary rounded-lg shadow-lg flex items-center justify-center text-white hover:bg-primary/90 transition-colors"
+            title="Center on my location"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+            </svg>
+          </button>
+        )}
+      </div>
     </div>
   );
 }

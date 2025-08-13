@@ -121,6 +121,15 @@ FamilyLocator is a modern web application that enables families to share their r
 
 ## Changelog
 
+- August 13, 2025. Enhanced map zoom capabilities with advanced controls:
+  - Increased maximum zoom from default to level 22 (extremely detailed view)
+  - Added satellite/hybrid view toggle for high-resolution imagery
+  - Custom zoom controls with dedicated zoom in/out buttons
+  - Removed default Leaflet zoom controls for cleaner interface
+  - Enhanced tile layer configuration for better performance at high zoom
+  - ArcGIS satellite imagery for detailed aerial views
+  - Improved map controls positioning and styling
+
 - August 13, 2025. Replaced email invitation system with invitation codes:
   - Replaced email-based family invitations with 6-character invitation codes
   - Users can now generate invitation codes that expire after 24 hours
