@@ -78,7 +78,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/locations/family', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
+      console.log('Fetching family locations for user:', userId);
       const locations = await storage.getFamilyMembersLocations(userId);
+      console.log('Found family locations:', locations);
       res.json(locations);
     } catch (error) {
       console.error("Error fetching family locations:", error);
