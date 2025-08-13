@@ -25,15 +25,28 @@ export default function Family() {
   const [generatedCode, setGeneratedCode] = useState('');
 
   // Fetch family members
-  const { data: familyMembers = [], isLoading } = useQuery<User[]>({
+  const { data: familyMembers = [], isLoading: familyLoading, error: familyError } = useQuery<User[]>({
     queryKey: ['/api/family'],
     enabled: !!user,
+    retry: 1,
   });
 
   // Fetch invitation codes
-  const { data: invitationCodes = [] } = useQuery<InvitationCode[]>({
+  const { data: invitationCodes = [], isLoading: codesLoading, error: codesError } = useQuery<InvitationCode[]>({
     queryKey: ['/api/family/codes'],
     enabled: !!user,
+    retry: 1,
+  });
+
+  // Debug logging
+  console.log('Family component state:', {
+    user: !!user,
+    familyMembers: familyMembers.length,
+    invitationCodes: invitationCodes.length,
+    familyLoading,
+    codesLoading,
+    familyError,
+    codesError
   });
 
   // Fetch family locations for status
@@ -279,7 +292,7 @@ export default function Family() {
 
         {/* Family Members List */}
         <div className="space-y-4">
-          {isLoading ? (
+          {familyLoading ? (
             // Loading skeletons
             Array.from({ length: 3 }).map((_, i) => (
               <div key={i} className="flex items-center space-x-3 p-4 bg-card rounded-xl border">
