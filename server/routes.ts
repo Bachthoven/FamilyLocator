@@ -44,12 +44,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/locations', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
+      console.log('Saving location for user:', userId, 'data:', req.body);
       const locationData = insertLocationSchema.parse({
         ...req.body,
         userId,
       });
       
       const location = await storage.saveLocation(locationData);
+      console.log('Saved location successfully:', location);
       
       // Broadcast location update to family members via WebSocket
       broadcastLocationUpdate(userId.toString(), location);
