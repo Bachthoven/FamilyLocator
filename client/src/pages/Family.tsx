@@ -21,6 +21,8 @@ export default function Family() {
 
   const [joinDialogOpen, setJoinDialogOpen] = useState(false);
   const [joinCode, setJoinCode] = useState('');
+  const [codeDialogOpen, setCodeDialogOpen] = useState(false);
+  const [generatedCode, setGeneratedCode] = useState('');
 
   // Fetch family members
   const { data: familyMembers = [], isLoading } = useQuery<User[]>({
@@ -50,11 +52,9 @@ export default function Family() {
       }
       return response.json();
     },
-    onSuccess: () => {
-      toast({
-        title: "Invitation code generated",
-        description: "Your family invitation code is ready to share.",
-      });
+    onSuccess: (data) => {
+      setGeneratedCode(data.code);
+      setCodeDialogOpen(true);
       queryClient.invalidateQueries({ queryKey: ['/api/family/codes'] });
     },
     onError: (error: any) => {
@@ -128,6 +128,8 @@ export default function Family() {
     });
   };
 
+
+
   const formatExpiration = (expiresAt: Date) => {
     const now = new Date();
     const expiry = new Date(expiresAt);
@@ -170,18 +172,6 @@ export default function Family() {
       });
     },
   });
-
-  const handleJoinFamily = () => {
-    if (!joinCode.trim()) {
-      toast({
-        title: "Error",
-        description: "Please enter an invitation code.",
-        variant: "destructive",
-      });
-      return;
-    }
-    joinFamilyMutation.mutate(joinCode.trim());
-  };
 
   const handleRemove = (memberId: string) => {
     if (confirm('Are you sure you want to remove this family member?')) {
@@ -242,8 +232,8 @@ export default function Family() {
                       Cancel
                     </Button>
                     <Button
-                      onClick={handleJoinFamily}
-                      disabled={joinFamilyMutation.isPending}
+                      onClick={() => joinFamilyMutation.mutate(joinCode)}
+                      disabled={joinCode.length !== 6 || joinFamilyMutation.isPending}
                     >
                       {joinFamilyMutation.isPending ? "Joining..." : "Join Family"}
                     </Button>
@@ -363,6 +353,88 @@ export default function Family() {
             </div>
           </div>
         )}
+
+        {/* Generated Code Dialog */}
+        <Dialog open={codeDialogOpen} onOpenChange={setCodeDialogOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <QrCode className="w-5 h-5" />
+                Invitation Code Generated
+              </DialogTitle>
+            </DialogHeader>
+            <div className="flex flex-col items-center space-y-4 py-4">
+              <div className="bg-primary/10 p-6 rounded-lg border-2 border-dashed border-primary/20">
+                <div className="text-3xl font-mono font-bold text-center tracking-wider text-primary">
+                  {generatedCode}
+                </div>
+              </div>
+              <p className="text-sm text-muted-foreground text-center">
+                Share this code with family members. It expires in 24 hours.
+              </p>
+              <div className="flex gap-2 w-full">
+                <Button
+                  onClick={() => copyToClipboard(generatedCode)}
+                  className="flex-1 gap-2"
+                >
+                  <Copy className="w-4 h-4" />
+                  Copy Code
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setCodeDialogOpen(false)}
+                  className="flex-1"
+                >
+                  Close
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Join Family Dialog */}
+        <Dialog open={joinDialogOpen} onOpenChange={setJoinDialogOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <KeyRound className="w-5 h-5" />
+                Join Family
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="join-code">Invitation Code</Label>
+                <Input
+                  id="join-code"
+                  placeholder="Enter 6-character code"
+                  value={joinCode}
+                  onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+                  maxLength={6}
+                  className="font-mono text-center text-lg tracking-wider"
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => joinFamilyMutation.mutate(joinCode)}
+                  disabled={joinCode.length !== 6 || joinFamilyMutation.isPending}
+                  className="flex-1"
+                >
+                  {joinFamilyMutation.isPending ? "Joining..." : "Join Family"}
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setJoinDialogOpen(false);
+                    setJoinCode('');
+                  }}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <BottomNavigation />
