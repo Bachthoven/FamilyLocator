@@ -90,7 +90,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/family', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
+      console.log('Fetching family members for user:', userId);
       const familyMembers = await storage.getFamilyMembers(userId);
+      console.log('Found family members:', familyMembers);
       res.json(familyMembers);
     } catch (error) {
       console.error("Error fetching family members:", error);
