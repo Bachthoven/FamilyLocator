@@ -9,6 +9,7 @@ import {
   real,
   boolean,
   uuid,
+  integer,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
@@ -80,7 +81,7 @@ export const invitationCodes = pgTable("invitation_codes", {
   userId: serial("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   expiresAt: timestamp("expires_at").notNull(), // Codes expire after 24 hours
   usedAt: timestamp("used_at"),
-  usedById: serial("used_by_id").references(() => users.id, { onDelete: "set null" }),
+  usedById: integer("used_by_id").references(() => users.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
