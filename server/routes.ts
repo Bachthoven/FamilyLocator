@@ -147,6 +147,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get user's invitation codes
+  app.get('/api/family/codes', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      console.log('Fetching invitation codes for user:', userId);
+      const codes = await storage.getUserActiveCodes(userId);
+      console.log('Found invitation codes:', codes);
+      res.json(codes);
+    } catch (error) {
+      console.error("Error fetching invitation codes:", error);
+      res.status(500).json({ message: "Failed to fetch invitation codes" });
+    }
+  });
+
   // Join family using invitation code
   app.post('/api/family/join', isAuthenticated, async (req: any, res) => {
     try {
