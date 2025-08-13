@@ -121,6 +121,15 @@ FamilyLocator is a modern web application that enables families to share their r
 
 ## Changelog
 
+- August 13, 2025. Implemented geofencing notifications for location-based alerts:
+  - Added geofencing detection system using Haversine distance calculations
+  - Real-time notifications via WebSocket when family members enter/exit saved places
+  - Toast notifications with visual indicators for arrival/departure events
+  - 100-meter radius detection around all family member places
+  - Automatic state tracking to prevent duplicate notifications
+  - Integration with existing location sharing and WebSocket infrastructure
+  - Test button in Settings page for demonstrating geofencing functionality
+
 - August 13, 2025. Enhanced map zoom capabilities with advanced controls:
   - Increased maximum zoom from default to level 22 (extremely detailed view)
   - Added satellite/hybrid view toggle for high-resolution imagery
