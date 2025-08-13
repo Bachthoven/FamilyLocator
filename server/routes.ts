@@ -130,6 +130,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const expiresAt = new Date();
       expiresAt.setHours(expiresAt.getHours() + 24);
       
+      console.log('Creating invitation code with data:', { code, userId, expiresAt });
+      
       const invitationCode = await storage.createInvitationCode({
         code,
         userId,
