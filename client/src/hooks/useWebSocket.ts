@@ -21,19 +21,23 @@ export function useWebSocket() {
     ws.current = new WebSocket(wsUrl);
 
     ws.current.onopen = () => {
+      console.log('WebSocket opened, authenticating...');
       setIsConnected(true);
       // Authenticate the WebSocket connection
       if (ws.current) {
-        ws.current.send(JSON.stringify({
+        const authMessage = {
           type: 'auth',
           userId: user.id,
-        }));
+        };
+        console.log('Sending auth message:', authMessage);
+        ws.current.send(JSON.stringify(authMessage));
       }
     };
 
     ws.current.onmessage = (event) => {
       try {
         const message = JSON.parse(event.data);
+        console.log('WebSocket message received:', message);
         setLastMessage(message);
       } catch (error) {
         console.error('Failed to parse WebSocket message:', error);
@@ -58,7 +62,10 @@ export function useWebSocket() {
 
   const sendMessage = (message: WebSocketMessage) => {
     if (ws.current && ws.current.readyState === WebSocket.OPEN) {
+      console.log('Sending WebSocket message:', message);
       ws.current.send(JSON.stringify(message));
+    } else {
+      console.warn('WebSocket not connected, cannot send message:', message);
     }
   };
 
