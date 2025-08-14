@@ -3,7 +3,7 @@ import { Bell, MapPin, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { useAuth } from '@/hooks/use-auth';
+import { useWebSocket } from '@/hooks/useWebSocket';
 
 interface GeofenceNotification {
   id: string;
@@ -97,60 +97,29 @@ interface NotificationManagerProps {
 
 export function NotificationManager({ children }: NotificationManagerProps) {
   const [notifications, setNotifications] = useState<GeofenceNotification[]>([]);
-  const { user } = useAuth();
+  const { lastMessage } = useWebSocket();
 
+  // Handle WebSocket messages for notifications
   useEffect(() => {
-    if (!user) return;
+    if (lastMessage?.type === 'notification' && lastMessage?.geofenceType === 'geofence') {
+      const notification: GeofenceNotification = {
+        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+        type: 'geofence',
+        userId: lastMessage.userId,
+        userName: lastMessage.userName,
+        placeName: lastMessage.placeName,
+        action: lastMessage.action,
+        message: lastMessage.message,
+        timestamp: lastMessage.timestamp,
+      };
+      
+      console.log('Adding geofence notification:', notification);
+      setNotifications(prev => [...prev, notification]);
+    }
+  }, [lastMessage]);
 
-    // Connect to WebSocket for notifications
-    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const wsUrl = `${protocol}//${window.location.host}/ws`;
-    
-    console.log('Attempting to connect to WebSocket:', wsUrl);
-    const ws = new WebSocket(wsUrl);
-    
-    ws.onopen = () => {
-      console.log('Notification WebSocket connected');
-      // Send auth message to register for notifications
-      const authMessage = { type: 'auth', userId: user.id };
-      ws.send(JSON.stringify(authMessage));
-      console.log('Sent auth message for notifications:', authMessage);
-    };
-    
-    ws.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        console.log('WebSocket message received:', data);
-        
-        if (data.type === 'notification' && data.geofenceType === 'geofence') {
-          const notification: GeofenceNotification = {
-            id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-            type: 'geofence',
-            userId: data.userId,
-            userName: data.userName,
-            placeName: data.placeName,
-            action: data.action,
-            message: data.message,
-            timestamp: data.timestamp,
-          };
-          
-          console.log('Adding geofence notification:', notification);
-          setNotifications(prev => [...prev, notification]);
-        }
-      } catch (error) {
-        console.error('Error parsing notification:', error);
-      }
-    };
-    
-    ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
-    };
-    
-    ws.onclose = (event) => {
-      console.log('Notification WebSocket disconnected:', event.code, event.reason);
-    };
-
-    // Add event listener for test notifications
+  // Add event listener for test notifications
+  useEffect(() => {
     const handleTestNotification = (event: CustomEvent) => {
       console.log('Test notification event received:', event.detail);
       setNotifications(prev => [...prev, event.detail]);
@@ -159,10 +128,9 @@ export function NotificationManager({ children }: NotificationManagerProps) {
     window.addEventListener('test-geofence-notification', handleTestNotification as EventListener);
     
     return () => {
-      ws.close();
       window.removeEventListener('test-geofence-notification', handleTestNotification as EventListener);
     };
-  }, [user]);
+  }, []);
 
   const dismissNotification = (id: string) => {
     setNotifications(prev => prev.filter(n => n.id !== id));
