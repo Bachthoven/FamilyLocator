@@ -38,6 +38,8 @@ export async function checkGeofenceTransitions(userId: number, newLat: number, n
     const userKey = userId.toString();
     const currentGeofences = userGeofenceStates.get(userKey) || new Set<number>();
     const newGeofences = new Set<number>();
+    
+    console.log(`Current geofence states for user ${userId}:`, Array.from(currentGeofences));
 
     // Check current position against all places
     for (const place of familyPlaces) {
@@ -52,14 +54,16 @@ export async function checkGeofenceTransitions(userId: number, newLat: number, n
 
       const wasInside = currentGeofences.has(place.id);
       
+      console.log(`Place "${place.name}": wasInside=${wasInside}, isCurrentlyInside=${isCurrentlyInside}`);
+      
       // Detect transitions (only send one notification per transition)
       if (isCurrentlyInside && !wasInside) {
         // User entered the place
-        console.log(`User ${userId} entered place ${place.name} (${place.id})`);
+        console.log(`🚨 User ${userId} entered place ${place.name} (${place.id})`);
         await sendGeofenceNotification(userId, place, 'entered');
       } else if (!isCurrentlyInside && wasInside) {
         // User exited the place
-        console.log(`User ${userId} exited place ${place.name} (${place.id})`);
+        console.log(`🚨 User ${userId} exited place ${place.name} (${place.id})`);
         await sendGeofenceNotification(userId, place, 'exited');
       }
     }
