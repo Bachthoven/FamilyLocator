@@ -3,6 +3,7 @@ import { Bell, MapPin, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { useAuth } from '@/hooks/use-auth';
 
 interface GeofenceNotification {
   id: string;
@@ -96,8 +97,11 @@ interface NotificationManagerProps {
 
 export function NotificationManager({ children }: NotificationManagerProps) {
   const [notifications, setNotifications] = useState<GeofenceNotification[]>([]);
+  const { user } = useAuth();
 
   useEffect(() => {
+    if (!user) return;
+
     // Connect to WebSocket for notifications
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const wsUrl = `${protocol}//${window.location.host}/ws`;
@@ -106,18 +110,29 @@ export function NotificationManager({ children }: NotificationManagerProps) {
     
     ws.onopen = () => {
       console.log('Notification WebSocket connected');
+      // Send auth message to register for notifications
+      ws.send(JSON.stringify({ type: 'auth', userId: user.id }));
+      console.log('Sent auth message for notifications:', user.id);
     };
     
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
+        console.log('WebSocket message received:', data);
         
         if (data.type === 'notification' && data.geofenceType === 'geofence') {
           const notification: GeofenceNotification = {
-            ...data,
             id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+            type: 'geofence',
+            userId: data.userId,
+            userName: data.userName,
+            placeName: data.placeName,
+            action: data.action,
+            message: data.message,
+            timestamp: data.timestamp,
           };
           
+          console.log('Adding geofence notification:', notification);
           setNotifications(prev => [...prev, notification]);
         }
       } catch (error) {
@@ -132,7 +147,7 @@ export function NotificationManager({ children }: NotificationManagerProps) {
     return () => {
       ws.close();
     };
-  }, []);
+  }, [user]);
 
   const dismissNotification = (id: string) => {
     setNotifications(prev => prev.filter(n => n.id !== id));

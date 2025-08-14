@@ -400,13 +400,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Function to broadcast notifications (for geofencing)
   global.broadcastNotification = function(notification: any) {
+    console.log(`Broadcasting notification to ${clients.size} connected clients:`, notification);
     clients.forEach((client, userId) => {
       if (client.readyState === WebSocket.OPEN) {
-        client.send(JSON.stringify({
+        const message = {
           type: 'notification',
           geofenceType: notification.type,
           ...notification,
-        }));
+        };
+        console.log(`Sending notification to user ${userId}:`, message);
+        client.send(JSON.stringify(message));
       }
     });
   };
