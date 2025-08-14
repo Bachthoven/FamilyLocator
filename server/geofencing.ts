@@ -13,8 +13,8 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
   return R * c * 1000; // Return distance in meters
 }
 
-// Check if a location is within a geofence (default 100m radius)
-function isWithinGeofence(userLat: number, userLon: number, placeLat: number, placeLon: number, radiusMeters = 100): boolean {
+// Check if a location is within a geofence (default 10m radius)
+function isWithinGeofence(userLat: number, userLon: number, placeLat: number, placeLon: number, radiusMeters = 10): boolean {
   const distance = calculateDistance(userLat, userLon, placeLat, placeLon);
   return distance <= radiusMeters;
 }
@@ -70,7 +70,7 @@ async function sendGeofenceNotification(userId: number, place: any, action: 'ent
     const user = await storage.getUser(userId);
     if (!user) return;
 
-    const message = `${user.firstName || user.email} has ${action} ${place.name}`;
+    const message = `${user.firstName || user.email} is ${action === 'entered' ? 'entering' : 'exiting'} ${place.name}`;
     
     console.log(`Geofence notification: ${message}`);
     
