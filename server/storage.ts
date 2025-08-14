@@ -262,7 +262,7 @@ export class DatabaseStorage implements IStorage {
     const familyMembers = await this.getFamilyMembers(userId);
     const familyMemberIds = [userId, ...familyMembers.map(member => member.id)];
     
-    // Get places for all family members
+    // Get places for all family members using inArray instead of SQL ANY
     const result = await db
       .select({
         id: places.id,
@@ -277,7 +277,7 @@ export class DatabaseStorage implements IStorage {
       })
       .from(places)
       .innerJoin(users, eq(places.userId, users.id))
-      .where(sql`${places.userId} = ANY(${familyMemberIds})`)
+      .where(inArray(places.userId, familyMemberIds))
       .orderBy(desc(places.createdAt));
     
     return result;
