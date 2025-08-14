@@ -106,13 +106,15 @@ export function NotificationManager({ children }: NotificationManagerProps) {
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const wsUrl = `${protocol}//${window.location.host}/ws`;
     
+    console.log('Attempting to connect to WebSocket:', wsUrl);
     const ws = new WebSocket(wsUrl);
     
     ws.onopen = () => {
       console.log('Notification WebSocket connected');
       // Send auth message to register for notifications
-      ws.send(JSON.stringify({ type: 'auth', userId: user.id }));
-      console.log('Sent auth message for notifications:', user.id);
+      const authMessage = { type: 'auth', userId: user.id };
+      ws.send(JSON.stringify(authMessage));
+      console.log('Sent auth message for notifications:', authMessage);
     };
     
     ws.onmessage = (event) => {
@@ -140,12 +142,25 @@ export function NotificationManager({ children }: NotificationManagerProps) {
       }
     };
     
-    ws.onclose = () => {
-      console.log('Notification WebSocket disconnected');
+    ws.onerror = (error) => {
+      console.error('WebSocket error:', error);
     };
+    
+    ws.onclose = (event) => {
+      console.log('Notification WebSocket disconnected:', event.code, event.reason);
+    };
+
+    // Add event listener for test notifications
+    const handleTestNotification = (event: CustomEvent) => {
+      console.log('Test notification event received:', event.detail);
+      setNotifications(prev => [...prev, event.detail]);
+    };
+
+    window.addEventListener('test-geofence-notification', handleTestNotification as EventListener);
     
     return () => {
       ws.close();
+      window.removeEventListener('test-geofence-notification', handleTestNotification as EventListener);
     };
   }, [user]);
 

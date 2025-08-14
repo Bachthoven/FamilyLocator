@@ -5,6 +5,7 @@ import BottomNavigation from '@/components/BottomNavigation';
 import PrivacySettings from '@/components/PrivacySettings';
 import LocationLogger from '@/components/LocationLogger';
 import { GeofenceTestButton } from '@/components/GeofenceTestButton';
+import { SimpleGeofenceTest } from '@/components/SimpleGeofenceTest';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -175,7 +176,8 @@ export default function Settings() {
         </div>
 
         {/* Geofencing Test Section */}
-        <div className="mb-8">
+        <div className="mb-8 space-y-4">
+          <SimpleGeofenceTest />
           <GeofenceTestButton />
         </div>
 

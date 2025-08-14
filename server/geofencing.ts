@@ -79,8 +79,8 @@ async function sendGeofenceNotification(userId: number, place: any, action: 'ent
     const familyMembers = await storage.getFamilyMembers(userId);
     
     // Broadcast to WebSocket clients
-    if (global.broadcastNotification) {
-      global.broadcastNotification({
+    if ((global as any).broadcastNotification) {
+      (global as any).broadcastNotification({
         type: 'geofence',
         userId,
         userName: user.firstName || user.email,
