@@ -6,6 +6,7 @@ import PrivacySettings from '@/components/PrivacySettings';
 import LocationLogger from '@/components/LocationLogger';
 import { GeofenceTestButton } from '@/components/GeofenceTestButton';
 import { SimpleGeofenceTest } from '@/components/SimpleGeofenceTest';
+import { WebSocketTest } from '@/components/WebSocketTest';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -177,6 +178,7 @@ export default function Settings() {
 
         {/* Geofencing Test Section */}
         <div className="mb-8 space-y-4">
+          <WebSocketTest />
           <SimpleGeofenceTest />
           <GeofenceTestButton />
         </div>

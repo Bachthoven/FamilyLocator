@@ -24,9 +24,6 @@ const userGeofenceStates = new Map<string, Set<number>>(); // userId -> Set of p
 
 export async function checkGeofenceTransitions(userId: number, newLat: number, newLon: number) {
   try {
-    // Get user's previous location
-    const previousLocation = await storage.getUserPreviousLocation(userId);
-    
     // Get all family members' places (not just user's own places)
     const familyPlaces = await storage.getAllFamilyPlaces(userId);
     
@@ -48,12 +45,14 @@ export async function checkGeofenceTransitions(userId: number, newLat: number, n
 
       const wasInside = currentGeofences.has(place.id);
       
-      // Detect transitions
+      // Detect transitions (only send one notification per transition)
       if (isCurrentlyInside && !wasInside) {
         // User entered the place
+        console.log(`User ${userId} entered place ${place.name} (${place.id})`);
         await sendGeofenceNotification(userId, place, 'entered');
       } else if (!isCurrentlyInside && wasInside) {
         // User exited the place
+        console.log(`User ${userId} exited place ${place.name} (${place.id})`);
         await sendGeofenceNotification(userId, place, 'exited');
       }
     }

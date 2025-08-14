@@ -352,7 +352,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         if (data.type === 'auth' && data.userId) {
           clients.set(data.userId.toString(), ws);
-          console.log(`User ${data.userId} registered for WebSocket updates`);
+          console.log(`User ${data.userId} registered for WebSocket updates. Total clients: ${clients.size}`);
           
           // Auto-start hourly location logging for users with location history enabled
           storage.getUser(parseInt(data.userId)).then(user => {
@@ -373,11 +373,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       clients.forEach((client, userId) => {
         if (client === ws) {
           clients.delete(userId);
+          console.log(`User ${userId} disconnected. Total clients: ${clients.size}`);
           // Stop hourly logging when user disconnects
           locationLogger.stopHourlyLogging(userId);
         }
       });
       console.log('WebSocket client disconnected');
+    });
+
+    ws.on('error', (error) => {
+      console.error('WebSocket error:', error);
     });
   });
 
