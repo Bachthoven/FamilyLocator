@@ -202,7 +202,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "You are already connected to this family member" });
       }
       
-      // Create bidirectional family connection
+      // Get all family members of the inviter to connect the new user to everyone
+      const inviterFamilyMembers = await storage.getFamilyMembers(invitation.userId);
+      
+      // Create connections between the new user and the inviter
       await storage.addFamilyMember({
         userId: invitation.userId,
         familyMemberId: userId,
@@ -214,6 +217,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         familyMemberId: invitation.userId,
         status: "accepted",
       });
+      
+      // Create connections between the new user and all existing family members
+      for (const familyMember of inviterFamilyMembers) {
+        // Skip if already connected (shouldn't happen, but safety check)
+        if (familyMember.id === userId) continue;
+        
+        await storage.addFamilyMember({
+          userId: familyMember.id,
+          familyMemberId: userId,
+          status: "accepted",
+        });
+        
+        await storage.addFamilyMember({
+          userId: userId,
+          familyMemberId: familyMember.id,
+          status: "accepted",
+        });
+      }
       
       // Mark invitation code as used
       await storage.useInvitationCode(code.toUpperCase(), userId);
