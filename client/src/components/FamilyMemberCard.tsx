@@ -27,16 +27,52 @@ function getTimeAgo(timestamp: Date): string {
   return `${days} day${days > 1 ? 's' : ''} ago`;
 }
 
-function getStatusColor(location?: Location, user?: User): string {
-  if (!location || !user?.locationSharingEnabled) return 'bg-gray-400';
+function getStatusInfo(location?: Location, user?: User): { color: string; status: string; message: string } {
+  if (!location || !user?.locationSharingEnabled) {
+    return {
+      color: 'bg-gray-400',
+      status: 'Unknown',
+      message: 'Location sharing disabled'
+    };
+  }
   
   const now = new Date();
   const diff = now.getTime() - new Date(location.timestamp!).getTime();
   const minutes = Math.floor(diff / (1000 * 60));
   
-  if (minutes < 5) return 'bg-green-500';
-  if (minutes < 30) return 'bg-yellow-500';
-  return 'bg-red-500';
+  if (minutes < 5) {
+    return {
+      color: 'bg-green-500',
+      status: 'Active',
+      message: 'Currently active'
+    };
+  } else if (minutes < 15) {
+    return {
+      color: 'bg-yellow-500',
+      status: 'Recent',
+      message: `${minutes} min ago`
+    };
+  } else if (minutes < 60) {
+    return {
+      color: 'bg-orange-500',
+      status: 'Inactive',
+      message: `Inactive for ${minutes} min`
+    };
+  } else if (minutes < 1440) { // Less than 24 hours
+    const hours = Math.floor(minutes / 60);
+    return {
+      color: 'bg-red-500',
+      status: 'Offline',
+      message: `Offline for ${hours}h`
+    };
+  } else {
+    const days = Math.floor(minutes / 1440);
+    return {
+      color: 'bg-gray-500',
+      status: 'Offline',
+      message: `Offline for ${days}d`
+    };
+  }
 }
 
 export default function FamilyMemberCard({
@@ -47,7 +83,7 @@ export default function FamilyMemberCard({
   onViewLocation,
   onRemove,
 }: FamilyMemberCardProps) {
-  const statusColor = getStatusColor(location, user);
+  const statusInfo = getStatusInfo(location, user);
   const canViewLocation = location && user.locationSharingEnabled;
   
   return (
@@ -71,21 +107,20 @@ export default function FamilyMemberCard({
             }
           </div>
           <div className="text-sm text-muted-foreground flex items-center">
-            <div className={`w-2 h-2 ${statusColor} rounded-full mr-2 ${!isRecent ? 'opacity-60' : ''}`}></div>
+            <div className={`w-2 h-2 ${statusInfo.color} rounded-full mr-2`}></div>
+            <span className="font-medium mr-1">{statusInfo.status}:</span>
             {canViewLocation ? (
-              location.address || 'Unknown location'
+              statusInfo.message
             ) : (
-              'Location sharing off'
+              <span className="flex items-center">
+                <EyeOff className="w-3 h-3 mr-1" />
+                Location sharing disabled
+              </span>
             )}
           </div>
-          {canViewLocation && lastSeen && (
+          {canViewLocation && location?.address && (
             <div className="text-xs text-muted-foreground">
-              Last seen {lastSeen}
-            </div>
-          )}
-          {canViewLocation && isRecent && (
-            <div className="text-xs text-green-600 dark:text-green-400">
-              Active now
+              📍 {location.address}
             </div>
           )}
         </div>
