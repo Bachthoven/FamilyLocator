@@ -101,6 +101,8 @@ export function NotificationManager({ children }: NotificationManagerProps) {
 
   // Handle WebSocket messages for notifications
   useEffect(() => {
+    console.log('NotificationManager: lastMessage changed:', lastMessage);
+    
     if (lastMessage?.type === 'geofence' || (lastMessage?.type === 'notification' && lastMessage?.geofenceType === 'geofence')) {
       const notification: GeofenceNotification = {
         id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
@@ -114,7 +116,14 @@ export function NotificationManager({ children }: NotificationManagerProps) {
       };
       
       console.log('Adding geofence notification from WebSocket:', notification);
-      setNotifications(prev => [...prev, notification]);
+      console.log('Current notifications count before add:', notifications.length);
+      setNotifications(prev => {
+        const updated = [...prev, notification];
+        console.log('Updated notifications count:', updated.length);
+        return updated;
+      });
+    } else if (lastMessage) {
+      console.log('Message type not matching geofence criteria:', lastMessage.type, lastMessage);
     }
   }, [lastMessage]);
 
@@ -133,16 +142,20 @@ export function NotificationManager({ children }: NotificationManagerProps) {
   }, []);
 
   const dismissNotification = (id: string) => {
+    console.log('Dismissing notification:', id);
     setNotifications(prev => prev.filter(n => n.id !== id));
   };
+
+  console.log('NotificationManager render: notifications count =', notifications.length);
 
   return (
     <>
       {children}
       
       {/* Render notifications */}
-      <div className="fixed top-0 right-0 z-50 pointer-events-none">
+      <div className="fixed top-4 right-4 z-50 pointer-events-none">
         <div className="space-y-2 pointer-events-auto">
+          {notifications.length > 0 && console.log('Rendering notifications:', notifications)}
           {notifications.map((notification, index) => (
             <div
               key={notification.id}
@@ -158,6 +171,13 @@ export function NotificationManager({ children }: NotificationManagerProps) {
               />
             </div>
           ))}
+          
+          {/* Debug indicator */}
+          {notifications.length > 0 && (
+            <div className="text-xs bg-blue-500 text-white p-2 rounded">
+              Debug: {notifications.length} notification(s)
+            </div>
+          )}
         </div>
       </div>
     </>
