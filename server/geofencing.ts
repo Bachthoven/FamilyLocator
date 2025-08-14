@@ -25,9 +25,13 @@ const userGeofenceStates = new Map<string, Set<number>>(); // userId -> Set of p
 export async function checkGeofenceTransitions(userId: number, newLat: number, newLon: number) {
   try {
     // Get all family members' places (not just user's own places)
-    const familyPlaces = await storage.getAllFamilyPlaces(userId);
+    const familyPlaces = await storage.getFamilyPlaces(userId);
+    
+    console.log(`Checking geofences for user ${userId} at ${newLat}, ${newLon}`);
+    console.log(`Found ${familyPlaces?.length || 0} places to check:`, familyPlaces?.map(p => p.name));
     
     if (!familyPlaces || familyPlaces.length === 0) {
+      console.log('No places to check for geofencing');
       return; // No places to check
     }
 
@@ -37,7 +41,10 @@ export async function checkGeofenceTransitions(userId: number, newLat: number, n
 
     // Check current position against all places
     for (const place of familyPlaces) {
+      const distance = calculateDistance(newLat, newLon, place.latitude, place.longitude);
       const isCurrentlyInside = isWithinGeofence(newLat, newLon, place.latitude, place.longitude);
+      
+      console.log(`Place "${place.name}": ${distance.toFixed(1)}m away, inside=${isCurrentlyInside} (10m radius)`);
       
       if (isCurrentlyInside) {
         newGeofences.add(place.id);
