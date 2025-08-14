@@ -101,7 +101,7 @@ export function NotificationManager({ children }: NotificationManagerProps) {
 
   // Handle WebSocket messages for notifications
   useEffect(() => {
-    if (lastMessage?.type === 'notification' && lastMessage?.geofenceType === 'geofence') {
+    if (lastMessage?.type === 'geofence' || (lastMessage?.type === 'notification' && lastMessage?.geofenceType === 'geofence')) {
       const notification: GeofenceNotification = {
         id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
         type: 'geofence',
@@ -113,7 +113,7 @@ export function NotificationManager({ children }: NotificationManagerProps) {
         timestamp: lastMessage.timestamp,
       };
       
-      console.log('Adding geofence notification:', notification);
+      console.log('Adding geofence notification from WebSocket:', notification);
       setNotifications(prev => [...prev, notification]);
     }
   }, [lastMessage]);

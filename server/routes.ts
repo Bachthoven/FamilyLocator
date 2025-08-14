@@ -409,8 +409,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     clients.forEach((client, userId) => {
       if (client.readyState === WebSocket.OPEN) {
         const message = {
-          type: 'notification',
-          geofenceType: notification.type,
+          type: 'geofence',
           ...notification,
         };
         console.log(`Sending notification to user ${userId}:`, message);
