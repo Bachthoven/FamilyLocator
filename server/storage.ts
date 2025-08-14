@@ -257,6 +257,32 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(places.createdAt));
   }
 
+  async getFamilyPlaces(userId: number): Promise<Array<Place & { user: User }>> {
+    // Get all family members
+    const familyMembers = await this.getFamilyMembers(userId);
+    const familyMemberIds = [userId, ...familyMembers.map(member => member.id)];
+    
+    // Get places for all family members
+    const result = await db
+      .select({
+        id: places.id,
+        userId: places.userId,
+        name: places.name,
+        address: places.address,
+        latitude: places.latitude,
+        longitude: places.longitude,
+        category: places.category,
+        createdAt: places.createdAt,
+        user: users,
+      })
+      .from(places)
+      .innerJoin(users, eq(places.userId, users.id))
+      .where(sql`${places.userId} = ANY(${familyMemberIds})`)
+      .orderBy(desc(places.createdAt));
+    
+    return result;
+  }
+
   async savePlace(place: InsertPlace): Promise<Place> {
     const [savedPlace] = await db
       .insert(places)

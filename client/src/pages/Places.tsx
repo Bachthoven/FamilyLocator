@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Plus, Bookmark, MapPin, Home, Briefcase, GraduationCap, Trash2 } from 'lucide-react';
-import { Place } from '@shared/schema';
+import { Place, User } from '@shared/schema';
 
 const categoryIcons = {
   home: Home,
@@ -43,8 +43,8 @@ export default function Places() {
     category: 'other' as const,
   });
 
-  // Fetch user places
-  const { data: places = [], isLoading } = useQuery({
+  // Fetch family places (now includes user info for each place)
+  const { data: places = [], isLoading } = useQuery<Array<Place & { user: User }>>({
     queryKey: ['/api/places'],
     enabled: !!user,
   });
@@ -158,7 +158,7 @@ export default function Places() {
     }
   };
 
-  const groupedPlaces = places.reduce((acc: Record<string, Place[]>, place: Place) => {
+  const groupedPlaces = places.reduce((acc: Record<string, Array<Place & { user: User }>>, place: Place & { user: User }) => {
     const category = place.category || 'other';
     if (!acc[category]) acc[category] = [];
     acc[category].push(place);
@@ -303,7 +303,7 @@ export default function Places() {
                   </h2>
                   
                   <div className="space-y-3">
-                    {categoryPlaces.map((place: Place) => (
+                    {categoryPlaces.map((place: Place & { user: User }) => (
                       <Card key={place.id} className="hover:shadow-md transition-shadow">
                         <CardHeader className="pb-3">
                           <div className="flex items-center justify-between">
@@ -314,17 +314,23 @@ export default function Places() {
                               <div>
                                 <CardTitle className="text-base">{place.name}</CardTitle>
                                 <p className="text-sm text-muted-foreground">{place.address}</p>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  Added by {place.user.firstName || place.user.email}
+                                </p>
                               </div>
                             </div>
                             
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleDeletePlace(place.id)}
-                              className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
+                            {/* Only show delete button if current user owns the place */}
+                            {user?.id === place.userId && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleDeletePlace(place.id)}
+                                className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            )}
                           </div>
                         </CardHeader>
                       </Card>

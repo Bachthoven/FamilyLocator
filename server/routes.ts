@@ -288,7 +288,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/places', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
-      const places = await storage.getUserPlaces(userId);
+      const places = await storage.getFamilyPlaces(userId);
       res.json(places);
     } catch (error) {
       console.error("Error fetching places:", error);
