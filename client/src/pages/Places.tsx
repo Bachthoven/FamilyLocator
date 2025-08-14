@@ -42,12 +42,48 @@ export default function Places() {
     longitude: 0,
     category: 'other' as const,
   });
+  const [useCurrentLocation, setUseCurrentLocation] = useState(false);
 
   // Fetch family places (now includes user info for each place)
   const { data: places = [], isLoading } = useQuery<Array<Place & { user: User }>>({
     queryKey: ['/api/places'],
     enabled: !!user,
   });
+
+  // Get current location
+  const getCurrentLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setNewPlace(prev => ({
+            ...prev,
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+            address: `GPS: ${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`
+          }));
+          setUseCurrentLocation(true);
+          toast({
+            title: "Location captured",
+            description: "Using your current GPS coordinates",
+          });
+        },
+        (error) => {
+          console.error('Error getting location:', error);
+          toast({
+            title: "Location error",
+            description: "Could not get your current location",
+            variant: "destructive",
+          });
+        }
+      );
+    } else {
+      toast({
+        title: "Location not supported",
+        description: "Your browser doesn't support location services",
+        variant: "destructive",
+      });
+    }
+  };
 
   // Add place mutation
   const addPlaceMutation = useMutation({
@@ -68,6 +104,7 @@ export default function Places() {
         longitude: 0,
         category: 'other',
       });
+      setUseCurrentLocation(false);
       queryClient.invalidateQueries({ queryKey: ['/api/places'] });
       // Trigger a toast to indicate the place was added to the map
       setTimeout(() => {
@@ -202,18 +239,39 @@ export default function Places() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="address">Address *</Label>
-                  <AddressAutocomplete
-                    value={newPlace.address}
-                    onValueChange={(address) => setNewPlace(prev => ({ ...prev, address }))}
-                    onLocationSelect={(location) => setNewPlace(prev => ({
-                      ...prev,
-                      address: location.address,
-                      latitude: location.latitude,
-                      longitude: location.longitude,
-                    }))}
-                    placeholder="Start typing an address..."
-                  />
+                  <div className="flex items-center justify-between mb-2">
+                    <Label htmlFor="address">Address *</Label>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={getCurrentLocation}
+                      className="text-xs"
+                    >
+                      <MapPin className="w-3 h-3 mr-1" />
+                      Use Current Location
+                    </Button>
+                  </div>
+                  {!useCurrentLocation ? (
+                    <AddressAutocomplete
+                      value={newPlace.address}
+                      onValueChange={(address) => setNewPlace(prev => ({ ...prev, address }))}
+                      onLocationSelect={(location) => setNewPlace(prev => ({
+                        ...prev,
+                        address: location.address,
+                        latitude: location.latitude,
+                        longitude: location.longitude,
+                      }))}
+                      placeholder="Start typing an address..."
+                    />
+                  ) : (
+                    <Input
+                      value={newPlace.address}
+                      readOnly
+                      className="bg-green-50 border-green-200"
+                      placeholder="Using current GPS location"
+                    />
+                  )}
                 </div>
                 <div>
                   <Label htmlFor="category">Category</Label>
