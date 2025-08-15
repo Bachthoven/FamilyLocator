@@ -122,11 +122,11 @@ FamilyLocator is a modern web application that enables families to share their r
 ## Changelog
 
 - August 15, 2025. Fixed saved place pin positioning accuracy:
-  - Adjusted Test location to exact house position (7th from north on Canyon Lakes Place)
-  - Implemented precise coordinate placement for saved places: 37.780170, -121.956450
+  - Corrected Test location to exact coordinates at 250 Canyon Lakes Place: 37.77959918666838, -121.9555844121186
+  - Identified root cause: Visual estimation from screenshots is unreliable for precise coordinates
+  - Solution: Always use "Use Current Location" feature or user-provided exact coordinates
   - Added geofence state clearing endpoint (/api/geofence/clear) for fresh detection
-  - Emphasized importance of precise coordinate placement for all future location pins
-  - Note: Always use exact coordinates for place pins rather than geocoded addresses
+  - Important: Never rely on geocoding or visual estimation for place coordinates - always use GPS coordinates
 
 - August 14, 2025. Enhanced geofencing precision and notifications:
   - Updated geofencing radius from 100m to 10m for more precise location detection
