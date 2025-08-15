@@ -126,15 +126,15 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
       >
         {mapType === 'street' ? (
           <TileLayer
-            url="https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=5R56EgCGkxGWZLjDNLVl"
-            attribution='&copy; <a href="https://www.maptiler.com/">MapTiler</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
+            attribution='&copy; <a href="https://maps.google.com">Google Maps</a>'
             maxZoom={22}
             maxNativeZoom={20}
           />
         ) : (
           <TileLayer
-            url="https://api.maptiler.com/maps/hybrid/{z}/{x}/{y}.jpg?key=5R56EgCGkxGWZLjDNLVl"
-            attribution='&copy; <a href="https://www.maptiler.com/">MapTiler</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://mt1.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}"
+            attribution='&copy; <a href="https://maps.google.com">Google Maps</a>'
             maxZoom={22}
             maxNativeZoom={20}
           />
