@@ -129,6 +129,7 @@ FamilyLocator is a modern web application that enables families to share their r
   - All saved places now support full coordinate precision (15+ decimal places)
   - Added geofence state clearing endpoint (/api/geofence/clear) for fresh detection
   - Root cause identified: Coordinate truncation due to insufficient database precision, not visual estimation
+  - Updated all place coordinates with official Google Maps data for perfect pin placement
 
 - August 14, 2025. Enhanced geofencing precision and notifications:
   - Updated geofencing radius from 100m to 10m for more precise location detection
