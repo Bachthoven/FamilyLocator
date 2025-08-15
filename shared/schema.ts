@@ -7,6 +7,7 @@ import {
   index,
   serial,
   real,
+  doublePrecision,
   boolean,
   uuid,
   integer,
@@ -54,9 +55,9 @@ export const familyConnections = pgTable("family_connections", {
 export const locations = pgTable("locations", {
   id: serial("id").primaryKey(),
   userId: serial("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  latitude: real("latitude").notNull(),
-  longitude: real("longitude").notNull(),
-  accuracy: real("accuracy"),
+  latitude: doublePrecision("latitude").notNull(),
+  longitude: doublePrecision("longitude").notNull(),
+  accuracy: doublePrecision("accuracy"),
   address: text("address"),
   type: varchar("type").notNull().default("manual"), // manual, automatic_hourly
   timestamp: timestamp("timestamp").defaultNow(),
@@ -68,8 +69,8 @@ export const places = pgTable("places", {
   userId: serial("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   name: varchar("name").notNull(),
   address: text("address"),
-  latitude: real("latitude").notNull(),
-  longitude: real("longitude").notNull(),
+  latitude: doublePrecision("latitude").notNull(),
+  longitude: doublePrecision("longitude").notNull(),
   category: varchar("category"), // home, work, school, etc.
   createdAt: timestamp("created_at").defaultNow(),
 });

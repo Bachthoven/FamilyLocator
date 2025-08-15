@@ -121,13 +121,14 @@ FamilyLocator is a modern web application that enables families to share their r
 
 ## Changelog
 
-- August 15, 2025. Map improvements and location accuracy fixes:
+- August 15, 2025. Map improvements and critical location accuracy fixes:
   - Switched map provider to Google Maps for familiar interface and better rendering
-  - Corrected Test location to exact coordinates at 250 Canyon Lakes Place: 37.77959918666838, -121.9555844121186
-  - Identified root cause: Visual estimation from screenshots is unreliable for precise coordinates
-  - Solution: Always use "Use Current Location" feature or user-provided exact coordinates
+  - Fixed critical precision issue: Database was using 32-bit `real` type limiting coordinates to 6-7 digits
+  - Solution: Upgraded latitude/longitude columns to `double precision` for full GPS accuracy
+  - Test location now at exact coordinates: 37.77959918666838, -121.9555844121186 (250 Canyon Lakes Place)
+  - All saved places now support full coordinate precision (15+ decimal places)
   - Added geofence state clearing endpoint (/api/geofence/clear) for fresh detection
-  - Important: Never rely on geocoding or visual estimation for place coordinates - always use GPS coordinates
+  - Root cause identified: Coordinate truncation due to insufficient database precision, not visual estimation
 
 - August 14, 2025. Enhanced geofencing precision and notifications:
   - Updated geofencing radius from 100m to 10m for more precise location detection
