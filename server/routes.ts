@@ -94,6 +94,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Clear geofence state for testing
+  app.post('/api/geofence/clear', isAuthenticated, async (req: any, res) => {
+    try {
+      const { clearUserGeofenceState } = await import('./geofencing');
+      clearUserGeofenceState(req.user.id);
+      console.log('Cleared geofence state for user:', req.user.id);
+      res.json({ message: 'Geofence state cleared' });
+    } catch (error) {
+      console.error("Error clearing geofence state:", error);
+      res.status(500).json({ message: "Failed to clear geofence state" });
+    }
+  });
+
   // Family member routes
   app.get('/api/family', isAuthenticated, async (req: any, res) => {
     try {
