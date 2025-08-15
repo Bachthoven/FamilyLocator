@@ -126,17 +126,17 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
       >
         {mapType === 'street' ? (
           <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://api.maptiler.com/maps/streets-v2/{z}/{x}/{y}.png?key=5R56EgCGkxGWZLjDNLVl"
+            attribution='&copy; <a href="https://www.maptiler.com/">MapTiler</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             maxZoom={22}
-            maxNativeZoom={19}
+            maxNativeZoom={20}
           />
         ) : (
           <TileLayer
-            url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-            attribution='&copy; <a href="https://www.arcgis.com/">ArcGIS</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://api.maptiler.com/maps/hybrid/{z}/{x}/{y}.jpg?key=5R56EgCGkxGWZLjDNLVl"
+            attribution='&copy; <a href="https://www.maptiler.com/">MapTiler</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             maxZoom={22}
-            maxNativeZoom={21}
+            maxNativeZoom={20}
           />
         )}
         

@@ -121,7 +121,8 @@ FamilyLocator is a modern web application that enables families to share their r
 
 ## Changelog
 
-- August 15, 2025. Fixed saved place pin positioning accuracy:
+- August 15, 2025. Map improvements and location accuracy fixes:
+  - Switched from OpenStreetMap to OpenMapTiles (MapTiler) for better map rendering
   - Corrected Test location to exact coordinates at 250 Canyon Lakes Place: 37.77959918666838, -121.9555844121186
   - Identified root cause: Visual estimation from screenshots is unreliable for precise coordinates
   - Solution: Always use "Use Current Location" feature or user-provided exact coordinates
