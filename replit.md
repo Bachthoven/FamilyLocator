@@ -197,3 +197,4 @@ FamilyLocator is a modern web application that enables families to share their r
 
 Preferred communication style: Simple, everyday language.
 Project focus: Cross-platform web-based family location sharing with real-time capabilities.
+Location accuracy: All location pins must use exact coordinates from Google Maps, never use geocoding or approximations.
