@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, forwardRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -15,8 +15,7 @@ L.Icon.Default.mergeOptions({
 });
 
 // Configure Leaflet for better mobile touch handling
-L.Marker.prototype.options.draggable = false;
-L.Marker.prototype.options.autoPan = false;
+// Set default marker options but allow overriding per marker
 
 // Custom marker icons
 const createUserIcon = (color: string, isRecent: boolean = true) => new L.DivIcon({
@@ -221,24 +220,38 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
             draggable={!!place.id}
             autoPan={false}
             eventHandlers={{
-              click: () => onPlaceClick?.(place),
+              click: () => {
+                if (!isDragging) {
+                  onPlaceClick?.(place);
+                }
+              },
               dragstart: (event) => {
                 if (place.id) {
                   setIsDragging(place.id);
-                }
-                // Prevent map from panning while dragging
-                const marker = event.target;
-                if (marker._map) {
-                  marker._map.dragging.disable();
+                  // Disable map interactions during drag
+                  const marker = event.target;
+                  const map = marker.getMap ? marker.getMap() : marker._map;
+                  if (map) {
+                    map.dragging.disable();
+                    map.doubleClickZoom.disable();
+                    map.touchZoom.disable();
+                    map.scrollWheelZoom.disable();
+                  }
                 }
               },
               dragend: async (event) => {
                 const marker = event.target;
                 const position = marker.getLatLng();
+                const map = marker.getMap ? marker.getMap() : marker._map;
                 
-                // Re-enable map dragging
-                if (marker._map) {
-                  marker._map.dragging.enable();
+                // Re-enable map interactions
+                if (map) {
+                  setTimeout(() => {
+                    map.dragging.enable();
+                    map.doubleClickZoom.enable();
+                    map.touchZoom.enable();
+                    map.scrollWheelZoom.enable();
+                  }, 100);
                 }
                 
                 // Check if place has an ID before making API call
@@ -301,7 +314,7 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
                 </div>
                 {place.id && (
                   <div className="text-xs text-blue-600 mt-2 font-medium">
-                    {isDragging === place.id ? "Drag to reposition" : "Drag pin to adjust location"}
+                    {isDragging === place.id ? "Release to save new position" : "Hold and drag to move"}
                   </div>
                 )}
               </div>
