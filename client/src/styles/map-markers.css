@@ -1,0 +1,45 @@
+/* Custom styles for map markers to improve touch interaction */
+.custom-marker,
+.custom-place-marker {
+  cursor: pointer !important;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: none;
+}
+
+.custom-place-marker {
+  cursor: move !important;
+}
+
+/* Ensure draggable markers are easier to grab on mobile */
+.leaflet-marker-draggable {
+  cursor: move !important;
+  touch-action: none !important;
+}
+
+.leaflet-marker-draggable .leaflet-interactive {
+  cursor: move !important;
+}
+
+/* Increase touch area for all markers on mobile */
+@media (max-width: 768px) {
+  .leaflet-marker-icon {
+    margin-left: -24px !important;
+    margin-top: -24px !important;
+  }
+  
+  .custom-marker div,
+  .custom-place-marker div {
+    transform: scale(1.1);
+  }
+  
+  /* Add visual feedback on touch */
+  .leaflet-marker-draggable:active {
+    transform: scale(1.15);
+    transition: transform 0.1s ease;
+  }
+}
+
+/* Improve visibility of dragging state */
+.leaflet-drag-target {
+  opacity: 0.8 !important;
+}
