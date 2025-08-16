@@ -4,7 +4,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { User, Location, Place } from '@shared/schema';
 import { useToast } from '@/hooks/use-toast';
-import { apiRequest } from '@/lib/queryClient';
+import { apiRequest, queryClient } from '@/lib/queryClient';
 
 // Fix for default markers in react-leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -214,34 +214,56 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
             key={`place-${place.id || Math.random()}`}
             position={[place.latitude, place.longitude]}
             icon={createPlaceIcon(place.category)}
-            draggable={true}
+            draggable={!!place.id}
             eventHandlers={{
               click: () => onPlaceClick?.(place),
               dragstart: () => {
-                setIsDragging(place.id);
+                if (place.id) {
+                  setIsDragging(place.id);
+                }
               },
               dragend: async (event) => {
                 const marker = event.target;
                 const position = marker.getLatLng();
                 
+                // Check if place has an ID before making API call
+                if (!place.id) {
+                  console.error('Cannot update place without ID');
+                  toast({
+                    title: "Cannot update location",
+                    description: "This place needs to be saved first",
+                    variant: "destructive",
+                  });
+                  marker.setLatLng([place.latitude, place.longitude]);
+                  setIsDragging(null);
+                  return;
+                }
+                
                 try {
+                  console.log(`Updating place ${place.id} to ${position.lat}, ${position.lng}`);
                   await apiRequest('PATCH', `/api/places/${place.id}/location`, {
                     latitude: position.lat,
                     longitude: position.lng,
                   });
                   
+                  // Update the place data locally on success
+                  place.latitude = position.lat;
+                  place.longitude = position.lng;
+                  
+                  // Invalidate places query to refresh the data
+                  queryClient.invalidateQueries({ queryKey: ['/api/places'] });
+                  
                   toast({
                     title: "Location updated",
                     description: `${place.name} has been moved to the new position`,
                   });
+                } catch (error: any) {
+                  console.error('Failed to update place location:', error);
+                  const errorMessage = error?.message || "Please try again";
                   
-                  // Update the place data locally
-                  place.latitude = position.lat;
-                  place.longitude = position.lng;
-                } catch (error) {
                   toast({
                     title: "Failed to update location",
-                    description: "Please try again",
+                    description: errorMessage,
                     variant: "destructive",
                   });
                   
@@ -262,9 +284,11 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
                 <div className="text-xs text-gray-400">
                   {place.address}
                 </div>
-                <div className="text-xs text-blue-600 mt-2 font-medium">
-                  {isDragging === place.id ? "Drag to reposition" : "Drag pin to adjust location"}
-                </div>
+                {place.id && (
+                  <div className="text-xs text-blue-600 mt-2 font-medium">
+                    {isDragging === place.id ? "Drag to reposition" : "Drag pin to adjust location"}
+                  </div>
+                )}
               </div>
             </Popup>
           </Marker>

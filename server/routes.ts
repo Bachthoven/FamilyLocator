@@ -358,10 +358,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Place not found" });
       }
       
-      // Only allow modification by the owner
-      if (place.userId !== userId) {
-        return res.status(403).json({ message: "You can only modify your own places" });
-      }
+      // Allow any family member to update shared places
+      // The place was already verified to belong to the family in getFamilyPlaces
       
       // Update the place coordinates
       await storage.updatePlaceLocation(placeId, latitude, longitude);
