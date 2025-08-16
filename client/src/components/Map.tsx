@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import '@/styles/map-markers.css';
 import { User, Location, Place } from '@shared/schema';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest, queryClient } from '@/lib/queryClient';
@@ -15,20 +14,18 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-// Custom marker icons - larger for better mobile touch targets
+// Custom marker icons
 const createUserIcon = (color: string, isRecent: boolean = true) => new L.DivIcon({
   html: `
     <div class="relative">
-      <div class="w-10 h-10 bg-${color}-500 rounded-full border-3 border-white shadow-lg flex items-center justify-center ${isRecent ? '' : 'opacity-60'}">
-        <div class="w-3 h-3 bg-white rounded-full"></div>
-      </div>
-      ${isRecent ? `<div class="absolute inset-0 w-10 h-10 bg-${color}-500 rounded-full animate-ping opacity-75"></div>` : ''}
-      ${!isRecent ? '<div class="absolute -top-1 -right-1 w-3 h-3 bg-gray-400 rounded-full border-2 border-white"></div>' : ''}
+      <div class="w-4 h-4 bg-${color}-500 rounded-full border-2 border-white shadow-lg ${isRecent ? '' : 'opacity-60'}"></div>
+      ${isRecent ? `<div class="absolute inset-0 w-4 h-4 bg-${color}-500 rounded-full animate-ping opacity-75"></div>` : ''}
+      ${!isRecent ? '<div class="absolute -top-1 -right-1 w-2 h-2 bg-gray-400 rounded-full border border-white"></div>' : ''}
     </div>
   `,
   className: 'custom-marker',
-  iconSize: [40, 40],
-  iconAnchor: [20, 20],
+  iconSize: [16, 16],
+  iconAnchor: [8, 8],
 });
 
 const currentUserIcon = createUserIcon('blue');
@@ -58,7 +55,7 @@ const formatTimeSince = (timestamp: string | Date) => {
   }
 };
 
-// Create place marker icons based on category - larger for better mobile touch targets
+// Create place marker icons based on category
 const createPlaceIcon = (category: string) => {
   const categoryColors = {
     home: 'purple',
@@ -71,16 +68,15 @@ const createPlaceIcon = (category: string) => {
   
   return new L.DivIcon({
     html: `
-      <div class="relative" style="touch-action: none;">
-        <div class="w-12 h-12 bg-${color}-500 rounded-lg border-3 border-white shadow-xl flex items-center justify-center cursor-move">
-          <div class="w-4 h-4 bg-white rounded-full"></div>
+      <div class="relative">
+        <div class="w-6 h-6 bg-${color}-500 rounded-lg border-2 border-white shadow-lg flex items-center justify-center">
+          <div class="w-2 h-2 bg-white rounded-full"></div>
         </div>
-        <div class="absolute inset-0 w-12 h-12 rounded-lg" style="pointer-events: all; touch-action: none;"></div>
       </div>
     `,
     className: 'custom-place-marker',
-    iconSize: [48, 48],
-    iconAnchor: [24, 24],
+    iconSize: [24, 24],
+    iconAnchor: [12, 12],
   });
 };
 
