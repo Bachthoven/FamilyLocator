@@ -70,14 +70,11 @@ function DraggablePlace({ place, isDragging, setIsDragging, onPlaceClick, toast 
         dragstart: (event) => {
           if (place.id) {
             setIsDragging(place.id);
-            // Disable map interactions during drag
+            // Only disable map dragging during marker drag, keep zoom enabled
             const marker = event.target;
             const map = (marker as any)._map;
             if (map) {
               map.dragging.disable();
-              map.doubleClickZoom.disable();
-              map.touchZoom.disable();
-              map.scrollWheelZoom.disable();
             }
           }
         },
@@ -86,13 +83,10 @@ function DraggablePlace({ place, isDragging, setIsDragging, onPlaceClick, toast 
           const position = marker.getLatLng();
           const map = (marker as any)._map;
           
-          // Re-enable map interactions
+          // Re-enable map dragging
           if (map) {
             setTimeout(() => {
               map.dragging.enable();
-              map.doubleClickZoom.enable();
-              map.touchZoom.enable();
-              map.scrollWheelZoom.enable();
             }, 100);
           }
           
