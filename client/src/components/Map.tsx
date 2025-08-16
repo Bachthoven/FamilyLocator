@@ -14,6 +14,10 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
+// Configure Leaflet for better mobile touch handling
+L.Marker.prototype.options.draggable = false;
+L.Marker.prototype.options.autoPan = false;
+
 // Custom marker icons
 const createUserIcon = (color: string, isRecent: boolean = true) => new L.DivIcon({
   html: `
@@ -215,16 +219,27 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
             position={[place.latitude, place.longitude]}
             icon={createPlaceIcon(place.category)}
             draggable={!!place.id}
+            autoPan={false}
             eventHandlers={{
               click: () => onPlaceClick?.(place),
-              dragstart: () => {
+              dragstart: (event) => {
                 if (place.id) {
                   setIsDragging(place.id);
+                }
+                // Prevent map from panning while dragging
+                const marker = event.target;
+                if (marker._map) {
+                  marker._map.dragging.disable();
                 }
               },
               dragend: async (event) => {
                 const marker = event.target;
                 const position = marker.getLatLng();
+                
+                // Re-enable map dragging
+                if (marker._map) {
+                  marker._map.dragging.enable();
+                }
                 
                 // Check if place has an ID before making API call
                 if (!place.id) {
