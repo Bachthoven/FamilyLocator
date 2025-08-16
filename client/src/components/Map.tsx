@@ -3,6 +3,8 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { User, Location, Place } from '@shared/schema';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest } from '@/lib/queryClient';
 
 // Fix for default markers in react-leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -100,6 +102,8 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
   const mapRef = useRef<L.Map | null>(null);
   const [mapCenter, setMapCenter] = useState<[number, number]>([40.7128, -74.0060]); // Default to NYC
   const [mapType, setMapType] = useState<'street' | 'satellite'>('street');
+  const [isDragging, setIsDragging] = useState<number | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (currentLocation) {
@@ -195,11 +199,46 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
         {/* Saved places */}
         {places.map((place) => (
           <Marker
-            key={`place-${place.id}`}
+            key={`place-${place.id || Math.random()}`}
             position={[place.latitude, place.longitude]}
             icon={createPlaceIcon(place.category)}
+            draggable={true}
             eventHandlers={{
               click: () => onPlaceClick?.(place),
+              dragstart: () => {
+                setIsDragging(place.id);
+              },
+              dragend: async (event) => {
+                const marker = event.target;
+                const position = marker.getLatLng();
+                
+                try {
+                  await apiRequest('PATCH', `/api/places/${place.id}/location`, {
+                    latitude: position.lat,
+                    longitude: position.lng,
+                  });
+                  
+                  toast({
+                    title: "Location updated",
+                    description: `${place.name} has been moved to the new position`,
+                  });
+                  
+                  // Update the place data locally
+                  place.latitude = position.lat;
+                  place.longitude = position.lng;
+                } catch (error) {
+                  toast({
+                    title: "Failed to update location",
+                    description: "Please try again",
+                    variant: "destructive",
+                  });
+                  
+                  // Reset marker to original position on error
+                  marker.setLatLng([place.latitude, place.longitude]);
+                } finally {
+                  setIsDragging(null);
+                }
+              },
             }}
           >
             <Popup>
@@ -210,6 +249,9 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
                 </div>
                 <div className="text-xs text-gray-400">
                   {place.address}
+                </div>
+                <div className="text-xs text-blue-600 mt-2 font-medium">
+                  {isDragging === place.id ? "Drag to reposition" : "Drag pin to adjust location"}
                 </div>
               </div>
             </Popup>

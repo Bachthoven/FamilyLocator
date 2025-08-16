@@ -338,6 +338,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update place location (for drag and drop)
+  app.patch('/api/places/:id/location', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const placeId = parseInt(req.params.id);
+      const { latitude, longitude } = req.body;
+      
+      // Validate coordinates
+      if (!latitude || !longitude) {
+        return res.status(400).json({ message: "Latitude and longitude are required" });
+      }
+      
+      // Check if place belongs to user or their family
+      const places = await storage.getFamilyPlaces(userId);
+      const place = places?.find(p => p.id === placeId);
+      
+      if (!place) {
+        return res.status(404).json({ message: "Place not found" });
+      }
+      
+      // Only allow modification by the owner
+      if (place.userId !== userId) {
+        return res.status(403).json({ message: "You can only modify your own places" });
+      }
+      
+      // Update the place coordinates
+      await storage.updatePlaceLocation(placeId, latitude, longitude);
+      
+      console.log(`Updated place ${placeId} location to ${latitude}, ${longitude}`);
+      res.json({ message: "Place location updated successfully" });
+    } catch (error) {
+      console.error("Error updating place location:", error);
+      res.status(500).json({ message: "Failed to update place location" });
+    }
+  });
+
   // Hourly location logging control routes
   app.post('/api/location-logging/start', isAuthenticated, async (req: any, res) => {
     try {
