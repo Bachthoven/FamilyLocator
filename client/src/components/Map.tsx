@@ -88,12 +88,14 @@ interface MapProps {
   onPlaceClick?: (place: Place) => void;
 }
 
-function MapCenter({ center }: { center: [number, number] }) {
+function MapCenter({ center, shouldUpdate }: { center: [number, number]; shouldUpdate: boolean }) {
   const map = useMap();
   
   useEffect(() => {
-    map.setView(center, map.getZoom());
-  }, [center, map]);
+    if (shouldUpdate) {
+      map.setView(center, map.getZoom());
+    }
+  }, [center, map, shouldUpdate]);
   
   return null;
 }
@@ -103,17 +105,27 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
   const [mapCenter, setMapCenter] = useState<[number, number]>([40.7128, -74.0060]); // Default to NYC
   const [mapType, setMapType] = useState<'street' | 'satellite'>('street');
   const [isDragging, setIsDragging] = useState<number | null>(null);
+  const [shouldUpdateCenter, setShouldUpdateCenter] = useState(false);
+  const [hasInitialized, setHasInitialized] = useState(false);
   const { toast } = useToast();
 
+  // Only set initial center once when location first becomes available
   useEffect(() => {
-    if (currentLocation) {
+    if (currentLocation && !hasInitialized) {
       setMapCenter([currentLocation.latitude, currentLocation.longitude]);
+      setShouldUpdateCenter(true);
+      setHasInitialized(true);
+      // Reset the flag after a short delay to allow the map to update
+      setTimeout(() => setShouldUpdateCenter(false), 100);
     }
-  }, [currentLocation]);
+  }, [currentLocation, hasInitialized]);
 
   const centerOnUser = () => {
     if (currentLocation) {
       setMapCenter([currentLocation.latitude, currentLocation.longitude]);
+      setShouldUpdateCenter(true);
+      // Reset the flag after a short delay
+      setTimeout(() => setShouldUpdateCenter(false), 100);
     }
   };
 
@@ -144,7 +156,7 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
           />
         )}
         
-        <MapCenter center={mapCenter} />
+        <MapCenter center={mapCenter} shouldUpdate={shouldUpdateCenter} />
         
         {/* Current user location */}
         {currentLocation && (
