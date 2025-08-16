@@ -70,18 +70,6 @@
   border: none !important;
 }
 
-/* Improve touch responsiveness for draggable markers */
-.leaflet-marker-draggable {
-  cursor: move !important;
-}
-
-/* Only disable touch-action when actively dragging */
-.leaflet-dragging .leaflet-marker-draggable {
-  touch-action: none !important;
-  -webkit-touch-callout: none !important;
-  -webkit-user-select: none !important;
-}
-
 /* PWA specific styles */
 .safe-area-bottom {
   padding-bottom: env(safe-area-inset-bottom);

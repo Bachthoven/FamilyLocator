@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import '@/styles/map-markers.css';
 import { User, Location, Place } from '@shared/schema';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest, queryClient } from '@/lib/queryClient';
@@ -14,163 +15,20 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-// Configure Leaflet for better mobile touch handling
-// Set default marker options but allow overriding per marker
-// Override tap tolerance for immediate dragging on mobile
-(L.Marker.prototype.options as any).tapTolerance = 0;
-(L.Draggable as any)._touchTolerance = 0;
-
-// Draggable place marker component
-function DraggablePlace({ place, isDragging, setIsDragging, onPlaceClick, toast }: {
-  place: Place;
-  isDragging: number | null;
-  setIsDragging: (id: number | null) => void;
-  onPlaceClick?: (place: Place) => void;
-  toast: any;
-}) {
-  const markerRef = useRef<L.Marker | null>(null);
-  
-  useEffect(() => {
-    const marker = markerRef.current;
-    if (marker && place.id) {
-      // Get the marker's icon element
-      const icon = (marker as any)._icon;
-      if (icon) {
-        // Set up immediate touch dragging
-        icon.style.touchAction = 'none';
-        icon.style.webkitTouchCallout = 'none';
-        icon.style.webkitUserSelect = 'none';
-        icon.style.userSelect = 'none';
-        
-        // Override Leaflet's dragging behavior for immediate response
-        if (marker.dragging) {
-          const draggable = (marker.dragging as any)._draggable;
-          if (draggable) {
-            draggable._tapTolerance = 0;
-            draggable._delay = 0;
-          }
-        }
-      }
-    }
-  }, [place.id]);
-  
-  return (
-    <Marker
-      ref={(ref) => { markerRef.current = ref; }}
-      position={[place.latitude, place.longitude]}
-      icon={createPlaceIcon(place.category)}
-      draggable={!!place.id}
-      autoPan={false}
-      eventHandlers={{
-        click: () => {
-          if (!isDragging) {
-            onPlaceClick?.(place);
-          }
-        },
-        dragstart: (event) => {
-          if (place.id) {
-            setIsDragging(place.id);
-            // Only disable map dragging during marker drag, keep zoom enabled
-            const marker = event.target;
-            const map = (marker as any)._map;
-            if (map) {
-              map.dragging.disable();
-            }
-          }
-        },
-        dragend: async (event) => {
-          const marker = event.target;
-          const position = marker.getLatLng();
-          const map = (marker as any)._map;
-          
-          // Re-enable map dragging
-          if (map) {
-            setTimeout(() => {
-              map.dragging.enable();
-            }, 100);
-          }
-          
-          // Check if place has an ID before making API call
-          if (!place.id) {
-            console.error('Cannot update place without ID');
-            toast({
-              title: "Cannot update location",
-              description: "This place needs to be saved first",
-              variant: "destructive",
-            });
-            marker.setLatLng([place.latitude, place.longitude]);
-            setIsDragging(null);
-            return;
-          }
-          
-          try {
-            console.log(`Updating place ${place.id} to ${position.lat}, ${position.lng}`);
-            await apiRequest('PATCH', `/api/places/${place.id}/location`, {
-              latitude: position.lat,
-              longitude: position.lng,
-            });
-            
-            // Update the place data locally on success
-            place.latitude = position.lat;
-            place.longitude = position.lng;
-            
-            // Invalidate places query to refresh the data
-            queryClient.invalidateQueries({ queryKey: ['/api/places'] });
-            
-            toast({
-              title: "Location updated",
-              description: `${place.name} has been moved to the new position`,
-            });
-          } catch (error: any) {
-            console.error('Failed to update place location:', error);
-            const errorMessage = error?.message || "Please try again";
-            
-            toast({
-              title: "Failed to update location",
-              description: errorMessage,
-              variant: "destructive",
-            });
-            
-            // Reset marker to original position on error
-            marker.setLatLng([place.latitude, place.longitude]);
-          } finally {
-            setIsDragging(null);
-          }
-        },
-      }}
-    >
-      <Popup>
-        <div className="text-center">
-          <div className="font-medium">{place.name}</div>
-          <div className="text-sm text-gray-500 capitalize">
-            {place.category} • Saved Place
-          </div>
-          <div className="text-xs text-gray-400">
-            {place.address}
-          </div>
-          {place.id && (
-            <div className="text-xs text-blue-600 mt-2 font-medium">
-              {isDragging === place.id ? "Release to save new position" : "Hold and drag to move"}
-            </div>
-          )}
-        </div>
-      </Popup>
-    </Marker>
-  );
-}
-
-// Custom marker icons
+// Custom marker icons - larger for better mobile touch targets
 const createUserIcon = (color: string, isRecent: boolean = true) => new L.DivIcon({
   html: `
     <div class="relative">
-      <div class="w-4 h-4 bg-${color}-500 rounded-full border-2 border-white shadow-lg ${isRecent ? '' : 'opacity-60'}"></div>
-      ${isRecent ? `<div class="absolute inset-0 w-4 h-4 bg-${color}-500 rounded-full animate-ping opacity-75"></div>` : ''}
-      ${!isRecent ? '<div class="absolute -top-1 -right-1 w-2 h-2 bg-gray-400 rounded-full border border-white"></div>' : ''}
+      <div class="w-10 h-10 bg-${color}-500 rounded-full border-3 border-white shadow-lg flex items-center justify-center ${isRecent ? '' : 'opacity-60'}">
+        <div class="w-3 h-3 bg-white rounded-full"></div>
+      </div>
+      ${isRecent ? `<div class="absolute inset-0 w-10 h-10 bg-${color}-500 rounded-full animate-ping opacity-75"></div>` : ''}
+      ${!isRecent ? '<div class="absolute -top-1 -right-1 w-3 h-3 bg-gray-400 rounded-full border-2 border-white"></div>' : ''}
     </div>
   `,
   className: 'custom-marker',
-  iconSize: [16, 16],
-  iconAnchor: [8, 8],
+  iconSize: [40, 40],
+  iconAnchor: [20, 20],
 });
 
 const currentUserIcon = createUserIcon('blue');
@@ -200,7 +58,7 @@ const formatTimeSince = (timestamp: string | Date) => {
   }
 };
 
-// Create place marker icons based on category
+// Create place marker icons based on category - larger for better mobile touch targets
 const createPlaceIcon = (category: string) => {
   const categoryColors = {
     home: 'purple',
@@ -213,15 +71,16 @@ const createPlaceIcon = (category: string) => {
   
   return new L.DivIcon({
     html: `
-      <div class="relative">
-        <div class="w-6 h-6 bg-${color}-500 rounded-lg border-2 border-white shadow-lg flex items-center justify-center">
-          <div class="w-2 h-2 bg-white rounded-full"></div>
+      <div class="relative" style="touch-action: none;">
+        <div class="w-12 h-12 bg-${color}-500 rounded-lg border-3 border-white shadow-xl flex items-center justify-center cursor-move">
+          <div class="w-4 h-4 bg-white rounded-full"></div>
         </div>
+        <div class="absolute inset-0 w-12 h-12 rounded-lg" style="pointer-events: all; touch-action: none;"></div>
       </div>
     `,
     className: 'custom-place-marker',
-    iconSize: [24, 24],
-    iconAnchor: [12, 12],
+    iconSize: [48, 48],
+    iconAnchor: [24, 24],
   });
 };
 
@@ -355,14 +214,88 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
 
         {/* Saved places */}
         {places.map((place) => (
-          <DraggablePlace 
-            key={`place-${place.id || `temp-${place.name}`}`}
-            place={place}
-            isDragging={isDragging}
-            setIsDragging={setIsDragging}
-            onPlaceClick={onPlaceClick}
-            toast={toast}
-          />
+          <Marker
+            key={`place-${place.id || Math.random()}`}
+            position={[place.latitude, place.longitude]}
+            icon={createPlaceIcon(place.category)}
+            draggable={!!place.id}
+            eventHandlers={{
+              click: () => onPlaceClick?.(place),
+              dragstart: () => {
+                if (place.id) {
+                  setIsDragging(place.id);
+                }
+              },
+              dragend: async (event) => {
+                const marker = event.target;
+                const position = marker.getLatLng();
+                
+                // Check if place has an ID before making API call
+                if (!place.id) {
+                  console.error('Cannot update place without ID');
+                  toast({
+                    title: "Cannot update location",
+                    description: "This place needs to be saved first",
+                    variant: "destructive",
+                  });
+                  marker.setLatLng([place.latitude, place.longitude]);
+                  setIsDragging(null);
+                  return;
+                }
+                
+                try {
+                  console.log(`Updating place ${place.id} to ${position.lat}, ${position.lng}`);
+                  await apiRequest('PATCH', `/api/places/${place.id}/location`, {
+                    latitude: position.lat,
+                    longitude: position.lng,
+                  });
+                  
+                  // Update the place data locally on success
+                  place.latitude = position.lat;
+                  place.longitude = position.lng;
+                  
+                  // Invalidate places query to refresh the data
+                  queryClient.invalidateQueries({ queryKey: ['/api/places'] });
+                  
+                  toast({
+                    title: "Location updated",
+                    description: `${place.name} has been moved to the new position`,
+                  });
+                } catch (error: any) {
+                  console.error('Failed to update place location:', error);
+                  const errorMessage = error?.message || "Please try again";
+                  
+                  toast({
+                    title: "Failed to update location",
+                    description: errorMessage,
+                    variant: "destructive",
+                  });
+                  
+                  // Reset marker to original position on error
+                  marker.setLatLng([place.latitude, place.longitude]);
+                } finally {
+                  setIsDragging(null);
+                }
+              },
+            }}
+          >
+            <Popup>
+              <div className="text-center">
+                <div className="font-medium">{place.name}</div>
+                <div className="text-sm text-gray-500 capitalize">
+                  {place.category} • Saved Place
+                </div>
+                <div className="text-xs text-gray-400">
+                  {place.address}
+                </div>
+                {place.id && (
+                  <div className="text-xs text-blue-600 mt-2 font-medium">
+                    {isDragging === place.id ? "Drag to reposition" : "Drag pin to adjust location"}
+                  </div>
+                )}
+              </div>
+            </Popup>
+          </Marker>
         ))}
       </MapContainer>
       
