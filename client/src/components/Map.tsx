@@ -16,6 +16,9 @@ L.Icon.Default.mergeOptions({
 
 // Configure Leaflet for better mobile touch handling
 // Set default marker options but allow overriding per marker
+// Override tap tolerance for immediate dragging on mobile
+(L.Marker.prototype.options as any).tapTolerance = 0;
+(L.Draggable as any)._touchTolerance = 0;
 
 // Custom marker icons
 const createUserIcon = (color: string, isRecent: boolean = true) => new L.DivIcon({
@@ -212,34 +215,62 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
         })}
 
         {/* Saved places */}
-        {places.map((place) => (
-          <Marker
-            key={`place-${place.id || Math.random()}`}
-            position={[place.latitude, place.longitude]}
-            icon={createPlaceIcon(place.category)}
-            draggable={!!place.id}
-            autoPan={false}
-            eventHandlers={{
-              click: () => {
-                if (!isDragging) {
-                  onPlaceClick?.(place);
-                }
-              },
-              dragstart: (event) => {
-                if (place.id) {
-                  setIsDragging(place.id);
-                  // Disable map interactions during drag
-                  const marker = event.target;
-                  const map = marker.getMap ? marker.getMap() : marker._map;
-                  if (map) {
-                    map.dragging.disable();
-                    map.doubleClickZoom.disable();
-                    map.touchZoom.disable();
-                    map.scrollWheelZoom.disable();
+        {places.map((place) => {
+          const markerRef = useRef<L.Marker | null>(null);
+          
+          useEffect(() => {
+            const marker = markerRef.current;
+            if (marker && place.id) {
+              // Get the marker's icon element
+              const icon = marker.getElement ? marker.getElement() : (marker as any)._icon;
+              if (icon) {
+                // Set up immediate touch dragging
+                icon.style.touchAction = 'none';
+                icon.style.webkitTouchCallout = 'none';
+                icon.style.webkitUserSelect = 'none';
+                icon.style.userSelect = 'none';
+                
+                // Override Leaflet's dragging behavior for immediate response
+                if (marker.dragging) {
+                  const draggable = (marker.dragging as any)._draggable;
+                  if (draggable) {
+                    draggable._tapTolerance = 0;
+                    draggable._delay = 0;
                   }
                 }
-              },
-              dragend: async (event) => {
+              }
+            }
+          }, [place.id, markerRef.current]);
+          
+          return (
+            <Marker
+              key={`place-${place.id || Math.random()}`}
+              ref={(ref) => { markerRef.current = ref; }}
+              position={[place.latitude, place.longitude]}
+              icon={createPlaceIcon(place.category)}
+              draggable={!!place.id}
+              autoPan={false}
+              eventHandlers={{
+                click: () => {
+                  if (!isDragging) {
+                    onPlaceClick?.(place);
+                  }
+                },
+                dragstart: (event) => {
+                  if (place.id) {
+                    setIsDragging(place.id);
+                    // Disable map interactions during drag
+                    const marker = event.target;
+                    const map = marker.getMap ? marker.getMap() : marker._map;
+                    if (map) {
+                      map.dragging.disable();
+                      map.doubleClickZoom.disable();
+                      map.touchZoom.disable();
+                      map.scrollWheelZoom.disable();
+                    }
+                  }
+                },
+                dragend: async (event) => {
                 const marker = event.target;
                 const position = marker.getLatLng();
                 const map = marker.getMap ? marker.getMap() : marker._map;
@@ -320,7 +351,8 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
               </div>
             </Popup>
           </Marker>
-        ))}
+          );
+        })}
       </MapContainer>
       
       {/* Map Controls */}
