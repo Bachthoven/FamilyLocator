@@ -189,8 +189,9 @@ export default function Places() {
     addPlaceMutation.mutate(newPlace);
   };
 
-  const handleDeletePlace = (placeId: number) => {
-    if (confirm('Are you sure you want to delete this place?')) {
+  const handleDeletePlace = (placeId: number, placeName: string) => {
+    if (confirm(`Are you sure you want to delete "${placeName}"?`)) {
+      console.log('Deleting place:', placeId, 'User ID:', user?.id);
       deletePlaceMutation.mutate(placeId);
     }
   };
@@ -382,8 +383,12 @@ export default function Places() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              onClick={() => handleDeletePlace(place.id)}
-                              className="text-red-500 hover:text-red-700 hover:bg-red-50 flex-shrink-0 ml-2 w-8 h-8 sm:w-10 sm:h-10"
+                              onClick={() => handleDeletePlace(place.id, place.name)}
+                              className={`flex-shrink-0 ml-2 w-8 h-8 sm:w-10 sm:h-10 ${
+                                user?.id === place.userId 
+                                  ? 'text-red-500 hover:text-red-700 hover:bg-red-50' 
+                                  : 'text-gray-400 cursor-not-allowed'
+                              }`}
                               disabled={user?.id !== place.userId}
                             >
                               <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
