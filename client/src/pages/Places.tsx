@@ -379,17 +379,12 @@ export default function Places() {
                               </div>
                             </div>
                             
-                            {/* Show delete button - only functional if current user owns the place */}
+                            {/* Delete button - allow family members to delete any place */}
                             <Button
                               variant="ghost"
                               size="icon"
                               onClick={() => handleDeletePlace(place.id, place.name)}
-                              className={`flex-shrink-0 ml-2 w-8 h-8 sm:w-10 sm:h-10 ${
-                                user?.id === place.userId 
-                                  ? 'text-red-500 hover:text-red-700 hover:bg-red-50' 
-                                  : 'text-gray-400 cursor-not-allowed'
-                              }`}
-                              disabled={user?.id !== place.userId}
+                              className="text-red-500 hover:text-red-700 hover:bg-red-50 flex-shrink-0 ml-2 w-8 h-8 sm:w-10 sm:h-10"
                             >
                               <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
                             </Button>

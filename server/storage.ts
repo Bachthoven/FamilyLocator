@@ -293,14 +293,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deletePlace(userId: number, placeId: number): Promise<void> {
+    // Allow family members to delete any place (places are shared among family)
     await db
       .delete(places)
-      .where(
-        and(
-          eq(places.id, placeId),
-          eq(places.userId, userId)
-        )
-      );
+      .where(eq(places.id, placeId));
   }
   
   async updatePlaceLocation(placeId: number, latitude: number, longitude: number): Promise<void> {
