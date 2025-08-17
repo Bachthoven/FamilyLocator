@@ -86,6 +86,7 @@ interface MapProps {
   places: Place[];
   onLocationClick?: (location: Location & { user: User }) => void;
   onPlaceClick?: (place: Place) => void;
+  onDragStateChange?: (isDragging: boolean) => void;
 }
 
 function MapCenter({ center, shouldUpdate }: { center: [number, number]; shouldUpdate: boolean }) {
@@ -100,15 +101,28 @@ function MapCenter({ center, shouldUpdate }: { center: [number, number]; shouldU
   return null;
 }
 
-export default function Map({ currentLocation, familyLocations, places, onLocationClick, onPlaceClick }: MapProps) {
+export default function Map({ currentLocation, familyLocations, places, onLocationClick, onPlaceClick, onDragStateChange }: MapProps) {
   const mapRef = useRef<L.Map | null>(null);
   const [mapCenter, setMapCenter] = useState<[number, number]>([40.7128, -74.0060]); // Default to NYC
   const [mapType, setMapType] = useState<'street' | 'satellite'>('street');
   const [isDragging, setIsDragging] = useState<number | null>(null);
   const [draggedPositions, setDraggedPositions] = useState<Record<number, [number, number]>>({});
+  const [stablePlaces, setStablePlaces] = useState<Place[]>(places);
   const [shouldUpdateCenter, setShouldUpdateCenter] = useState(false);
   const [hasInitialized, setHasInitialized] = useState(false);
   const { toast } = useToast();
+
+  // Update stable places only when not dragging
+  useEffect(() => {
+    if (!isDragging) {
+      setStablePlaces(places);
+    }
+  }, [places, isDragging]);
+
+  // Notify parent of drag state changes
+  useEffect(() => {
+    onDragStateChange?.(!!isDragging);
+  }, [isDragging, onDragStateChange]);
 
   // Only set initial center once when location first becomes available
   useEffect(() => {
@@ -210,7 +224,7 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
         })}
 
         {/* Saved places */}
-        {places.map((place, index) => {
+        {stablePlaces.map((place, index) => {
           // Use dragged position if available, otherwise use place position
           const currentPosition = (place.id && draggedPositions[place.id]) || [place.latitude, place.longitude];
           

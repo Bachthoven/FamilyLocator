@@ -25,6 +25,7 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isFamilyPanelExpanded, setIsFamilyPanelExpanded] = useState(false);
+  const [isDragInProgress, setIsDragInProgress] = useState(false);
 
   // This component is now protected by authentication in App.tsx
   // No need for manual redirect logic
@@ -55,7 +56,8 @@ export default function Home() {
   // Get user places  
   const { data: places = [], isLoading: placesLoading } = useQuery<Array<{ id: number; name: string; createdAt: Date | null; address: string | null; userId: number; latitude: number; longitude: number; category: string | null; }>>({
     queryKey: ['/api/places'],
-    enabled: !!user,
+    enabled: !!user && !isDragInProgress, // Disable query refetching during drag
+    refetchInterval: isDragInProgress ? false : 30000, // Stop auto-refetch during drag
   });
 
   // Helper functions for last seen indicator
@@ -167,6 +169,7 @@ export default function Home() {
           places={places}
           onLocationClick={handleLocationClick}
           onPlaceClick={handlePlaceClick}
+          onDragStateChange={setIsDragInProgress}
         />
         
         {/* Top Header */}
