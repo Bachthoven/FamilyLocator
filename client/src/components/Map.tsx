@@ -86,7 +86,6 @@ interface MapProps {
   places: Place[];
   onLocationClick?: (location: Location & { user: User }) => void;
   onPlaceClick?: (place: Place) => void;
-  onDragStateChange?: (isDragging: boolean) => void;
 }
 
 function MapCenter({ center, shouldUpdate }: { center: [number, number]; shouldUpdate: boolean }) {
@@ -101,37 +100,14 @@ function MapCenter({ center, shouldUpdate }: { center: [number, number]; shouldU
   return null;
 }
 
-export default function Map({ currentLocation, familyLocations, places, onLocationClick, onPlaceClick, onDragStateChange }: MapProps) {
+export default function Map({ currentLocation, familyLocations, places, onLocationClick, onPlaceClick }: MapProps) {
   const mapRef = useRef<L.Map | null>(null);
   const [mapCenter, setMapCenter] = useState<[number, number]>([40.7128, -74.0060]); // Default to NYC
   const [mapType, setMapType] = useState<'street' | 'satellite'>('street');
   const [isDragging, setIsDragging] = useState<number | null>(null);
-  const [draggedPositions, setDraggedPositions] = useState<Record<number, [number, number]>>({});
-  const [stablePlaces, setStablePlaces] = useState<Place[]>(places);
-
   const [shouldUpdateCenter, setShouldUpdateCenter] = useState(false);
   const [hasInitialized, setHasInitialized] = useState(false);
   const { toast } = useToast();
-
-  // Update stable places only when not dragging
-  useEffect(() => {
-    if (!isDragging) {
-      setStablePlaces(places);
-    }
-  }, [places, isDragging]);
-
-  // Notify parent of drag state changes
-  useEffect(() => {
-    onDragStateChange?.(!!isDragging);
-  }, [isDragging, onDragStateChange]);
-
-  // Clean up dragged positions when places change and not currently dragging
-  useEffect(() => {
-    if (!isDragging) {
-      // Clear any stale dragged positions
-      setDraggedPositions({});
-    }
-  }, [places, isDragging]);
 
   // Only set initial center once when location first becomes available
   useEffect(() => {
@@ -233,114 +209,71 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
         })}
 
         {/* Saved places */}
-        {stablePlaces.map((place, index) => {
-          // Only use the original position when not dragging this specific place
-          const isBeingDragged = isDragging === place.id;
-          const currentPosition = isBeingDragged 
-            ? (draggedPositions[place.id!] || [place.latitude, place.longitude])
-            : [place.latitude, place.longitude];
-          
-          return (
-            <Marker
-              key={`place-${place.id || index}`}
-              position={currentPosition as [number, number]}
-              icon={createPlaceIcon(place.category)}
-              draggable={!!place.id}
-              eventHandlers={{
-                click: () => onPlaceClick?.(place),
-                dragstart: (event) => {
-                  if (place.id) {
-                    setIsDragging(place.id);
-                    const marker = event.target;
-                    const position = marker.getLatLng();
-                    // Store initial drag position
-                    setDraggedPositions(prev => ({
-                      ...prev,
-                      [place.id!]: [position.lat, position.lng]
-                    }));
-                  }
-                },
-                drag: (event) => {
-                  // Update the position in local state during drag
-                  if (place.id) {
-                    const marker = event.target;
-                    const position = marker.getLatLng();
-                    setDraggedPositions(prev => ({
-                      ...prev,
-                      [place.id!]: [position.lat, position.lng]
-                    }));
-                  }
-                },
-                dragend: async (event) => {
-                  const marker = event.target;
-                  const position = marker.getLatLng();
+        {places.map((place) => (
+          <Marker
+            key={`place-${place.id || Math.random()}`}
+            position={[place.latitude, place.longitude]}
+            icon={createPlaceIcon(place.category)}
+            draggable={!!place.id}
+            eventHandlers={{
+              click: () => onPlaceClick?.(place),
+              dragstart: () => {
+                if (place.id) {
+                  setIsDragging(place.id);
+                }
+              },
+              dragend: async (event) => {
+                const marker = event.target;
+                const position = marker.getLatLng();
+                
+                // Check if place has an ID before making API call
+                if (!place.id) {
+                  console.error('Cannot update place without ID');
+                  toast({
+                    title: "Cannot update location",
+                    description: "This place needs to be saved first",
+                    variant: "destructive",
+                  });
+                  marker.setLatLng([place.latitude, place.longitude]);
+                  setIsDragging(null);
+                  return;
+                }
+                
+                try {
+                  console.log(`Updating place ${place.id} to ${position.lat}, ${position.lng}`);
+                  await apiRequest('PATCH', `/api/places/${place.id}/location`, {
+                    latitude: position.lat,
+                    longitude: position.lng,
+                  });
                   
-                  // Mark drag as complete
+                  // Update the place data locally on success
+                  place.latitude = position.lat;
+                  place.longitude = position.lng;
                   
-                  // Check if place has an ID before making API call
-                  if (!place.id) {
-                    console.error('Cannot update place without ID');
-                    toast({
-                      title: "Cannot update location",
-                      description: "This place needs to be saved first",
-                      variant: "destructive",
-                    });
-                    marker.setLatLng([place.latitude, place.longitude]);
-                    setIsDragging(null);
-                    return;
-                  }
+                  // Invalidate places query to refresh the data
+                  queryClient.invalidateQueries({ queryKey: ['/api/places'] });
                   
-                  try {
-                    console.log(`Updating place ${place.id} to ${position.lat}, ${position.lng}`);
-                    await apiRequest('PATCH', `/api/places/${place.id}/location`, {
-                      latitude: position.lat,
-                      longitude: position.lng,
-                    });
-                    
-                    toast({
-                      title: "Location updated",
-                      description: `${place.name} has been moved to the new position`,
-                    });
-                    
-                    // Update the place data immediately without triggering query refresh
-                    queryClient.setQueryData(['/api/places'], (oldData: any) => {
-                      if (!oldData) return oldData;
-                      return oldData.map((p: any) => 
-                        p.id === place.id 
-                          ? { ...p, latitude: position.lat, longitude: position.lng }
-                          : p
-                      );
-                    });
-                    
-                    // Clear the dragged position since it's now saved
-                    setDraggedPositions(prev => {
-                      const newState = { ...prev };
-                      delete newState[place.id!];
-                      return newState;
-                    });
-                  } catch (error: any) {
-                    console.error('Failed to update place location:', error);
-                    const errorMessage = error?.message || "Please try again";
-                    
-                    toast({
-                      title: "Failed to update location",
-                      description: errorMessage,
-                      variant: "destructive",
-                    });
-                    
-                    // Reset marker to original position on error
-                    marker.setLatLng([place.latitude, place.longitude]);
-                    // Clear dragged position on error
-                    setDraggedPositions(prev => {
-                      const newState = { ...prev };
-                      delete newState[place.id!];
-                      return newState;
-                    });
-                  } finally {
-                    setIsDragging(null);
-                  }
-                },
-              }}
+                  toast({
+                    title: "Location updated",
+                    description: `${place.name} has been moved to the new position`,
+                  });
+                } catch (error: any) {
+                  console.error('Failed to update place location:', error);
+                  const errorMessage = error?.message || "Please try again";
+                  
+                  toast({
+                    title: "Failed to update location",
+                    description: errorMessage,
+                    variant: "destructive",
+                  });
+                  
+                  // Reset marker to original position on error
+                  marker.setLatLng([place.latitude, place.longitude]);
+                } finally {
+                  setIsDragging(null);
+                }
+              },
+            }}
           >
             <Popup>
               <div className="text-center">
@@ -359,8 +292,7 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
               </div>
             </Popup>
           </Marker>
-          );
-        })}
+        ))}
       </MapContainer>
       
       {/* Map Controls */}
