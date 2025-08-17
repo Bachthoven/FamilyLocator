@@ -105,6 +105,7 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
   const [mapCenter, setMapCenter] = useState<[number, number]>([40.7128, -74.0060]); // Default to NYC
   const [mapType, setMapType] = useState<'street' | 'satellite'>('street');
   const [isDragging, setIsDragging] = useState<number | null>(null);
+  const [draggedPositions, setDraggedPositions] = useState<Record<number, [number, number]>>({});
   const [shouldUpdateCenter, setShouldUpdateCenter] = useState(false);
   const [hasInitialized, setHasInitialized] = useState(false);
   const { toast } = useToast();
@@ -209,78 +210,102 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
         })}
 
         {/* Saved places */}
-        {places.map((place, index) => (
-          <Marker
-            key={`place-${place.id || index}`}
-            position={[place.latitude, place.longitude]}
-            icon={createPlaceIcon(place.category)}
-            draggable={!!place.id}
-            eventHandlers={{
-              click: () => onPlaceClick?.(place),
-              dragstart: () => {
-                if (place.id) {
-                  setIsDragging(place.id);
-                }
-              },
-              drag: (event) => {
-                // Allow dragging without interference from React Query
-                // The marker position is managed by Leaflet during drag
-              },
-              dragend: async (event) => {
-                const marker = event.target;
-                const position = marker.getLatLng();
-                
-                // Check if place has an ID before making API call
-                if (!place.id) {
-                  console.error('Cannot update place without ID');
-                  toast({
-                    title: "Cannot update location",
-                    description: "This place needs to be saved first",
-                    variant: "destructive",
-                  });
-                  marker.setLatLng([place.latitude, place.longitude]);
-                  setIsDragging(null);
-                  return;
-                }
-                
-                try {
-                  console.log(`Updating place ${place.id} to ${position.lat}, ${position.lng}`);
-                  await apiRequest('PATCH', `/api/places/${place.id}/location`, {
-                    latitude: position.lat,
-                    longitude: position.lng,
-                  });
+        {places.map((place, index) => {
+          // Use dragged position if available, otherwise use place position
+          const currentPosition = (place.id && draggedPositions[place.id]) || [place.latitude, place.longitude];
+          
+          return (
+            <Marker
+              key={`place-${place.id || index}`}
+              position={currentPosition as [number, number]}
+              icon={createPlaceIcon(place.category)}
+              draggable={!!place.id}
+              eventHandlers={{
+                click: () => onPlaceClick?.(place),
+                dragstart: () => {
+                  if (place.id) {
+                    setIsDragging(place.id);
+                  }
+                },
+                drag: (event) => {
+                  // Update the position in local state during drag
+                  if (place.id) {
+                    const marker = event.target;
+                    const position = marker.getLatLng();
+                    setDraggedPositions(prev => ({
+                      ...prev,
+                      [place.id!]: [position.lat, position.lng]
+                    }));
+                  }
+                },
+                dragend: async (event) => {
+                  const marker = event.target;
+                  const position = marker.getLatLng();
                   
-                  toast({
-                    title: "Location updated",
-                    description: `${place.name} has been moved to the new position`,
-                  });
+                  // Check if place has an ID before making API call
+                  if (!place.id) {
+                    console.error('Cannot update place without ID');
+                    toast({
+                      title: "Cannot update location",
+                      description: "This place needs to be saved first",
+                      variant: "destructive",
+                    });
+                    marker.setLatLng([place.latitude, place.longitude]);
+                    setIsDragging(null);
+                    return;
+                  }
                   
-                  // Update the place data immediately without triggering query refresh
-                  queryClient.setQueryData(['/api/places'], (oldData: any) => {
-                    if (!oldData) return oldData;
-                    return oldData.map((p: any) => 
-                      p.id === place.id 
-                        ? { ...p, latitude: position.lat, longitude: position.lng }
-                        : p
-                    );
-                  });
-                } catch (error: any) {
-                  console.error('Failed to update place location:', error);
-                  const errorMessage = error?.message || "Please try again";
-                  
-                  toast({
-                    title: "Failed to update location",
-                    description: errorMessage,
-                    variant: "destructive",
-                  });
-                  
-                  // Reset marker to original position on error
-                  marker.setLatLng([place.latitude, place.longitude]);
-                } finally {
-                  setIsDragging(null);
-                }
-              },
-            }}
+                  try {
+                    console.log(`Updating place ${place.id} to ${position.lat}, ${position.lng}`);
+                    await apiRequest('PATCH', `/api/places/${place.id}/location`, {
+                      latitude: position.lat,
+                      longitude: position.lng,
+                    });
+                    
+                    toast({
+                      title: "Location updated",
+                      description: `${place.name} has been moved to the new position`,
+                    });
+                    
+                    // Update the place data immediately without triggering query refresh
+                    queryClient.setQueryData(['/api/places'], (oldData: any) => {
+                      if (!oldData) return oldData;
+                      return oldData.map((p: any) => 
+                        p.id === place.id 
+                          ? { ...p, latitude: position.lat, longitude: position.lng }
+                          : p
+                      );
+                    });
+                    
+                    // Clear the dragged position since it's now saved
+                    setDraggedPositions(prev => {
+                      const newState = { ...prev };
+                      delete newState[place.id!];
+                      return newState;
+                    });
+                  } catch (error: any) {
+                    console.error('Failed to update place location:', error);
+                    const errorMessage = error?.message || "Please try again";
+                    
+                    toast({
+                      title: "Failed to update location",
+                      description: errorMessage,
+                      variant: "destructive",
+                    });
+                    
+                    // Reset marker to original position on error
+                    marker.setLatLng([place.latitude, place.longitude]);
+                    // Clear dragged position on error
+                    setDraggedPositions(prev => {
+                      const newState = { ...prev };
+                      delete newState[place.id!];
+                      return newState;
+                    });
+                  } finally {
+                    setIsDragging(null);
+                  }
+                },
+              }}
           >
             <Popup>
               <div className="text-center">
@@ -299,7 +324,8 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
               </div>
             </Popup>
           </Marker>
-        ))}
+          );
+        })}
       </MapContainer>
       
       {/* Map Controls */}
