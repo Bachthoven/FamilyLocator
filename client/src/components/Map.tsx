@@ -109,8 +109,35 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
   const [hasInitialized, setHasInitialized] = useState(false);
   const { toast } = useToast();
 
-  // Only set initial center once when location first becomes available
+  // Check for focus location from family page navigation
   useEffect(() => {
+    const focusLocationData = sessionStorage.getItem('focusLocation');
+    if (focusLocationData) {
+      try {
+        const focusLocation = JSON.parse(focusLocationData);
+        setMapCenter([focusLocation.latitude, focusLocation.longitude]);
+        setShouldUpdateCenter(true);
+        setHasInitialized(true);
+        
+        // Clear the session storage
+        sessionStorage.removeItem('focusLocation');
+        
+        // Reset the flag after a short delay
+        setTimeout(() => setShouldUpdateCenter(false), 100);
+        
+        toast({
+          title: "Map centered",
+          description: "Showing family member's location",
+        });
+        
+        return; // Exit early so we don't set center to current location
+      } catch (error) {
+        console.error('Failed to parse focus location:', error);
+        sessionStorage.removeItem('focusLocation');
+      }
+    }
+    
+    // Only set initial center once when location first becomes available (and no focus location)
     if (currentLocation && !hasInitialized) {
       setMapCenter([currentLocation.latitude, currentLocation.longitude]);
       setShouldUpdateCenter(true);
@@ -118,7 +145,7 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
       // Reset the flag after a short delay to allow the map to update
       setTimeout(() => setShouldUpdateCenter(false), 100);
     }
-  }, [currentLocation, hasInitialized]);
+  }, [currentLocation, hasInitialized, toast]);
 
   const centerOnUser = () => {
     if (currentLocation) {

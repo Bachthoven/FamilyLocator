@@ -12,12 +12,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Plus, Users, Copy, QrCode, KeyRound } from 'lucide-react';
-import { User, InvitationCode } from '@shared/schema';
+import { User, InvitationCode, Location } from '@shared/schema';
+import { useLocation } from 'wouter';
 
 export default function Family() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
 
   const [joinDialogOpen, setJoinDialogOpen] = useState(false);
   const [joinCode, setJoinCode] = useState('');
@@ -192,6 +194,23 @@ export default function Family() {
     }
   };
 
+  const handleViewLocation = (location: Location) => {
+    // Store the location data in sessionStorage to pass to the map
+    sessionStorage.setItem('focusLocation', JSON.stringify({
+      latitude: location.latitude,
+      longitude: location.longitude,
+      userId: location.userId
+    }));
+    
+    // Navigate to the map page
+    setLocation('/home');
+    
+    toast({
+      title: "Navigating to map",
+      description: "Centering on family member's location",
+    });
+  };
+
   return (
     <div className="min-h-screen bg-background pb-24">
       <div className="container mx-auto px-4 py-8 max-w-2xl">
@@ -350,6 +369,7 @@ export default function Family() {
                   key={member.id}
                   user={member}
                   location={location}
+                  onViewLocation={location ? () => handleViewLocation(location) : undefined}
                   onRemove={() => handleRemove(member.id.toString())}
                 />
               );
