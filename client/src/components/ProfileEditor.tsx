@@ -4,7 +4,6 @@ import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { ObjectUploader } from './ObjectUploader';
-import type { UploadResult } from '@uppy/core';
 
 import {
   Dialog,
@@ -68,39 +67,29 @@ export function ProfileEditor({ open, onOpenChange, user }: ProfileEditorProps) 
     },
   });
 
-  const handleGetUploadParameters = async () => {
-    const response = await apiRequest('POST', '/api/objects/upload');
-    const data = await response.json();
-    return {
-      method: 'PUT' as const,
-      url: data.uploadURL,
-    };
-  };
-
-  const handleUploadComplete = async (result: UploadResult<Record<string, unknown>, Record<string, unknown>>) => {
-    if (result.successful && result.successful[0]) {
-      const uploadUrl = result.successful[0].uploadURL;
+  const handleUploadComplete = async (uploadUrl: string) => {
+    try {
+      // Set the profile image ACL policy and update profile
+      const response = await apiRequest('PUT', '/api/profile-image', {
+        profileImageURL: uploadUrl
+      });
       
-      try {
-        // Set the profile image ACL policy
-        const response = await apiRequest('PUT', '/api/profile-image', {
-          profileImageURL: uploadUrl
-        });
-        
-        const data = await response.json();
-        setProfileImageUrl(data.objectPath);
-        
-        toast({
-          title: "Image Uploaded",
-          description: "Profile image uploaded successfully!",
-        });
-      } catch (error: any) {
-        toast({
-          title: "Upload Failed",
-          description: error.message || "Failed to process uploaded image.",
-          variant: "destructive",
-        });
-      }
+      const data = await response.json();
+      setProfileImageUrl(data.objectPath);
+      
+      // Update the form data as well
+      setFormData(prev => ({ ...prev, profileImageUrl: data.objectPath }));
+      
+      toast({
+        title: "Image Uploaded",
+        description: "Profile image uploaded successfully!",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Upload Failed",
+        description: error.message || "Failed to process uploaded image.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -186,11 +175,10 @@ export function ProfileEditor({ open, onOpenChange, user }: ProfileEditorProps) 
             </Avatar>
             
             <ObjectUploader
-              maxNumberOfFiles={1}
-              maxFileSize={5242880} // 5MB
-              onGetUploadParameters={handleGetUploadParameters}
               onComplete={handleUploadComplete}
               buttonClassName="bg-blue-500 hover:bg-blue-600"
+              accept="image/*"
+              maxFileSize={5242880} // 5MB
             >
               <div className="flex items-center gap-2">
                 <Camera className="w-4 h-4" />
