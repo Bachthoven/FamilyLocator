@@ -209,9 +209,9 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
         })}
 
         {/* Saved places */}
-        {places.map((place) => (
+        {places.map((place, index) => (
           <Marker
-            key={`place-${place.id || Math.random()}`}
+            key={`place-${place.id || index}`}
             position={[place.latitude, place.longitude]}
             icon={createPlaceIcon(place.category)}
             draggable={!!place.id}
@@ -221,6 +221,10 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
                 if (place.id) {
                   setIsDragging(place.id);
                 }
+              },
+              drag: (event) => {
+                // Allow dragging without interference from React Query
+                // The marker position is managed by Leaflet during drag
               },
               dragend: async (event) => {
                 const marker = event.target;
@@ -246,16 +250,19 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
                     longitude: position.lng,
                   });
                   
-                  // Update the place data locally on success
-                  place.latitude = position.lat;
-                  place.longitude = position.lng;
-                  
-                  // Invalidate places query to refresh the data
-                  queryClient.invalidateQueries({ queryKey: ['/api/places'] });
-                  
                   toast({
                     title: "Location updated",
                     description: `${place.name} has been moved to the new position`,
+                  });
+                  
+                  // Update the place data immediately without triggering query refresh
+                  queryClient.setQueryData(['/api/places'], (oldData: any) => {
+                    if (!oldData) return oldData;
+                    return oldData.map((p: any) => 
+                      p.id === place.id 
+                        ? { ...p, latitude: position.lat, longitude: position.lng }
+                        : p
+                    );
                   });
                 } catch (error: any) {
                   console.error('Failed to update place location:', error);
