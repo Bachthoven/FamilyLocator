@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/use-auth';
-
+import { useLocationLogger } from '@/hooks/useLocationLogger';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { useToast } from '@/hooks/use-toast';
 import { isUnauthorizedError } from '@/lib/authUtils';
@@ -26,6 +26,13 @@ export default function Home() {
 
   // This component is now protected by authentication in App.tsx
   // No need for manual redirect logic
+
+  // Use the location logger hook for automatic location tracking
+  const { 
+    currentLocation, 
+    locationError, 
+    isLoggingLocation 
+  } = useLocationLogger();
 
   // WebSocket for real-time updates
   const { lastMessage, sendMessage } = useWebSocket();
@@ -97,6 +104,17 @@ export default function Home() {
     }
   }, [lastMessage, familyLocations, queryClient, toast]);
 
+  // Handle location errors
+  useEffect(() => {
+    if (locationError) {
+      toast({
+        title: "Location Error", 
+        description: locationError,
+        variant: "destructive",
+      });
+    }
+  }, [locationError, toast]);
+
   const handleLocationClick = (location: Location & { user: User }) => {
     setSelectedLocation(location);
     // Center map on selected location would be handled by Map component
@@ -132,7 +150,7 @@ export default function Home() {
       {/* Map Interface */}
       <div className="h-screen w-full relative">
         <Map
-          currentLocation={null}
+          currentLocation={currentLocation}
           familyLocations={familyLocations}
           places={places}
           onLocationClick={handleLocationClick}

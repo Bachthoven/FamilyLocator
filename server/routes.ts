@@ -4,7 +4,7 @@ import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./auth";
 import { insertLocationSchema, insertPlaceSchema, insertFamilyConnectionSchema } from "@shared/schema";
-
+import { locationLogger } from "./locationLogger";
 import { z } from "zod";
 import { checkGeofenceTransitions } from "./geofencing";
 
@@ -24,6 +24,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const settings = settingsSchema.parse(req.body);
       const user = await storage.updateUserSettings(userId, settings);
+      
+      // Start or stop hourly logging based on location history setting
+      if (settings.locationHistoryEnabled !== undefined) {
+        if (settings.locationHistoryEnabled) {
+          locationLogger.startHourlyLogging(userId.toString());
+        } else {
+          locationLogger.stopHourlyLogging(userId.toString());
+        }
+      }
       
       res.json(user);
     } catch (error) {
@@ -363,6 +372,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Hourly location logging control routes
+  app.post('/api/location-logging/start', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      locationLogger.startHourlyLogging(userId.toString());
+      res.json({ message: "Hourly location logging started", success: true });
+    } catch (error) {
+      console.error("Error starting location logging:", error);
+      res.status(500).json({ message: "Failed to start location logging" });
+    }
+  });
+
+  app.post('/api/location-logging/stop', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      locationLogger.stopHourlyLogging(userId.toString());
+      res.json({ message: "Hourly location logging stopped", success: true });
+    } catch (error) {
+      console.error("Error stopping location logging:", error);
+      res.status(500).json({ message: "Failed to stop location logging" });
+    }
+  });
+
+  app.get('/api/location-logging/status', isAuthenticated, async (req: any, res) => {
+    try {
+      const activeSessions = locationLogger.getActiveSessions();
+      res.json({ activeSessions });
+    } catch (error) {
+      console.error("Error getting logging status:", error);
+      res.status(500).json({ message: "Failed to get logging status" });
+    }
+  });
+
   // Clear user geofence state (for testing)
   app.post('/api/geofence/clear', isAuthenticated, async (req: any, res) => {
     try {
@@ -423,7 +465,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           clients.set(data.userId.toString(), ws);
           console.log(`User ${data.userId} registered for WebSocket updates. Total clients: ${clients.size}`);
           
-
+          // Auto-start hourly location logging for users with location history enabled
+          storage.getUser(parseInt(data.userId)).then(user => {
+            if (user && user.locationHistoryEnabled) {
+              locationLogger.startHourlyLogging(data.userId.toString());
+            }
+          }).catch(error => {
+            console.error(`Error checking user settings for ${data.userId}:`, error);
+          });
         }
       } catch (error) {
         console.error('WebSocket message error:', error);
@@ -436,7 +485,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (client === ws) {
           clients.delete(userId);
           console.log(`User ${userId} disconnected. Total clients: ${clients.size}`);
-
+          // Stop hourly logging when user disconnects
+          locationLogger.stopHourlyLogging(userId);
         }
       });
       console.log('WebSocket client disconnected');
