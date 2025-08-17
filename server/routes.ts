@@ -7,10 +7,113 @@ import { insertLocationSchema, insertPlaceSchema, insertFamilyConnectionSchema }
 import { locationLogger } from "./locationLogger";
 import { z } from "zod";
 import { checkGeofenceTransitions } from "./geofencing";
+import { ObjectStorageService } from "./objectStorage.js";
+import { scrypt, randomBytes, timingSafeEqual } from "crypto";
+import { promisify } from "util";
+
+const scryptAsync = promisify(scrypt);
+
+async function hashPassword(password: string) {
+  const salt = randomBytes(16).toString("hex");
+  const buf = (await scryptAsync(password, salt, 64)) as Buffer;
+  return `${buf.toString("hex")}.${salt}`;
+}
+
+async function comparePasswords(supplied: string, stored: string) {
+  const [hashed, salt] = stored.split(".");
+  const hashedBuf = Buffer.from(hashed, "hex");
+  const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
+  return timingSafeEqual(hashedBuf, suppliedBuf);
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   setupAuth(app);
+
+  // Profile update routes
+  app.put('/api/user/profile', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const profileSchema = z.object({
+        firstName: z.string().optional(),
+        lastName: z.string().optional(),
+        email: z.string().email().optional(),
+        profileImageUrl: z.string().optional(),
+        currentPassword: z.string().optional(),
+        newPassword: z.string().min(6).optional(),
+      });
+      
+      const profileData = profileSchema.parse(req.body);
+      
+      // If changing password, verify current password
+      if (profileData.newPassword && profileData.currentPassword) {
+        const user = await storage.getUser(userId);
+        if (!user || !(await comparePasswords(profileData.currentPassword, user.password))) {
+          return res.status(400).json({ message: "Current password is incorrect" });
+        }
+        
+        // Hash new password
+        profileData.currentPassword = await hashPassword(profileData.newPassword);
+        delete profileData.newPassword;
+      }
+      
+      const updatedUser = await storage.updateUserProfile(userId, profileData);
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      res.status(500).json({ message: "Failed to update profile" });
+    }
+  });
+
+  // Object storage routes
+  app.post('/api/objects/upload', isAuthenticated, async (req: any, res) => {
+    try {
+      const objectStorageService = new ObjectStorageService();
+      const uploadURL = await objectStorageService.getObjectEntityUploadURL();
+      res.json({ uploadURL });
+    } catch (error) {
+      console.error("Error getting upload URL:", error);
+      res.status(500).json({ message: "Failed to get upload URL" });
+    }
+  });
+
+  app.put('/api/profile-image', isAuthenticated, async (req: any, res) => {
+    if (!req.body.profileImageURL) {
+      return res.status(400).json({ error: "profileImageURL is required" });
+    }
+
+    const userId = req.user.id;
+
+    try {
+      const objectStorageService = new ObjectStorageService();
+      const objectPath = await objectStorageService.trySetObjectEntityAclPolicy(
+        req.body.profileImageURL,
+        {
+          owner: userId.toString(),
+          visibility: "public", // Profile images are public
+        },
+      );
+
+      res.status(200).json({
+        objectPath: objectPath,
+      });
+    } catch (error) {
+      console.error("Error setting profile image:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // Serve private objects (profile images)
+  app.get('/objects/:objectPath(*)', async (req: any, res) => {
+    try {
+      const objectStorageService = new ObjectStorageService();
+      const objectFile = await objectStorageService.getObjectEntityFile(req.path);
+      objectStorageService.downloadObject(objectFile, res);
+    } catch (error) {
+      console.error("Error serving object:", error);
+      res.status(404).json({ error: "Object not found" });
+    }
+  });
 
   // User settings
   app.patch('/api/user/settings', isAuthenticated, async (req: any, res) => {

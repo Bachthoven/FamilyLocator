@@ -24,6 +24,7 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUserSettings(userId: number, settings: Partial<User>): Promise<User>;
+  updateUserProfile(userId: number, profile: Partial<User>): Promise<User>;
   
   // Location operations
   saveLocation(location: InsertLocation): Promise<Location>;
@@ -74,6 +75,23 @@ export class DatabaseStorage implements IStorage {
     const [user] = await db
       .update(users)
       .set({ ...settings, updatedAt: new Date() })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
+  }
+
+  async updateUserProfile(userId: number, profile: Partial<User>): Promise<User> {
+    const updateData: any = { ...profile, updatedAt: new Date() };
+    
+    // If currentPassword is provided, it means the password hash should be updated
+    if (profile.currentPassword) {
+      updateData.password = profile.currentPassword;
+      delete updateData.currentPassword;
+    }
+    
+    const [user] = await db
+      .update(users)
+      .set(updateData)
       .where(eq(users.id, userId))
       .returning();
     return user;

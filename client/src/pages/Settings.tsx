@@ -3,6 +3,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
 import BottomNavigation from '@/components/BottomNavigation';
 import PrivacySettings from '@/components/PrivacySettings';
+import { ProfileEditor } from '@/components/ProfileEditor';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,6 +21,7 @@ export default function Settings() {
   const { user, logoutMutation } = useAuth();
   const { toast } = useToast();
   const [privacySettingsOpen, setPrivacySettingsOpen] = useState(false);
+  const [profileEditorOpen, setProfileEditorOpen] = useState(false);
 
   const handleLogout = () => {
     if (confirm('Are you sure you want to log out?')) {
@@ -35,7 +37,7 @@ export default function Settings() {
           icon: User,
           label: 'Profile Information',
           description: 'Update your personal details',
-          action: () => toast({ title: 'Coming soon', description: 'Profile editing will be available soon.' }),
+          action: () => setProfileEditorOpen(true),
         },
         {
           icon: Shield,
@@ -175,6 +177,15 @@ export default function Settings() {
         <PrivacySettings
           open={privacySettingsOpen}
           onOpenChange={setPrivacySettingsOpen}
+          user={user}
+        />
+      )}
+
+      {/* Profile Editor Modal */}
+      {user && (
+        <ProfileEditor
+          open={profileEditorOpen}
+          onOpenChange={setProfileEditorOpen}
           user={user}
         />
       )}
