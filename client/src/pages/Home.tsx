@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, Search, Plus, Settings, Users, MapPin } from 'lucide-react';
+import { Menu, Search, Plus, Settings, Users, MapPin, Bell } from 'lucide-react';
 import { User, Location } from '@shared/schema';
 import { Link } from 'wouter';
 
@@ -52,8 +52,8 @@ export default function Home() {
     refetchInterval: 30000, // Refresh every 30 seconds
   });
 
-  // Get user places
-  const { data: places = [], isLoading: placesLoading } = useQuery({
+  // Get user places  
+  const { data: places = [], isLoading: placesLoading } = useQuery<Array<{ id: number; name: string; createdAt: Date | null; address: string | null; userId: number; latitude: number; longitude: number; category: string | null; }>>({
     queryKey: ['/api/places'],
     enabled: !!user,
   });
@@ -96,6 +96,13 @@ export default function Home() {
           description: `${updatedUser.firstName || updatedUser.email} shared their location`,
         });
       }
+    } else if (lastMessage?.type === 'geofence') {
+      // Handle geofence notifications
+      const action = lastMessage.action === 'entered' ? 'entering' : 'exiting';
+      toast({
+        title: `${lastMessage.userName} is ${action} ${lastMessage.placeName}`,
+        description: `Location-based notification • ${new Date().toLocaleTimeString()}`,
+      });
     }
   }, [lastMessage, familyLocations, queryClient, toast]);
 
@@ -201,6 +208,19 @@ export default function Home() {
                       Places
                     </Button>
                   </Link>
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start" 
+                    onClick={() => {
+                      toast({
+                        title: "John is entering Home",
+                        description: `Location-based notification • ${new Date().toLocaleTimeString()}`,
+                      });
+                    }}
+                  >
+                    <Bell className="w-4 h-4 mr-2" />
+                    Test Notification
+                  </Button>
                   <Link href="/settings">
                     <Button variant="ghost" className="w-full justify-start">
                       <Settings className="w-4 h-4 mr-2" />
