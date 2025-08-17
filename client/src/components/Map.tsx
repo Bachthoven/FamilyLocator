@@ -108,6 +108,7 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
   const [isDragging, setIsDragging] = useState<number | null>(null);
   const [draggedPositions, setDraggedPositions] = useState<Record<number, [number, number]>>({});
   const [stablePlaces, setStablePlaces] = useState<Place[]>(places);
+
   const [shouldUpdateCenter, setShouldUpdateCenter] = useState(false);
   const [hasInitialized, setHasInitialized] = useState(false);
   const { toast } = useToast();
@@ -123,6 +124,14 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
   useEffect(() => {
     onDragStateChange?.(!!isDragging);
   }, [isDragging, onDragStateChange]);
+
+  // Clean up dragged positions when places change and not currently dragging
+  useEffect(() => {
+    if (!isDragging) {
+      // Clear any stale dragged positions
+      setDraggedPositions({});
+    }
+  }, [places, isDragging]);
 
   // Only set initial center once when location first becomes available
   useEffect(() => {
@@ -225,8 +234,11 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
 
         {/* Saved places */}
         {stablePlaces.map((place, index) => {
-          // Use dragged position if available, otherwise use place position
-          const currentPosition = (place.id && draggedPositions[place.id]) || [place.latitude, place.longitude];
+          // Only use the original position when not dragging this specific place
+          const isBeingDragged = isDragging === place.id;
+          const currentPosition = isBeingDragged 
+            ? (draggedPositions[place.id!] || [place.latitude, place.longitude])
+            : [place.latitude, place.longitude];
           
           return (
             <Marker
@@ -236,9 +248,16 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
               draggable={!!place.id}
               eventHandlers={{
                 click: () => onPlaceClick?.(place),
-                dragstart: () => {
+                dragstart: (event) => {
                   if (place.id) {
                     setIsDragging(place.id);
+                    const marker = event.target;
+                    const position = marker.getLatLng();
+                    // Store initial drag position
+                    setDraggedPositions(prev => ({
+                      ...prev,
+                      [place.id!]: [position.lat, position.lng]
+                    }));
                   }
                 },
                 drag: (event) => {
@@ -255,6 +274,8 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
                 dragend: async (event) => {
                   const marker = event.target;
                   const position = marker.getLatLng();
+                  
+                  // Mark drag as complete
                   
                   // Check if place has an ID before making API call
                   if (!place.id) {
