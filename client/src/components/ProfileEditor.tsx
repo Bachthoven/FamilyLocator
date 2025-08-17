@@ -161,7 +161,7 @@ export function ProfileEditor({ open, onOpenChange, user }: ProfileEditorProps) 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="w-full max-w-[95vw] sm:max-w-[500px] max-h-[90vh] overflow-y-auto mx-4">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <User className="w-5 h-5" />
@@ -172,7 +172,7 @@ export function ProfileEditor({ open, onOpenChange, user }: ProfileEditorProps) 
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           {/* Profile Picture Section */}
           <div className="flex flex-col items-center space-y-4">
             <Avatar className="w-24 h-24">
@@ -236,7 +236,7 @@ export function ProfileEditor({ open, onOpenChange, user }: ProfileEditorProps) 
           </div>
 
           {/* Password Fields */}
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             <h4 className="text-sm font-medium">Change Password (Optional)</h4>
             <div>
               <Label htmlFor="currentPassword">Current Password</Label>
@@ -271,12 +271,13 @@ export function ProfileEditor({ open, onOpenChange, user }: ProfileEditorProps) 
           </div>
 
           {/* Action Buttons */}
-          <div className="flex justify-end gap-3 pt-4">
+          <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4">
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={updateProfileMutation.isPending}
+              className="order-2 sm:order-1"
             >
               <X className="w-4 h-4 mr-2" />
               Cancel
@@ -284,6 +285,7 @@ export function ProfileEditor({ open, onOpenChange, user }: ProfileEditorProps) 
             <Button
               type="submit"
               disabled={updateProfileMutation.isPending}
+              className="order-1 sm:order-2"
             >
               <Save className="w-4 h-4 mr-2" />
               {updateProfileMutation.isPending ? 'Saving...' : 'Save Changes'}
