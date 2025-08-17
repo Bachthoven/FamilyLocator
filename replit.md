@@ -121,13 +121,15 @@ FamilyLocator is a modern web application that enables families to share their r
 
 ## Changelog
 
-- August 17, 2025. Enhanced geofencing notifications and mobile pin dragging:
+- August 17, 2025. Enhanced geofencing notifications and UI improvements:
   - Fixed mobile pin dragging issues - pins now stay where moved and save correctly
   - Updated database permissions to allow family members to modify shared place locations
   - Implemented geofencing notifications for entering/exiting saved places (10m radius)
   - Added test notification system with manual trigger and geofence state clearing
   - Real-time toast notifications appear when family members enter/exit saved locations
   - Enhanced WebSocket system to broadcast geofence events to all family members
+  - Removed hamburger menu and search button from map interface for cleaner UI
+  - Streamlined top header to show only family member status indicator
 
 - August 15, 2025. Map improvements and critical location accuracy fixes:
   - Switched map provider to Google Maps for familiar interface and better rendering

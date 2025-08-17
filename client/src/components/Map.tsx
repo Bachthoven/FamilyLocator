@@ -213,7 +213,7 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
           <Marker
             key={`place-${place.id || Math.random()}`}
             position={[place.latitude, place.longitude]}
-            icon={createPlaceIcon(place.category)}
+            icon={createPlaceIcon(place.category || 'other')}
             draggable={!!place.id}
             eventHandlers={{
               click: () => onPlaceClick?.(place),

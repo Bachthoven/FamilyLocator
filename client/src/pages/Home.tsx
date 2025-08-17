@@ -10,10 +10,9 @@ import BottomSheet from '@/components/BottomSheet';
 import FamilyMemberCard from '@/components/FamilyMemberCard';
 import BottomNavigation from '@/components/BottomNavigation';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+
 import { Skeleton } from '@/components/ui/skeleton';
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, Search, Plus, Settings, Users, MapPin, Bell } from 'lucide-react';
+import { Users, MapPin } from 'lucide-react';
 import { User, Location } from '@shared/schema';
 import { Link } from 'wouter';
 import { apiRequest } from '@/lib/queryClient';
@@ -23,8 +22,6 @@ export default function Home() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [selectedLocation, setSelectedLocation] = useState<(Location & { user: User }) | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isFamilyPanelExpanded, setIsFamilyPanelExpanded] = useState(false);
 
   // This component is now protected by authentication in App.tsx
@@ -130,18 +127,8 @@ export default function Home() {
     });
   };
 
-  // Filter family locations based on search query
-  const filteredFamilyLocations = familyLocations.filter(location => {
-    if (!searchQuery) return true;
-    const user = location.user;
-    const searchLower = searchQuery.toLowerCase();
-    return (
-      user?.firstName?.toLowerCase().includes(searchLower) ||
-      user?.lastName?.toLowerCase().includes(searchLower) ||
-      user?.email?.toLowerCase().includes(searchLower) ||
-      location.address?.toLowerCase().includes(searchLower)
-    );
-  });
+  // Use all family locations since search was removed
+  const filteredFamilyLocations = familyLocations;
 
   if (authLoading) {
     return (
@@ -170,129 +157,16 @@ export default function Home() {
           onPlaceClick={handlePlaceClick}
         />
         
-        {/* Top Header */}
+        {/* Top Header - Clean status indicator only */}
         <div className="absolute top-0 left-0 right-0 z-30 p-4 pt-12">
-          <div className="flex items-center justify-between">
-            {/* Hamburger Menu - positioned to avoid map controls */}
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="secondary" size="icon" className="rounded-full shadow-lg">
-                  <Menu className="w-5 h-5" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-80">
-                <SheetHeader>
-                  <SheetTitle className="flex items-center">
-                    <MapPin className="w-5 h-5 mr-2" />
-                    FamilyLocator
-                  </SheetTitle>
-                  <SheetDescription>
-                    Navigate to different sections of the app
-                  </SheetDescription>
-                </SheetHeader>
-                <div className="mt-6 space-y-4">
-                  <Link href="/">
-                    <Button variant="ghost" className="w-full justify-start">
-                      <MapPin className="w-4 h-4 mr-2" />
-                      Map
-                    </Button>
-                  </Link>
-                  <Link href="/family">
-                    <Button variant="ghost" className="w-full justify-start">
-                      <Users className="w-4 h-4 mr-2" />
-                      Family Members
-                    </Button>
-                  </Link>
-                  <Link href="/places">
-                    <Button variant="ghost" className="w-full justify-start">
-                      <MapPin className="w-4 h-4 mr-2" />
-                      Places
-                    </Button>
-                  </Link>
-                  <Button 
-                    variant="ghost" 
-                    className="w-full justify-start" 
-                    onClick={async () => {
-                      try {
-                        await apiRequest('POST', '/api/geofence/test');
-                        toast({
-                          title: "Test notification sent",
-                          description: "Check if geofence notification appears",
-                        });
-                      } catch (error) {
-                        toast({
-                          title: "Test failed",
-                          description: "Could not send test notification",
-                          variant: "destructive",
-                        });
-                      }
-                    }}
-                  >
-                    <Bell className="w-4 h-4 mr-2" />
-                    Test Notification
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    className="w-full justify-start" 
-                    onClick={async () => {
-                      try {
-                        await apiRequest('POST', '/api/geofence/clear');
-                        toast({
-                          title: "Geofence state cleared",
-                          description: "You can now get entry notifications again",
-                        });
-                      } catch (error) {
-                        toast({
-                          title: "Clear failed", 
-                          description: "Could not clear geofence state",
-                          variant: "destructive",
-                        });
-                      }
-                    }}
-                  >
-                    <MapPin className="w-4 h-4 mr-2" />
-                    Clear Geofence State
-                  </Button>
-                  <Link href="/settings">
-                    <Button variant="ghost" className="w-full justify-start">
-                      <Settings className="w-4 h-4 mr-2" />
-                      Settings
-                    </Button>
-                  </Link>
-                </div>
-              </SheetContent>
-            </Sheet>
-            
+          <div className="flex items-center justify-center">
             <div className="bg-background/80 backdrop-blur-sm rounded-full px-4 py-2 flex items-center space-x-2">
               <div className="w-2 h-2 bg-green-500 rounded-full"></div>
               <span className="text-sm font-medium">
                 {familyLocations.length} member{familyLocations.length !== 1 ? 's' : ''} online
               </span>
             </div>
-            
-            {/* Search Button */}
-            <Button 
-              variant="secondary" 
-              size="icon" 
-              className="rounded-full shadow-lg"
-              onClick={() => setIsSearchOpen(!isSearchOpen)}
-            >
-              <Search className="w-5 h-5" />
-            </Button>
           </div>
-          
-          {/* Search Bar */}
-          {isSearchOpen && (
-            <div className="mt-4">
-              <Input
-                placeholder="Search family members or places..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="bg-background/90 backdrop-blur-sm border-border"
-                autoFocus
-              />
-            </div>
-          )}
         </div>
       </div>
       
@@ -341,20 +215,12 @@ export default function Home() {
                     <Skeleton className="w-16 h-8" />
                   </div>
                 ))
-              ) : filteredFamilyLocations.length === 0 && searchQuery ? (
-                <div className="text-center py-8">
-                  <Search className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">No results found for "{searchQuery}"</p>
-                  <Button variant="outline" className="mt-2" onClick={() => setSearchQuery('')}>
-                    Clear Search
-                  </Button>
-                </div>
               ) : filteredFamilyLocations.length === 0 ? (
                 <div className="text-center py-8">
                   <p className="text-muted-foreground">No family members added yet</p>
                   <Link href="/family">
                     <Button variant="outline" className="mt-2">
-                      <Plus className="w-4 h-4 mr-2" />
+                      <Users className="w-4 h-4 mr-2" />
                       Add Family Member
                     </Button>
                   </Link>
