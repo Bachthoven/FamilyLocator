@@ -405,6 +405,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Clear user geofence state (for testing)
+  app.post('/api/geofence/clear', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { clearUserGeofenceState } = await import('./geofencing');
+      clearUserGeofenceState(userId);
+      console.log(`Cleared geofence state for user ${userId}`);
+      res.json({ message: "Geofence state cleared successfully" });
+    } catch (error) {
+      console.error("Error clearing geofence state:", error);
+      res.status(500).json({ message: "Failed to clear geofence state" });
+    }
+  });
+
+  // Test geofence notification (for debugging)
+  app.post('/api/geofence/test', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Broadcast test notification
+      if ((global as any).broadcastNotification) {
+        (global as any).broadcastNotification({
+          type: 'geofence',
+          userId,
+          userName: user.firstName || user.email,
+          placeName: 'Test Location',
+          action: 'entered',
+          message: `${user.firstName || user.email} is entering Test Location`,
+          timestamp: new Date().toISOString()
+        });
+      }
+
+      res.json({ message: "Test notification sent" });
+    } catch (error) {
+      console.error("Error sending test notification:", error);
+      res.status(500).json({ message: "Failed to get logging status" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   // WebSocket server for real-time location updates

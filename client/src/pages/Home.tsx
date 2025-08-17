@@ -16,6 +16,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { Menu, Search, Plus, Settings, Users, MapPin, Bell } from 'lucide-react';
 import { User, Location } from '@shared/schema';
 import { Link } from 'wouter';
+import { apiRequest } from '@/lib/queryClient';
 
 export default function Home() {
   const { user, isLoading: authLoading } = useAuth();
@@ -211,15 +212,46 @@ export default function Home() {
                   <Button 
                     variant="ghost" 
                     className="w-full justify-start" 
-                    onClick={() => {
-                      toast({
-                        title: "John is entering Home",
-                        description: `Location-based notification • ${new Date().toLocaleTimeString()}`,
-                      });
+                    onClick={async () => {
+                      try {
+                        await apiRequest('POST', '/api/geofence/test');
+                        toast({
+                          title: "Test notification sent",
+                          description: "Check if geofence notification appears",
+                        });
+                      } catch (error) {
+                        toast({
+                          title: "Test failed",
+                          description: "Could not send test notification",
+                          variant: "destructive",
+                        });
+                      }
                     }}
                   >
                     <Bell className="w-4 h-4 mr-2" />
                     Test Notification
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    className="w-full justify-start" 
+                    onClick={async () => {
+                      try {
+                        await apiRequest('POST', '/api/geofence/clear');
+                        toast({
+                          title: "Geofence state cleared",
+                          description: "You can now get entry notifications again",
+                        });
+                      } catch (error) {
+                        toast({
+                          title: "Clear failed", 
+                          description: "Could not clear geofence state",
+                          variant: "destructive",
+                        });
+                      }
+                    }}
+                  >
+                    <MapPin className="w-4 h-4 mr-2" />
+                    Clear Geofence State
                   </Button>
                   <Link href="/settings">
                     <Button variant="ghost" className="w-full justify-start">
