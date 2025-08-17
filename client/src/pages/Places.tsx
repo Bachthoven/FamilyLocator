@@ -378,17 +378,16 @@ export default function Places() {
                               </div>
                             </div>
                             
-                            {/* Only show delete button if current user owns the place */}
-                            {user?.id === place.userId && (
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => handleDeletePlace(place.id)}
-                                className="text-red-500 hover:text-red-700 hover:bg-red-50 flex-shrink-0 ml-2 w-8 h-8 sm:w-10 sm:h-10"
-                              >
-                                <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
-                              </Button>
-                            )}
+                            {/* Show delete button - only functional if current user owns the place */}
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleDeletePlace(place.id)}
+                              className="text-red-500 hover:text-red-700 hover:bg-red-50 flex-shrink-0 ml-2 w-8 h-8 sm:w-10 sm:h-10"
+                              disabled={user?.id !== place.userId}
+                            >
+                              <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
+                            </Button>
                           </div>
                         </CardHeader>
                       </Card>
