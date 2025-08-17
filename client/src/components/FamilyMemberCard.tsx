@@ -87,9 +87,9 @@ export default function FamilyMemberCard({
   const canViewLocation = location && user.locationSharingEnabled;
   
   return (
-    <div className="flex items-start justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
-      <div className="flex items-start space-x-3 flex-1 min-w-0">
-        <Avatar className="w-12 h-12 flex-shrink-0">
+    <div className="flex items-start justify-between p-3 sm:p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
+      <div className="flex items-start space-x-2 sm:space-x-3 flex-1 min-w-0">
+        <Avatar className="w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0">
           <AvatarImage 
             src={user.profileImageUrl || undefined} 
             alt={`${user.firstName || user.email}'s profile`}
@@ -99,44 +99,44 @@ export default function FamilyMemberCard({
           </AvatarFallback>
         </Avatar>
         
-        <div className="flex-1 min-w-0 py-1">
-          <div className="font-medium text-foreground truncate mb-1">
+        <div className="flex-1 min-w-0 py-0.5 sm:py-1">
+          <div className="font-medium text-foreground text-sm sm:text-base truncate mb-0.5 sm:mb-1">
             {user.firstName && user.lastName 
               ? `${user.firstName} ${user.lastName}`
               : user.firstName || user.email
             }
           </div>
           <div className="text-sm text-muted-foreground">
-            <div className="flex items-center">
-              <div className={`w-2 h-2 ${statusInfo.color} rounded-full mr-2 flex-shrink-0`}></div>
-              <span className="font-medium mr-1">{statusInfo.status}:</span>
+            <div className="flex items-start sm:items-center flex-wrap gap-1">
+              <div className={`w-2 h-2 ${statusInfo.color} rounded-full mr-1 flex-shrink-0 mt-1.5 sm:mt-0`}></div>
+              <span className="font-medium">{statusInfo.status}:</span>
               {canViewLocation ? (
-                <span>{statusInfo.message}</span>
+                <span className="break-words">{statusInfo.message}</span>
               ) : (
-                <span className="flex items-center">
-                  <EyeOff className="w-3 h-3 mr-1" />
-                  Location sharing disabled
+                <span className="flex items-center gap-1">
+                  <EyeOff className="w-3 h-3 flex-shrink-0" />
+                  <span className="break-words">Location sharing disabled</span>
                 </span>
               )}
             </div>
           </div>
           {canViewLocation && location?.address && (
-            <div className="text-xs text-muted-foreground mt-1 truncate">
+            <div className="text-xs text-muted-foreground mt-0.5 sm:mt-1 truncate">
               📍 {location.address}
             </div>
           )}
         </div>
       </div>
       
-      <div className="flex items-center space-x-2 flex-shrink-0 ml-3">
+      <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0 ml-2 sm:ml-3">
         {canViewLocation ? (
           <Button
             variant="ghost"
             size="sm"
             onClick={onViewLocation}
-            className="text-primary hover:text-primary/80"
+            className="text-primary hover:text-primary/80 text-xs sm:text-sm px-2 sm:px-3"
           >
-            <MapPin className="w-4 h-4 mr-1" />
+            <MapPin className="w-3 h-3 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
             View
           </Button>
         ) : (
@@ -144,9 +144,9 @@ export default function FamilyMemberCard({
             variant="ghost"
             size="sm"
             disabled
-            className="text-muted-foreground"
+            className="text-muted-foreground text-xs sm:text-sm px-2 sm:px-3"
           >
-            <EyeOff className="w-4 h-4 mr-1" />
+            <EyeOff className="w-3 h-3 sm:w-4 sm:h-4 mr-0.5 sm:mr-1" />
             Hidden
           </Button>
         )}
