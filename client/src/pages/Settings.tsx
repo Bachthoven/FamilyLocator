@@ -12,10 +12,8 @@ import {
   Settings as SettingsIcon, 
   User, 
   Shield, 
-  Bell, 
   HelpCircle, 
-  LogOut,
-  MapPin
+  LogOut
 } from 'lucide-react';
 
 export default function Settings() {
@@ -45,25 +43,10 @@ export default function Settings() {
           description: 'Control your location sharing and data privacy',
           action: () => setPrivacySettingsOpen(true),
         },
-        {
-          icon: Bell,
-          label: 'Notifications',
-          description: 'Manage your notification preferences',
-          action: () => toast({ title: 'Coming soon', description: 'Notification settings will be available soon.' }),
-        },
+
       ],
     },
-    {
-      title: 'App Features',
-      items: [
-        {
-          icon: MapPin,
-          label: 'Location Services',
-          description: 'Manage location accuracy and permissions',
-          action: () => toast({ title: 'Coming soon', description: 'Location service settings will be available soon.' }),
-        },
-      ],
-    },
+
     {
       title: 'Support',
       items: [
@@ -71,7 +54,7 @@ export default function Settings() {
           icon: HelpCircle,
           label: 'Help & Support',
           description: 'Get help and contact support',
-          action: () => toast({ title: 'Coming soon', description: 'Help center will be available soon.' }),
+          action: () => toast({ title: 'Support Contact', description: 'For support, contact: bachtoven.rules@gmail.com' }),
         },
       ],
     },
