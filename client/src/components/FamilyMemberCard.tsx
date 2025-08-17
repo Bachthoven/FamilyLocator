@@ -87,9 +87,9 @@ export default function FamilyMemberCard({
   const canViewLocation = location && user.locationSharingEnabled;
   
   return (
-    <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
-      <div className="flex items-center space-x-3">
-        <Avatar className="w-12 h-12">
+    <div className="flex items-start justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
+      <div className="flex items-start space-x-3 flex-1 min-w-0">
+        <Avatar className="w-12 h-12 flex-shrink-0">
           <AvatarImage 
             src={user.profileImageUrl || undefined} 
             alt={`${user.firstName || user.email}'s profile`}
@@ -99,34 +99,36 @@ export default function FamilyMemberCard({
           </AvatarFallback>
         </Avatar>
         
-        <div>
-          <div className="font-medium text-foreground">
+        <div className="flex-1 min-w-0 py-1">
+          <div className="font-medium text-foreground truncate mb-1">
             {user.firstName && user.lastName 
               ? `${user.firstName} ${user.lastName}`
               : user.firstName || user.email
             }
           </div>
-          <div className="text-sm text-muted-foreground flex items-center">
-            <div className={`w-2 h-2 ${statusInfo.color} rounded-full mr-2`}></div>
-            <span className="font-medium mr-1">{statusInfo.status}:</span>
-            {canViewLocation ? (
-              statusInfo.message
-            ) : (
-              <span className="flex items-center">
-                <EyeOff className="w-3 h-3 mr-1" />
-                Location sharing disabled
-              </span>
-            )}
+          <div className="text-sm text-muted-foreground">
+            <div className="flex items-center">
+              <div className={`w-2 h-2 ${statusInfo.color} rounded-full mr-2 flex-shrink-0`}></div>
+              <span className="font-medium mr-1">{statusInfo.status}:</span>
+              {canViewLocation ? (
+                <span>{statusInfo.message}</span>
+              ) : (
+                <span className="flex items-center">
+                  <EyeOff className="w-3 h-3 mr-1" />
+                  Location sharing disabled
+                </span>
+              )}
+            </div>
           </div>
           {canViewLocation && location?.address && (
-            <div className="text-xs text-muted-foreground">
+            <div className="text-xs text-muted-foreground mt-1 truncate">
               📍 {location.address}
             </div>
           )}
         </div>
       </div>
       
-      <div className="text-right flex items-center space-x-2">
+      <div className="flex items-center space-x-2 flex-shrink-0 ml-3">
         {canViewLocation ? (
           <Button
             variant="ghost"
