@@ -49,7 +49,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (profileData.newPassword && profileData.currentPassword) {
         const user = await storage.getUser(userId);
         if (!user || !(await comparePasswords(profileData.currentPassword, user.password))) {
-          return res.status(400).json({ message: "Current password is incorrect" });
+          return res.status(400).json({ message: "The current password you entered is wrong. Please try again." });
         }
         
         // Hash new password

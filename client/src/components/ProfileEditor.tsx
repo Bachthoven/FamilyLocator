@@ -59,9 +59,26 @@ export function ProfileEditor({ open, onOpenChange, user }: ProfileEditorProps) 
       onOpenChange(false);
     },
     onError: (error: any) => {
+      // Show user-friendly error messages
+      let errorTitle = "Update Failed";
+      let errorMessage = "Failed to update profile. Please try again.";
+      
+      if (error.message?.includes("current password") || error.message?.includes("wrong")) {
+        errorTitle = "Wrong Password";
+        errorMessage = "The current password you entered is incorrect. Please check and try again.";
+      } else if (error.message?.includes("password")) {
+        errorTitle = "Password Error";
+        errorMessage = error.message;
+      } else if (error.message?.includes("email")) {
+        errorTitle = "Email Error";
+        errorMessage = "Please enter a valid email address.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       toast({
-        title: "Update Failed",
-        description: error.message || "Failed to update profile. Please try again.",
+        title: errorTitle,
+        description: errorMessage,
         variant: "destructive",
       });
     },
