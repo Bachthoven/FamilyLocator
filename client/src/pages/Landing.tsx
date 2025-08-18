@@ -116,16 +116,7 @@ export default function Landing() {
               </div>
             </div>
             
-            <div className="flex items-start space-x-4">
-              <div className="bg-blue-100 dark:bg-blue-900/30 p-2 rounded-lg">
-                <Shield className="w-6 h-6 text-blue-600" />
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold mb-2">Privacy Controls</h3>
-                <p className="text-muted-foreground">Complete control over when and with whom you share your location. Your privacy, your choice.</p>
-              </div>
-            </div>
-            
+
             <div className="flex items-start space-x-4">
               <div className="bg-purple-100 dark:bg-purple-900/30 p-2 rounded-lg">
                 <Users className="w-6 h-6 text-purple-600" />
