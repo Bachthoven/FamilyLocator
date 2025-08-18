@@ -75,13 +75,9 @@ export default function Landing() {
                   <Heart className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="text-xl font-bold mb-3">2. Share with Family</h3>
-                <p className="text-muted-foreground mb-4">
+                <p className="text-muted-foreground">
                   Send this website link to your family members so they can create their own accounts the same way you did.
                 </p>
-                <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg text-sm">
-                  <strong>Copy this link:</strong><br />
-                  <code className="text-xs break-all">{window.location.origin}</code>
-                </div>
               </CardContent>
             </Card>
             
