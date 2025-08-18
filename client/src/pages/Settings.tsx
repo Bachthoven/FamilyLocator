@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
 import BottomNavigation from '@/components/BottomNavigation';
-import PrivacySettings from '@/components/PrivacySettings';
 import { ProfileEditor } from '@/components/ProfileEditor';
 
 import { Button } from '@/components/ui/button';
@@ -12,7 +11,6 @@ import { Badge } from '@/components/ui/badge';
 import { 
   Settings as SettingsIcon, 
   User, 
-  Shield, 
   HelpCircle, 
   LogOut
 } from 'lucide-react';
@@ -20,7 +18,6 @@ import {
 export default function Settings() {
   const { user, logoutMutation } = useAuth();
   const { toast } = useToast();
-  const [privacySettingsOpen, setPrivacySettingsOpen] = useState(false);
   const [profileEditorOpen, setProfileEditorOpen] = useState(false);
 
   const handleLogout = () => {
@@ -29,36 +26,18 @@ export default function Settings() {
     }
   };
 
-  const settingsGroups = [
+  const settingsItems = [
     {
-      title: 'Account',
-      items: [
-        {
-          icon: User,
-          label: 'Profile Information',
-          description: 'Update your personal details',
-          action: () => setProfileEditorOpen(true),
-        },
-        {
-          icon: Shield,
-          label: 'Privacy Settings',
-          description: 'Control your location sharing and data privacy',
-          action: () => setPrivacySettingsOpen(true),
-        },
-
-      ],
+      icon: User,
+      label: 'Profile Information',
+      description: 'Update your personal details',
+      action: () => setProfileEditorOpen(true),
     },
-
     {
-      title: 'Support',
-      items: [
-        {
-          icon: HelpCircle,
-          label: 'Help & Support',
-          description: 'Get help and contact support',
-          action: () => toast({ title: 'Support Contact', description: 'For support, contact: bachtoven.rules@gmail.com' }),
-        },
-      ],
+      icon: HelpCircle,
+      label: 'Help & Support',
+      description: 'Get help and contact support',
+      action: () => toast({ title: 'Support Contact', description: 'For support, contact: bachtoven.rules@gmail.com' }),
     },
   ];
 
@@ -119,38 +98,31 @@ export default function Settings() {
           </CardHeader>
         </Card>
 
-        {/* Settings Groups */}
-        <div className="space-y-6">
-          {settingsGroups.map((group) => (
-            <div key={group.title}>
-              <h2 className="text-lg font-semibold mb-4">{group.title}</h2>
-              <div className="space-y-2">
-                {group.items.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <Card key={item.label} className="hover:shadow-md transition-shadow cursor-pointer" onClick={item.action}>
-                      <CardContent className="p-4">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                            <Icon className="w-5 h-5 text-primary" />
-                          </div>
-                          <div className="flex-1">
-                            <div className="font-medium">{item.label}</div>
-                            <div className="text-sm text-muted-foreground">{item.description}</div>
-                          </div>
-                          <div className="text-muted-foreground">
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                            </svg>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
+        {/* Settings Items */}
+        <div className="space-y-2">
+          {settingsItems.map((item) => {
+            const Icon = item.icon;
+            return (
+              <Card key={item.label} className="hover:shadow-md transition-shadow cursor-pointer" onClick={item.action}>
+                <CardContent className="p-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Icon className="w-5 h-5 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="font-medium">{item.label}</div>
+                      <div className="text-sm text-muted-foreground">{item.description}</div>
+                    </div>
+                    <div className="text-muted-foreground">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
 
         {/* Logout Button */}
@@ -171,15 +143,6 @@ export default function Settings() {
           <p className="mt-1">Stay connected, stay safe</p>
         </div>
       </div>
-
-      {/* Privacy Settings Modal */}
-      {user && (
-        <PrivacySettings
-          open={privacySettingsOpen}
-          onOpenChange={setPrivacySettingsOpen}
-          user={user}
-        />
-      )}
 
       {/* Profile Editor Modal */}
       {user && (
