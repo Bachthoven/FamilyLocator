@@ -384,7 +384,7 @@ export default function Places() {
                               variant="ghost"
                               size="icon"
                               onClick={() => handleDeletePlace(place.id, place.name)}
-                              className="text-red-500 hover:text-red-700 hover:bg-red-50 flex-shrink-0 ml-2 w-8 h-8 sm:w-10 sm:h-10"
+                              className="text-red-500 hover:text-red-700 hover:bg-red-50 flex-shrink-0 ml-2 w-8 h-8 sm:w-10 sm:h-10 self-start mt-1"
                             >
                               <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
                             </Button>
