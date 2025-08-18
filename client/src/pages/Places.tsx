@@ -365,7 +365,7 @@ export default function Places() {
                     {categoryPlaces.map((place: Place & { user: User }) => (
                       <Card key={place.id} className="hover:shadow-md transition-shadow">
                         <CardHeader className="pb-3">
-                          <div className="flex items-start justify-between">
+                          <div className="flex items-center justify-between">
                             <div className="flex items-start space-x-3 flex-1 min-w-0">
                               <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0`}>
                                 <Icon className={`w-4 h-4 sm:w-5 sm:h-5 ${colorClass}`} />
