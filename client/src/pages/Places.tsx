@@ -401,26 +401,17 @@ export default function Places() {
 
         {/* Statistics */}
         {places.length > 0 && (
-          <div className="mt-8">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Quick Stats</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-4 text-center">
-                  <div>
-                    <div className="text-2xl font-bold text-primary">{places.length}</div>
-                    <div className="text-sm text-muted-foreground">Total Places</div>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold text-green-500">
-                      {Object.keys(groupedPlaces).length}
-                    </div>
-                    <div className="text-sm text-muted-foreground">Categories</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+          <div className="mt-8 grid grid-cols-2 gap-4">
+            <div className="bg-card p-4 rounded-xl border text-center">
+              <div className="text-2xl font-bold text-primary">{places.length}</div>
+              <div className="text-sm text-muted-foreground">Total Places</div>
+            </div>
+            <div className="bg-card p-4 rounded-xl border text-center">
+              <div className="text-2xl font-bold text-green-500">
+                {Object.keys(groupedPlaces).length}
+              </div>
+              <div className="text-sm text-muted-foreground">Categories</div>
+            </div>
           </div>
         )}
       </div>
