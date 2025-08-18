@@ -121,6 +121,15 @@ FamilyLocator is a modern web application that enables families to share their r
 
 ## Changelog
 
+- August 18, 2025. Profile management improvements and UI streamlining:
+  - Fixed profile image upload and display across all components
+  - Improved password change error handling with user-friendly messages
+  - Enhanced error handling in queryClient.ts to properly parse JSON responses
+  - Fixed logout functionality to properly redirect to landing page instead of 404 error
+  - Completely removed privacy settings feature from the application
+  - Consolidated Settings page into single group without section headers (Account/Support removed)
+  - Simplified settings layout to show just Profile Information and Help & Support
+
 - August 17, 2025. Enhanced geofencing notifications and UI improvements:
   - Fixed mobile pin dragging issues - pins now stay where moved and save correctly
   - Updated database permissions to allow family members to modify shared place locations
