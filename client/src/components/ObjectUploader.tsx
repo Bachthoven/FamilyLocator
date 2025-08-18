@@ -106,6 +106,7 @@ export function ObjectUploader({
         style={{ display: 'none' }}
       />
       <Button 
+        type="button"
         onClick={handleButtonClick}
         className={buttonClassName}
         disabled={isUploading}

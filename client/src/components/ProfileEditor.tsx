@@ -69,20 +69,19 @@ export function ProfileEditor({ open, onOpenChange, user }: ProfileEditorProps) 
 
   const handleUploadComplete = async (uploadUrl: string) => {
     try {
-      // Set the profile image ACL policy and update profile
+      // Just set the ACL policy but don't update profile yet
       const response = await apiRequest('PUT', '/api/profile-image', {
         profileImageURL: uploadUrl
       });
       
       const data = await response.json();
-      setProfileImageUrl(data.objectPath);
       
-      // Update the form data as well
-      setFormData(prev => ({ ...prev, profileImageUrl: data.objectPath }));
+      // Only update local state - don't trigger profile update
+      setProfileImageUrl(data.objectPath);
       
       toast({
         title: "Image Uploaded",
-        description: "Profile image uploaded successfully!",
+        description: "Profile image uploaded! Click Save to update your profile.",
       });
     } catch (error: any) {
       toast({
