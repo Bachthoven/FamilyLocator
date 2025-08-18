@@ -45,6 +45,11 @@ export default function AuthPage() {
   const { user, loginMutation, registerMutation } = useAuth();
   const [, navigate] = useLocation();
 
+  // Get the tab parameter from URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const tabParam = urlParams.get('tab');
+  const defaultTab = tabParam === 'register' ? 'register' : 'login';
+
   // Redirect if already logged in
   useEffect(() => {
     if (user) {
@@ -101,7 +106,7 @@ export default function AuthPage() {
           </p>
         </div>
 
-        <Tabs defaultValue="login" className="w-full">
+        <Tabs defaultValue={defaultTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="login">Sign In</TabsTrigger>
             <TabsTrigger value="register">Create Account</TabsTrigger>
