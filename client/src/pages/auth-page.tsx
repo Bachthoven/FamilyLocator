@@ -95,17 +95,19 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-4">
-      <div className="w-full max-w-md space-y-8 relative">
-        {/* Close button */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="absolute -top-2 -right-2 z-10 h-8 w-8 rounded-full bg-white dark:bg-gray-800 shadow-md hover:bg-gray-100 dark:hover:bg-gray-700"
-          onClick={() => navigate('/')}
-        >
-          <X className="h-4 w-4" />
-        </Button>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 relative">
+      {/* Close button - fixed to top right of screen */}
+      <Button
+        variant="ghost"
+        size="icon"
+        className="fixed top-4 right-4 z-20 h-10 w-10 rounded-full bg-white dark:bg-gray-800 shadow-lg hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600"
+        onClick={() => navigate('/')}
+      >
+        <X className="h-5 w-5" />
+      </Button>
+      
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="w-full max-w-md space-y-8">
         
         <div className="text-center">
           <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
@@ -264,6 +266,7 @@ export default function AuthPage() {
             </Card>
           </TabsContent>
         </Tabs>
+        </div>
       </div>
     </div>
   );
