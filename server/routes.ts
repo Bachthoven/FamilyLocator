@@ -551,6 +551,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Create sample notification for testing styling
+  app.post('/api/notifications/test', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Create a sample notification
+      const notification = await storage.createNotification({
+        userId,
+        type: 'geofence',
+        title: 'Location Alert',
+        message: `${user.firstName || user.email} entered Test Location`,
+        relatedId: null,
+        isRead: false
+      });
+
+      res.json({ message: "Test notification created", notification });
+    } catch (error) {
+      console.error("Error creating test notification:", error);
+      res.status(500).json({ message: "Failed to create test notification" });
+    }
+  });
+
   // Notification routes
   app.get('/api/notifications', isAuthenticated, async (req: any, res) => {
     try {

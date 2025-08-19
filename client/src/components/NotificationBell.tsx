@@ -90,15 +90,22 @@ export function NotificationBell() {
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-0" align="end">
-        <div className="flex items-center justify-between p-4 border-b">
-          <h3 className="font-semibold text-sm">Notifications</h3>
-          {notifications.length > 0 && (
+      <PopoverContent className="w-80 p-0 shadow-xl border-0" align="end">
+        <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-slate-50 to-gray-50">
+          <div>
+            <h3 className="font-bold text-base text-gray-900">Notifications</h3>
+            {notifications.length > 0 && (
+              <p className="text-xs text-gray-500 mt-0.5">
+                {unreadCount > 0 ? `${unreadCount} new` : 'All caught up'}
+              </p>
+            )}
+          </div>
+          {notifications.length > 0 && unreadCount > 0 && (
             <Button
               variant="ghost"
               size="sm"
               onClick={handleMarkAllAsRead}
-              className="text-xs text-blue-600 hover:text-blue-800"
+              className="text-xs font-semibold text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-3 py-1.5 rounded-full"
             >
               Mark all read
             </Button>
@@ -110,38 +117,65 @@ export function NotificationBell() {
               Loading notifications...
             </div>
           ) : notifications.length === 0 ? (
-            <div className="p-4 text-center text-sm text-gray-500">
-              No notifications yet
+            <div className="p-8 text-center">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                <Bell className="h-8 w-8 text-gray-400" />
+              </div>
+              <h4 className="font-medium text-gray-900 mb-1">No notifications yet</h4>
+              <p className="text-sm text-gray-500">
+                You'll see location alerts and updates here
+              </p>
             </div>
           ) : (
-            <div className="divide-y">
+            <div className="divide-y divide-gray-100">
               {notifications.map((notification) => (
                 <div
                   key={notification.id}
-                  className={`p-4 cursor-pointer hover:bg-gray-50 ${
-                    !notification.isRead ? 'bg-blue-50' : ''
+                  className={`p-4 cursor-pointer transition-all duration-200 ${
+                    !notification.isRead 
+                      ? 'bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 border-l-4 border-blue-400' 
+                      : 'hover:bg-gray-50'
                   }`}
                   onClick={() => !notification.isRead && handleMarkAsRead(notification.id)}
                 >
-                  <div className="flex items-start gap-3">
-                    <span className="text-lg flex-shrink-0 mt-0.5">
-                      {getNotificationIcon(notification.type)}
-                    </span>
+                  <div className="flex items-start gap-4">
+                    <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
+                      !notification.isRead 
+                        ? 'bg-blue-500 text-white shadow-md' 
+                        : 'bg-gray-100 text-gray-600'
+                    }`}>
+                      <span className="text-lg">
+                        {getNotificationIcon(notification.type)}
+                      </span>
+                    </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <p className="font-medium text-sm text-gray-900 truncate">
+                        <h4 className={`font-semibold text-sm truncate ${
+                          !notification.isRead ? 'text-gray-900' : 'text-gray-700'
+                        }`}>
                           {notification.title}
-                        </p>
+                        </h4>
                         {!notification.isRead && (
-                          <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0" />
+                          <div className="w-2.5 h-2.5 bg-blue-500 rounded-full flex-shrink-0 animate-pulse" />
                         )}
                       </div>
-                      <p className="text-sm text-gray-600 leading-relaxed mb-2">
+                      <p className={`text-sm leading-relaxed mb-3 ${
+                        !notification.isRead ? 'text-gray-800' : 'text-gray-600'
+                      }`}>
                         {notification.message}
                       </p>
-                      <p className="text-xs text-gray-400">
-                        {formatTime(notification.createdAt || new Date().toISOString())}
-                      </p>
+                      <div className="flex items-center gap-2">
+                        <p className={`text-xs font-medium ${
+                          !notification.isRead ? 'text-blue-600' : 'text-gray-400'
+                        }`}>
+                          {formatTime(notification.createdAt || new Date().toISOString())}
+                        </p>
+                        {!notification.isRead && (
+                          <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
+                            New
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
