@@ -157,6 +157,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const location = await storage.saveLocation(locationData);
       console.log('Saved location successfully:', location);
       
+      // Get user info for notifications
+      const user = await storage.getUser(userId);
+      const userName = user?.firstName || user?.email || 'User';
+      
+      // Create location update notification for all family members (including self)
+      const familyMembers = await storage.getFamilyMembers(userId);
+      const allUsersToNotify = [userId, ...familyMembers.map(m => m.id)];
+      
+      for (const memberId of allUsersToNotify) {
+        try {
+          await storage.createNotification({
+            userId: memberId,
+            type: 'location',
+            title: 'Location Update',
+            message: `${userName} updated their location`,
+            data: { locationId: location.id },
+            isRead: memberId === userId // Mark as read for the user who updated their location
+          });
+        } catch (notificationError) {
+          console.error(`Failed to create location notification for user ${memberId}:`, notificationError);
+        }
+      }
+      
       // Check for geofence transitions
       await checkGeofenceTransitions(userId, location.latitude, location.longitude);
       
@@ -566,7 +589,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         type: 'geofence',
         title: 'Location Alert',
         message: `${user.firstName || user.email} entered Test Location`,
-        relatedId: null,
+        data: null,
         isRead: false
       });
 
