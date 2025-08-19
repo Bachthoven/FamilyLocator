@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Bell } from "lucide-react";
+import { Bell, X, CheckCircle, AlertTriangle, XCircle, Info, MapPin, Users } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
@@ -62,40 +62,102 @@ export function NotificationBell() {
     return `${Math.floor(diffInMinutes / 1440)}d ago`;
   };
 
-  const getNotificationIcon = (type: string) => {
-    if (type.includes('geofence')) {
-      return '📍';
+  const getToastIcon = (title: string, type: string) => {
+    const titleStr = title.toLowerCase();
+    
+    // Geofence notifications
+    if (titleStr.includes('entering') || titleStr.includes('entering')) {
+      return <MapPin className="w-5 h-5 text-green-500" />;
     }
-    if (type.includes('family')) {
-      return '👥';
+    if (titleStr.includes('exiting') || titleStr.includes('leaving')) {
+      return <MapPin className="w-5 h-5 text-orange-500" />;
     }
-    return '🔔';
+    
+    // Success notifications
+    if (titleStr.includes('success') || titleStr.includes('saved') || titleStr.includes('added') || 
+        titleStr.includes('copied') || titleStr.includes('joined') || titleStr.includes('started') ||
+        titleStr.includes('stopped') || titleStr.includes('deleted') || titleStr.includes('removed') ||
+        titleStr.includes('updated') || titleStr.includes('centered')) {
+      return <CheckCircle className="w-5 h-5 text-green-500" />;
+    }
+    
+    // Family/location notifications
+    if (titleStr.includes('location') || titleStr.includes('family') || titleStr.includes('member')) {
+      return <Users className="w-5 h-5 text-blue-500" />;
+    }
+    
+    // Error notifications
+    if (titleStr.includes('error') || titleStr.includes('failed') || titleStr.includes('unauthorized')) {
+      return <XCircle className="w-5 h-5 text-red-500" />;
+    }
+    
+    // Warning notifications
+    if (titleStr.includes('warning') || titleStr.includes('expired')) {
+      return <AlertTriangle className="w-5 h-5 text-yellow-500" />;
+    }
+    
+    // Default info icon
+    return <Info className="w-5 h-5 text-blue-500" />;
+  };
+
+  const getToastColors = (title: string) => {
+    const titleStr = title.toLowerCase();
+    
+    // Geofence notifications - special styling
+    if (titleStr.includes('entering') || titleStr.includes('exiting')) {
+      return 'border-l-4 border-l-green-500 bg-green-50 dark:bg-green-950/20';
+    }
+    
+    // Success notifications
+    if (titleStr.includes('success') || titleStr.includes('saved') || titleStr.includes('added') || 
+        titleStr.includes('copied') || titleStr.includes('joined') || titleStr.includes('started') ||
+        titleStr.includes('stopped') || titleStr.includes('deleted') || titleStr.includes('removed') ||
+        titleStr.includes('updated') || titleStr.includes('centered')) {
+      return 'border-l-4 border-l-green-500 bg-green-50 dark:bg-green-950/20';
+    }
+    
+    // Error notifications
+    if (titleStr.includes('error') || titleStr.includes('failed') || titleStr.includes('unauthorized')) {
+      return 'border-l-4 border-l-red-500 bg-red-50 dark:bg-red-950/20';
+    }
+    
+    // Warning notifications
+    if (titleStr.includes('warning') || titleStr.includes('expired')) {
+      return 'border-l-4 border-l-yellow-500 bg-yellow-50 dark:bg-yellow-950/20';
+    }
+    
+    // Default styling
+    return 'border-l-4 border-l-blue-500 bg-blue-50 dark:bg-blue-950/20';
   };
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <Button 
-          variant="ghost" 
+          variant="outline" 
           size="sm" 
-          className="relative p-2 h-10 w-10 rounded-full bg-white/90 hover:bg-white shadow-lg border"
+          className={`relative p-2 h-10 w-10 rounded-lg shadow-lg transition-all hover:shadow-xl ${
+            unreadCount > 0 
+              ? 'bg-primary text-primary-foreground border-primary hover:bg-primary/90' 
+              : 'bg-background hover:bg-muted'
+          }`}
         >
-          <Bell className="h-5 w-5 text-gray-700" />
+          <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
             <Badge 
-              className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-red-500 text-white text-xs font-bold rounded-full"
+              className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 bg-destructive text-destructive-foreground text-xs font-bold rounded-full border-2 border-background animate-pulse"
             >
               {unreadCount > 99 ? '99+' : unreadCount}
             </Badge>
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-0 shadow-xl border-0" align="end">
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-slate-50 to-gray-50">
+      <PopoverContent className="w-96 p-0 shadow-2xl border rounded-lg" align="end">
+        <div className="flex items-center justify-between p-4 border-b bg-background">
           <div>
-            <h3 className="font-bold text-base text-gray-900">Notifications</h3>
+            <h3 className="font-semibold text-foreground">Notifications</h3>
             {notifications.length > 0 && (
-              <p className="text-xs text-gray-500 mt-0.5">
+              <p className="text-xs text-muted-foreground mt-0.5">
                 {unreadCount > 0 ? `${unreadCount} new` : 'All caught up'}
               </p>
             )}
@@ -105,13 +167,13 @@ export function NotificationBell() {
               variant="ghost"
               size="sm"
               onClick={handleMarkAllAsRead}
-              className="text-xs font-semibold text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-3 py-1.5 rounded-full"
+              className="text-xs font-medium text-primary hover:text-primary/80 hover:bg-primary/10 px-3 py-1.5 rounded-md"
             >
               Mark all read
             </Button>
           )}
         </div>
-        <ScrollArea className="h-[400px]">
+        <ScrollArea className="h-[500px]">
           {isLoading ? (
             <div className="p-4 text-center text-sm text-gray-500">
               Loading notifications...
@@ -127,57 +189,51 @@ export function NotificationBell() {
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-gray-100">
+            <div className="space-y-2 p-2">
               {notifications.map((notification) => (
                 <div
                   key={notification.id}
-                  className={`p-4 cursor-pointer transition-all duration-200 ${
-                    !notification.isRead 
-                      ? 'bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 border-l-4 border-blue-400' 
-                      : 'hover:bg-gray-50'
+                  className={`relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border p-6 pr-8 shadow-lg transition-all cursor-pointer hover:shadow-xl ${getToastColors(notification.title)} ${
+                    !notification.isRead ? 'ring-2 ring-blue-200' : 'opacity-75'
                   }`}
                   onClick={() => !notification.isRead && handleMarkAsRead(notification.id)}
                 >
-                  <div className="flex items-start gap-4">
-                    <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
-                      !notification.isRead 
-                        ? 'bg-blue-500 text-white shadow-md' 
-                        : 'bg-gray-100 text-gray-600'
-                    }`}>
-                      <span className="text-lg">
-                        {getNotificationIcon(notification.type)}
-                      </span>
+                  <div className="flex items-start space-x-4 flex-1">
+                    {/* Toast-style icon */}
+                    <div className="flex-shrink-0">
+                      {getToastIcon(notification.title, notification.type)}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h4 className={`font-semibold text-sm truncate ${
-                          !notification.isRead ? 'text-gray-900' : 'text-gray-700'
-                        }`}>
-                          {notification.title}
-                        </h4>
-                        {!notification.isRead && (
-                          <div className="w-2.5 h-2.5 bg-blue-500 rounded-full flex-shrink-0 animate-pulse" />
-                        )}
+                    
+                    <div className="flex-1 space-y-1">
+                      {/* Toast-style title */}
+                      <div className="text-sm font-semibold text-foreground">
+                        {notification.title}
                       </div>
-                      <p className={`text-sm leading-relaxed mb-3 ${
-                        !notification.isRead ? 'text-gray-800' : 'text-gray-600'
-                      }`}>
+                      
+                      {/* Toast-style description */}
+                      <div className="text-sm opacity-90 text-foreground">
                         {notification.message}
-                      </p>
-                      <div className="flex items-center gap-2">
-                        <p className={`text-xs font-medium ${
-                          !notification.isRead ? 'text-blue-600' : 'text-gray-400'
-                        }`}>
-                          {formatTime(notification.createdAt || new Date().toISOString())}
-                        </p>
-                        {!notification.isRead && (
-                          <span className="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-                            New
-                          </span>
-                        )}
+                      </div>
+                      
+                      {/* Time stamp */}
+                      <div className="text-xs opacity-70 text-foreground">
+                        {formatTime(notification.createdAt || new Date().toISOString())}
                       </div>
                     </div>
                   </div>
+                  
+                  {/* Toast-style close button (only for unread) */}
+                  {!notification.isRead && (
+                    <button
+                      className="absolute right-2 top-2 rounded-md p-1 text-foreground/50 opacity-0 transition-opacity hover:text-foreground focus:opacity-100 focus:outline-none focus:ring-2 group-hover:opacity-100 hover:opacity-100"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleMarkAsRead(notification.id);
+                      }}
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
