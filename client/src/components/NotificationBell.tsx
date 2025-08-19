@@ -170,8 +170,8 @@ export function NotificationBell() {
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-0 shadow-2xl border rounded-lg" align="end">
-        <div className="flex items-center justify-between p-4 border-b bg-background">
+      <PopoverContent className="w-80 p-0 shadow-2xl border rounded-lg z-50" align="end">
+        <div className="flex items-center justify-between p-4 border-b bg-background rounded-t-lg">
           <div>
             <h3 className="font-semibold text-foreground">Notifications</h3>
             {notifications.length > 0 && (
@@ -220,7 +220,7 @@ export function NotificationBell() {
                 >
                   {/* Red dot indicator for unread notifications */}
                   {!notification.isRead && (
-                    <div className="absolute top-1 right-1 w-4 h-4 bg-red-500 rounded-full shadow-sm animate-pulse z-10"></div>
+                    <div className="absolute top-1.5 right-1.5 w-3 h-3 bg-red-500 rounded-full shadow-sm animate-pulse z-10"></div>
                   )}
                   <div className="flex items-start space-x-4 flex-1">
                     {/* Toast-style icon */}

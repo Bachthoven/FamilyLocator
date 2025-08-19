@@ -329,7 +329,7 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
       </div>
       
       {/* Map Controls */}
-      <div className="absolute bottom-32 right-4 z-[1000] flex flex-col space-y-2">
+      <div className="absolute bottom-32 right-4 z-40 flex flex-col space-y-2">
         {/* Map Type Toggle */}
         <button
           onClick={() => setMapType(mapType === 'street' ? 'satellite' : 'street')}
