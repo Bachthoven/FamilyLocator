@@ -160,17 +160,17 @@ export function NotificationBell() {
               : 'bg-background hover:bg-muted'
           }`}
         >
-          <Bell className="h-5 w-5" />
+          <Bell className="h-5 w-5 text-white" />
           {unreadCount > 0 && (
             <Badge 
-              className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 bg-destructive text-destructive-foreground text-xs font-bold rounded-full border-2 border-background animate-pulse"
+              className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 bg-red-500 text-white text-xs font-bold rounded-full animate-pulse"
             >
               {unreadCount > 99 ? '99+' : unreadCount}
             </Badge>
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-96 p-0 shadow-2xl border rounded-lg" align="end">
+      <PopoverContent className="w-80 p-0 shadow-2xl border rounded-lg" align="end">
         <div className="flex items-center justify-between p-4 border-b bg-background">
           <div>
             <h3 className="font-semibold text-foreground">Notifications</h3>
@@ -191,7 +191,7 @@ export function NotificationBell() {
             </Button>
           )}
         </div>
-        <ScrollArea className="h-[500px]">
+        <ScrollArea className="h-[400px]">
           {isLoading ? (
             <div className="p-4 text-center text-sm text-gray-500">
               Loading notifications...
@@ -220,7 +220,7 @@ export function NotificationBell() {
                 >
                   {/* Red dot indicator for unread notifications */}
                   {!notification.isRead && (
-                    <div className="absolute top-1 right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white dark:border-gray-800 shadow-sm animate-pulse z-10"></div>
+                    <div className="absolute top-1 right-1 w-4 h-4 bg-red-500 rounded-full shadow-sm animate-pulse z-10"></div>
                   )}
                   <div className="flex items-start space-x-4 flex-1">
                     {/* Toast-style icon */}
