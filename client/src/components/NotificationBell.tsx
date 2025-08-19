@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Bell, X, CheckCircle, AlertTriangle, XCircle, Info, MapPin, Users } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useWebSocket } from "@/hooks/useWebSocket";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -15,20 +16,37 @@ import type { Notification } from "@shared/schema";
 
 export function NotificationBell() {
   const [isOpen, setIsOpen] = useState(false);
+  const { lastMessage } = useWebSocket();
 
   // Get unread notification count for the red dot
   const { data: unreadCountData } = useQuery<{ count: number }>({
     queryKey: ["/api/notifications/unread-count"],
-    refetchInterval: 30000, // Check every 30 seconds
+    refetchInterval: 5000, // Check every 5 seconds for faster updates
   });
   
   const unreadCount = unreadCountData?.count || 0;
 
-  // Get notifications when the popover is opened
+  // Listen for WebSocket notifications and refresh the queries
+  useEffect(() => {
+    if (lastMessage) {
+      try {
+        const message = JSON.parse(lastMessage);
+        if (message.type === 'geofence' || message.type === 'notification') {
+          // Immediately refresh notification queries when new notifications arrive
+          queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
+          queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
+        }
+      } catch (error) {
+        // Ignore parsing errors
+      }
+    }
+  }, [lastMessage]);
+
+  // Get notifications (always fetch, not just when opened)
   const { data: notifications = [], isLoading } = useQuery<Notification[]>({
     queryKey: ["/api/notifications"],
-    enabled: isOpen,
-    refetchOnWindowFocus: false,
+    refetchInterval: 10000, // Refresh every 10 seconds
+    refetchOnWindowFocus: true,
   });
 
   const handleMarkAsRead = async (notificationId: number) => {

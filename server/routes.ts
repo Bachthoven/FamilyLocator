@@ -189,6 +189,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
               isRead: false
             });
             console.log(`Created location notification for family member ${familyMember.id}`);
+            
+            // Broadcast notification via WebSocket for real-time updates
+            if ((global as any).broadcastNotification) {
+              (global as any).broadcastNotification({
+                type: 'notification',
+                userId: familyMember.id,
+                notificationType: 'location',
+                message: `${userName} updated their location`,
+                timestamp: new Date().toISOString()
+              });
+            }
           } catch (notificationError) {
             console.error(`Failed to create location notification for user ${familyMember.id}:`, notificationError);
           }
