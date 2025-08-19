@@ -161,22 +161,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const user = await storage.getUser(userId);
       const userName = user?.firstName || user?.email || 'User';
       
-      // Create location update notification for all family members (including self)
+      // Create location update notification for family members only (not self) and limit frequency
       const familyMembers = await storage.getFamilyMembers(userId);
-      const allUsersToNotify = [userId, ...familyMembers.map(m => m.id)];
       
-      for (const memberId of allUsersToNotify) {
-        try {
-          await storage.createNotification({
-            userId: memberId,
-            type: 'location',
-            title: 'Location Update',
-            message: `${userName} updated their location`,
-            data: { locationId: location.id },
-            isRead: memberId === userId // Mark as read for the user who updated their location
-          });
-        } catch (notificationError) {
-          console.error(`Failed to create location notification for user ${memberId}:`, notificationError);
+      // Only create location notifications for significant moves (not every ping)
+      // Check if this is the first location or if it's been more than 5 minutes since last notification
+      const lastNotificationTime = (global as any).lastLocationNotification?.[userId] || 0;
+      const currentTime = Date.now();
+      const timeSinceLastNotification = currentTime - lastNotificationTime;
+      const shouldCreateNotification = timeSinceLastNotification > 5 * 60 * 1000; // 5 minutes
+      
+      if (shouldCreateNotification && familyMembers.length > 0) {
+        // Initialize global tracking object if it doesn't exist
+        if (!(global as any).lastLocationNotification) {
+          (global as any).lastLocationNotification = {};
+        }
+        (global as any).lastLocationNotification[userId] = currentTime;
+        
+        for (const familyMember of familyMembers) {
+          try {
+            await storage.createNotification({
+              userId: familyMember.id,
+              type: 'location',
+              title: 'Location Update',
+              message: `${userName} updated their location`,
+              data: { locationId: location.id, userId: userId },
+              isRead: false
+            });
+            console.log(`Created location notification for family member ${familyMember.id}`);
+          } catch (notificationError) {
+            console.error(`Failed to create location notification for user ${familyMember.id}:`, notificationError);
+          }
         }
       }
       
