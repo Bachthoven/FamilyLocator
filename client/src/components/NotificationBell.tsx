@@ -30,7 +30,7 @@ export function NotificationBell() {
   useEffect(() => {
     if (lastMessage) {
       try {
-        const message = JSON.parse(lastMessage);
+        const message = JSON.parse(lastMessage.toString());
         if (message.type === 'geofence' || message.type === 'notification') {
           // Immediately refresh notification queries when new notifications arrive
           queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
@@ -213,14 +213,14 @@ export function NotificationBell() {
                   key={notification.id}
                   className={`relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border p-6 pr-8 shadow-lg transition-all cursor-pointer hover:shadow-xl ${getToastColors(notification.title)} ${
                     !notification.isRead 
-                      ? 'ring-2 ring-blue-400 dark:ring-blue-300 shadow-xl border-blue-300 dark:border-blue-600 bg-opacity-100' 
+                      ? 'ring-2 ring-blue-200 dark:ring-blue-500 shadow-xl border-blue-200 dark:border-blue-500 bg-opacity-100' 
                       : 'opacity-75 hover:opacity-90'
                   }`}
                   onClick={() => !notification.isRead && handleMarkAsRead(notification.id)}
                 >
                   {/* Red dot indicator for unread notifications */}
                   {!notification.isRead && (
-                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white dark:border-gray-800 shadow-sm animate-pulse"></div>
+                    <div className="absolute top-1 right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white dark:border-gray-800 shadow-sm animate-pulse z-10"></div>
                   )}
                   <div className="flex items-start space-x-4 flex-1">
                     {/* Toast-style icon */}
