@@ -123,7 +123,7 @@ export function NotificationBell() {
     
     // Geofence notifications - special styling
     if (titleStr.includes('entering') || titleStr.includes('exiting')) {
-      return 'border-l-4 border-l-green-500 bg-green-50 dark:bg-green-950/20';
+      return 'bg-green-50 dark:bg-green-950/20';
     }
     
     // Success notifications
@@ -131,21 +131,51 @@ export function NotificationBell() {
         titleStr.includes('copied') || titleStr.includes('joined') || titleStr.includes('started') ||
         titleStr.includes('stopped') || titleStr.includes('deleted') || titleStr.includes('removed') ||
         titleStr.includes('updated') || titleStr.includes('centered')) {
-      return 'border-l-4 border-l-green-500 bg-green-50 dark:bg-green-950/20';
+      return 'bg-green-50 dark:bg-green-950/20';
     }
     
     // Error notifications
     if (titleStr.includes('error') || titleStr.includes('failed') || titleStr.includes('unauthorized')) {
-      return 'border-l-4 border-l-red-500 bg-red-50 dark:bg-red-950/20';
+      return 'bg-red-50 dark:bg-red-950/20';
     }
     
     // Warning notifications
     if (titleStr.includes('warning') || titleStr.includes('expired')) {
-      return 'border-l-4 border-l-yellow-500 bg-yellow-50 dark:bg-yellow-950/20';
+      return 'bg-yellow-50 dark:bg-yellow-950/20';
     }
     
     // Default styling
-    return 'border-l-4 border-l-blue-500 bg-blue-50 dark:bg-blue-950/20';
+    return 'bg-blue-50 dark:bg-blue-950/20';
+  };
+
+  const getBorderColor = (title: string) => {
+    const titleStr = title.toLowerCase();
+    
+    // Geofence notifications
+    if (titleStr.includes('entering') || titleStr.includes('exiting')) {
+      return 'border-l-green-500';
+    }
+    
+    // Success notifications
+    if (titleStr.includes('success') || titleStr.includes('saved') || titleStr.includes('added') || 
+        titleStr.includes('copied') || titleStr.includes('joined') || titleStr.includes('started') ||
+        titleStr.includes('stopped') || titleStr.includes('deleted') || titleStr.includes('removed') ||
+        titleStr.includes('updated') || titleStr.includes('centered')) {
+      return 'border-l-green-500';
+    }
+    
+    // Error notifications
+    if (titleStr.includes('error') || titleStr.includes('failed') || titleStr.includes('unauthorized')) {
+      return 'border-l-red-500';
+    }
+    
+    // Warning notifications
+    if (titleStr.includes('warning') || titleStr.includes('expired')) {
+      return 'border-l-yellow-500';
+    }
+    
+    // Default styling
+    return 'border-l-blue-500';
   };
 
   return (
@@ -211,7 +241,7 @@ export function NotificationBell() {
               {notifications.map((notification) => (
                 <div
                   key={notification.id}
-                  className={`relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border p-6 pr-8 shadow-lg transition-all cursor-pointer hover:shadow-xl ${getToastColors(notification.title)} ${
+                  className={`relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border border-l-4 p-6 pr-8 shadow-lg transition-all cursor-pointer hover:shadow-xl ${getBorderColor(notification.title)} ${getToastColors(notification.title)} ${
                     !notification.isRead 
                       ? 'shadow-xl border-blue-300 dark:border-blue-400 bg-opacity-100' 
                       : 'opacity-75 hover:opacity-90'
