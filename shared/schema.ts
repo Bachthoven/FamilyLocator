@@ -86,6 +86,18 @@ export const invitationCodes = pgTable("invitation_codes", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Notifications table for storing user notifications
+export const notifications = pgTable("notifications", {
+  id: serial("id").primaryKey(),
+  userId: serial("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  type: varchar("type").notNull(), // 'geofence_enter', 'geofence_exit', 'family_invite', etc.
+  title: varchar("title").notNull(),
+  message: text("message").notNull(),
+  data: jsonb("data"), // Additional data for the notification
+  isRead: boolean("is_read").notNull().default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   locations: many(locations),
@@ -93,6 +105,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   familyConnections: many(familyConnections, { relationName: "userConnections" }),
   familyMemberConnections: many(familyConnections, { relationName: "memberConnections" }),
   invitationCodes: many(invitationCodes),
+  notifications: many(notifications),
 }));
 
 export const familyConnectionsRelations = relations(familyConnections, ({ one }) => ({
@@ -135,6 +148,13 @@ export const invitationCodesRelations = relations(invitationCodes, ({ one }) => 
   }),
 }));
 
+export const notificationsRelations = relations(notifications, ({ one }) => ({
+  user: one(users, {
+    fields: [notifications.userId],
+    references: [users.id],
+  }),
+}));
+
 // Schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -164,6 +184,11 @@ export const insertInvitationCodeSchema = createInsertSchema(invitationCodes).om
   usedById: true,
 });
 
+export const insertNotificationSchema = createInsertSchema(notifications).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Type exports
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -175,3 +200,5 @@ export type FamilyConnection = typeof familyConnections.$inferSelect;
 export type InsertFamilyConnection = z.infer<typeof insertFamilyConnectionSchema>;
 export type InvitationCode = typeof invitationCodes.$inferSelect;
 export type InsertInvitationCode = z.infer<typeof insertInvitationCodeSchema>;
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;

@@ -82,13 +82,45 @@ async function sendGeofenceNotification(userId: number, place: any, action: 'ent
     if (!user) return;
 
     const message = `${user.firstName || user.email} is ${action === 'entered' ? 'entering' : 'exiting'} ${place.name}`;
+    const title = `Location Alert`;
     
     console.log(`Geofence notification: ${message}`);
     
     // Send notification to all family members
     const familyMembers = await storage.getFamilyMembers(userId);
     
-    // Broadcast to WebSocket clients
+    // Create database notifications for all family members
+    for (const familyMember of familyMembers) {
+      await storage.createNotification({
+        userId: familyMember.id,
+        type: `geofence_${action}`,
+        title,
+        message,
+        data: {
+          triggeredByUserId: userId,
+          placeId: place.id,
+          placeName: place.name,
+          action
+        },
+        isRead: false
+      });
+    }
+    
+    // Also notify the user who triggered the geofence (for their own records)
+    await storage.createNotification({
+      userId,
+      type: `geofence_${action}`,
+      title,
+      message: `You ${action === 'entered' ? 'entered' : 'exited'} ${place.name}`,
+      data: {
+        placeId: place.id,
+        placeName: place.name,
+        action
+      },
+      isRead: false
+    });
+    
+    // Broadcast to WebSocket clients for real-time updates
     if ((global as any).broadcastNotification) {
       (global as any).broadcastNotification({
         type: 'geofence',

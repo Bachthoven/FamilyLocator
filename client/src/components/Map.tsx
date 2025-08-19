@@ -5,6 +5,7 @@ import 'leaflet/dist/leaflet.css';
 import { User, Location, Place } from '@shared/schema';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest, queryClient } from '@/lib/queryClient';
+import { NotificationBell } from '@/components/NotificationBell';
 
 // Fix for default markers in react-leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -321,6 +322,11 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
           </Marker>
         ))}
       </MapContainer>
+      
+      {/* Top Left Controls - Notification Bell */}
+      <div className="absolute top-4 right-4 z-[1000]">
+        <NotificationBell />
+      </div>
       
       {/* Map Controls */}
       <div className="absolute bottom-32 right-4 z-[1000] flex flex-col space-y-2">
