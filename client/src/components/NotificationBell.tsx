@@ -212,10 +212,16 @@ export function NotificationBell() {
                 <div
                   key={notification.id}
                   className={`relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border p-6 pr-8 shadow-lg transition-all cursor-pointer hover:shadow-xl ${getToastColors(notification.title)} ${
-                    !notification.isRead ? 'ring-2 ring-blue-200' : 'opacity-75'
+                    !notification.isRead 
+                      ? 'ring-2 ring-blue-400 dark:ring-blue-300 shadow-xl border-blue-300 dark:border-blue-600 bg-opacity-100' 
+                      : 'opacity-75 hover:opacity-90'
                   }`}
                   onClick={() => !notification.isRead && handleMarkAsRead(notification.id)}
                 >
+                  {/* Red dot indicator for unread notifications */}
+                  {!notification.isRead && (
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white dark:border-gray-800 shadow-sm animate-pulse"></div>
+                  )}
                   <div className="flex items-start space-x-4 flex-1">
                     {/* Toast-style icon */}
                     <div className="flex-shrink-0">
@@ -224,17 +230,25 @@ export function NotificationBell() {
                     
                     <div className="flex-1 space-y-1">
                       {/* Toast-style title */}
-                      <div className="text-sm font-semibold text-foreground">
+                      <div className={`text-sm font-semibold text-foreground ${
+                        !notification.isRead ? 'font-bold text-blue-900 dark:text-blue-100' : ''
+                      }`}>
                         {notification.title}
                       </div>
                       
                       {/* Toast-style description */}
-                      <div className="text-sm opacity-90 text-foreground">
+                      <div className={`text-sm text-foreground ${
+                        !notification.isRead 
+                          ? 'opacity-95 font-medium text-blue-800 dark:text-blue-200' 
+                          : 'opacity-90'
+                      }`}>
                         {notification.message}
                       </div>
                       
                       {/* Time stamp */}
-                      <div className="text-xs opacity-70 text-foreground">
+                      <div className={`text-xs text-foreground ${
+                        !notification.isRead ? 'opacity-80' : 'opacity-70'
+                      }`}>
                         {formatTime(notification.createdAt || new Date().toISOString())}
                       </div>
                     </div>
