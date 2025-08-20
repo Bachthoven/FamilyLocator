@@ -25,14 +25,50 @@ export function NotificationSettings() {
         description: "Check if you received a system notification!",
       });
     },
-    onError: () => {
+    onError: (error) => {
+      console.error("Test notification error:", error);
       toast({
         title: "Test Failed",
-        description: "Could not send test notification",
+        description: "Could not send test notification - check console for details",
         variant: "destructive",
       });
     },
   });
+
+  // Direct browser test notification
+  const testBrowserNotification = () => {
+    if (Notification.permission === 'granted') {
+      try {
+        const notification = new Notification("FamilyLocator Test", {
+          body: "This is a test notification to verify your browser settings are working correctly.",
+          icon: '/favicon.ico',
+          tag: 'test-notification',
+          requireInteraction: false,
+          silent: false,
+        });
+
+        setTimeout(() => notification.close(), 5000);
+        
+        toast({
+          title: "Browser Test Sent",
+          description: "Did you see a notification? If not, check your browser/system settings.",
+        });
+      } catch (error) {
+        console.error('Error showing test notification:', error);
+        toast({
+          title: "Browser Test Failed",
+          description: "Error creating notification - check console for details",
+          variant: "destructive",
+        });
+      }
+    } else {
+      toast({
+        title: "Permission Required",
+        description: "Please enable notifications first",
+        variant: "destructive",
+      });
+    }
+  };
 
   useEffect(() => {
     if ('Notification' in window) {
@@ -162,15 +198,25 @@ export function NotificationSettings() {
         )}
 
         {systemNotificationsEnabled && (
-          <Button
-            variant="outline"
-            onClick={() => testNotificationMutation.mutate()}
-            disabled={testNotificationMutation.isPending}
-            className="w-full"
-          >
-            <TestTube className="w-4 h-4 mr-2" />
-            {testNotificationMutation.isPending ? "Sending..." : "Test System Notification"}
-          </Button>
+          <div className="space-y-2">
+            <Button
+              variant="outline"
+              onClick={testBrowserNotification}
+              className="w-full"
+            >
+              <TestTube className="w-4 h-4 mr-2" />
+              Test Browser Notification
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => testNotificationMutation.mutate()}
+              disabled={testNotificationMutation.isPending}
+              className="w-full"
+            >
+              <TestTube className="w-4 h-4 mr-2" />
+              {testNotificationMutation.isPending ? "Sending..." : "Test Geofence Notification"}
+            </Button>
+          </div>
         )}
 
         <div className="text-xs text-muted-foreground">
