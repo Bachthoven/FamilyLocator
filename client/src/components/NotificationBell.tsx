@@ -52,24 +52,7 @@ export function NotificationBell() {
           queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
           queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
           
-          // Show system notification for geofence events
-          if (message.type === 'geofence' && Notification.permission === 'granted') {
-            try {
-              const { userName, placeName, action, message: notificationMessage } = message;
-              const notification = new Notification(`Location Alert - ${placeName}`, {
-                body: notificationMessage,
-                icon: '/favicon.ico',
-                tag: 'geofence-notification',
-                requireInteraction: false,
-                silent: false,
-              });
-
-              // Auto-close after 5 seconds
-              setTimeout(() => notification.close(), 5000);
-            } catch (error) {
-              console.error('Error showing system notification:', error);
-            }
-          }
+          // System notifications are handled by useWebSocket.ts to avoid duplicates
         }
       } catch (error) {
         // Ignore parsing errors
