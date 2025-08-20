@@ -81,7 +81,7 @@ async function sendGeofenceNotification(userId: number, place: any, action: 'ent
     const user = await storage.getUser(userId);
     if (!user) return;
 
-    const message = `${user.firstName || user.email} is ${action === 'entered' ? 'entering' : 'exiting'} ${place.name}`;
+    const message = `${user.firstName || user.email} has ${action} ${place.name}`;
     const title = `Location Alert`;
     
     console.log(`Geofence notification: ${message}`);
