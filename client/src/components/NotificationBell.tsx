@@ -241,11 +241,19 @@ export function NotificationBell() {
               {notifications.map((notification) => (
                 <div
                   key={notification.id}
-                  className={`relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border-l-4 border-t border-r border-b p-6 pr-8 shadow-lg transition-all cursor-pointer hover:shadow-xl ${getBorderColor(notification.title)} ${getToastColors(notification.title)} ${
-                    !notification.isRead 
-                      ? 'border-t-blue-300 border-r-blue-300 border-b-blue-300 dark:border-t-blue-400 dark:border-r-blue-400 dark:border-b-blue-400 shadow-xl' 
-                      : 'border-t-gray-200 border-r-gray-200 border-b-gray-200 dark:border-t-gray-700 dark:border-r-gray-700 dark:border-b-gray-700 opacity-75 hover:opacity-90'
-                  }`}
+                  className={`relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md p-6 pr-8 shadow-lg transition-all cursor-pointer hover:shadow-xl`}
+                  style={{
+                    borderLeft: `4px solid ${notification.title.toLowerCase().includes('entering') || notification.title.toLowerCase().includes('exiting') ? '#10b981' : 
+                      notification.title.toLowerCase().includes('error') || notification.title.toLowerCase().includes('failed') ? '#ef4444' :
+                      notification.title.toLowerCase().includes('warning') || notification.title.toLowerCase().includes('expired') ? '#f59e0b' : '#3b82f6'}`,
+                    borderTop: `1px solid ${!notification.isRead ? '#93c5fd' : '#e5e7eb'}`,
+                    borderRight: `1px solid ${!notification.isRead ? '#93c5fd' : '#e5e7eb'}`,
+                    borderBottom: `1px solid ${!notification.isRead ? '#93c5fd' : '#e5e7eb'}`,
+                    backgroundColor: notification.title.toLowerCase().includes('entering') || notification.title.toLowerCase().includes('exiting') ? '#f0fdf4' :
+                      notification.title.toLowerCase().includes('error') || notification.title.toLowerCase().includes('failed') ? '#fef2f2' :
+                      notification.title.toLowerCase().includes('warning') || notification.title.toLowerCase().includes('expired') ? '#fffbeb' : '#eff6ff',
+                    opacity: !notification.isRead ? 1 : 0.75
+                  }}
                   onClick={() => !notification.isRead && handleMarkAsRead(notification.id)}
                 >
                   {/* Red dot indicator for unread notifications */}
