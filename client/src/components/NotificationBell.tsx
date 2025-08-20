@@ -238,22 +238,23 @@ export function NotificationBell() {
             </div>
           ) : (
             <div className="space-y-2 p-2">
-              {notifications.map((notification) => (
+              {notifications.map((notification) => {
+                const borderLeftColor = notification.title.toLowerCase().includes('entering') || notification.title.toLowerCase().includes('exiting') ? 'border-l-green-500' : 
+                  notification.title.toLowerCase().includes('error') || notification.title.toLowerCase().includes('failed') ? 'border-l-red-500' :
+                  notification.title.toLowerCase().includes('warning') || notification.title.toLowerCase().includes('expired') ? 'border-l-yellow-500' : 'border-l-blue-500';
+                
+                const bgColor = notification.title.toLowerCase().includes('entering') || notification.title.toLowerCase().includes('exiting') ? 'bg-green-50 dark:bg-green-950/20' :
+                  notification.title.toLowerCase().includes('error') || notification.title.toLowerCase().includes('failed') ? 'bg-red-50 dark:bg-red-950/20' :
+                  notification.title.toLowerCase().includes('warning') || notification.title.toLowerCase().includes('expired') ? 'bg-yellow-50 dark:bg-yellow-950/20' : 'bg-blue-50 dark:bg-blue-950/20';
+
+                return (
                 <div
                   key={notification.id}
-                  className={`relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md p-6 pr-8 shadow-lg transition-all cursor-pointer hover:shadow-xl`}
-                  style={{
-                    borderLeft: `4px solid ${notification.title.toLowerCase().includes('entering') || notification.title.toLowerCase().includes('exiting') ? '#10b981' : 
-                      notification.title.toLowerCase().includes('error') || notification.title.toLowerCase().includes('failed') ? '#ef4444' :
-                      notification.title.toLowerCase().includes('warning') || notification.title.toLowerCase().includes('expired') ? '#f59e0b' : '#3b82f6'}`,
-                    borderTop: `1px solid ${!notification.isRead ? '#93c5fd' : '#e5e7eb'}`,
-                    borderRight: `1px solid ${!notification.isRead ? '#93c5fd' : '#e5e7eb'}`,
-                    borderBottom: `1px solid ${!notification.isRead ? '#93c5fd' : '#e5e7eb'}`,
-                    backgroundColor: notification.title.toLowerCase().includes('entering') || notification.title.toLowerCase().includes('exiting') ? '#f0fdf4' :
-                      notification.title.toLowerCase().includes('error') || notification.title.toLowerCase().includes('failed') ? '#fef2f2' :
-                      notification.title.toLowerCase().includes('warning') || notification.title.toLowerCase().includes('expired') ? '#fffbeb' : '#eff6ff',
-                    opacity: !notification.isRead ? 1 : 0.75
-                  }}
+                  className={`relative flex w-full items-center justify-between overflow-hidden rounded-md border-l-4 ${borderLeftColor} ${bgColor} p-6 pr-8 shadow-lg transition-all cursor-pointer hover:shadow-xl ${
+                    !notification.isRead 
+                      ? 'border-2 border-l-4 border-blue-400 dark:border-blue-500 shadow-xl' 
+                      : 'border border-l-4 border-gray-200 dark:border-gray-700 opacity-75 hover:opacity-90'
+                  }`}
                   onClick={() => !notification.isRead && handleMarkAsRead(notification.id)}
                 >
                   {/* Red dot indicator for unread notifications */}
@@ -305,7 +306,8 @@ export function NotificationBell() {
                     </button>
                   )}
                 </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </ScrollArea>
