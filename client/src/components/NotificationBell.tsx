@@ -241,10 +241,10 @@ export function NotificationBell() {
               {notifications.map((notification) => (
                 <div
                   key={notification.id}
-                  className={`relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border border-l-4 p-6 pr-8 shadow-lg transition-all cursor-pointer hover:shadow-xl ${getBorderColor(notification.title)} ${getToastColors(notification.title)} ${
+                  className={`relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border-l-4 p-6 pr-8 shadow-lg transition-all cursor-pointer hover:shadow-xl ${getBorderColor(notification.title)} ${getToastColors(notification.title)} ${
                     !notification.isRead 
-                      ? 'shadow-xl' 
-                      : 'opacity-75 hover:opacity-90'
+                      ? 'border border-blue-300 dark:border-blue-400 shadow-xl' 
+                      : 'border border-gray-200 dark:border-gray-700 opacity-75 hover:opacity-90'
                   }`}
                   onClick={() => !notification.isRead && handleMarkAsRead(notification.id)}
                 >
