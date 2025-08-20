@@ -98,30 +98,11 @@ export default function Home() {
       // Handle geofence notifications
       const { userName, placeName, action, message } = lastMessage;
       
-      // Show toast notification
+      // Show toast notification only (system notification is handled by useWebSocket.ts)
       toast({
-        title: `${userName} ${action === 'entered' ? 'entered' : 'exited'} ${placeName}`,
-        description: message,
+        title: message,
         duration: 5000,
       });
-
-      // Show native system notification if permission granted
-      if (Notification.permission === 'granted') {
-        try {
-          const notification = new Notification(`Location Alert - ${placeName}`, {
-            body: message,
-            icon: '/favicon.ico', // You can customize this icon
-            tag: 'geofence-notification', // Prevents duplicate notifications
-            requireInteraction: false,
-            silent: false,
-          });
-
-          // Auto-close after 5 seconds
-          setTimeout(() => notification.close(), 5000);
-        } catch (error) {
-          console.error('Error showing system notification:', error);
-        }
-      }
       
     }
   }, [lastMessage, familyLocations, queryClient, toast]);
