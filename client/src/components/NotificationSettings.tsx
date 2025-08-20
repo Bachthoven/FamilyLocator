@@ -37,34 +37,50 @@ export function NotificationSettings() {
 
   // Direct browser test notification
   const testBrowserNotification = () => {
+    console.log('Testing browser notification directly...');
+    console.log('Notification permission:', Notification.permission);
+    
     if (Notification.permission === 'granted') {
       try {
-        const notification = new Notification("FamilyLocator Test", {
-          body: "This is a test notification to verify your browser settings are working correctly.",
+        console.log('Creating test notification...');
+        const notification = new Notification("🔔 FamilyLocator Test", {
+          body: "This is a test notification to verify your browser settings are working correctly. You should see this popup!",
           icon: '/favicon.ico',
           tag: 'test-notification',
           requireInteraction: false,
           silent: false,
+          badge: '/favicon.ico',
         });
 
-        setTimeout(() => notification.close(), 5000);
+        console.log('Test notification created successfully:', notification);
+        
+        notification.onclick = () => {
+          console.log('Test notification was clicked');
+          window.focus();
+        };
+
+        setTimeout(() => {
+          console.log('Closing test notification');
+          notification.close();
+        }, 8000); // Keep it open longer for testing
         
         toast({
           title: "Browser Test Sent",
-          description: "Did you see a notification? If not, check your browser/system settings.",
+          description: "Check if you saw a system notification! Look for a popup outside the browser.",
         });
       } catch (error) {
         console.error('Error showing test notification:', error);
         toast({
           title: "Browser Test Failed",
-          description: "Error creating notification - check console for details",
+          description: `Error: ${error.message}`,
           variant: "destructive",
         });
       }
     } else {
+      console.log('Notification permission not granted:', Notification.permission);
       toast({
         title: "Permission Required",
-        description: "Please enable notifications first",
+        description: `Permission status: ${Notification.permission}. Please enable notifications first.`,
         variant: "destructive",
       });
     }

@@ -27,7 +27,7 @@ export function useWebSocket() {
       if (ws.current) {
         const authMessage = {
           type: 'auth',
-          userId: user.id,
+          userId: (user as any)?.id,
         };
         console.log('Sending auth message:', authMessage);
         ws.current.send(JSON.stringify(authMessage));
