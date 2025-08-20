@@ -3,7 +3,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
 import BottomNavigation from '@/components/BottomNavigation';
 import { ProfileEditor } from '@/components/ProfileEditor';
-import { NotificationSettingsCompact } from '@/components/NotificationSettingsCompact';
+import { NotificationSettings } from '@/components/NotificationSettings';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -99,29 +99,11 @@ export default function Settings() {
           </CardHeader>
         </Card>
 
-        {/* Profile Information */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>Profile Information</CardTitle>
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowProfileEditor(true)}
-              >
-                Edit
-              </Button>
-            </div>
-          </CardHeader>
-        </Card>
-
         {/* Notification Settings */}
-        <NotificationSettingsCompact />
+        <NotificationSettings />
 
         {/* Settings Items */}
-        <div className="space-y-4">
+        <div className="space-y-2">
           {settingsItems.map((item) => {
             const Icon = item.icon;
             return (
