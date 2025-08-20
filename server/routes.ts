@@ -683,7 +683,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           userName: user.firstName || user.email,
           placeName: 'Test Location',
           action: 'entered',
-          message: `${user.firstName || user.email} is entering Test Location`,
+          message: `${user.firstName || user.email} has entered Test Location`,
           timestamp: new Date().toISOString()
         });
       }
