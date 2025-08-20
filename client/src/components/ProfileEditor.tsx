@@ -26,6 +26,7 @@ interface ProfileEditorProps {
     email: string;
     firstName?: string | null;
     lastName?: string | null;
+    phoneNumber?: string | null;
     profileImageUrl?: string | null;
   };
 }
@@ -38,6 +39,7 @@ export function ProfileEditor({ open, onOpenChange, user }: ProfileEditorProps) 
     firstName: user.firstName || '',
     lastName: user.lastName || '',
     email: user.email,
+    phoneNumber: user.phoneNumber || '',
     currentPassword: '',
     newPassword: '',
     confirmPassword: ''
@@ -156,6 +158,7 @@ export function ProfileEditor({ open, onOpenChange, user }: ProfileEditorProps) 
       firstName: formData.firstName,
       lastName: formData.lastName,
       email: formData.email,
+      phoneNumber: formData.phoneNumber,
     };
 
     if (profileImageUrl !== user.profileImageUrl) {
@@ -246,6 +249,18 @@ export function ProfileEditor({ open, onOpenChange, user }: ProfileEditorProps) 
               value={formData.email}
               onChange={(e) => handleInputChange('email', e.target.value)}
               placeholder="Enter email"
+            />
+          </div>
+
+          {/* Phone Number Field */}
+          <div>
+            <Label htmlFor="phoneNumber">Phone Number</Label>
+            <Input
+              id="phoneNumber"
+              type="tel"
+              value={formData.phoneNumber}
+              onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
+              placeholder="(555) 123-4567"
             />
           </div>
 

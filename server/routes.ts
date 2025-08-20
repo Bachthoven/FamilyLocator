@@ -38,6 +38,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         firstName: z.string().optional(),
         lastName: z.string().optional(),
         email: z.string().email().optional(),
+        phoneNumber: z.string().optional(),
         profileImageUrl: z.string().optional(),
         currentPassword: z.string().optional(),
         newPassword: z.string().min(6).optional(),

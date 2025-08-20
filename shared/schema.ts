@@ -34,6 +34,7 @@ export const users = pgTable("users", {
   password: varchar("password").notNull(),
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
+  phoneNumber: varchar("phone_number"),
   profileImageUrl: varchar("profile_image_url"),
   locationSharingEnabled: boolean("location_sharing_enabled").default(true),
   locationHistoryEnabled: boolean("location_history_enabled").default(true),

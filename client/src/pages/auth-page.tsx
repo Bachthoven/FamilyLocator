@@ -37,6 +37,7 @@ const registerSchema = z.object({
   confirmPassword: z.string().min(6, "Please confirm your password"),
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
+  phoneNumber: z.string().min(10, "Phone number must be at least 10 digits").regex(/^[\d\s\-\(\)]+$/, "Please enter a valid phone number"),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
@@ -77,6 +78,7 @@ export default function AuthPage() {
       confirmPassword: "",
       firstName: "",
       lastName: "",
+      phoneNumber: "",
     },
   });
 
@@ -233,6 +235,19 @@ export default function AuthPage() {
                           <FormLabel>Email</FormLabel>
                           <FormControl>
                             <Input placeholder="your@email.com" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={registerForm.control}
+                      name="phoneNumber"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Phone Number</FormLabel>
+                          <FormControl>
+                            <Input placeholder="(555) 123-4567" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
