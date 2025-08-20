@@ -3,7 +3,9 @@ import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./auth";
-import { insertLocationSchema, insertPlaceSchema, insertFamilyConnectionSchema, insertNotificationSchema } from "@shared/schema";
+import { insertLocationSchema, insertPlaceSchema, insertFamilyConnectionSchema, insertNotificationSchema, passwordResetCodes, users } from "@shared/schema";
+import { eq, desc, and, sql, gte, lte } from "drizzle-orm";
+import { db } from "./db";
 import { locationLogger } from "./locationLogger";
 import { z } from "zod";
 import { checkGeofenceTransitions } from "./geofencing";
@@ -63,6 +65,98 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating profile:", error);
       res.status(500).json({ message: "Failed to update profile" });
+    }
+  });
+
+  // Forgot Password Routes
+  app.post('/api/auth/forgot-password', async (req, res) => {
+    try {
+      const { email } = z.object({ email: z.string().email() }).parse(req.body);
+      
+      // Check if user exists
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.status(404).json({ message: "No account found with this email address" });
+      }
+
+      // Check if user has a phone number
+      if (!user.phoneNumber) {
+        return res.status(400).json({ message: "This account doesn't have a phone number. Please contact support." });
+      }
+
+      // Generate 6-digit verification code
+      const code = Math.floor(100000 + Math.random() * 900000).toString();
+      const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+
+      // Store the code in database
+      await db.insert(passwordResetCodes).values({
+        email,
+        code,
+        expiresAt,
+      });
+
+      // TODO: In a real implementation, you would send the code via SMS
+      // For now, we'll just log it to console for testing
+      console.log(`Password reset code for ${email} (${user.phoneNumber}): ${code}`);
+      
+      res.json({ 
+        message: "Verification code sent to your phone",
+        // For testing purposes only - remove in production
+        testCode: process.env.NODE_ENV === 'development' ? code : undefined
+      });
+    } catch (error) {
+      console.error("Error sending reset code:", error);
+      res.status(500).json({ message: "Failed to send verification code" });
+    }
+  });
+
+  app.post('/api/auth/reset-password', async (req, res) => {
+    try {
+      const { email, code, newPassword } = z.object({
+        email: z.string().email(),
+        code: z.string().min(6).max(6),
+        newPassword: z.string().min(6)
+      }).parse(req.body);
+
+      // Find the reset code
+      const [resetCode] = await db
+        .select()
+        .from(passwordResetCodes)
+        .where(
+          and(
+            eq(passwordResetCodes.email, email),
+            eq(passwordResetCodes.code, code),
+            gte(passwordResetCodes.expiresAt, new Date()),
+            sql`${passwordResetCodes.usedAt} IS NULL`
+          )
+        );
+
+      if (!resetCode) {
+        return res.status(400).json({ message: "Invalid or expired verification code" });
+      }
+
+      // Hash the new password
+      const hashedPassword = await hashPassword(newPassword);
+
+      // Update user's password
+      await db
+        .update(users)
+        .set({ 
+          password: hashedPassword,
+          updatedAt: new Date()
+        })
+        .where(eq(users.email, email));
+
+      // Mark the reset code as used
+      await db
+        .update(passwordResetCodes)
+        .set({ usedAt: new Date() })
+        .where(eq(passwordResetCodes.id, resetCode.id));
+
+      res.json({ message: "Password reset successfully" });
+    } catch (error) {
+      console.error("Error resetting password:", error);
+      res.status(500).json({ message: "Failed to reset password" });
     }
   });
 

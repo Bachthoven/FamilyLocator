@@ -12,7 +12,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, X } from "lucide-react";
+import { Loader2, X, KeyRound } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -24,7 +27,14 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email"),
@@ -49,6 +59,60 @@ type RegisterFormData = z.infer<typeof registerSchema>;
 export default function AuthPage() {
   const { user, loginMutation, registerMutation } = useAuth();
   const [, navigate] = useLocation();
+  const { toast } = useToast();
+  const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
+  const [resetStep, setResetStep] = useState<'email' | 'code' | 'password'>('email');
+  const [resetEmail, setResetEmail] = useState('');
+  const [verificationCode, setVerificationCode] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
+
+  const sendCodeMutation = useMutation({
+    mutationFn: async (email: string) => {
+      const response = await apiRequest('POST', '/api/auth/forgot-password', { email });
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Verification Code Sent",
+        description: "Check your phone for a verification code.",
+      });
+      setResetStep('code');
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to send verification code",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const resetPasswordMutation = useMutation({
+    mutationFn: async (data: { email: string; code: string; newPassword: string }) => {
+      const response = await apiRequest('POST', '/api/auth/reset-password', data);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Password Reset",
+        description: "Your password has been successfully reset.",
+      });
+      setForgotPasswordOpen(false);
+      setResetStep('email');
+      setResetEmail('');
+      setVerificationCode('');
+      setNewPassword('');
+      setConfirmNewPassword('');
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to reset password",
+        variant: "destructive",
+      });
+    },
+  });
 
   // Get the tab parameter from URL
   const urlParams = new URLSearchParams(window.location.search);
@@ -184,6 +248,18 @@ export default function AuthPage() {
                     </Button>
                   </form>
                 </Form>
+                
+                {/* Forgot Password Link */}
+                <div className="text-center mt-4">
+                  <Button
+                    type="button"
+                    variant="link"
+                    className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200"
+                    onClick={() => setForgotPasswordOpen(true)}
+                  >
+                    Forgot your password?
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -301,6 +377,135 @@ export default function AuthPage() {
         </Tabs>
         </div>
       </div>
+
+      {/* Forgot Password Dialog */}
+      <Dialog open={forgotPasswordOpen} onOpenChange={setForgotPasswordOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <KeyRound className="w-5 h-5" />
+              Reset Password
+            </DialogTitle>
+            <DialogDescription>
+              {resetStep === 'email' && 'Enter your email address to receive a verification code'}
+              {resetStep === 'code' && 'Enter the verification code sent to your phone'}
+              {resetStep === 'password' && 'Enter your new password'}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {resetStep === 'email' && (
+              <>
+                <div>
+                  <Label htmlFor="reset-email">Email Address</Label>
+                  <Input
+                    id="reset-email"
+                    type="email"
+                    value={resetEmail}
+                    onChange={(e) => setResetEmail(e.target.value)}
+                    placeholder="your@email.com"
+                  />
+                </div>
+                <Button
+                  onClick={() => sendCodeMutation.mutate(resetEmail)}
+                  disabled={sendCodeMutation.isPending || !resetEmail}
+                  className="w-full"
+                >
+                  {sendCodeMutation.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Sending Code...
+                    </>
+                  ) : (
+                    'Send Verification Code'
+                  )}
+                </Button>
+              </>
+            )}
+
+            {resetStep === 'code' && (
+              <>
+                <div>
+                  <Label htmlFor="verification-code">Verification Code</Label>
+                  <Input
+                    id="verification-code"
+                    type="text"
+                    value={verificationCode}
+                    onChange={(e) => setVerificationCode(e.target.value)}
+                    placeholder="Enter 6-digit code"
+                    maxLength={6}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="new-password">New Password</Label>
+                  <Input
+                    id="new-password"
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Enter new password"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="confirm-new-password">Confirm New Password</Label>
+                  <Input
+                    id="confirm-new-password"
+                    type="password"
+                    value={confirmNewPassword}
+                    onChange={(e) => setConfirmNewPassword(e.target.value)}
+                    placeholder="Confirm new password"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => setResetStep('email')}
+                    className="flex-1"
+                  >
+                    Back
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      if (newPassword !== confirmNewPassword) {
+                        toast({
+                          title: "Password Mismatch",
+                          description: "Passwords don't match",
+                          variant: "destructive",
+                        });
+                        return;
+                      }
+                      if (newPassword.length < 6) {
+                        toast({
+                          title: "Password Too Short",
+                          description: "Password must be at least 6 characters",
+                          variant: "destructive",
+                        });
+                        return;
+                      }
+                      resetPasswordMutation.mutate({
+                        email: resetEmail,
+                        code: verificationCode,
+                        newPassword: newPassword
+                      });
+                    }}
+                    disabled={resetPasswordMutation.isPending || !verificationCode || !newPassword || !confirmNewPassword}
+                    className="flex-1"
+                  >
+                    {resetPasswordMutation.isPending ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Resetting...
+                      </>
+                    ) : (
+                      'Reset Password'
+                    )}
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

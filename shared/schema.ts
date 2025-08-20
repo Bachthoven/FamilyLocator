@@ -99,6 +99,16 @@ export const notifications = pgTable("notifications", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Password reset codes table for storing verification codes
+export const passwordResetCodes = pgTable("password_reset_codes", {
+  id: serial("id").primaryKey(),
+  email: varchar("email").notNull(),
+  code: varchar("code", { length: 6 }).notNull(), // 6-digit verification code
+  expiresAt: timestamp("expires_at").notNull(), // Codes expire after 15 minutes
+  usedAt: timestamp("used_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   locations: many(locations),
@@ -190,6 +200,12 @@ export const insertNotificationSchema = createInsertSchema(notifications).omit({
   createdAt: true,
 });
 
+export const insertPasswordResetCodeSchema = createInsertSchema(passwordResetCodes).omit({
+  id: true,
+  createdAt: true,
+  usedAt: true,
+});
+
 // Type exports
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -203,3 +219,5 @@ export type InvitationCode = typeof invitationCodes.$inferSelect;
 export type InsertInvitationCode = z.infer<typeof insertInvitationCodeSchema>;
 export type Notification = typeof notifications.$inferSelect;
 export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+export type PasswordResetCode = typeof passwordResetCodes.$inferSelect;
+export type InsertPasswordResetCode = z.infer<typeof insertPasswordResetCodeSchema>;
