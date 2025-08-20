@@ -128,6 +128,8 @@ FamilyLocator is a modern web application that enables families to share their r
   - Integrated Service Worker notifications with existing WebSocket geofencing system
   - System now successfully delivers notifications on both desktop and mobile platforms
   - Removed diagnostic and test components from Settings after successful implementation
+  - Updated geofence radius from 10 meters to 20 meters
+  - Redesigned notification settings as compact card with dialog box interface
 
 - August 18, 2025. Profile management improvements and UI streamlining:
   - Fixed profile image upload and display across all components
