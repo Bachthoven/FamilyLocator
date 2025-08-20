@@ -100,7 +100,9 @@ export default function Settings() {
         </Card>
 
         {/* Notification Settings */}
-        <NotificationSettings />
+        <div className="mb-8">
+          <NotificationSettings />
+        </div>
 
         {/* Settings Items */}
         <div className="space-y-2">
