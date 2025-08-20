@@ -96,11 +96,33 @@ export default function Home() {
       }
     } else if (lastMessage?.type === 'geofence') {
       // Handle geofence notifications
-      const action = lastMessage.action === 'entered' ? 'entering' : 'exiting';
+      const { userName, placeName, action, message } = lastMessage;
+      
+      // Show toast notification
       toast({
-        title: `${lastMessage.userName} is ${action} ${lastMessage.placeName}`,
-        description: `Location-based notification • ${new Date().toLocaleTimeString()}`,
+        title: `${userName} ${action === 'entered' ? 'entered' : 'exited'} ${placeName}`,
+        description: message,
+        duration: 5000,
       });
+
+      // Show native system notification if permission granted
+      if (Notification.permission === 'granted') {
+        try {
+          const notification = new Notification(`Location Alert - ${placeName}`, {
+            body: message,
+            icon: '/favicon.ico', // You can customize this icon
+            tag: 'geofence-notification', // Prevents duplicate notifications
+            requireInteraction: false,
+            silent: false,
+          });
+
+          // Auto-close after 5 seconds
+          setTimeout(() => notification.close(), 5000);
+        } catch (error) {
+          console.error('Error showing system notification:', error);
+        }
+      }
+      
     }
   }, [lastMessage, familyLocations, queryClient, toast]);
 

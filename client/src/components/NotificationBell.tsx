@@ -26,6 +26,22 @@ export function NotificationBell() {
   
   const unreadCount = unreadCountData?.count || 0;
 
+  // Request notification permission when component mounts
+  useEffect(() => {
+    const requestNotificationPermission = async () => {
+      if ('Notification' in window && Notification.permission === 'default') {
+        try {
+          const permission = await Notification.requestPermission();
+          console.log('Notification permission:', permission);
+        } catch (error) {
+          console.error('Error requesting notification permission:', error);
+        }
+      }
+    };
+
+    requestNotificationPermission();
+  }, []);
+
   // Listen for WebSocket notifications and refresh the queries
   useEffect(() => {
     if (lastMessage) {
@@ -35,6 +51,25 @@ export function NotificationBell() {
           // Immediately refresh notification queries when new notifications arrive
           queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
           queryClient.invalidateQueries({ queryKey: ["/api/notifications/unread-count"] });
+          
+          // Show system notification for geofence events
+          if (message.type === 'geofence' && Notification.permission === 'granted') {
+            try {
+              const { userName, placeName, action, message: notificationMessage } = message;
+              const notification = new Notification(`Location Alert - ${placeName}`, {
+                body: notificationMessage,
+                icon: '/favicon.ico',
+                tag: 'geofence-notification',
+                requireInteraction: false,
+                silent: false,
+              });
+
+              // Auto-close after 5 seconds
+              setTimeout(() => notification.close(), 5000);
+            } catch (error) {
+              console.error('Error showing system notification:', error);
+            }
+          }
         }
       } catch (error) {
         // Ignore parsing errors

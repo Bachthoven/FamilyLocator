@@ -3,6 +3,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
 import BottomNavigation from '@/components/BottomNavigation';
 import { ProfileEditor } from '@/components/ProfileEditor';
+import { NotificationSettings } from '@/components/NotificationSettings';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -97,6 +98,9 @@ export default function Settings() {
             </div>
           </CardHeader>
         </Card>
+
+        {/* Notification Settings */}
+        <NotificationSettings />
 
         {/* Settings Items */}
         <div className="space-y-2">
