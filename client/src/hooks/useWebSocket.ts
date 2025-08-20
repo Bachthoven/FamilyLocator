@@ -44,8 +44,8 @@ export function useWebSocket() {
           console.log('Attempting to show system notification for geofence event');
           // Import the helper dynamically to avoid circular dependency
           import('@/utils/notificationHelper').then(({ showNotification }) => {
-            showNotification(`Location Alert - ${message.placeName}`, {
-              body: message.message,
+            showNotification(message.message, {
+              body: '',
               icon: '/favicon.ico',
               tag: 'geofence-notification',
               requireInteraction: false,
