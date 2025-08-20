@@ -7,6 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { showNotification, requestNotificationPermission, isMobileDevice } from "@/utils/notificationHelper";
 
 export function NotificationSettings() {
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>('default');
@@ -35,44 +36,44 @@ export function NotificationSettings() {
     },
   });
 
-  // Direct browser test notification
-  const testBrowserNotification = () => {
-    console.log('Testing browser notification directly...');
+  // Direct browser test notification - works on both mobile and desktop
+  const testBrowserNotification = async () => {
+    console.log('Testing browser notification...');
+    console.log('Is mobile device:', isMobileDevice());
     console.log('Notification permission:', Notification.permission);
     
     if (Notification.permission === 'granted') {
       try {
-        console.log('Creating test notification...');
-        const notification = new Notification("🔔 FamilyLocator Test", {
-          body: "This is a test notification to verify your browser settings are working correctly. You should see this popup!",
-          icon: '/favicon.ico',
-          tag: 'test-notification',
-          requireInteraction: false,
-          silent: false,
-          badge: '/favicon.ico',
-        });
+        const success = await showNotification(
+          "🔔 FamilyLocator Test",
+          {
+            body: `Test notification on ${isMobileDevice() ? 'mobile' : 'desktop'} device. You should see this popup!`,
+            tag: 'test-notification',
+            requireInteraction: isMobileDevice(), // Keep open on mobile
+            vibrate: isMobileDevice() ? [200, 100, 200] : undefined,
+          }
+        );
 
-        console.log('Test notification created successfully:', notification);
-        
-        notification.onclick = () => {
-          console.log('Test notification was clicked');
-          window.focus();
-        };
-
-        setTimeout(() => {
-          console.log('Closing test notification');
-          notification.close();
-        }, 8000); // Keep it open longer for testing
-        
-        toast({
-          title: "Browser Test Sent",
-          description: "Check if you saw a system notification! Look for a popup outside the browser.",
-        });
+        if (success) {
+          console.log('Test notification created successfully');
+          toast({
+            title: "Test Sent Successfully", 
+            description: isMobileDevice() 
+              ? "Check your notification panel!" 
+              : "Check if you saw a system notification!",
+          });
+        } else {
+          toast({
+            title: "Test Failed",
+            description: "Could not show notification. Check console for details.",
+            variant: "destructive",
+          });
+        }
       } catch (error) {
         console.error('Error showing test notification:', error);
         toast({
           title: "Browser Test Failed",
-          description: `Error: ${error.message}`,
+          description: `Error: ${(error as Error).message}`,
           variant: "destructive",
         });
       }

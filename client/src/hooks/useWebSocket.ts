@@ -42,19 +42,24 @@ export function useWebSocket() {
         // If it's a geofence message, try to show a system notification immediately
         if (message.type === 'geofence' && Notification.permission === 'granted') {
           console.log('Attempting to show system notification for geofence event');
-          try {
-            const notification = new Notification(`Location Alert - ${message.placeName}`, {
+          // Import the helper dynamically to avoid circular dependency
+          import('@/utils/notificationHelper').then(({ showNotification }) => {
+            showNotification(`Location Alert - ${message.placeName}`, {
               body: message.message,
               icon: '/favicon.ico',
               tag: 'geofence-notification',
               requireInteraction: false,
-              silent: false,
+              vibrate: [200, 100, 200],
+            }).then(success => {
+              if (success) {
+                console.log('Geofence notification shown successfully');
+              } else {
+                console.error('Failed to show geofence notification');
+              }
             });
-            console.log('System notification created successfully');
-            setTimeout(() => notification.close(), 5000);
-          } catch (notificationError) {
-            console.error('Error creating system notification:', notificationError);
-          }
+          }).catch(error => {
+            console.error('Error loading notification helper:', error);
+          });
         }
         
         setLastMessage(message);
