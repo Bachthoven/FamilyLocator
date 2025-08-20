@@ -4,7 +4,6 @@ import { useToast } from '@/hooks/use-toast';
 import BottomNavigation from '@/components/BottomNavigation';
 import { ProfileEditor } from '@/components/ProfileEditor';
 import { NotificationSettings } from '@/components/NotificationSettings';
-import { TestNotifications } from '@/components/TestNotifications';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -102,9 +101,6 @@ export default function Settings() {
 
         {/* Notification Settings */}
         <NotificationSettings />
-        
-        {/* Notification Diagnostics - for testing */}
-        <TestNotifications />
 
         {/* Settings Items */}
         <div className="space-y-2">

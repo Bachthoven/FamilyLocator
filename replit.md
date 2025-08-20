@@ -121,6 +121,14 @@ FamilyLocator is a modern web application that enables families to share their r
 
 ## Changelog
 
+- August 20, 2025. Completed cross-platform notification system:
+  - Fixed mobile notification issues by implementing Service Worker API for mobile devices
+  - Created comprehensive notification helper that automatically detects mobile vs desktop
+  - Added vibration support for mobile notifications and proper fallback handling
+  - Integrated Service Worker notifications with existing WebSocket geofencing system
+  - System now successfully delivers notifications on both desktop and mobile platforms
+  - Removed diagnostic and test components from Settings after successful implementation
+
 - August 18, 2025. Profile management improvements and UI streamlining:
   - Fixed profile image upload and display across all components
   - Improved password change error handling with user-friendly messages

@@ -1,91 +1,18 @@
 import { useState, useEffect } from "react";
-import { Bell, BellOff, Check, X, TestTube } from "lucide-react";
-import { useMutation } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { Bell, BellOff, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { showNotification, requestNotificationPermission, isMobileDevice } from "@/utils/notificationHelper";
+import { requestNotificationPermission } from "@/utils/notificationHelper";
 
 export function NotificationSettings() {
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>('default');
   const [systemNotificationsEnabled, setSystemNotificationsEnabled] = useState(false);
   const { toast } = useToast();
 
-  // Test notification mutation
-  const testNotificationMutation = useMutation({
-    mutationFn: async () => {
-      const response = await apiRequest("POST", "/api/geofence/test");
-      return response.json();
-    },
-    onSuccess: () => {
-      toast({
-        title: "Test Notification Sent",
-        description: "Check if you received a system notification!",
-      });
-    },
-    onError: (error) => {
-      console.error("Test notification error:", error);
-      toast({
-        title: "Test Failed",
-        description: "Could not send test notification - check console for details",
-        variant: "destructive",
-      });
-    },
-  });
 
-  // Direct browser test notification - works on both mobile and desktop
-  const testBrowserNotification = async () => {
-    console.log('Testing browser notification...');
-    console.log('Is mobile device:', isMobileDevice());
-    console.log('Notification permission:', Notification.permission);
-    
-    if (Notification.permission === 'granted') {
-      try {
-        const success = await showNotification(
-          "🔔 FamilyLocator Test",
-          {
-            body: `Test notification on ${isMobileDevice() ? 'mobile' : 'desktop'} device. You should see this popup!`,
-            tag: 'test-notification',
-            requireInteraction: isMobileDevice(), // Keep open on mobile
-            vibrate: isMobileDevice() ? [200, 100, 200] : undefined,
-          }
-        );
-
-        if (success) {
-          console.log('Test notification created successfully');
-          toast({
-            title: "Test Sent Successfully", 
-            description: isMobileDevice() 
-              ? "Check your notification panel!" 
-              : "Check if you saw a system notification!",
-          });
-        } else {
-          toast({
-            title: "Test Failed",
-            description: "Could not show notification. Check console for details.",
-            variant: "destructive",
-          });
-        }
-      } catch (error) {
-        console.error('Error showing test notification:', error);
-        toast({
-          title: "Browser Test Failed",
-          description: `Error: ${(error as Error).message}`,
-          variant: "destructive",
-        });
-      }
-    } else {
-      console.log('Notification permission not granted:', Notification.permission);
-      toast({
-        title: "Permission Required",
-        description: `Permission status: ${Notification.permission}. Please enable notifications first.`,
-        variant: "destructive",
-      });
-    }
-  };
 
   useEffect(() => {
     if ('Notification' in window) {
@@ -214,27 +141,7 @@ export function NotificationSettings() {
           </Button>
         )}
 
-        {systemNotificationsEnabled && (
-          <div className="space-y-2">
-            <Button
-              variant="outline"
-              onClick={testBrowserNotification}
-              className="w-full"
-            >
-              <TestTube className="w-4 h-4 mr-2" />
-              Test Browser Notification
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => testNotificationMutation.mutate()}
-              disabled={testNotificationMutation.isPending}
-              className="w-full"
-            >
-              <TestTube className="w-4 h-4 mr-2" />
-              {testNotificationMutation.isPending ? "Sending..." : "Test Geofence Notification"}
-            </Button>
-          </div>
-        )}
+
 
         <div className="text-xs text-muted-foreground">
           <p>• You'll receive notifications when family members enter or exit saved places</p>
