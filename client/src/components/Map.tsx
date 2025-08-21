@@ -124,6 +124,11 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
       setShouldUpdateCenter(true);
       setHasInitialized(true);
       
+      // Set the map zoom to the specified level and center
+      if (mapRef.current) {
+        mapRef.current.setView([focusLocation.latitude, focusLocation.longitude], focusLocation.zoom || 16);
+      }
+      
       // Reset the flag after a short delay
       setTimeout(() => setShouldUpdateCenter(false), 100);
       return; // Exit early so we don't set center to current location

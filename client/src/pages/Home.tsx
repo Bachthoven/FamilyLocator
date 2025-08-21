@@ -51,14 +51,19 @@ export default function Home() {
     }
   }, [user, sendMessage]);
 
-  // Check for focus location from History page
+  // Check for focus location from History page via URL parameters
   useEffect(() => {
-    const stored = localStorage.getItem('focusLocation');
-    if (stored) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const focusParam = urlParams.get('focus');
+    if (focusParam) {
       try {
-        const parsed = JSON.parse(stored);
+        const parsed = JSON.parse(decodeURIComponent(focusParam));
         setFocusLocation(parsed);
-        localStorage.removeItem('focusLocation'); // Clear after reading
+        
+        // Clear the URL parameter to avoid re-triggering
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.delete('focus');
+        window.history.replaceState({}, '', newUrl.pathname);
         
         // Show toast notification
         toast({

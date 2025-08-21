@@ -342,15 +342,15 @@ export default function History() {
                                 <button
                                   className="flex items-start space-x-3 w-full text-left hover:bg-muted/50 rounded-lg p-2 -m-2 transition-colors"
                                   onClick={() => {
-                                    // Store location data and redirect to Home (map) page
-                                    localStorage.setItem('focusLocation', JSON.stringify({
+                                    // Navigate to Home page with focus location data in URL
+                                    const focusData = {
                                       latitude: location.latitude,
                                       longitude: location.longitude,
                                       zoom: 16,
                                       timestamp: location.timestamp,
                                       userName: data.user.firstName || data.user.email
-                                    }));
-                                    setLocation('/');
+                                    };
+                                    setLocation(`/?focus=${encodeURIComponent(JSON.stringify(focusData))}`);
                                   }}
                                 >
                                   <div 
