@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAuth } from '@/hooks/use-auth';
+import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import { isUnauthorizedError } from '@/lib/authUtils';
@@ -41,6 +41,7 @@ export default function Places() {
     latitude: 0,
     longitude: 0,
     category: 'other' as const,
+    color: '#8b5cf6', // Default purple color
   });
   const [useCurrentLocation, setUseCurrentLocation] = useState(false);
 
@@ -103,6 +104,7 @@ export default function Places() {
         latitude: 0,
         longitude: 0,
         category: 'other',
+        color: '#8b5cf6',
       });
       setUseCurrentLocation(false);
       queryClient.invalidateQueries({ queryKey: ['/api/places'] });
@@ -291,6 +293,46 @@ export default function Places() {
                     </SelectContent>
                   </Select>
                 </div>
+                
+                <div>
+                  <Label htmlFor="color">Pin Color</Label>
+                  <div className="flex items-center space-x-2 mt-2">
+                    {/* Predefined color options */}
+                    {[
+                      { name: 'Purple', value: '#8b5cf6' },
+                      { name: 'Blue', value: '#3b82f6' },
+                      { name: 'Green', value: '#10b981' },
+                      { name: 'Red', value: '#ef4444' },
+                      { name: 'Orange', value: '#f97316' },
+                      { name: 'Pink', value: '#ec4899' },
+                      { name: 'Yellow', value: '#eab308' },
+                      { name: 'Gray', value: '#6b7280' }
+                    ].map((color) => (
+                      <button
+                        key={color.value}
+                        type="button"
+                        onClick={() => setNewPlace(prev => ({ ...prev, color: color.value }))}
+                        className={`w-8 h-8 rounded-full border-2 ${
+                          newPlace.color === color.value ? 'border-foreground' : 'border-gray-300'
+                        }`}
+                        style={{ backgroundColor: color.value }}
+                        title={color.name}
+                      />
+                    ))}
+                    {/* Custom color picker */}
+                    <input
+                      type="color"
+                      value={newPlace.color}
+                      onChange={(e) => setNewPlace(prev => ({ ...prev, color: e.target.value }))}
+                      className="w-8 h-8 rounded border border-gray-300 cursor-pointer"
+                      title="Custom color"
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Choose a color for your place pin on the map
+                  </p>
+                </div>
+                
                 <div className="flex justify-end space-x-2">
                   <Button
                     variant="outline"

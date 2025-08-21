@@ -73,6 +73,7 @@ export const places = pgTable("places", {
   latitude: doublePrecision("latitude").notNull(),
   longitude: doublePrecision("longitude").notNull(),
   category: varchar("category"), // home, work, school, etc.
+  color: varchar("color").default("purple"), // Custom color for the place pin
   createdAt: timestamp("created_at").defaultNow(),
 });
 

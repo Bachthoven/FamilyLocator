@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useLocation } from 'wouter';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -36,6 +37,7 @@ export default function History() {
   const { user } = useAuth();
   const [selectedMember, setSelectedMember] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
+  const [, setLocation] = useLocation();
 
   // Fetch location history for the past 24 hours
   const { data: locationHistory = {}, isLoading, error } = useQuery<FamilyLocationHistory>({
@@ -348,7 +350,7 @@ export default function History() {
                                       timestamp: location.timestamp,
                                       userName: data.user.firstName || data.user.email
                                     }));
-                                    window.location.href = '/';
+                                    setLocation('/');
                                   }}
                                 >
                                   <div 

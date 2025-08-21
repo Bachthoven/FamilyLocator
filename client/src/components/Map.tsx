@@ -56,8 +56,8 @@ const formatTimeSince = (timestamp: string | Date) => {
   }
 };
 
-// Create place marker icons based on category
-const createPlaceIcon = (category: string) => {
+// Create place marker icons based on category and custom color
+const createPlaceIcon = (category: string, customColor?: string) => {
   const categoryColors = {
     home: 'purple',
     work: 'orange', 
@@ -65,12 +65,12 @@ const createPlaceIcon = (category: string) => {
     other: 'gray'
   };
   
-  const color = categoryColors[category as keyof typeof categoryColors] || 'gray';
+  const color = customColor || categoryColors[category as keyof typeof categoryColors] || 'gray';
   
   return new L.DivIcon({
     html: `
       <div class="relative">
-        <div class="w-6 h-6 bg-${color}-500 rounded-lg border-2 border-white shadow-lg flex items-center justify-center">
+        <div class="w-6 h-6 rounded-lg border-2 border-white shadow-lg flex items-center justify-center" style="background-color: ${color}">
           <div class="w-2 h-2 bg-white rounded-full"></div>
         </div>
       </div>
@@ -232,7 +232,7 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
           <Marker
             key={`place-${place.id || Math.random()}`}
             position={[place.latitude, place.longitude]}
-            icon={createPlaceIcon(place.category || 'other')}
+            icon={createPlaceIcon(place.category || 'other', place.color || undefined)}
             draggable={!!place.id}
             eventHandlers={{
               click: () => onPlaceClick?.(place),
