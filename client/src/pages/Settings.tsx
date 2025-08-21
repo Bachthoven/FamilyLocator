@@ -4,6 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 import BottomNavigation from '@/components/BottomNavigation';
 import { ProfileEditor } from '@/components/ProfileEditor';
 import { NotificationSettings } from '@/components/NotificationSettings';
+import { LocationSettings } from '../components/LocationSettings';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,13 +14,15 @@ import {
   Settings as SettingsIcon, 
   User, 
   HelpCircle, 
-  LogOut
+  LogOut,
+  MapPin
 } from 'lucide-react';
 
 export default function Settings() {
   const { user, logoutMutation } = useAuth();
   const { toast } = useToast();
   const [profileEditorOpen, setProfileEditorOpen] = useState(false);
+  const [locationSettingsOpen, setLocationSettingsOpen] = useState(false);
 
   const handleLogout = () => {
     if (confirm('Are you sure you want to log out?')) {
@@ -33,6 +36,12 @@ export default function Settings() {
       label: 'Profile Information',
       description: 'Update your personal details',
       action: () => setProfileEditorOpen(true),
+    },
+    {
+      icon: MapPin,
+      label: 'Location Settings',
+      description: 'Configure automatic location logging',
+      action: () => setLocationSettingsOpen(true),
     },
     {
       icon: HelpCircle,
@@ -158,6 +167,12 @@ export default function Settings() {
           user={user}
         />
       )}
+      
+      {/* Location Settings Modal */}
+      <LocationSettings
+        open={locationSettingsOpen}
+        onOpenChange={setLocationSettingsOpen}
+      />
 
       <BottomNavigation />
     </div>

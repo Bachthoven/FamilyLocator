@@ -87,6 +87,13 @@ interface MapProps {
   places: Place[];
   onLocationClick?: (location: Location & { user: User }) => void;
   onPlaceClick?: (place: Place) => void;
+  focusLocation?: {
+    latitude: number;
+    longitude: number;
+    zoom: number;
+    timestamp: string;
+    userName: string;
+  } | null;
 }
 
 function MapCenter({ center, shouldUpdate }: { center: [number, number]; shouldUpdate: boolean }) {
@@ -101,7 +108,7 @@ function MapCenter({ center, shouldUpdate }: { center: [number, number]; shouldU
   return null;
 }
 
-export default function Map({ currentLocation, familyLocations, places, onLocationClick, onPlaceClick }: MapProps) {
+export default function Map({ currentLocation, familyLocations, places, onLocationClick, onPlaceClick, focusLocation }: MapProps) {
   const mapRef = useRef<L.Map | null>(null);
   const [mapCenter, setMapCenter] = useState<[number, number]>([40.7128, -74.0060]); // Default to NYC
   const [mapType, setMapType] = useState<'street' | 'satellite'>('street');
@@ -110,32 +117,16 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
   const [hasInitialized, setHasInitialized] = useState(false);
   const { toast } = useToast();
 
-  // Check for focus location from family page navigation
+  // Handle focus location from History page
   useEffect(() => {
-    const focusLocationData = sessionStorage.getItem('focusLocation');
-    if (focusLocationData) {
-      try {
-        const focusLocation = JSON.parse(focusLocationData);
-        setMapCenter([focusLocation.latitude, focusLocation.longitude]);
-        setShouldUpdateCenter(true);
-        setHasInitialized(true);
-        
-        // Clear the session storage
-        sessionStorage.removeItem('focusLocation');
-        
-        // Reset the flag after a short delay
-        setTimeout(() => setShouldUpdateCenter(false), 100);
-        
-        toast({
-          title: "Map centered",
-          description: "Showing family member's location",
-        });
-        
-        return; // Exit early so we don't set center to current location
-      } catch (error) {
-        console.error('Failed to parse focus location:', error);
-        sessionStorage.removeItem('focusLocation');
-      }
+    if (focusLocation) {
+      setMapCenter([focusLocation.latitude, focusLocation.longitude]);
+      setShouldUpdateCenter(true);
+      setHasInitialized(true);
+      
+      // Reset the flag after a short delay
+      setTimeout(() => setShouldUpdateCenter(false), 100);
+      return; // Exit early so we don't set center to current location
     }
     
     // Only set initial center once when location first becomes available (and no focus location)
@@ -146,7 +137,7 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
       // Reset the flag after a short delay to allow the map to update
       setTimeout(() => setShouldUpdateCenter(false), 100);
     }
-  }, [currentLocation, hasInitialized, toast]);
+  }, [currentLocation, hasInitialized, focusLocation]);
 
   const centerOnUser = () => {
     if (currentLocation) {

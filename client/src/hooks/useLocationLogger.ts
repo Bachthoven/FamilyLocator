@@ -80,7 +80,36 @@ export function useLocationLogger() {
         error: error
       });
     }
-  }, [location, error, isAuthenticated, user]);
+  }, [location, error, isAuthenticated, user, saveLocationMutation]);
+
+  // Auto-location logging at configurable intervals
+  useEffect(() => {
+    const autoLocationEnabled = localStorage.getItem('autoLocationEnabled') === 'true';
+    const intervalMinutes = parseInt(localStorage.getItem('autoLocationInterval') || '60');
+    
+    if (!autoLocationEnabled || !isAuthenticated || !user || !location) {
+      return;
+    }
+
+    console.log(`🕰️ Setting up auto-location logging every ${intervalMinutes} minutes`);
+    
+    const interval = setInterval(() => {
+      if (isAuthenticated && user && location && !error) {
+        console.log('⏰ Auto-location logging triggered');
+        saveLocationMutation.mutate({
+          latitude: location.latitude,
+          longitude: location.longitude,
+          accuracy: location.accuracy,
+          type: 'automatic_hourly',
+        });
+      }
+    }, intervalMinutes * 60 * 1000); // Convert minutes to milliseconds
+
+    return () => {
+      console.log('🛑 Clearing auto-location logging interval');
+      clearInterval(interval);
+    };
+  }, [isAuthenticated, user, location, error, saveLocationMutation]);
 
   // Handle location errors
   useEffect(() => {

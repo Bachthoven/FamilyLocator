@@ -86,7 +86,7 @@ export default function History() {
   );
 
   // Calculate map center from all locations
-  const getMapCenter = () => {
+  const getMapCenter = (): [number, number] => {
     if (allLocations.length === 0) return [37.7749, -122.4194]; // Default to SF
     
     const avgLat = allLocations.reduce((sum, loc) => sum + loc.latitude, 0) / allLocations.length;
@@ -309,16 +309,34 @@ export default function History() {
                                 {index > 0 && (
                                   <div className="absolute left-4 -top-3 w-px h-6 bg-border" />
                                 )}
-                                <div className="flex items-start space-x-3">
+                                <button
+                                  className="flex items-start space-x-3 w-full text-left hover:bg-muted/50 rounded-lg p-2 -m-2 transition-colors"
+                                  onClick={() => {
+                                    // Store location data and redirect to Home (map) page
+                                    localStorage.setItem('focusLocation', JSON.stringify({
+                                      latitude: location.latitude,
+                                      longitude: location.longitude,
+                                      zoom: 16,
+                                      timestamp: location.timestamp,
+                                      userName: data.user.firstName || data.user.email
+                                    }));
+                                    window.location.href = '/';
+                                  }}
+                                >
                                   <div 
                                     className="w-2 h-2 rounded-full mt-2 flex-shrink-0"
                                     style={{ backgroundColor: getColorForUser(parseInt(userId)) }}
                                   />
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center justify-between">
-                                      <p className="text-sm font-medium text-foreground">
-                                        {formatTime(location.timestamp)}
-                                      </p>
+                                      <div className="flex flex-col">
+                                        <p className="text-sm font-medium text-foreground">
+                                          {formatTime(location.timestamp)}
+                                        </p>
+                                        <p className="text-xs text-muted-foreground">
+                                          {new Date(location.timestamp).toLocaleString()}
+                                        </p>
+                                      </div>
                                       <div className="flex items-center space-x-2">
                                         <Badge
                                           variant="secondary"
@@ -329,6 +347,7 @@ export default function History() {
                                         <Badge variant="outline" className="text-xs">
                                           {location.type}
                                         </Badge>
+                                        <MapPin className="w-3 h-3 text-muted-foreground" />
                                       </div>
                                     </div>
                                     <div className="text-xs text-muted-foreground mt-1">
@@ -341,9 +360,10 @@ export default function History() {
                                       {location.address && (
                                         <p className="mt-1 truncate">{location.address}</p>
                                       )}
+                                      <p className="mt-1 text-xs text-blue-600">Click to view on map</p>
                                     </div>
                                   </div>
-                                </div>
+                                </button>
                               </div>
                             );
                           })
