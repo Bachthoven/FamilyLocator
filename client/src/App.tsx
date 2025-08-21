@@ -10,6 +10,7 @@ import AuthPage from "@/pages/auth-page";
 import Home from "@/pages/Home";
 import Family from "@/pages/Family";
 import Places from "@/pages/Places";
+import History from "./pages/History";
 import Settings from "@/pages/Settings";
 import NotFound from "@/pages/not-found";
 
@@ -25,6 +26,7 @@ function Router() {
           <Route path="/home" component={Home} />
           <Route path="/family" component={Family} />
           <Route path="/places" component={Places} />
+          <Route path="/history" component={History} />
           <Route path="/settings" component={Settings} />
         </>
       )}

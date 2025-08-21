@@ -33,6 +33,7 @@ export interface IStorage {
   saveLocation(location: InsertLocation): Promise<Location>;
   getUserLatestLocation(userId: number): Promise<Location | undefined>;
   getFamilyMembersLocations(userId: number): Promise<Array<Location & { user: User }>>;
+  getFamilyLocationHistory(userId: number): Promise<Record<string, { user: User; locations: Array<Location & { user: User }> }>>;
   
   // Family connection operations
   getFamilyMembers(userId: number): Promise<Array<User>>;
@@ -94,8 +95,8 @@ export class DatabaseStorage implements IStorage {
     const updateData: any = { ...profile, updatedAt: new Date() };
     
     // If currentPassword is provided, it means the password hash should be updated
-    if (profile.currentPassword) {
-      updateData.password = profile.currentPassword;
+    if ((profile as any).currentPassword) {
+      updateData.password = (profile as any).currentPassword;
       delete updateData.currentPassword;
     }
     
@@ -197,6 +198,76 @@ export class DatabaseStorage implements IStorage {
     });
 
     return Array.from(latestLocations.values());
+  }
+
+  async getFamilyLocationHistory(userId: number): Promise<Record<string, { user: User; locations: Array<Location & { user: User }> }>> {
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    
+    const result = await db
+      .select({
+        id: locations.id,
+        userId: locations.userId,
+        latitude: locations.latitude,
+        longitude: locations.longitude,
+        accuracy: locations.accuracy,
+        address: locations.address,
+        type: locations.type,
+        timestamp: locations.timestamp,
+        user: users,
+      })
+      .from(locations)
+      .innerJoin(users, eq(locations.userId, users.id))
+      .innerJoin(familyConnections, 
+        and(
+          eq(familyConnections.familyMemberId, locations.userId),
+          eq(familyConnections.userId, userId),
+          eq(familyConnections.status, "accepted")
+        )
+      )
+      .where(
+        and(
+          eq(users.locationSharingEnabled, true),
+          sql`${locations.timestamp} >= ${twentyFourHoursAgo}`
+        )
+      )
+      .orderBy(desc(locations.timestamp));
+
+    // Group locations by user ID
+    const groupedHistory: Record<string, { user: User; locations: Array<Location & { user: User }> }> = {};
+    
+    result.forEach(item => {
+      const userIdStr = item.userId.toString();
+      if (!groupedHistory[userIdStr]) {
+        groupedHistory[userIdStr] = {
+          user: item.user,
+          locations: []
+        };
+      }
+      groupedHistory[userIdStr].locations.push(item);
+    });
+
+    // Filter to include only hourly locations (approximately)
+    Object.keys(groupedHistory).forEach(userIdStr => {
+      const userHistory = groupedHistory[userIdStr];
+      const filteredLocations: Array<Location & { user: User }> = [];
+      let lastIncludedTime = 0;
+      
+      userHistory.locations.forEach(location => {
+        const locationTime = new Date(location.timestamp || new Date()).getTime();
+        const timeDiff = Math.abs(locationTime - lastIncludedTime);
+        const oneHour = 60 * 60 * 1000;
+        
+        // Include location if it's the first one or if it's been more than 45 minutes since the last included location
+        if (lastIncludedTime === 0 || timeDiff >= oneHour * 0.75) {
+          filteredLocations.push(location);
+          lastIncludedTime = locationTime;
+        }
+      });
+      
+      groupedHistory[userIdStr].locations = filteredLocations;
+    });
+
+    return groupedHistory;
   }
 
   // Family connection operations

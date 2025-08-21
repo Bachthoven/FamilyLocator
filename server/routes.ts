@@ -341,6 +341,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get location history for family members in the past 24 hours
+  app.get('/api/locations/history', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const history = await storage.getFamilyLocationHistory(userId);
+      res.json(history);
+    } catch (error) {
+      console.error("Error fetching location history:", error);
+      res.status(500).json({ message: "Failed to fetch location history" });
+    }
+  });
+
   // Clear geofence state for testing
   app.post('/api/geofence/clear', isAuthenticated, async (req: any, res) => {
     try {
