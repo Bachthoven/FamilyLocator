@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, Bookmark, MapPin, Home, Briefcase, GraduationCap, Trash2 } from 'lucide-react';
+import { Plus, Bookmark, MapPin, Home, Briefcase, GraduationCap, Trash2, Edit3 } from 'lucide-react';
 import { Place, User } from '@shared/schema';
 
 const categoryIcons = {
@@ -35,6 +35,8 @@ export default function Places() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [addPlaceDialogOpen, setAddPlaceDialogOpen] = useState(false);
+  const [editPlaceDialogOpen, setEditPlaceDialogOpen] = useState(false);
+  const [editingPlace, setEditingPlace] = useState<(Place & { user: User }) | null>(null);
   const [newPlace, setNewPlace] = useState({
     name: '',
     address: '',
@@ -168,6 +170,45 @@ export default function Places() {
     },
   });
 
+  // Edit place mutation
+  const editPlaceMutation = useMutation({
+    mutationFn: async (placeData: { id: number; name: string; category: string; color: string }) => {
+      const response = await apiRequest('PATCH', `/api/places/${placeData.id}`, {
+        name: placeData.name,
+        category: placeData.category,
+        color: placeData.color,
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Place updated",
+        description: "Your place has been updated successfully.",
+      });
+      setEditPlaceDialogOpen(false);
+      setEditingPlace(null);
+      queryClient.invalidateQueries({ queryKey: ['/api/places'] });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/auth";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: "Failed to update place. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleAddPlace = () => {
     if (!newPlace.name.trim() || !newPlace.address.trim()) {
       toast({
@@ -196,6 +237,22 @@ export default function Places() {
       console.log('Deleting place:', placeId, 'User ID:', user?.id);
       deletePlaceMutation.mutate(placeId);
     }
+  };
+
+  const handleEditPlace = (place: Place & { user: User }) => {
+    setEditingPlace(place);
+    setEditPlaceDialogOpen(true);
+  };
+
+  const handleUpdatePlace = () => {
+    if (!editingPlace) return;
+    
+    editPlaceMutation.mutate({
+      id: editingPlace.id,
+      name: editingPlace.name,
+      category: editingPlace.category || 'other',
+      color: editingPlace.color || '#8b5cf6',
+    });
   };
 
   const groupedPlaces = places.reduce((acc: Record<string, Array<Place & { user: User }>>, place: Place & { user: User }) => {
@@ -350,6 +407,100 @@ export default function Places() {
               </div>
             </DialogContent>
           </Dialog>
+
+          {/* Edit Place Dialog */}
+          <Dialog open={editPlaceDialogOpen} onOpenChange={setEditPlaceDialogOpen}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Edit Place</DialogTitle>
+              </DialogHeader>
+              {editingPlace && (
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="edit-name">Place Name *</Label>
+                    <Input
+                      id="edit-name"
+                      placeholder="e.g. Home, Office, School"
+                      value={editingPlace.name}
+                      onChange={(e) => setEditingPlace(prev => prev ? ({ ...prev, name: e.target.value }) : null)}
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="edit-category">Category</Label>
+                    <Select 
+                      value={editingPlace.category || 'other'} 
+                      onValueChange={(value: any) => setEditingPlace(prev => prev ? ({ ...prev, category: value }) : null)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="home">Home</SelectItem>
+                        <SelectItem value="work">Work</SelectItem>
+                        <SelectItem value="school">School</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="edit-color">Pin Color</Label>
+                    <div className="flex items-center space-x-2 mt-2">
+                      {/* Predefined color options */}
+                      {[
+                        { name: 'Purple', value: '#8b5cf6' },
+                        { name: 'Blue', value: '#3b82f6' },
+                        { name: 'Green', value: '#10b981' },
+                        { name: 'Red', value: '#ef4444' },
+                        { name: 'Orange', value: '#f97316' },
+                        { name: 'Pink', value: '#ec4899' },
+                        { name: 'Yellow', value: '#eab308' },
+                        { name: 'Gray', value: '#6b7280' }
+                      ].map((color) => (
+                        <button
+                          key={color.value}
+                          type="button"
+                          onClick={() => setEditingPlace(prev => prev ? ({ ...prev, color: color.value }) : null)}
+                          className={`w-8 h-8 rounded-full border-2 ${
+                            editingPlace.color === color.value ? 'border-foreground' : 'border-gray-300'
+                          }`}
+                          style={{ backgroundColor: color.value }}
+                          title={color.name}
+                        />
+                      ))}
+                      {/* Custom color picker */}
+                      <input
+                        type="color"
+                        value={editingPlace.color || '#8b5cf6'}
+                        onChange={(e) => setEditingPlace(prev => prev ? ({ ...prev, color: e.target.value }) : null)}
+                        className="w-8 h-8 rounded border border-gray-300 cursor-pointer"
+                        title="Custom color"
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Choose a color for your place pin on the map
+                    </p>
+                  </div>
+                  
+                  <div className="flex justify-end space-x-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => setEditPlaceDialogOpen(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={handleUpdatePlace}
+                      disabled={editPlaceMutation.isPending}
+                    >
+                      {editPlaceMutation.isPending ? 'Updating...' : 'Update Place'}
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </DialogContent>
+          </Dialog>
         </div>
 
         {/* Places List */}
@@ -421,15 +572,25 @@ export default function Places() {
                               </div>
                             </div>
                             
-                            {/* Delete button - allow family members to delete any place */}
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleDeletePlace(place.id, place.name)}
-                              className="text-red-500 hover:text-red-700 hover:bg-red-50 flex-shrink-0 ml-2 w-8 h-8 sm:w-10 sm:h-10 self-start mt-1"
-                            >
-                              <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
-                            </Button>
+                            {/* Action buttons */}
+                            <div className="flex items-center space-x-1 flex-shrink-0 ml-2">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleEditPlace(place)}
+                                className="text-blue-500 hover:text-blue-700 hover:bg-blue-50 w-8 h-8 sm:w-10 sm:h-10 self-start mt-1"
+                              >
+                                <Edit3 className="w-3 h-3 sm:w-4 sm:h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleDeletePlace(place.id, place.name)}
+                                className="text-red-500 hover:text-red-700 hover:bg-red-50 w-8 h-8 sm:w-10 sm:h-10 self-start mt-1"
+                              >
+                                <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
+                              </Button>
+                            </div>
                           </div>
                         </CardHeader>
                       </Card>

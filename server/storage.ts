@@ -47,6 +47,7 @@ export interface IStorage {
   savePlace(place: InsertPlace): Promise<Place>;
   deletePlace(userId: number, placeId: number): Promise<void>;
   updatePlaceLocation(placeId: number, latitude: number, longitude: number): Promise<void>;
+  updatePlace(placeId: number, updates: { name?: string; category?: string; color?: string }): Promise<void>;
   
   // Invitation code operations
   createInvitationCode(invitation: InsertInvitationCode): Promise<InvitationCode>;
@@ -372,6 +373,7 @@ export class DatabaseStorage implements IStorage {
         latitude: places.latitude,
         longitude: places.longitude,
         category: places.category,
+        color: places.color,
         createdAt: places.createdAt,
         user: users,
       })
@@ -402,6 +404,13 @@ export class DatabaseStorage implements IStorage {
     await db
       .update(places)
       .set({ latitude, longitude })
+      .where(eq(places.id, placeId));
+  }
+
+  async updatePlace(placeId: number, updates: { name?: string; category?: string; color?: string }): Promise<void> {
+    await db
+      .update(places)
+      .set(updates)
       .where(eq(places.id, placeId));
   }
   

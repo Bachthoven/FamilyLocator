@@ -599,6 +599,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update place details (name, category, color)
+  app.patch('/api/places/:placeId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const placeId = parseInt(req.params.placeId);
+      const { name, category, color } = req.body;
+      
+      // Validate input
+      if (!name || !name.trim()) {
+        return res.status(400).json({ message: "Place name is required" });
+      }
+      
+      // Check if place belongs to user or their family
+      const places = await storage.getFamilyPlaces(userId);
+      const place = places?.find(p => p.id === placeId);
+      
+      if (!place) {
+        return res.status(404).json({ message: "Place not found" });
+      }
+      
+      // Update the place details
+      await storage.updatePlace(placeId, { name, category, color });
+      
+      console.log(`Updated place ${placeId} details`);
+      res.json({ message: "Place updated successfully" });
+    } catch (error) {
+      console.error("Error updating place:", error);
+      res.status(500).json({ message: "Failed to update place" });
+    }
+  });
+
   // Update place location (for drag and drop)
   app.patch('/api/places/:id/location', isAuthenticated, async (req: any, res) => {
     try {
