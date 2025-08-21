@@ -372,7 +372,7 @@ export default function History() {
                                     <div className="text-xs text-muted-foreground mt-1">
                                       <div className="flex items-center space-x-4">
                                         <span>
-                                          📍 {location.latitude.toFixed(6)}, {location.longitude.toFixed(6)}
+                                          📍 {location.address || `${location.latitude.toFixed(6)}, ${location.longitude.toFixed(6)}`}
                                         </span>
                                         <span>±{location.accuracy.toFixed(0)}m</span>
                                       </div>

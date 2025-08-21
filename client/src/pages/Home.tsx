@@ -41,9 +41,25 @@ export default function Home() {
   // Connect to WebSocket when user is authenticated
   useEffect(() => {
     if (user && sendMessage) {
-      sendMessage({ type: 'auth', userId: user.id });
+      sendMessage({ type: 'auth', userId: (user as any).id });
     }
   }, [user, sendMessage]);
+
+  // Handle focus location from Family page
+  const [focusLocation, setFocusLocation] = useState<{ latitude: number; longitude: number; userId: number } | null>(null);
+  
+  useEffect(() => {
+    const savedFocusLocation = sessionStorage.getItem('focusLocation');
+    if (savedFocusLocation) {
+      try {
+        const location = JSON.parse(savedFocusLocation);
+        setFocusLocation(location);
+        sessionStorage.removeItem('focusLocation'); // Clear after use
+      } catch (error) {
+        console.error('Error parsing focus location:', error);
+      }
+    }
+  }, []);
 
 
 
@@ -54,7 +70,7 @@ export default function Home() {
   });
 
   // Get user places  
-  const { data: places = [], isLoading: placesLoading } = useQuery<Array<{ id: number; name: string; createdAt: Date | null; address: string | null; userId: number; latitude: number; longitude: number; category: string | null; }>>({
+  const { data: places = [], isLoading: placesLoading } = useQuery<Array<{ id: number; name: string; createdAt: Date | null; address: string | null; userId: number; latitude: number; longitude: number; category: string | null; color: string | null; }>>({
     queryKey: ['/api/places'],
     enabled: !!user,
   });
@@ -161,7 +177,7 @@ export default function Home() {
           places={places}
           onLocationClick={handleLocationClick}
           onPlaceClick={handlePlaceClick}
-
+          focusLocation={focusLocation}
         />
         
         {/* Top Header - Clean status indicator only */}
