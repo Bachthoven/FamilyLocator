@@ -121,6 +121,17 @@ FamilyLocator is a modern web application that enables families to share their r
 
 ## Changelog
 
+- August 21, 2025. Enhanced History page with interactive features and fixed location logging:
+  - Implemented clickable location history entries that redirect to main map with automatic centering
+  - Added comprehensive Location Settings panel with configurable auto-location logging intervals (15min to 8hrs)
+  - Enhanced address autocomplete functionality for better place creation with real address suggestions
+  - Fixed critical location logging issue - eliminated duplicate saves with intelligent throttling system
+  - Added location distance-based deduplication to prevent rapid duplicate entries
+  - Improved error handling in History page with proper authentication and retry mechanisms
+  - Created visual indicators and "Click to view on map" hints for better user experience
+  - History map view shows color-coded pins with tooltips and family member filtering
+  - Detailed timestamps display both relative time ("2h ago") and full date/time information
+
 - August 20, 2025. Completed cross-platform notification system:
   - Fixed mobile notification issues by implementing Service Worker API for mobile devices
   - Created comprehensive notification helper that automatically detects mobile vs desktop

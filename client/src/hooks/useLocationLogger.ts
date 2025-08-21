@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -22,22 +22,47 @@ export function useLocationLogger() {
   });
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  
+  // Track last saved location to prevent duplicates
+  const lastSavedLocationRef = useRef<{ lat: number; lng: number; timestamp: number } | null>(null);
+  const saveInProgressRef = useRef(false);
 
   const saveLocationMutation = useMutation({
     mutationFn: async (locationData: LocationData) => {
+      // Prevent multiple simultaneous saves
+      if (saveInProgressRef.current) {
+        console.log('⏸️ Save already in progress, skipping duplicate');
+        return null;
+      }
+      
+      saveInProgressRef.current = true;
       console.log('🔄 Attempting to save location:', locationData);
-      console.log('🔐 User authenticated:', isAuthenticated);
-      console.log('👤 User data:', user);
-      const response = await apiRequest('POST', '/api/locations', locationData);
-      console.log('✅ Location save response:', response);
-      return response;
+      
+      try {
+        const response = await apiRequest('POST', '/api/locations', locationData);
+        console.log('✅ Location save response:', response);
+        
+        // Update last saved location
+        lastSavedLocationRef.current = {
+          lat: locationData.latitude,
+          lng: locationData.longitude,
+          timestamp: Date.now()
+        };
+        
+        return response;
+      } finally {
+        saveInProgressRef.current = false;
+      }
     },
     onSuccess: (data) => {
-      console.log('🎉 Location saved successfully:', data);
-      queryClient.invalidateQueries({ queryKey: ['/api/locations/family'] });
+      if (data) {
+        console.log('🎉 Location saved successfully:', data);
+        queryClient.invalidateQueries({ queryKey: ['/api/locations/family'] });
+      }
     },
     onError: (error: any) => {
       console.error('❌ Failed to save location:', error);
+      saveInProgressRef.current = false;
       toast({
         title: "Location Save Failed",
         description: error.message || "Unable to save location. Please try logging in again.",
@@ -46,41 +71,44 @@ export function useLocationLogger() {
     },
   });
 
+  // Helper function to check if location is significantly different
+  const isLocationSignificantlyDifferent = (newLat: number, newLng: number): boolean => {
+    if (!lastSavedLocationRef.current) return true;
+    
+    const { lat: oldLat, lng: oldLng, timestamp } = lastSavedLocationRef.current;
+    
+    // If last save was more than 30 seconds ago, allow save
+    if (Date.now() - timestamp > 30000) return true;
+    
+    // Calculate distance (simple approximation)
+    const latDiff = Math.abs(newLat - oldLat);
+    const lngDiff = Math.abs(newLng - oldLng);
+    const distance = Math.sqrt(latDiff * latDiff + lngDiff * lngDiff);
+    
+    // Only save if moved more than ~10 meters (rough approximation: 0.0001 degrees ≈ 11 meters)
+    return distance > 0.0001;
+  };
+
   // Auto-save location when it changes (for real-time updates)
   useEffect(() => {
-    console.log('🗺️ Location change detected:', {
-      isAuthenticated,
-      hasUser: !!user,
-      locationSharingEnabled: (user as any)?.locationSharingEnabled,
-      hasLocation: !!location,
-      hasError: !!error,
-      locationData: location
-    });
-    
     if (
       isAuthenticated && 
       user && 
       (user as any).locationSharingEnabled !== false && 
       location && 
-      !error
+      !error &&
+      !saveInProgressRef.current &&
+      isLocationSignificantlyDifferent(location.latitude, location.longitude)
     ) {
-      console.log('📍 All conditions met, saving location...');
+      console.log('📍 Saving location:', { lat: location.latitude, lng: location.longitude });
       saveLocationMutation.mutate({
         latitude: location.latitude,
         longitude: location.longitude,
         accuracy: location.accuracy,
         type: 'manual',
       });
-    } else {
-      console.log('❌ Location save conditions not met:', {
-        authenticated: isAuthenticated,
-        user: !!user,
-        sharingEnabled: (user as any)?.locationSharingEnabled,
-        location: !!location,
-        error: error
-      });
     }
-  }, [location, error, isAuthenticated, user, saveLocationMutation]);
+  }, [location, error, isAuthenticated, user]);
 
   // Auto-location logging at configurable intervals
   useEffect(() => {
@@ -109,7 +137,7 @@ export function useLocationLogger() {
       console.log('🛑 Clearing auto-location logging interval');
       clearInterval(interval);
     };
-  }, [isAuthenticated, user, location, error, saveLocationMutation]);
+  }, [isAuthenticated, user, location, error]);
 
   // Handle location errors
   useEffect(() => {

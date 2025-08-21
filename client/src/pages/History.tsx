@@ -7,7 +7,7 @@ import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Clock, MapPin, Users, List, Map } from 'lucide-react';
 import BottomNavigation from '@/components/BottomNavigation';
-import { useAuth } from '@/hooks/use-auth';
+import { useAuth } from '@/hooks/useAuth';
 import type { User } from '@shared/schema';
 import { getUserColor } from '@/utils/familyColors';
 import { MapContainer, TileLayer, CircleMarker, Popup, Tooltip } from 'react-leaflet';
@@ -38,11 +38,39 @@ export default function History() {
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
 
   // Fetch location history for the past 24 hours
-  const { data: locationHistory = {}, isLoading } = useQuery<FamilyLocationHistory>({
+  const { data: locationHistory = {}, isLoading, error } = useQuery<FamilyLocationHistory>({
     queryKey: ['/api/locations/history'],
     enabled: !!user,
     refetchInterval: 30000, // Refresh every 30 seconds
+    retry: 3,
+    retryDelay: 2000,
   });
+
+  // Show error state if there's an authentication or fetch error
+  if (error) {
+    console.error('History fetch error:', error);
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <MapPin className="h-8 w-8 mx-auto mb-4 text-red-500" />
+            <p className="text-red-500 font-medium">Unable to load location history</p>
+            <p className="text-muted-foreground text-sm mt-2">
+              {error.message || 'Please try refreshing the page'}
+            </p>
+            <Button 
+              onClick={() => window.location.reload()} 
+              className="mt-4"
+              variant="outline"
+            >
+              Refresh Page
+            </Button>
+          </div>
+        </div>
+        <BottomNavigation />
+      </div>
+    );
+  }
 
   const formatTime = (timestamp: string) => {
     const date = new Date(timestamp);

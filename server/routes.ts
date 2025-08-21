@@ -345,7 +345,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/locations/history', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.id;
+      console.log('Fetching location history for user:', userId);
       const history = await storage.getFamilyLocationHistory(userId);
+      console.log('Location history result:', Object.keys(history).length, 'family members');
       res.json(history);
     } catch (error) {
       console.error("Error fetching location history:", error);
