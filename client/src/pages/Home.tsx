@@ -23,13 +23,7 @@ export default function Home() {
   const queryClient = useQueryClient();
   const [selectedLocation, setSelectedLocation] = useState<(Location & { user: User }) | null>(null);
   const [isFamilyPanelExpanded, setIsFamilyPanelExpanded] = useState(false);
-  const [focusLocation, setFocusLocation] = useState<{
-    latitude: number;
-    longitude: number;
-    zoom: number;
-    timestamp: string;
-    userName: string;
-  } | null>(null);
+
 
   // This component is now protected by authentication in App.tsx
   // No need for manual redirect logic
@@ -51,30 +45,7 @@ export default function Home() {
     }
   }, [user, sendMessage]);
 
-  // Check for focus location from History page via URL parameters
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const focusParam = urlParams.get('focus');
-    if (focusParam) {
-      try {
-        const parsed = JSON.parse(decodeURIComponent(focusParam));
-        setFocusLocation(parsed);
-        
-        // Clear the URL parameter to avoid re-triggering
-        const newUrl = new URL(window.location.href);
-        newUrl.searchParams.delete('focus');
-        window.history.replaceState({}, '', newUrl.pathname);
-        
-        // Show toast notification
-        toast({
-          title: `Viewing ${parsed.userName}'s location`,
-          description: `From ${new Date(parsed.timestamp).toLocaleString()}`,
-        });
-      } catch (error) {
-        console.error('Failed to parse focus location:', error);
-      }
-    }
-  }, [toast]);
+
 
   // Get family locations
   const { data: familyLocations = [], isLoading: locationsLoading } = useQuery<Array<Location & { user: User }>>({
@@ -190,7 +161,7 @@ export default function Home() {
           places={places}
           onLocationClick={handleLocationClick}
           onPlaceClick={handlePlaceClick}
-          focusLocation={focusLocation}
+
         />
         
         {/* Top Header - Clean status indicator only */}

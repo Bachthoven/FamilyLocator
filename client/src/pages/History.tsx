@@ -339,19 +339,8 @@ export default function History() {
                                 {index > 0 && (
                                   <div className="absolute left-4 -top-3 w-px h-6 bg-border" />
                                 )}
-                                <button
-                                  className="flex items-start space-x-3 w-full text-left hover:bg-muted/50 rounded-lg p-2 -m-2 transition-colors"
-                                  onClick={() => {
-                                    // Navigate to Home page with focus location data in URL
-                                    const focusData = {
-                                      latitude: location.latitude,
-                                      longitude: location.longitude,
-                                      zoom: 16,
-                                      timestamp: location.timestamp,
-                                      userName: data.user.firstName || data.user.email
-                                    };
-                                    setLocation(`/?focus=${encodeURIComponent(JSON.stringify(focusData))}`);
-                                  }}
+                                <div
+                                  className="flex items-start space-x-3 w-full"
                                 >
                                   <div 
                                     className="w-2 h-2 rounded-full mt-2 flex-shrink-0"
@@ -390,10 +379,10 @@ export default function History() {
                                       {location.address && (
                                         <p className="mt-1 truncate">{location.address}</p>
                                       )}
-                                      <p className="mt-1 text-xs text-blue-600">Click to view on map</p>
+
                                     </div>
                                   </div>
-                                </button>
+                                </div>
                               </div>
                             );
                           })

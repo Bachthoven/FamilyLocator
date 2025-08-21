@@ -87,13 +87,7 @@ interface MapProps {
   places: Place[];
   onLocationClick?: (location: Location & { user: User }) => void;
   onPlaceClick?: (place: Place) => void;
-  focusLocation?: {
-    latitude: number;
-    longitude: number;
-    zoom: number;
-    timestamp: string;
-    userName: string;
-  } | null;
+
 }
 
 function MapCenter({ center, shouldUpdate }: { center: [number, number]; shouldUpdate: boolean }) {
@@ -108,7 +102,7 @@ function MapCenter({ center, shouldUpdate }: { center: [number, number]; shouldU
   return null;
 }
 
-export default function Map({ currentLocation, familyLocations, places, onLocationClick, onPlaceClick, focusLocation }: MapProps) {
+export default function Map({ currentLocation, familyLocations, places, onLocationClick, onPlaceClick }: MapProps) {
   const mapRef = useRef<L.Map | null>(null);
   const [mapCenter, setMapCenter] = useState<[number, number]>([40.7128, -74.0060]); // Default to NYC
   const [mapType, setMapType] = useState<'street' | 'satellite'>('street');
@@ -117,24 +111,8 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
   const [hasInitialized, setHasInitialized] = useState(false);
   const { toast } = useToast();
 
-  // Handle focus location from History page
+  // Set initial center once when location first becomes available
   useEffect(() => {
-    if (focusLocation) {
-      setMapCenter([focusLocation.latitude, focusLocation.longitude]);
-      setShouldUpdateCenter(true);
-      setHasInitialized(true);
-      
-      // Set the map zoom to the specified level and center
-      if (mapRef.current) {
-        mapRef.current.setView([focusLocation.latitude, focusLocation.longitude], focusLocation.zoom || 16);
-      }
-      
-      // Reset the flag after a short delay
-      setTimeout(() => setShouldUpdateCenter(false), 100);
-      return; // Exit early so we don't set center to current location
-    }
-    
-    // Only set initial center once when location first becomes available (and no focus location)
     if (currentLocation && !hasInitialized) {
       setMapCenter([currentLocation.latitude, currentLocation.longitude]);
       setShouldUpdateCenter(true);
@@ -142,7 +120,7 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
       // Reset the flag after a short delay to allow the map to update
       setTimeout(() => setShouldUpdateCenter(false), 100);
     }
-  }, [currentLocation, hasInitialized, focusLocation]);
+  }, [currentLocation, hasInitialized]);
 
   const centerOnUser = () => {
     if (currentLocation) {
