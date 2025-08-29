@@ -284,11 +284,11 @@ export default function Places() {
                 Add Place
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="sm:max-w-md w-full mx-4">
               <DialogHeader>
                 <DialogTitle>Add New Place</DialogTitle>
               </DialogHeader>
-              <div className="space-y-4">
+              <div className="space-y-4 w-full">
                 <div>
                   <Label htmlFor="name">Place Name *</Label>
                   <Input
@@ -353,7 +353,7 @@ export default function Places() {
                 
                 <div>
                   <Label htmlFor="color">Pin Color</Label>
-                  <div className="flex items-center space-x-2 mt-2">
+                  <div className="flex flex-wrap items-center gap-2 mt-2 w-full">
                     {/* Predefined color options */}
                     {[
                       { name: 'Purple', value: '#8b5cf6' },
@@ -369,7 +369,7 @@ export default function Places() {
                         key={color.value}
                         type="button"
                         onClick={() => setNewPlace(prev => ({ ...prev, color: color.value }))}
-                        className={`w-8 h-8 rounded-full border-2 ${
+                        className={`w-8 h-8 rounded-full border-2 flex-shrink-0 ${
                           newPlace.color === color.value ? 'border-foreground' : 'border-gray-300'
                         }`}
                         style={{ backgroundColor: color.value }}
@@ -381,7 +381,7 @@ export default function Places() {
                       type="color"
                       value={newPlace.color}
                       onChange={(e) => setNewPlace(prev => ({ ...prev, color: e.target.value }))}
-                      className="w-8 h-8 rounded border border-gray-300 cursor-pointer"
+                      className="w-8 h-8 rounded border border-gray-300 cursor-pointer flex-shrink-0"
                       title="Custom color"
                     />
                   </div>
@@ -390,7 +390,7 @@ export default function Places() {
                   </p>
                 </div>
                 
-                <div className="flex justify-end space-x-2">
+                <div className="flex justify-end space-x-2 w-full pt-2">
                   <Button
                     variant="outline"
                     onClick={() => setAddPlaceDialogOpen(false)}
@@ -410,29 +410,30 @@ export default function Places() {
 
           {/* Edit Place Dialog */}
           <Dialog open={editPlaceDialogOpen} onOpenChange={setEditPlaceDialogOpen}>
-            <DialogContent>
+            <DialogContent className="sm:max-w-md w-full mx-4">
               <DialogHeader>
                 <DialogTitle>Edit Place</DialogTitle>
               </DialogHeader>
               {editingPlace && (
-                <div className="space-y-4">
-                  <div>
+                <div className="space-y-4 w-full">
+                  <div className="w-full">
                     <Label htmlFor="edit-name">Place Name *</Label>
                     <Input
                       id="edit-name"
                       placeholder="e.g. Home, Office, School"
                       value={editingPlace.name}
                       onChange={(e) => setEditingPlace(prev => prev ? ({ ...prev, name: e.target.value }) : null)}
+                      className="w-full"
                     />
                   </div>
                   
-                  <div>
+                  <div className="w-full">
                     <Label htmlFor="edit-category">Category</Label>
                     <Select 
                       value={editingPlace.category || 'other'} 
                       onValueChange={(value: any) => setEditingPlace(prev => prev ? ({ ...prev, category: value }) : null)}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select a category" />
                       </SelectTrigger>
                       <SelectContent>
@@ -444,9 +445,9 @@ export default function Places() {
                     </Select>
                   </div>
                   
-                  <div>
+                  <div className="w-full">
                     <Label htmlFor="edit-color">Pin Color</Label>
-                    <div className="flex items-center space-x-2 mt-2">
+                    <div className="flex flex-wrap items-center gap-2 mt-2 w-full">
                       {/* Predefined color options */}
                       {[
                         { name: 'Purple', value: '#8b5cf6' },
@@ -462,7 +463,7 @@ export default function Places() {
                           key={color.value}
                           type="button"
                           onClick={() => setEditingPlace(prev => prev ? ({ ...prev, color: color.value }) : null)}
-                          className={`w-8 h-8 rounded-full border-2 ${
+                          className={`w-8 h-8 rounded-full border-2 flex-shrink-0 ${
                             editingPlace.color === color.value ? 'border-foreground' : 'border-gray-300'
                           }`}
                           style={{ backgroundColor: color.value }}
@@ -474,16 +475,16 @@ export default function Places() {
                         type="color"
                         value={editingPlace.color || '#8b5cf6'}
                         onChange={(e) => setEditingPlace(prev => prev ? ({ ...prev, color: e.target.value }) : null)}
-                        className="w-8 h-8 rounded border border-gray-300 cursor-pointer"
+                        className="w-8 h-8 rounded border border-gray-300 cursor-pointer flex-shrink-0"
                         title="Custom color"
                       />
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1">
+                    <p className="text-xs text-muted-foreground mt-1 w-full">
                       Choose a color for your place pin on the map
                     </p>
                   </div>
                   
-                  <div className="flex justify-end space-x-2">
+                  <div className="flex justify-end space-x-2 w-full pt-2">
                     <Button
                       variant="outline"
                       onClick={() => setEditPlaceDialogOpen(false)}
