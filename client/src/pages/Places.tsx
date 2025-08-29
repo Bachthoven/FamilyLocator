@@ -284,7 +284,7 @@ export default function Places() {
                 Add Place
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-md w-full mx-4">
+            <DialogContent className="max-w-[90vw] sm:max-w-md w-full mx-auto">
               <DialogHeader>
                 <DialogTitle>Add New Place</DialogTitle>
               </DialogHeader>
@@ -410,7 +410,7 @@ export default function Places() {
 
           {/* Edit Place Dialog */}
           <Dialog open={editPlaceDialogOpen} onOpenChange={setEditPlaceDialogOpen}>
-            <DialogContent className="sm:max-w-md w-full mx-4">
+            <DialogContent className="max-w-[90vw] sm:max-w-md w-full mx-auto">
               <DialogHeader>
                 <DialogTitle>Edit Place</DialogTitle>
               </DialogHeader>
