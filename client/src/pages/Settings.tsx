@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { useAuth } from '@/hooks/use-auth';
+import { useTheme } from '@/hooks/useTheme';
 import { useToast } from '@/hooks/use-toast';
 import BottomNavigation from '@/components/BottomNavigation';
 import { ProfileEditor } from '@/components/ProfileEditor';
 import { NotificationSettings } from '@/components/NotificationSettings';
 import { LocationSettings } from '../components/LocationSettings';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,11 +17,13 @@ import {
   User, 
   HelpCircle, 
   LogOut,
-  MapPin
+  MapPin,
+  Palette
 } from 'lucide-react';
 
 export default function Settings() {
   const { user, logoutMutation } = useAuth();
+  const { theme } = useTheme();
   const { toast } = useToast();
   const [profileEditorOpen, setProfileEditorOpen] = useState(false);
   const [locationSettingsOpen, setLocationSettingsOpen] = useState(false);
@@ -138,6 +142,22 @@ export default function Settings() {
               </Card>
             );
           })}
+          
+          {/* Theme Toggle Card */}
+          <Card className="hover:shadow-md transition-shadow">
+            <CardContent className="p-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Palette className="w-5 h-5 text-primary" />
+                </div>
+                <div className="flex-1">
+                  <div className="font-medium">Appearance</div>
+                  <div className="text-sm text-muted-foreground">Choose light, dark, or system theme</div>
+                </div>
+                <ThemeToggle />
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Logout Button */}

@@ -70,9 +70,24 @@
   z-index: 1;
 }
 
+/* Dark mode map adjustments */
+.dark .leaflet-container {
+  filter: hue-rotate(180deg) invert(1);
+}
+
+.dark .leaflet-container .leaflet-control-container {
+  filter: hue-rotate(180deg) invert(1);
+}
+
 .custom-marker {
   background: transparent !important;
   border: none !important;
+}
+
+/* Ensure markers aren't affected by dark mode filter */
+.dark .custom-marker,
+.dark .custom-place-marker {
+  filter: hue-rotate(180deg) invert(1);
 }
 
 /* PWA specific styles */

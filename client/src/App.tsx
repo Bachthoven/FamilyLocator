@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from "@/hooks/use-auth";
+import { ThemeProvider } from "@/hooks/useTheme";
 import { NotificationManager } from "@/components/NotificationToast";
 import Landing from "@/pages/Landing";
 import AuthPage from "@/pages/auth-page";
@@ -38,14 +39,16 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <TooltipProvider>
-          <NotificationManager>
-            <Toaster />
-            <Router />
-          </NotificationManager>
-        </TooltipProvider>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <TooltipProvider>
+            <NotificationManager>
+              <Toaster />
+              <Router />
+            </NotificationManager>
+          </TooltipProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
