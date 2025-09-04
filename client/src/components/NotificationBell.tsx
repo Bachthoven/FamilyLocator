@@ -277,7 +277,7 @@ export function NotificationBell() {
                 >
                   {/* Red dot indicator for unread notifications */}
                   {!notification.isRead && (
-                    <div className="absolute top-1.5 right-1.5 w-3 h-3 bg-red-500 rounded-full shadow-sm animate-pulse z-10"></div>
+                    <div className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full shadow-sm animate-pulse z-10"></div>
                   )}
                   <div className="flex items-start space-x-4 flex-1">
                     {/* Toast-style icon */}
