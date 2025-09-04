@@ -18,7 +18,8 @@ import {
   HelpCircle, 
   LogOut,
   MapPin,
-  Palette
+  Palette,
+  Bell
 } from 'lucide-react';
 
 export default function Settings() {
@@ -27,6 +28,7 @@ export default function Settings() {
   const { toast } = useToast();
   const [profileEditorOpen, setProfileEditorOpen] = useState(false);
   const [locationSettingsOpen, setLocationSettingsOpen] = useState(false);
+  const [notificationSettingsOpen, setNotificationSettingsOpen] = useState(false);
 
   const handleLogout = () => {
     if (confirm('Are you sure you want to log out?')) {
@@ -46,6 +48,12 @@ export default function Settings() {
       label: 'Location Settings',
       description: 'Configure automatic location logging',
       action: () => setLocationSettingsOpen(true),
+    },
+    {
+      icon: Bell,
+      label: 'Notification Settings',
+      description: 'Manage system notifications and alerts',
+      action: () => setNotificationSettingsOpen(true),
     },
     {
       icon: HelpCircle,
@@ -112,10 +120,6 @@ export default function Settings() {
           </CardHeader>
         </Card>
 
-        {/* Notification Settings */}
-        <div className="mb-8">
-          <NotificationSettings />
-        </div>
 
         {/* Settings Items */}
         <div className="space-y-2">
@@ -192,6 +196,12 @@ export default function Settings() {
       <LocationSettings
         open={locationSettingsOpen}
         onOpenChange={setLocationSettingsOpen}
+      />
+      
+      {/* Notification Settings Modal */}
+      <NotificationSettings
+        open={notificationSettingsOpen}
+        onOpenChange={setNotificationSettingsOpen}
       />
 
       <BottomNavigation />

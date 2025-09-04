@@ -4,10 +4,16 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { requestNotificationPermission } from "@/utils/notificationHelper";
 
-export function NotificationSettings() {
+interface NotificationSettingsProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
+export function NotificationSettings({ open, onOpenChange }: NotificationSettingsProps) {
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>('default');
   const [systemNotificationsEnabled, setSystemNotificationsEnabled] = useState(false);
   const { toast } = useToast();
@@ -81,7 +87,7 @@ export function NotificationSettings() {
   const status = getPermissionStatus();
   const StatusIcon = status.icon;
 
-  return (
+  const notificationContent = (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
@@ -151,4 +157,26 @@ export function NotificationSettings() {
       </CardContent>
     </Card>
   );
+
+  // If modal props are provided, wrap in Dialog
+  if (open !== undefined && onOpenChange) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Bell className="w-5 h-5" />
+              Notification Settings
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {notificationContent}
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  // Otherwise, render standalone
+  return notificationContent;
 }
