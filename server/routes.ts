@@ -828,6 +828,133 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Mobile-specific routes
+
+  // Register/update push notification token
+  app.post('/api/notifications/push-token', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { pushToken } = z.object({ pushToken: z.string() }).parse(req.body);
+
+      // Store push token for this user (you may want to add a pushTokens table)
+      // For now, we'll update the user record or store in memory
+      console.log(`Registered push token for user ${userId}: ${pushToken}`);
+
+      // TODO: Store push token in database
+      res.json({ message: "Push token registered successfully" });
+    } catch (error) {
+      console.error("Error registering push token:", error);
+      res.status(500).json({ message: "Failed to register push token" });
+    }
+  });
+
+  // Mobile-friendly family member endpoints
+  app.get('/api/family/members', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const familyMembers = await storage.getFamilyMembers(userId);
+      res.json(familyMembers);
+    } catch (error) {
+      console.error("Error fetching family members:", error);
+      res.status(500).json({ message: "Failed to fetch family members" });
+    }
+  });
+
+  app.get('/api/family/locations', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const locations = await storage.getFamilyMembersLocations(userId);
+      res.json(locations);
+    } catch (error) {
+      console.error("Error fetching family locations:", error);
+      res.status(500).json({ message: "Failed to fetch family locations" });
+    }
+  });
+
+  app.post('/api/family/invite-code', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+
+      // Generate random 6-character code
+      const generateCode = () => Math.random().toString(36).substring(2, 8).toUpperCase();
+      let code = generateCode();
+
+      // Ensure code is unique
+      let existingCode = await storage.getInvitationByCode(code);
+      while (existingCode) {
+        code = generateCode();
+        existingCode = await storage.getInvitationByCode(code);
+      }
+
+      // Set expiration to 24 hours from now
+      const expiresAt = new Date();
+      expiresAt.setHours(expiresAt.getHours() + 24);
+
+      const invitationCode = await storage.createInvitationCode({
+        code,
+        userId,
+        expiresAt,
+      });
+
+      res.json(invitationCode);
+    } catch (error) {
+      console.error("Error generating invitation code:", error);
+      res.status(500).json({ message: "Failed to generate invitation code" });
+    }
+  });
+
+  app.delete('/api/family/members/:memberId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const { memberId } = req.params;
+
+      await storage.removeFamilyMember(userId, parseInt(memberId));
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error removing family member:", error);
+      res.status(500).json({ message: "Failed to remove family member" });
+    }
+  });
+
+  // Mobile-friendly places endpoints
+  app.put('/api/places/:placeId', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const placeId = parseInt(req.params.placeId);
+      const updateData = req.body;
+
+      // Check if place belongs to user or their family
+      const places = await storage.getFamilyPlaces(userId);
+      const place = places?.find(p => p.id === placeId);
+
+      if (!place) {
+        return res.status(404).json({ message: "Place not found" });
+      }
+
+      // Update the place
+      await storage.updatePlace(placeId, updateData);
+      res.json({ message: "Place updated successfully" });
+    } catch (error) {
+      console.error("Error updating place:", error);
+      res.status(500).json({ message: "Failed to update place" });
+    }
+  });
+
+  // Get location history with pagination for mobile
+  app.get('/api/locations/history', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      const limit = parseInt(req.query.limit as string) || 50;
+      const offset = parseInt(req.query.offset as string) || 0;
+
+      const history = await storage.getUserLocationHistory(userId, limit, offset);
+      res.json(history);
+    } catch (error) {
+      console.error("Error fetching location history:", error);
+      res.status(500).json({ message: "Failed to fetch location history" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   // WebSocket server for real-time location updates
