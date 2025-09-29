@@ -1,7 +1,9 @@
 import * as SecureStore from 'expo-secure-store';
 import { MockApiService } from './mockApi';
 
-const API_BASE_URL = __DEV__ ? 'http://192.168.0.14:3000/api' : 'https://your-production-url.com/api';
+const API_BASE_URL = __DEV__
+  ? 'http://192.168.0.14:3000/api'
+  : 'https://your-production-url.com/api';
 const USE_MOCK_API = true; // Set to false when backend is ready
 
 // Initialize mock API service
@@ -140,14 +142,17 @@ class ApiService {
     });
   }
 
-  async updatePlace(placeId: number, placeData: Partial<{
-    name: string;
-    address: string;
-    latitude: number;
-    longitude: number;
-    category: string;
-    color: string;
-  }>) {
+  async updatePlace(
+    placeId: number,
+    placeData: Partial<{
+      name: string;
+      address: string;
+      latitude: number;
+      longitude: number;
+      category: string;
+      color: string;
+    }>
+  ) {
     return this.makeRequest(`/places/${placeId}`, {
       method: 'PUT',
       body: JSON.stringify(placeData),

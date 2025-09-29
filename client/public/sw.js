@@ -10,21 +10,19 @@ const urlsToCache = [
 // Install event
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => {
-        return cache.addAll(urlsToCache);
-      })
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(urlsToCache);
+    })
   );
 });
 
 // Fetch event
 self.addEventListener('fetch', (event) => {
   event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        // Return cached version or fetch from network
-        return response || fetch(event.request);
-      })
+    caches.match(event.request).then((response) => {
+      // Return cached version or fetch from network
+      return response || fetch(event.request);
+    })
   );
 });
 
@@ -59,25 +57,23 @@ self.addEventListener('push', (event) => {
     vibrate: [100, 50, 100],
     data: {
       dateOfArrival: Date.now(),
-      primaryKey: 1
+      primaryKey: 1,
     },
     actions: [
       {
         action: 'view',
         title: 'View Location',
-        icon: '/icon-view.png'
+        icon: '/icon-view.png',
       },
       {
         action: 'close',
         title: 'Close',
-        icon: '/icon-close.png'
-      }
-    ]
+        icon: '/icon-close.png',
+      },
+    ],
   };
 
-  event.waitUntil(
-    self.registration.showNotification('FamilyLocator', options)
-  );
+  event.waitUntil(self.registration.showNotification('FamilyLocator', options));
 });
 
 // Notification click
@@ -85,9 +81,7 @@ self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
   if (event.action === 'view') {
-    event.waitUntil(
-      clients.openWindow('/')
-    );
+    event.waitUntil(clients.openWindow('/'));
   }
 });
 
@@ -97,7 +91,7 @@ async function syncLocationData() {
   try {
     const cache = await caches.open('location-data');
     const requests = await cache.keys();
-    
+
     for (const request of requests) {
       if (request.url.includes('/api/locations')) {
         const response = await fetch(request);

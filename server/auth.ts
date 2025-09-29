@@ -1,12 +1,12 @@
-import passport from "passport";
-import { Strategy as LocalStrategy } from "passport-local";
-import { Express } from "express";
-import session from "express-session";
-import { scrypt, randomBytes, timingSafeEqual } from "crypto";
-import { promisify } from "util";
-import { storage } from "./storage";
-import { User, InsertUser } from "@shared/schema";
-import MemoryStore from "memorystore";
+import passport from 'passport';
+import { Strategy as LocalStrategy } from 'passport-local';
+import { Express } from 'express';
+import session from 'express-session';
+import { scrypt, randomBytes, timingSafeEqual } from 'crypto';
+import { promisify } from 'util';
+import { storage } from './storage';
+import { User, InsertUser } from '@shared/schema';
+import MemoryStore from 'memorystore';
 
 declare global {
   namespace Express {
@@ -26,21 +26,21 @@ declare global {
 const scryptAsync = promisify(scrypt);
 
 async function hashPassword(password: string) {
-  const salt = randomBytes(16).toString("hex");
+  const salt = randomBytes(16).toString('hex');
   const buf = (await scryptAsync(password, salt, 64)) as Buffer;
-  return `${buf.toString("hex")}.${salt}`;
+  return `${buf.toString('hex')}.${salt}`;
 }
 
 async function comparePasswords(supplied: string, stored: string) {
-  const [hashed, salt] = stored.split(".");
-  const hashedBuf = Buffer.from(hashed, "hex");
+  const [hashed, salt] = stored.split('.');
+  const hashedBuf = Buffer.from(hashed, 'hex');
   const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
   return timingSafeEqual(hashedBuf, suppliedBuf);
 }
 
 export function setupAuth(app: Express) {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
-  
+
   // Use memory store for sessions with better persistence settings
   const MemStore = MemoryStore(session);
   const sessionStore = new MemStore({
@@ -53,7 +53,9 @@ export function setupAuth(app: Express) {
   });
 
   const sessionSettings: session.SessionOptions = {
-    secret: process.env.SESSION_SECRET || "fallback-secret-key-for-development-very-long-key",
+    secret:
+      process.env.SESSION_SECRET ||
+      'fallback-secret-key-for-development-very-long-key',
     resave: false,
     saveUninitialized: false,
     store: sessionStore,
@@ -67,7 +69,7 @@ export function setupAuth(app: Express) {
     name: 'familylocator.sid', // Custom session name
   };
 
-  app.set("trust proxy", 1);
+  app.set('trust proxy', 1);
   app.use(session(sessionSettings));
   app.use(passport.initialize());
   app.use(passport.session());
@@ -100,17 +102,19 @@ export function setupAuth(app: Express) {
     }
   });
 
-  app.post("/api/register", async (req, res, next) => {
+  app.post('/api/register', async (req, res, next) => {
     try {
       const { email, password, firstName, lastName } = req.body;
-      
+
       if (!email || !password) {
-        return res.status(400).json({ message: "Email and password are required" });
+        return res
+          .status(400)
+          .json({ message: 'Email and password are required' });
       }
 
       const existingUser = await storage.getUserByEmail(email);
       if (existingUser) {
-        return res.status(400).json({ message: "User already exists" });
+        return res.status(400).json({ message: 'User already exists' });
       }
 
       const hashedPassword = await hashPassword(password);
@@ -139,18 +143,18 @@ export function setupAuth(app: Express) {
         });
       });
     } catch (error) {
-      console.error("Registration error:", error);
-      res.status(500).json({ message: "Internal server error" });
+      console.error('Registration error:', error);
+      res.status(500).json({ message: 'Internal server error' });
     }
   });
 
-  app.post("/api/login", (req, res, next) => {
-    passport.authenticate("local", (err: any, user: any, info: any) => {
+  app.post('/api/login', (req, res, next) => {
+    passport.authenticate('local', (err: any, user: any, info: any) => {
       if (err) {
         return next(err);
       }
       if (!user) {
-        return res.status(401).json({ message: "Invalid email or password" });
+        return res.status(401).json({ message: 'Invalid email or password' });
       }
       req.login(user, (err) => {
         if (err) {
@@ -170,16 +174,16 @@ export function setupAuth(app: Express) {
     })(req, res, next);
   });
 
-  app.post("/api/logout", (req, res, next) => {
+  app.post('/api/logout', (req, res, next) => {
     req.logout((err) => {
       if (err) return next(err);
       res.sendStatus(200);
     });
   });
 
-  app.get("/api/user", (req, res) => {
+  app.get('/api/user', (req, res) => {
     if (!req.isAuthenticated() || !req.user) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({ message: 'Unauthorized' });
     }
     res.json({
       id: req.user.id,
@@ -194,9 +198,9 @@ export function setupAuth(app: Express) {
   });
 
   // Alias for compatibility with frontend useAuth hook
-  app.get("/api/auth/user", (req, res) => {
+  app.get('/api/auth/user', (req, res) => {
     if (!req.isAuthenticated() || !req.user) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({ message: 'Unauthorized' });
     }
     res.json({
       id: req.user.id,
@@ -215,5 +219,5 @@ export function isAuthenticated(req: any, res: any, next: any) {
   if (req.isAuthenticated() && req.user) {
     return next();
   }
-  res.status(401).json({ message: "Unauthorized" });
+  res.status(401).json({ message: 'Unauthorized' });
 }

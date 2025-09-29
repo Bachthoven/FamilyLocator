@@ -1,4 +1,7 @@
-import { checkGeofenceTransitions, clearUserGeofenceState } from '../geofencing';
+import {
+  checkGeofenceTransitions,
+  clearUserGeofenceState,
+} from '../geofencing';
 import { storage } from '../storage';
 
 // Mock the storage module
@@ -29,7 +32,7 @@ describe('Geofencing', () => {
         id: 1,
         name: 'Home',
         latitude: 40.7128,
-        longitude: -74.0060,
+        longitude: -74.006,
       };
 
       mockStorage.getFamilyPlaces.mockResolvedValue([mockPlace]);
@@ -41,7 +44,7 @@ describe('Geofencing', () => {
       mockStorage.getFamilyMembers.mockResolvedValue([]);
 
       // User location within 20m radius (same coordinates)
-      await checkGeofenceTransitions(1, 40.7128, -74.0060);
+      await checkGeofenceTransitions(1, 40.7128, -74.006);
 
       expect(mockStorage.createNotification).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -58,13 +61,13 @@ describe('Geofencing', () => {
         id: 1,
         name: 'Home',
         latitude: 40.7128,
-        longitude: -74.0060,
+        longitude: -74.006,
       };
 
       mockStorage.getFamilyPlaces.mockResolvedValue([mockPlace]);
 
       // User location far outside 20m radius
-      await checkGeofenceTransitions(1, 40.8128, -74.1060);
+      await checkGeofenceTransitions(1, 40.8128, -74.106);
 
       expect(mockStorage.createNotification).not.toHaveBeenCalled();
     });
@@ -136,7 +139,7 @@ describe('Geofencing', () => {
       mockStorage.createNotification.mockClear();
 
       // Then exit the geofence
-      await checkGeofenceTransitions(1, 40.8000, -74.0000);
+      await checkGeofenceTransitions(1, 40.8, -74.0);
 
       expect(mockStorage.createNotification).toHaveBeenCalledTimes(2);
 
@@ -171,17 +174,17 @@ describe('Geofencing', () => {
       mockStorage.createNotification.mockClear();
 
       // Move within geofence (should not trigger notification)
-      await checkGeofenceTransitions(1, 40.7590, -73.9850);
+      await checkGeofenceTransitions(1, 40.759, -73.985);
 
       expect(mockStorage.createNotification).not.toHaveBeenCalled();
     });
 
     it('should not trigger duplicate notifications when staying outside geofence', async () => {
       // Start outside geofence
-      await checkGeofenceTransitions(1, 40.8000, -74.0000);
+      await checkGeofenceTransitions(1, 40.8, -74.0);
 
       // Move to another location outside geofence
-      await checkGeofenceTransitions(1, 40.8100, -74.0100);
+      await checkGeofenceTransitions(1, 40.81, -74.01);
 
       expect(mockStorage.createNotification).not.toHaveBeenCalled();
     });
@@ -193,7 +196,7 @@ describe('Geofencing', () => {
         id: 1,
         name: 'Home',
         latitude: 40.7128,
-        longitude: -74.0060,
+        longitude: -74.006,
       },
       {
         id: 2,
@@ -218,7 +221,7 @@ describe('Geofencing', () => {
     it('should handle entering multiple geofences simultaneously', async () => {
       // This scenario is unlikely in real world but tests edge case
       // Position that's somehow within both geofences
-      await checkGeofenceTransitions(1, 40.7128, -74.0060); // At Home
+      await checkGeofenceTransitions(1, 40.7128, -74.006); // At Home
 
       expect(mockStorage.createNotification).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -229,7 +232,7 @@ describe('Geofencing', () => {
 
     it('should handle transitioning between geofences', async () => {
       // Enter Home
-      await checkGeofenceTransitions(1, 40.7128, -74.0060);
+      await checkGeofenceTransitions(1, 40.7128, -74.006);
 
       mockStorage.createNotification.mockClear();
 
@@ -239,7 +242,7 @@ describe('Geofencing', () => {
       expect(mockStorage.createNotification).toHaveBeenCalledTimes(2);
 
       const calls = mockStorage.createNotification.mock.calls;
-      const messages = calls.map(call => call[0].message);
+      const messages = calls.map((call) => call[0].message);
 
       expect(messages).toContain('You exited Home');
       expect(messages).toContain('You entered Work');
@@ -248,16 +251,20 @@ describe('Geofencing', () => {
 
   describe('Error handling', () => {
     it('should handle storage errors gracefully', async () => {
-      mockStorage.getFamilyPlaces.mockRejectedValue(new Error('Database error'));
+      mockStorage.getFamilyPlaces.mockRejectedValue(
+        new Error('Database error')
+      );
 
       // Should not throw
-      await expect(checkGeofenceTransitions(1, 40.7128, -74.0060)).resolves.toBeUndefined();
+      await expect(
+        checkGeofenceTransitions(1, 40.7128, -74.006)
+      ).resolves.toBeUndefined();
     });
 
     it('should handle empty places array', async () => {
       mockStorage.getFamilyPlaces.mockResolvedValue([]);
 
-      await checkGeofenceTransitions(1, 40.7128, -74.0060);
+      await checkGeofenceTransitions(1, 40.7128, -74.006);
 
       expect(mockStorage.createNotification).not.toHaveBeenCalled();
     });
@@ -265,7 +272,7 @@ describe('Geofencing', () => {
     it('should handle null places response', async () => {
       mockStorage.getFamilyPlaces.mockResolvedValue(null);
 
-      await checkGeofenceTransitions(1, 40.7128, -74.0060);
+      await checkGeofenceTransitions(1, 40.7128, -74.006);
 
       expect(mockStorage.createNotification).not.toHaveBeenCalled();
     });

@@ -23,7 +23,8 @@ export default function LandingScreen() {
           </View>
           <Text style={styles.title}>FamilyLocator</Text>
           <Text style={styles.subtitle}>
-            Stay connected with your loved ones. Share your location securely and keep{'\n'}
+            Stay connected with your loved ones. Share your location securely
+            and keep{'\n'}
             your family safe with real-time location tracking.
           </Text>
         </View>
@@ -34,15 +35,27 @@ export default function LandingScreen() {
             style={styles.createAccountButton}
             onPress={() => navigation.navigate('Auth' as never)}
           >
-            <Ionicons name="sparkles" size={16} color="white" style={styles.buttonIcon} />
-            <Text style={styles.createAccountText}>Create Your Free Account</Text>
+            <Ionicons
+              name="sparkles"
+              size={16}
+              color="white"
+              style={styles.buttonIcon}
+            />
+            <Text style={styles.createAccountText}>
+              Create Your Free Account
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.signInButton}
             onPress={() => navigation.navigate('Auth' as never)}
           >
-            <Ionicons name="arrow-forward" size={16} color="#6B7280" style={styles.buttonIcon} />
+            <Ionicons
+              name="arrow-forward"
+              size={16}
+              color="#6B7280"
+              style={styles.buttonIcon}
+            />
             <Text style={styles.signInText}>Sign In</Text>
           </TouchableOpacity>
         </View>
@@ -59,13 +72,17 @@ export default function LandingScreen() {
           </View>
           <View style={styles.featureItem}>
             <Ionicons name="checkmark" size={14} color="#10B981" />
-            <Text style={styles.featureText}>Uses secure email authentication</Text>
+            <Text style={styles.featureText}>
+              Uses secure email authentication
+            </Text>
           </View>
         </View>
 
         {/* How It Works Section */}
         <View style={styles.howItWorksSection}>
-          <Text style={styles.sectionTitle}>How to Get Your Family Connected</Text>
+          <Text style={styles.sectionTitle}>
+            How to Get Your Family Connected
+          </Text>
 
           <View style={styles.stepsContainer}>
             <View style={styles.step}>
@@ -74,10 +91,15 @@ export default function LandingScreen() {
               </View>
               <Text style={styles.stepTitle}>1. Sign Up or Sign In</Text>
               <Text style={styles.stepDescription}>
-                Click either button above - if you're new, you'll create an account. If you already have one, you'll sign in. Takes seconds with secure email authentication.
+                Click either button above - if you're new, you'll create an
+                account. If you already have one, you'll sign in. Takes seconds
+                with secure email authentication.
               </Text>
               <View style={styles.readyBadge}>
-                <Text style={styles.readyBadgeText}>That's it! New or returning, you're instantly ready to use the app.</Text>
+                <Text style={styles.readyBadgeText}>
+                  That's it! New or returning, you're instantly ready to use the
+                  app.
+                </Text>
               </View>
             </View>
 
@@ -87,7 +109,8 @@ export default function LandingScreen() {
               </View>
               <Text style={styles.stepTitle}>2. Share with Family</Text>
               <Text style={styles.stepDescription}>
-                Send this website link to your family members so they can create their accounts the same way you did.
+                Send this website link to your family members so they can create
+                their accounts the same way you did.
               </Text>
             </View>
 
@@ -97,11 +120,14 @@ export default function LandingScreen() {
               </View>
               <Text style={styles.stepTitle}>3. Connect & Share</Text>
               <Text style={styles.stepDescription}>
-                Once everyone has accounts, invite each other through the Family tab and start sharing locations safely.
+                Once everyone has accounts, invite each other through the Family
+                tab and start sharing locations safely.
               </Text>
               <View style={styles.importantNote}>
                 <Text style={styles.importantLabel}>Important: </Text>
-                <Text style={styles.importantText}>Everyone needs their own account before you can invite them.</Text>
+                <Text style={styles.importantText}>
+                  Everyone needs their own account before you can invite them.
+                </Text>
               </View>
             </View>
           </View>
@@ -109,7 +135,9 @@ export default function LandingScreen() {
 
         {/* Why Families Love Section */}
         <View style={styles.whySection}>
-          <Text style={styles.sectionTitle}>Why Families Love FamilyLocator</Text>
+          <Text style={styles.sectionTitle}>
+            Why Families Love FamilyLocator
+          </Text>
 
           <View style={styles.benefitsContainer}>
             <View style={styles.benefit}>
@@ -117,9 +145,12 @@ export default function LandingScreen() {
                 <Ionicons name="checkmark-circle" size={20} color="#10B981" />
               </View>
               <View style={styles.benefitContent}>
-                <Text style={styles.benefitTitle}>Real-time Location Sharing</Text>
+                <Text style={styles.benefitTitle}>
+                  Real-time Location Sharing
+                </Text>
                 <Text style={styles.benefitDescription}>
-                  See where your family members are right now with live location updates on an interactive map.
+                  See where your family members are right now with live location
+                  updates on an interactive map.
                 </Text>
               </View>
             </View>
@@ -131,7 +162,8 @@ export default function LandingScreen() {
               <View style={styles.benefitContent}>
                 <Text style={styles.benefitTitle}>Family Groups</Text>
                 <Text style={styles.benefitDescription}>
-                  Easily manage your family connections and see everyone's status in one place.
+                  Easily manage your family connections and see everyone's
+                  status in one place.
                 </Text>
               </View>
             </View>
@@ -143,7 +175,8 @@ export default function LandingScreen() {
               <View style={styles.benefitContent}>
                 <Text style={styles.benefitTitle}>Works Everywhere</Text>
                 <Text style={styles.benefitDescription}>
-                  Access from any device with a web browser. No app downloads required.
+                  Access from any device with a web browser. No app downloads
+                  required.
                 </Text>
               </View>
             </View>
@@ -152,9 +185,12 @@ export default function LandingScreen() {
 
         {/* Bottom CTA */}
         <View style={styles.bottomCTA}>
-          <Text style={styles.ctaTitle}>Ready to Keep Your Family Connected?</Text>
+          <Text style={styles.ctaTitle}>
+            Ready to Keep Your Family Connected?
+          </Text>
           <Text style={styles.ctaSubtitle}>
-            Join families worldwide who trust FamilyLocator for safe, secure location sharing.
+            Join families worldwide who trust FamilyLocator for safe, secure
+            location sharing.
           </Text>
 
           <View style={styles.bottomButtons}>
@@ -162,7 +198,12 @@ export default function LandingScreen() {
               style={styles.createAccountButton}
               onPress={() => navigation.navigate('Auth' as never)}
             >
-              <Ionicons name="sparkles" size={16} color="white" style={styles.buttonIcon} />
+              <Ionicons
+                name="sparkles"
+                size={16}
+                color="white"
+                style={styles.buttonIcon}
+              />
               <Text style={styles.createAccountText}>Create Account</Text>
             </TouchableOpacity>
 
@@ -170,13 +211,19 @@ export default function LandingScreen() {
               style={styles.signInButton}
               onPress={() => navigation.navigate('Auth' as never)}
             >
-              <Ionicons name="arrow-forward" size={16} color="#6B7280" style={styles.buttonIcon} />
+              <Ionicons
+                name="arrow-forward"
+                size={16}
+                color="#6B7280"
+                style={styles.buttonIcon}
+              />
               <Text style={styles.signInText}>Sign In</Text>
             </TouchableOpacity>
           </View>
 
           <Text style={styles.disclaimer}>
-            By creating an account, you agree to keep your family's location data private and secure.
+            By creating an account, you agree to keep your family's location
+            data private and secure.
           </Text>
         </View>
       </ScrollView>

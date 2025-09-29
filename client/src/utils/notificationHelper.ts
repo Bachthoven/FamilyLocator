@@ -1,12 +1,16 @@
 // Notification helper that works on both desktop and mobile
 
 export const isMobileDevice = () => {
-  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+    navigator.userAgent
+  );
 };
 
 export const isStandalonePWA = () => {
-  return window.matchMedia('(display-mode: standalone)').matches ||
-         (window.navigator as any).standalone === true;
+  return (
+    window.matchMedia('(display-mode: standalone)').matches ||
+    (window.navigator as any).standalone === true
+  );
 };
 
 let serviceWorkerRegistration: ServiceWorkerRegistration | null = null;
@@ -18,7 +22,8 @@ export const initializeServiceWorker = async (): Promise<boolean> => {
   }
 
   try {
-    const registration = await navigator.serviceWorker.register('/service-worker.js');
+    const registration =
+      await navigator.serviceWorker.register('/service-worker.js');
     serviceWorkerRegistration = registration;
     console.log('Service Worker registered successfully');
     return true;
@@ -28,23 +33,24 @@ export const initializeServiceWorker = async (): Promise<boolean> => {
   }
 };
 
-export const requestNotificationPermission = async (): Promise<NotificationPermission> => {
-  if (!('Notification' in window)) {
-    console.log('Notifications not supported');
-    return 'denied';
-  }
+export const requestNotificationPermission =
+  async (): Promise<NotificationPermission> => {
+    if (!('Notification' in window)) {
+      console.log('Notifications not supported');
+      return 'denied';
+    }
 
-  if (Notification.permission === 'granted') {
-    return 'granted';
-  }
+    if (Notification.permission === 'granted') {
+      return 'granted';
+    }
 
-  if (Notification.permission !== 'denied') {
-    const permission = await Notification.requestPermission();
-    return permission;
-  }
+    if (Notification.permission !== 'denied') {
+      const permission = await Notification.requestPermission();
+      return permission;
+    }
 
-  return Notification.permission;
-};
+    return Notification.permission;
+  };
 
 export interface NotificationOptions {
   body?: string;
@@ -76,7 +82,7 @@ export const showNotification = async (
   const defaultOptions: NotificationOptions = {
     icon: '/favicon.ico',
     badge: '/favicon.ico',
-    ...options
+    ...options,
   };
 
   try {
@@ -99,7 +105,7 @@ export const showNotification = async (
     if (!isMobileDevice()) {
       console.log('Using direct Notification API');
       const notification = new Notification(title, defaultOptions);
-      
+
       // Auto-close after 8 seconds unless requireInteraction is true
       if (!options.requireInteraction) {
         setTimeout(() => notification.close(), 8000);
@@ -112,7 +118,7 @@ export const showNotification = async (
     return false;
   } catch (error) {
     console.error('Error showing notification:', error);
-    
+
     // Fallback: Try Service Worker if direct API failed
     if (serviceWorkerRegistration) {
       try {
@@ -123,7 +129,7 @@ export const showNotification = async (
         console.error('Service Worker notification also failed:', swError);
       }
     }
-    
+
     return false;
   }
 };

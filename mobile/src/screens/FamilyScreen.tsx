@@ -43,7 +43,7 @@ export default function FamilyScreen() {
         lastName: 'Chang',
         email: 'qing.chang@example.com',
         status: 'offline',
-        lastSeen: 'Offline for 22d'
+        lastSeen: 'Offline for 22d',
       },
       {
         id: 2,
@@ -52,8 +52,8 @@ export default function FamilyScreen() {
         email: 'jing.li@example.com',
         status: 'offline',
         lastSeen: 'Offline for 22d',
-        profileImageUrl: 'https://example.com/avatar.jpg' // Mock avatar
-      }
+        profileImageUrl: 'https://example.com/avatar.jpg', // Mock avatar
+      },
     ]);
   };
 
@@ -63,7 +63,7 @@ export default function FamilyScreen() {
       'A new invite code will be generated for your family.',
       [
         { text: 'Cancel', style: 'cancel' },
-        { text: 'Generate', onPress: () => console.log('Generate code') }
+        { text: 'Generate', onPress: () => console.log('Generate code') },
       ]
     );
   };
@@ -84,12 +84,13 @@ export default function FamilyScreen() {
     <View style={styles.memberCard}>
       <View style={styles.memberLeft}>
         {item.profileImageUrl ? (
-          <Image source={{ uri: item.profileImageUrl }} style={styles.memberAvatar} />
+          <Image
+            source={{ uri: item.profileImageUrl }}
+            style={styles.memberAvatar}
+          />
         ) : (
           <View style={styles.memberAvatarPlaceholder}>
-            <Text style={styles.memberInitials}>
-              {item.firstName[0]}
-            </Text>
+            <Text style={styles.memberInitials}>{item.firstName[0]}</Text>
           </View>
         )}
 
@@ -98,9 +99,15 @@ export default function FamilyScreen() {
             {item.firstName} {item.lastName}
           </Text>
           <View style={styles.statusContainer}>
-            <View style={[styles.statusDot, {
-              backgroundColor: item.status === 'accepted' ? '#10B981' : '#9CA3AF'
-            }]} />
+            <View
+              style={[
+                styles.statusDot,
+                {
+                  backgroundColor:
+                    item.status === 'accepted' ? '#10B981' : '#9CA3AF',
+                },
+              ]}
+            />
             <Text style={styles.statusText}>
               {item.status === 'accepted' ? 'Online' : item.lastSeen}
             </Text>
@@ -117,7 +124,9 @@ export default function FamilyScreen() {
     </View>
   );
 
-  const onlineMemberCount = familyMembers.filter(m => m.status === 'accepted').length;
+  const onlineMemberCount = familyMembers.filter(
+    (m) => m.status === 'accepted'
+  ).length;
   const totalMemberCount = familyMembers.length;
 
   return (
@@ -139,7 +148,10 @@ export default function FamilyScreen() {
 
       {/* Action Buttons */}
       <View style={styles.actionButtons}>
-        <TouchableOpacity style={styles.generateButton} onPress={handleGenerateCode}>
+        <TouchableOpacity
+          style={styles.generateButton}
+          onPress={handleGenerateCode}
+        >
           <Ionicons name="qr-code" size={16} color="white" />
           <Text style={styles.generateButtonText}>Generate Code</Text>
         </TouchableOpacity>
@@ -178,7 +190,9 @@ export default function FamilyScreen() {
               </View>
 
               <View style={styles.statCard}>
-                <Text style={[styles.statNumber, { color: '#10B981' }]}>{onlineMemberCount}</Text>
+                <Text style={[styles.statNumber, { color: '#10B981' }]}>
+                  {onlineMemberCount}
+                </Text>
                 <Text style={styles.statLabel}>Online Now</Text>
               </View>
             </View>

@@ -3,9 +3,12 @@ export default {
   testEnvironment: 'node',
   extensionsToTreatAsEsm: ['.ts'],
   transform: {
-    '^.+\\.ts$': ['ts-jest', {
-      useESM: true
-    }]
+    '^.+\\.ts$': [
+      'ts-jest',
+      {
+        useESM: true,
+      },
+    ],
   },
   testMatch: [
     '<rootDir>/server/**/__tests__/**/*.{js,jsx,ts,tsx}',
@@ -13,7 +16,7 @@ export default {
     '<rootDir>/client/**/__tests__/**/*.{js,jsx,ts,tsx}',
     '<rootDir>/client/**/*.(test|spec).{js,jsx,ts,tsx}',
     '<rootDir>/shared/**/__tests__/**/*.{js,jsx,ts,tsx}',
-    '<rootDir>/shared/**/*.(test|spec).{js,jsx,ts,tsx}'
+    '<rootDir>/shared/**/*.(test|spec).{js,jsx,ts,tsx}',
   ],
   collectCoverageFrom: [
     'server/**/*.{js,jsx,ts,tsx}',
@@ -22,11 +25,11 @@ export default {
     '!**/*.d.ts',
     '!**/__tests__/**',
     '!**/node_modules/**',
-    '!**/dist/**'
+    '!**/dist/**',
   ],
   coverageReporters: ['text', 'lcov', 'html'],
   setupFilesAfterEnv: ['<rootDir>/setupTests.js'],
   moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/$1'
-  }
+    '^@/(.*)$': '<rootDir>/$1',
+  },
 };

@@ -70,7 +70,9 @@ describe('ApiService', () => {
 
       // This test would work if we could override USE_MOCK_API
       // For now, we're testing the general structure
-      expect(mockSecureStore.getItemAsync).not.toHaveBeenCalledWith('sessionToken');
+      expect(mockSecureStore.getItemAsync).not.toHaveBeenCalledWith(
+        'sessionToken'
+      );
     });
 
     it('should handle HTTP errors properly', async () => {
@@ -87,7 +89,7 @@ describe('ApiService', () => {
     it('should update location with correct data structure', async () => {
       const locationData = {
         latitude: 40.7128,
-        longitude: -74.0060,
+        longitude: -74.006,
         accuracy: 5,
         address: 'New York, NY',
       };
@@ -141,7 +143,7 @@ describe('ApiService', () => {
         name: 'Home',
         address: '123 Main St',
         latitude: 40.7128,
-        longitude: -74.0060,
+        longitude: -74.006,
         category: 'home',
         color: '#FF0000',
       };

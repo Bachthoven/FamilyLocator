@@ -7,9 +7,9 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "test": "npx jest",
-    "test:watch": "npx jest --watch",
-    "test:coverage": "npx jest --coverage",
+    "test": "./node_modules/.bin/jest",
+    "test:watch": "./node_modules/.bin/jest --watch",
+    "test:coverage": "./node_modules/.bin/jest --coverage",
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx}\"",
     "format:check": "prettier --check \"src/**/*.{js,jsx,ts,tsx}\"",
     "lint": "eslint src --ext .js,.jsx,.ts,.tsx"

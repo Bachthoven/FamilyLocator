@@ -15,7 +15,7 @@ const mockUsers: { [email: string]: User } = {
     notificationsEnabled: true,
     createdAt: new Date(),
     updatedAt: new Date(),
-  }
+  },
 };
 
 const mockPassword = 'password123';
@@ -23,7 +23,7 @@ const mockPassword = 'password123';
 export class MockApiService {
   async login(email: string, password: string) {
     // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
     const user = mockUsers[email];
     if (!user || password !== mockPassword) {
@@ -43,7 +43,7 @@ export class MockApiService {
     lastName: string;
   }) {
     // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
     if (mockUsers[userData.email]) {
       throw new Error('User already exists');
@@ -73,33 +73,33 @@ export class MockApiService {
 
   async logout() {
     // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
     return { success: true };
   }
 
   // Mock other API methods
   async updateLocation(locationData: any) {
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
     return { id: 1, ...locationData, timestamp: new Date() };
   }
 
   async getLocationHistory() {
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
     return [];
   }
 
   async getFamilyMembers() {
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
     return [];
   }
 
   async getFamilyLocations() {
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
     return [];
   }
 
   async generateInviteCode() {
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
     return {
       id: 1,
       code: 'ABC123',
@@ -112,52 +112,52 @@ export class MockApiService {
   }
 
   async joinFamily(inviteCode: string) {
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
     return { success: true, message: 'Successfully joined family!' };
   }
 
   async removeFamilyMember(memberId: number) {
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
     return { success: true };
   }
 
   async getPlaces() {
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
     return [];
   }
 
   async createPlace(placeData: any) {
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
     return { id: 1, ...placeData, createdAt: new Date() };
   }
 
   async updatePlace(placeId: number, placeData: any) {
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
     return { success: true };
   }
 
   async deletePlace(placeId: number) {
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
     return { success: true };
   }
 
   async getNotifications() {
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
     return [];
   }
 
   async markNotificationRead(notificationId: number) {
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
     return { success: true };
   }
 
   async updatePushToken(expoPushToken: string) {
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
     return { message: 'Push token registered successfully' };
   }
 
   async updateProfile(profileData: any) {
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
     return { success: true };
   }
 }

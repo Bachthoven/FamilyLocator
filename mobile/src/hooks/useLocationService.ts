@@ -25,9 +25,12 @@ TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
 });
 
 export function useLocationService() {
-  const [currentLocation, setCurrentLocation] = useState<LocationData | null>(null);
+  const [currentLocation, setCurrentLocation] = useState<LocationData | null>(
+    null
+  );
   const [isLocationEnabled, setIsLocationEnabled] = useState(false);
-  const [locationPermissions, setLocationPermissions] = useState<Location.PermissionStatus | null>(null);
+  const [locationPermissions, setLocationPermissions] =
+    useState<Location.PermissionStatus | null>(null);
 
   useEffect(() => {
     checkLocationPermissions();
@@ -46,7 +49,8 @@ export function useLocationService() {
   const requestLocationPermissions = async (): Promise<boolean> => {
     try {
       // Request foreground permissions
-      const { status: foregroundStatus } = await Location.requestForegroundPermissionsAsync();
+      const { status: foregroundStatus } =
+        await Location.requestForegroundPermissionsAsync();
 
       if (foregroundStatus !== 'granted') {
         console.log('Foreground location permission denied');
@@ -54,7 +58,8 @@ export function useLocationService() {
       }
 
       // Request background permissions for continuous tracking
-      const { status: backgroundStatus } = await Location.requestBackgroundPermissionsAsync();
+      const { status: backgroundStatus } =
+        await Location.requestBackgroundPermissionsAsync();
 
       if (backgroundStatus !== 'granted') {
         console.log('Background location permission denied');
@@ -137,7 +142,8 @@ export function useLocationService() {
 
   const stopLocationTracking = async (): Promise<void> => {
     try {
-      const hasStarted = await Location.hasStartedLocationUpdatesAsync(LOCATION_TASK_NAME);
+      const hasStarted =
+        await Location.hasStartedLocationUpdatesAsync(LOCATION_TASK_NAME);
       if (hasStarted) {
         await Location.stopLocationUpdatesAsync(LOCATION_TASK_NAME);
       }
@@ -147,7 +153,9 @@ export function useLocationService() {
     }
   };
 
-  const updateLocationToServer = async (location: LocationData): Promise<boolean> => {
+  const updateLocationToServer = async (
+    location: LocationData
+  ): Promise<boolean> => {
     try {
       // This will be implemented when we connect to the backend
       const API_BASE_URL = 'http://localhost:3000/api';

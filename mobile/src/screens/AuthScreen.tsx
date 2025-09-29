@@ -44,7 +44,9 @@ export default function AuthScreen() {
     } catch (error) {
       Alert.alert(
         'Error',
-        isLogin ? 'Login failed. Please check your credentials.' : 'Registration failed. Please try again.'
+        isLogin
+          ? 'Login failed. Please check your credentials.'
+          : 'Registration failed. Please try again.'
       );
     } finally {
       setIsLoading(false);
@@ -57,88 +59,92 @@ export default function AuthScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardAvoid}
       >
-          <ScrollView contentContainerStyle={styles.scrollContent}>
-            <View style={styles.header}>
-              <View style={styles.iconContainer}>
-                <Ionicons name="location" size={40} color="white" />
-              </View>
-              <Text style={styles.title}>
-                {isLogin ? 'Welcome Back' : 'Create Account'}
-              </Text>
-              <Text style={styles.subtitle}>
-                {isLogin ? 'Sign in to continue' : 'Join your family network'}
-              </Text>
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          <View style={styles.header}>
+            <View style={styles.iconContainer}>
+              <Ionicons name="location" size={40} color="white" />
             </View>
+            <Text style={styles.title}>
+              {isLogin ? 'Welcome Back' : 'Create Account'}
+            </Text>
+            <Text style={styles.subtitle}>
+              {isLogin ? 'Sign in to continue' : 'Join your family network'}
+            </Text>
+          </View>
 
-            <View style={styles.form}>
-              {!isLogin && (
-                <View style={styles.nameRow}>
-                  <View style={styles.nameInput}>
-                    <TextInput
-                      style={styles.input}
-                      placeholder="First Name"
-                      placeholderTextColor="#9ca3af"
-                      value={firstName}
-                      onChangeText={setFirstName}
-                      autoCapitalize="words"
-                    />
-                  </View>
-                  <View style={styles.nameInput}>
-                    <TextInput
-                      style={styles.input}
-                      placeholder="Last Name"
-                      placeholderTextColor="#9ca3af"
-                      value={lastName}
-                      onChangeText={setLastName}
-                      autoCapitalize="words"
-                    />
-                  </View>
+          <View style={styles.form}>
+            {!isLogin && (
+              <View style={styles.nameRow}>
+                <View style={styles.nameInput}>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="First Name"
+                    placeholderTextColor="#9ca3af"
+                    value={firstName}
+                    onChangeText={setFirstName}
+                    autoCapitalize="words"
+                  />
                 </View>
-              )}
+                <View style={styles.nameInput}>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Last Name"
+                    placeholderTextColor="#9ca3af"
+                    value={lastName}
+                    onChangeText={setLastName}
+                    autoCapitalize="words"
+                  />
+                </View>
+              </View>
+            )}
 
-              <TextInput
-                style={styles.input}
-                placeholder="Email"
-                placeholderTextColor="#9ca3af"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoComplete="email"
-              />
+            <TextInput
+              style={styles.input}
+              placeholder="Email"
+              placeholderTextColor="#9ca3af"
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoComplete="email"
+            />
 
-              <TextInput
-                style={styles.input}
-                placeholder="Password"
-                placeholderTextColor="#9ca3af"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-                autoComplete="password"
-              />
+            <TextInput
+              style={styles.input}
+              placeholder="Password"
+              placeholderTextColor="#9ca3af"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+              autoComplete="password"
+            />
 
-              <TouchableOpacity
-                style={[styles.submitButton, isLoading && styles.disabledButton]}
-                onPress={handleSubmit}
-                disabled={isLoading}
-              >
-                <Text style={styles.submitText}>
-                  {isLoading ? 'Loading...' : isLogin ? 'Sign In' : 'Create Account'}
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.footer}>
-              <Text style={styles.footerText}>
-                {isLogin ? "Don't have an account?" : 'Already have an account?'}
+            <TouchableOpacity
+              style={[styles.submitButton, isLoading && styles.disabledButton]}
+              onPress={handleSubmit}
+              disabled={isLoading}
+            >
+              <Text style={styles.submitText}>
+                {isLoading
+                  ? 'Loading...'
+                  : isLogin
+                    ? 'Sign In'
+                    : 'Create Account'}
               </Text>
-              <TouchableOpacity onPress={() => setIsLogin(!isLogin)}>
-                <Text style={styles.linkText}>
-                  {isLogin ? 'Sign Up' : 'Sign In'}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </ScrollView>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>
+              {isLogin ? "Don't have an account?" : 'Already have an account?'}
+            </Text>
+            <TouchableOpacity onPress={() => setIsLogin(!isLogin)}>
+              <Text style={styles.linkText}>
+                {isLogin ? 'Sign Up' : 'Sign In'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

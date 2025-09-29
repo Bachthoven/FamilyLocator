@@ -19,21 +19,24 @@ export default function SettingsScreen() {
   const [locationHistory, setLocationHistory] = React.useState(true);
 
   const handleLogout = () => {
-    Alert.alert(
-      'Logout',
-      'Are you sure you want to logout?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Logout',
-          style: 'destructive',
-          onPress: logout,
-        },
-      ]
-    );
+    Alert.alert('Logout', 'Are you sure you want to logout?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Logout',
+        style: 'destructive',
+        onPress: logout,
+      },
+    ]);
   };
 
-  const SettingItem = ({ icon, title, value, onToggle, hasSwitch = false, onPress }: {
+  const SettingItem = ({
+    icon,
+    title,
+    value,
+    onToggle,
+    hasSwitch = false,
+    onPress,
+  }: {
     icon: string;
     title: string;
     value?: boolean;
@@ -78,7 +81,8 @@ export default function SettingsScreen() {
           <View style={styles.profileCard}>
             <View style={styles.profileAvatar}>
               <Text style={styles.profileInitials}>
-                {user?.firstName?.[0]}{user?.lastName?.[0]}
+                {user?.firstName?.[0]}
+                {user?.lastName?.[0]}
               </Text>
             </View>
             <View style={styles.profileInfo}>
@@ -130,12 +134,22 @@ export default function SettingsScreen() {
           <SettingItem
             icon="help-circle"
             title="Help & Support"
-            onPress={() => Alert.alert('Help', 'Contact support at support@familylocator.com')}
+            onPress={() =>
+              Alert.alert(
+                'Help',
+                'Contact support at support@familylocator.com'
+              )
+            }
           />
           <SettingItem
             icon="document-text"
             title="Privacy Policy"
-            onPress={() => Alert.alert('Privacy Policy', 'Privacy policy will be displayed here')}
+            onPress={() =>
+              Alert.alert(
+                'Privacy Policy',
+                'Privacy policy will be displayed here'
+              )
+            }
           />
           <SettingItem
             icon="information-circle"

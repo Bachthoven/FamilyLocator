@@ -1,5 +1,5 @@
-import { storage } from "./storage";
-import { log } from "./vite";
+import { storage } from './storage';
+import { log } from './vite';
 
 interface UserLocationSession {
   userId: string;
@@ -48,7 +48,9 @@ class LocationLogger {
       // Get user's current settings
       const user = await storage.getUser(userId);
       if (!user || !user.locationHistoryEnabled) {
-        log(`Skipping automatic location log for user ${userId} - history disabled`);
+        log(
+          `Skipping automatic location log for user ${userId} - history disabled`
+        );
         return;
       }
 
@@ -62,7 +64,9 @@ class LocationLogger {
       // Check if the latest location is recent (within the last 2 hours)
       const twoHoursAgo = new Date(Date.now() - 2 * this.HOUR_IN_MS);
       if (latestLocation.timestamp < twoHoursAgo) {
-        log(`Latest location for user ${userId} is too old, skipping automatic log`);
+        log(
+          `Latest location for user ${userId} is too old, skipping automatic log`
+        );
         return;
       }
 
@@ -73,7 +77,7 @@ class LocationLogger {
         longitude: latestLocation.longitude,
         accuracy: latestLocation.accuracy,
         address: latestLocation.address,
-        type: "automatic_hourly",
+        type: 'automatic_hourly',
       });
 
       log(`Automatic hourly location logged for user ${userId}`);
@@ -84,7 +88,7 @@ class LocationLogger {
 
   // Get all active logging sessions (for debugging)
   getActiveSessions() {
-    return Array.from(this.activeSessions.values()).map(session => ({
+    return Array.from(this.activeSessions.values()).map((session) => ({
       userId: session.userId,
       lastLogTime: session.lastLogTime,
       nextLogTime: new Date(session.lastLogTime.getTime() + this.HOUR_IN_MS),
@@ -97,7 +101,7 @@ class LocationLogger {
       clearInterval(session.intervalId);
     }
     this.activeSessions.clear();
-    log("Location logger cleanup completed");
+    log('Location logger cleanup completed');
   }
 }
 

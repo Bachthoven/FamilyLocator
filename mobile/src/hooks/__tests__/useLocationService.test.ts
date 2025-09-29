@@ -102,7 +102,7 @@ describe('useLocationService', () => {
     const mockLocationData = {
       coords: {
         latitude: 40.7128,
-        longitude: -74.0060,
+        longitude: -74.006,
         accuracy: 5,
         altitude: 0,
         altitudeAccuracy: 0,
@@ -133,7 +133,7 @@ describe('useLocationService', () => {
 
     expect(currentLocation).toEqual({
       latitude: 40.7128,
-      longitude: -74.0060,
+      longitude: -74.006,
       accuracy: 5,
       timestamp: mockLocationData.timestamp,
     });
@@ -166,7 +166,7 @@ describe('useLocationService', () => {
     const mockLocationData = {
       coords: {
         latitude: 40.7128,
-        longitude: -74.0060,
+        longitude: -74.006,
         accuracy: 5,
         altitude: 0,
         altitudeAccuracy: 0,
@@ -231,7 +231,7 @@ describe('useLocationService', () => {
 
     const locationData = {
       latitude: 40.7128,
-      longitude: -74.0060,
+      longitude: -74.006,
       accuracy: 5,
       timestamp: Date.now(),
     };
@@ -268,7 +268,7 @@ describe('useLocationService', () => {
 
     const locationData = {
       latitude: 40.7128,
-      longitude: -74.0060,
+      longitude: -74.006,
       accuracy: 5,
       timestamp: Date.now(),
     };
@@ -285,7 +285,7 @@ describe('useLocationService', () => {
     const mockLocationData = {
       coords: {
         latitude: 40.7128,
-        longitude: -74.0060,
+        longitude: -74.006,
         accuracy: 5,
         altitude: 0,
         altitudeAccuracy: 0,
@@ -302,13 +302,11 @@ describe('useLocationService', () => {
       canAskAgain: true,
       expires: 'never',
     });
-    mockLocation.watchPositionAsync.mockImplementation(
-      (options, callback) => {
-        // Simulate calling the callback
-        setTimeout(() => callback(mockLocationData), 0);
-        return Promise.resolve(mockSubscription);
-      }
-    );
+    mockLocation.watchPositionAsync.mockImplementation((options, callback) => {
+      // Simulate calling the callback
+      setTimeout(() => callback(mockLocationData), 0);
+      return Promise.resolve(mockSubscription);
+    });
 
     const { result } = renderHook(() => useLocationService());
     const mockCallback = jest.fn();
@@ -326,7 +324,7 @@ describe('useLocationService', () => {
     expect(subscription).toBe(mockSubscription);
     expect(mockCallback).toHaveBeenCalledWith({
       latitude: 40.7128,
-      longitude: -74.0060,
+      longitude: -74.006,
       accuracy: 5,
       timestamp: mockLocationData.timestamp,
     });

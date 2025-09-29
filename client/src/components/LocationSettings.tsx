@@ -11,7 +11,13 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { MapPin, Clock, Save } from 'lucide-react';
@@ -21,7 +27,10 @@ interface LocationSettingsProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export function LocationSettings({ open, onOpenChange }: LocationSettingsProps) {
+export function LocationSettings({
+  open,
+  onOpenChange,
+}: LocationSettingsProps) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
@@ -33,7 +42,8 @@ export function LocationSettings({ open, onOpenChange }: LocationSettingsProps) 
       // Initialize with user's current settings
       setAutoLocationEnabled(user.locationHistoryEnabled || true);
       // Get stored interval or default to 60 minutes
-      const storedInterval = localStorage.getItem('autoLocationInterval') || '60';
+      const storedInterval =
+        localStorage.getItem('autoLocationInterval') || '60';
       setLocationInterval(storedInterval);
     }
   }, [user, open]);
@@ -50,8 +60,11 @@ export function LocationSettings({ open, onOpenChange }: LocationSettingsProps) 
 
       // Store interval in localStorage for the location logger
       localStorage.setItem('autoLocationInterval', locationInterval);
-      localStorage.setItem('autoLocationEnabled', autoLocationEnabled.toString());
-      
+      localStorage.setItem(
+        'autoLocationEnabled',
+        autoLocationEnabled.toString()
+      );
+
       // Trigger page reload to restart location logging with new settings
       window.location.reload();
 
@@ -106,7 +119,9 @@ export function LocationSettings({ open, onOpenChange }: LocationSettingsProps) 
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label className="text-sm font-medium">Enable auto-logging</Label>
+                  <Label className="text-sm font-medium">
+                    Enable auto-logging
+                  </Label>
                   <p className="text-xs text-muted-foreground">
                     Automatically save your location at regular intervals
                   </p>
@@ -119,8 +134,13 @@ export function LocationSettings({ open, onOpenChange }: LocationSettingsProps) 
 
               {autoLocationEnabled && (
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium">Logging interval</Label>
-                  <Select value={locationInterval} onValueChange={setLocationInterval}>
+                  <Label className="text-sm font-medium">
+                    Logging interval
+                  </Label>
+                  <Select
+                    value={locationInterval}
+                    onValueChange={setLocationInterval}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select interval" />
                     </SelectTrigger>

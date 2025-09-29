@@ -1,11 +1,5 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  SafeAreaView,
-  FlatList,
-} from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, FlatList } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 interface LocationHistory {

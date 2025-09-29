@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+} from 'react';
 import * as SecureStore from 'expo-secure-store';
 import { User } from '../types/schema';
 import { apiService } from '../services/api';
@@ -57,7 +63,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const userData = await apiService.login(email, password);
       setUser(userData.user);
       await SecureStore.setItemAsync('user', JSON.stringify(userData.user));
-      await SecureStore.setItemAsync('sessionToken', userData.sessionToken || '');
+      await SecureStore.setItemAsync(
+        'sessionToken',
+        userData.sessionToken || ''
+      );
     } catch (error) {
       console.error('Login error:', error);
       throw error;

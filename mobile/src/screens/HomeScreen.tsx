@@ -28,7 +28,7 @@ export default function HomeScreen() {
     isLocationEnabled,
     requestLocationPermissions,
     startLocationTracking,
-    stopLocationTracking
+    stopLocationTracking,
   } = useLocationService();
 
   const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
@@ -47,7 +47,7 @@ export default function HomeScreen() {
 
   useEffect(() => {
     if (currentLocation) {
-      setMapRegion(prev => ({
+      setMapRegion((prev) => ({
         ...prev,
         latitude: currentLocation.latitude,
         longitude: currentLocation.longitude,
@@ -75,7 +75,7 @@ export default function HomeScreen() {
         lastName: 'Chang',
         latitude: 37.78925,
         longitude: -122.4334,
-        lastUpdated: 'now'
+        lastUpdated: 'now',
       },
       {
         id: 2,
@@ -83,8 +83,8 @@ export default function HomeScreen() {
         lastName: 'Li',
         latitude: 37.78725,
         longitude: -122.4314,
-        lastUpdated: 'now'
-      }
+        lastUpdated: 'now',
+      },
     ]);
   };
 
@@ -94,7 +94,9 @@ export default function HomeScreen() {
       <View style={styles.statusBar}>
         <View style={styles.onlineIndicator}>
           <View style={styles.onlineDot} />
-          <Text style={styles.onlineText}>{onlineMemberCount} members online</Text>
+          <Text style={styles.onlineText}>
+            {onlineMemberCount} members online
+          </Text>
         </View>
 
         <TouchableOpacity style={styles.notificationButton}>
@@ -129,47 +131,71 @@ export default function HomeScreen() {
           </Marker>
         )}
 
-        {familyMembers.map((member) => (
-          member.latitude && member.longitude && (
-            <Marker
-              key={member.id}
-              coordinate={{
-                latitude: member.latitude,
-                longitude: member.longitude,
-              }}
-              title={`${member.firstName} ${member.lastName}`}
-              description={member.lastUpdated ? `Last updated: ${member.lastUpdated}` : ''}
-            >
-              <View style={styles.familyMarker}>
-                <View style={styles.familyMarkerInner}>
-                  <Text style={styles.familyMarkerText}>
-                    {member.firstName[0]}
-                  </Text>
+        {familyMembers.map(
+          (member) =>
+            member.latitude &&
+            member.longitude && (
+              <Marker
+                key={member.id}
+                coordinate={{
+                  latitude: member.latitude,
+                  longitude: member.longitude,
+                }}
+                title={`${member.firstName} ${member.lastName}`}
+                description={
+                  member.lastUpdated
+                    ? `Last updated: ${member.lastUpdated}`
+                    : ''
+                }
+              >
+                <View style={styles.familyMarker}>
+                  <View style={styles.familyMarkerInner}>
+                    <Text style={styles.familyMarkerText}>
+                      {member.firstName[0]}
+                    </Text>
+                  </View>
                 </View>
-              </View>
-            </Marker>
-          )
-        ))}
+              </Marker>
+            )
+        )}
 
         {/* Location Markers from Screenshot */}
-        <Marker coordinate={{ latitude: 37.7899, longitude: -122.4194 }} title="Costco Wholesale" />
-        <Marker coordinate={{ latitude: 37.7849, longitude: -122.4094 }} title="In-N-Out Burger" />
-        <Marker coordinate={{ latitude: 37.7809, longitude: -122.4160 }} title="Burger King" />
-        <Marker coordinate={{ latitude: 37.7939, longitude: -122.4319 }} title="Love is Timeless" />
-        <Marker coordinate={{ latitude: 37.7869, longitude: -122.4269 }} title="Real Flowers Every Day Danville" />
+        <Marker
+          coordinate={{ latitude: 37.7899, longitude: -122.4194 }}
+          title="Costco Wholesale"
+        />
+        <Marker
+          coordinate={{ latitude: 37.7849, longitude: -122.4094 }}
+          title="In-N-Out Burger"
+        />
+        <Marker
+          coordinate={{ latitude: 37.7809, longitude: -122.416 }}
+          title="Burger King"
+        />
+        <Marker
+          coordinate={{ latitude: 37.7939, longitude: -122.4319 }}
+          title="Love is Timeless"
+        />
+        <Marker
+          coordinate={{ latitude: 37.7869, longitude: -122.4269 }}
+          title="Real Flowers Every Day Danville"
+        />
       </MapView>
 
       {/* Map Controls */}
-      <TouchableOpacity style={styles.myLocationButton} onPress={() => {
-        if (currentLocation) {
-          setMapRegion({
-            latitude: currentLocation.latitude,
-            longitude: currentLocation.longitude,
-            latitudeDelta: 0.01,
-            longitudeDelta: 0.01,
-          });
-        }
-      }}>
+      <TouchableOpacity
+        style={styles.myLocationButton}
+        onPress={() => {
+          if (currentLocation) {
+            setMapRegion({
+              latitude: currentLocation.latitude,
+              longitude: currentLocation.longitude,
+              latitudeDelta: 0.01,
+              longitudeDelta: 0.01,
+            });
+          }
+        }}
+      >
         <Ionicons name="locate" size={24} color="#3B82F6" />
       </TouchableOpacity>
 

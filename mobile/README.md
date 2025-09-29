@@ -26,11 +26,13 @@ A React Native mobile application for family location sharing, built with Expo.
 ### Installation
 
 1. Navigate to the mobile directory:
+
    ```bash
    cd mobile
    ```
 
 2. Install dependencies:
+
    ```bash
    npm install
    ```
@@ -45,6 +47,7 @@ A React Native mobile application for family location sharing, built with Expo.
 #### iOS (macOS only)
 
 1. **iOS Simulator:**
+
    ```bash
    npx expo start --ios
    ```
@@ -57,6 +60,7 @@ A React Native mobile application for family location sharing, built with Expo.
 #### Android
 
 1. **Android Emulator:**
+
    ```bash
    npx expo start --android
    ```
@@ -68,6 +72,7 @@ A React Native mobile application for family location sharing, built with Expo.
 ### Running with Expo Go
 
 1. Start the development server:
+
    ```bash
    npx expo start
    ```
@@ -81,7 +86,9 @@ A React Native mobile application for family location sharing, built with Expo.
 The app is configured to connect to a backend server. Update the API base URL in `src/services/api.ts`:
 
 ```typescript
-const API_BASE_URL = __DEV__ ? 'http://localhost:3000/api' : 'https://your-production-url.com/api';
+const API_BASE_URL = __DEV__
+  ? 'http://localhost:3000/api'
+  : 'https://your-production-url.com/api';
 ```
 
 For local development, ensure your backend server is running on `http://localhost:3000`.

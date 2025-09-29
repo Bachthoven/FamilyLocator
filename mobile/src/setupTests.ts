@@ -29,7 +29,9 @@ jest.mock('react-native-maps', () => {
   const React = require('react');
   const { View } = require('react-native');
 
-  const MapView = React.forwardRef((props: any, ref: any) => React.createElement(View, { ...props, ref }));
+  const MapView = React.forwardRef((props: any, ref: any) =>
+    React.createElement(View, { ...props, ref })
+  );
   MapView.Marker = View;
   MapView.Circle = View;
 
