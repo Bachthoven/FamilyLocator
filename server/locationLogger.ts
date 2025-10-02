@@ -11,9 +11,10 @@ class LocationLogger {
   private activeSessions = new Map<string, UserLocationSession>();
   private readonly HOUR_IN_MS = 60 * 60 * 1000; // 1 hour
 
-  startHourlyLogging(userId: string) {
+  startHourlyLogging(userId: number) {
     // Don't start if already active
-    if (this.activeSessions.has(userId)) {
+    const userKey = userId.toString();
+    if (this.activeSessions.has(userKey)) {
       return;
     }
 
@@ -27,23 +28,24 @@ class LocationLogger {
       }
     }, this.HOUR_IN_MS);
 
-    this.activeSessions.set(userId, {
-      userId,
+    this.activeSessions.set(userKey, {
+      userId: userKey,
       lastLogTime: new Date(),
       intervalId,
     });
   }
 
-  stopHourlyLogging(userId: string) {
-    const session = this.activeSessions.get(userId);
+  stopHourlyLogging(userId: number) {
+    const userKey = userId.toString();
+    const session = this.activeSessions.get(userKey);
     if (session) {
       clearInterval(session.intervalId);
-      this.activeSessions.delete(userId);
+      this.activeSessions.delete(userKey);
       log(`Stopped hourly location logging for user ${userId}`);
     }
   }
 
-  private async logUserLocation(userId: string) {
+  private async logUserLocation(userId: number) {
     try {
       // Get user's current settings
       const user = await storage.getUser(userId);
@@ -63,7 +65,7 @@ class LocationLogger {
 
       // Check if the latest location is recent (within the last 2 hours)
       const twoHoursAgo = new Date(Date.now() - 2 * this.HOUR_IN_MS);
-      if (latestLocation.timestamp < twoHoursAgo) {
+      if (latestLocation.timestamp && latestLocation.timestamp < twoHoursAgo) {
         log(
           `Latest location for user ${userId} is too old, skipping automatic log`
         );
@@ -75,8 +77,8 @@ class LocationLogger {
         userId,
         latitude: latestLocation.latitude,
         longitude: latestLocation.longitude,
-        accuracy: latestLocation.accuracy,
-        address: latestLocation.address,
+        accuracy: latestLocation.accuracy ?? null,
+        address: latestLocation.address ?? null,
         type: 'automatic_hourly',
       });
 
@@ -97,7 +99,8 @@ class LocationLogger {
 
   // Cleanup all sessions (for server shutdown)
   cleanup() {
-    for (const session of this.activeSessions.values()) {
+    const sessions = Array.from(this.activeSessions.values());
+    for (const session of sessions) {
       clearInterval(session.intervalId);
     }
     this.activeSessions.clear();

@@ -21,7 +21,7 @@ describe('useLocationService', () => {
 
   it('should initialize with default state', () => {
     mockLocation.getForegroundPermissionsAsync.mockResolvedValue({
-      status: 'denied',
+      status: 'denied' as any,
       granted: false,
       canAskAgain: true,
       expires: 'never',
@@ -36,7 +36,7 @@ describe('useLocationService', () => {
 
   it('should check location permissions on mount', async () => {
     mockLocation.getForegroundPermissionsAsync.mockResolvedValue({
-      status: 'granted',
+      status: 'granted' as any,
       granted: true,
       canAskAgain: true,
       expires: 'never',
@@ -55,13 +55,13 @@ describe('useLocationService', () => {
 
   it('should request location permissions successfully', async () => {
     mockLocation.requestForegroundPermissionsAsync.mockResolvedValue({
-      status: 'granted',
+      status: 'granted' as any,
       granted: true,
       canAskAgain: true,
       expires: 'never',
     });
     mockLocation.requestBackgroundPermissionsAsync.mockResolvedValue({
-      status: 'granted',
+      status: 'granted' as any,
       granted: true,
       canAskAgain: true,
       expires: 'never',
@@ -82,7 +82,7 @@ describe('useLocationService', () => {
 
   it('should handle denied location permissions', async () => {
     mockLocation.requestForegroundPermissionsAsync.mockResolvedValue({
-      status: 'denied',
+      status: 'denied' as any,
       granted: false,
       canAskAgain: true,
       expires: 'never',
@@ -113,7 +113,7 @@ describe('useLocationService', () => {
     };
 
     mockLocation.getForegroundPermissionsAsync.mockResolvedValue({
-      status: 'granted',
+      status: 'granted' as any,
       granted: true,
       canAskAgain: true,
       expires: 'never',
@@ -142,7 +142,7 @@ describe('useLocationService', () => {
 
   it('should handle location permission denied for getCurrentLocation', async () => {
     mockLocation.getForegroundPermissionsAsync.mockResolvedValue({
-      status: 'denied',
+      status: 'denied' as any,
       granted: false,
       canAskAgain: true,
       expires: 'never',
@@ -177,7 +177,7 @@ describe('useLocationService', () => {
     };
 
     mockLocation.getForegroundPermissionsAsync.mockResolvedValue({
-      status: 'granted',
+      status: 'granted' as any,
       granted: true,
       canAskAgain: true,
       expires: 'never',
@@ -297,7 +297,7 @@ describe('useLocationService', () => {
 
     const mockSubscription = { remove: jest.fn() };
     mockLocation.getForegroundPermissionsAsync.mockResolvedValue({
-      status: 'granted',
+      status: 'granted' as any,
       granted: true,
       canAskAgain: true,
       expires: 'never',

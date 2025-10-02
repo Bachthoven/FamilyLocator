@@ -1,15 +1,6 @@
 export default {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  extensionsToTreatAsEsm: ['.ts'],
-  transform: {
-    '^.+\\.ts$': [
-      'ts-jest',
-      {
-        useESM: true,
-      },
-    ],
-  },
   testMatch: [
     '<rootDir>/server/**/__tests__/**/*.{js,jsx,ts,tsx}',
     '<rootDir>/server/**/*.(test|spec).{js,jsx,ts,tsx}',

@@ -33,13 +33,41 @@ describe('Geofencing', () => {
         name: 'Home',
         latitude: 40.7128,
         longitude: -74.006,
+        createdAt: new Date(),
+        userId: 1,
+        address: null,
+        category: null,
+        color: null,
+        user: {
+          id: 1,
+          email: 'test@example.com',
+          password: 'hashedpassword',
+          firstName: 'Test',
+          lastName: 'User',
+          phoneNumber: null,
+          profileImageUrl: null,
+          locationSharingEnabled: true,
+          locationHistoryEnabled: true,
+          notificationsEnabled: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
       };
 
       mockStorage.getFamilyPlaces.mockResolvedValue([mockPlace]);
       mockStorage.getUser.mockResolvedValue({
         id: 1,
         firstName: 'John',
+        lastName: 'Doe',
         email: 'john@example.com',
+        password: 'hashedpassword',
+        phoneNumber: null,
+        profileImageUrl: null,
+        locationSharingEnabled: true,
+        locationHistoryEnabled: true,
+        notificationsEnabled: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       });
       mockStorage.getFamilyMembers.mockResolvedValue([]);
 
@@ -62,6 +90,25 @@ describe('Geofencing', () => {
         name: 'Home',
         latitude: 40.7128,
         longitude: -74.006,
+        createdAt: new Date(),
+        userId: 1,
+        address: null,
+        category: null,
+        color: null,
+        user: {
+          id: 1,
+          email: 'test@example.com',
+          password: 'hashedpassword',
+          firstName: 'Test',
+          lastName: 'User',
+          phoneNumber: null,
+          profileImageUrl: null,
+          locationSharingEnabled: true,
+          locationHistoryEnabled: true,
+          notificationsEnabled: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
       };
 
       mockStorage.getFamilyPlaces.mockResolvedValue([mockPlace]);
@@ -79,18 +126,55 @@ describe('Geofencing', () => {
       name: 'Work',
       latitude: 40.7589,
       longitude: -73.9851,
+      createdAt: new Date(),
+      userId: 1,
+      address: null,
+      category: null,
+      color: null,
+      user: {
+        id: 1,
+        email: 'jane@example.com',
+        password: 'hashedpassword',
+        firstName: 'Jane',
+        lastName: 'Doe',
+        phoneNumber: null,
+        profileImageUrl: null,
+        locationSharingEnabled: true,
+        locationHistoryEnabled: true,
+        notificationsEnabled: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
     };
 
     const mockUser = {
       id: 1,
       firstName: 'Jane',
+      lastName: 'Doe',
       email: 'jane@example.com',
+      password: 'hashedpassword',
+      phoneNumber: null,
+      profileImageUrl: null,
+      locationSharingEnabled: true,
+      locationHistoryEnabled: true,
+      notificationsEnabled: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     };
 
     const mockFamilyMember = {
       id: 2,
       firstName: 'John',
+      lastName: 'Doe',
       email: 'john@example.com',
+      password: 'hashedpassword',
+      phoneNumber: null,
+      profileImageUrl: null,
+      locationSharingEnabled: true,
+      locationHistoryEnabled: true,
+      notificationsEnabled: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     };
 
     beforeEach(() => {
@@ -197,19 +281,66 @@ describe('Geofencing', () => {
         name: 'Home',
         latitude: 40.7128,
         longitude: -74.006,
+        createdAt: new Date(),
+        userId: 1,
+        address: null,
+        category: null,
+        color: null,
+        user: {
+          id: 1,
+          email: 'alice@example.com',
+          password: 'hashedpassword',
+          firstName: 'Alice',
+          lastName: 'Doe',
+          phoneNumber: null,
+          profileImageUrl: null,
+          locationSharingEnabled: true,
+          locationHistoryEnabled: true,
+          notificationsEnabled: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
       },
       {
         id: 2,
         name: 'Work',
         latitude: 40.7589,
         longitude: -73.9851,
+        createdAt: new Date(),
+        userId: 1,
+        address: null,
+        category: null,
+        color: null,
+        user: {
+          id: 1,
+          email: 'alice@example.com',
+          password: 'hashedpassword',
+          firstName: 'Alice',
+          lastName: 'Doe',
+          phoneNumber: null,
+          profileImageUrl: null,
+          locationSharingEnabled: true,
+          locationHistoryEnabled: true,
+          notificationsEnabled: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
       },
     ];
 
     const mockUser = {
       id: 1,
       firstName: 'Alice',
+      lastName: 'Doe',
       email: 'alice@example.com',
+      password: 'hashedpassword',
+      phoneNumber: null,
+      profileImageUrl: null,
+      locationSharingEnabled: true,
+      locationHistoryEnabled: true,
+      notificationsEnabled: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     };
 
     beforeEach(() => {
@@ -270,7 +401,7 @@ describe('Geofencing', () => {
     });
 
     it('should handle null places response', async () => {
-      mockStorage.getFamilyPlaces.mockResolvedValue(null);
+      mockStorage.getFamilyPlaces.mockResolvedValue([]);
 
       await checkGeofenceTransitions(1, 40.7128, -74.006);
 
@@ -284,12 +415,40 @@ describe('Geofencing', () => {
       name: 'School',
       latitude: 40.7831,
       longitude: -73.9712,
+      createdAt: new Date(),
+      userId: 1,
+      address: null,
+      category: null,
+      color: null,
+      user: {
+        id: 1,
+        email: 'bob@example.com',
+        password: 'hashedpassword',
+        firstName: 'Bob',
+        lastName: 'Doe',
+        phoneNumber: null,
+        profileImageUrl: null,
+        locationSharingEnabled: true,
+        locationHistoryEnabled: true,
+        notificationsEnabled: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
     };
 
     const mockUser = {
       id: 1,
       firstName: 'Bob',
+      lastName: 'Doe',
       email: 'bob@example.com',
+      password: 'hashedpassword',
+      phoneNumber: null,
+      profileImageUrl: null,
+      locationSharingEnabled: true,
+      locationHistoryEnabled: true,
+      notificationsEnabled: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     };
 
     beforeEach(() => {

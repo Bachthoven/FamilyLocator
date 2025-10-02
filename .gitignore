@@ -9,6 +9,7 @@ yarn-error.log*
 dist/
 build/
 *.tsbuildinfo
+coverage/
 
 # Environment variables
 .env

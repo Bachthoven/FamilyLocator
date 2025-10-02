@@ -140,7 +140,7 @@ export function Toaster() {
         action,
         variant,
         ...props
-      }) {
+      }: any) {
         const icon = getToastIcon(title, variant);
         const colors = getToastColors(title, variant);
 

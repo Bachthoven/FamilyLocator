@@ -62,12 +62,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           !user ||
           !(await comparePasswords(profileData.currentPassword, user.password))
         ) {
-          return res
-            .status(400)
-            .json({
-              message:
-                'The current password you entered is wrong. Please try again.',
-            });
+          return res.status(400).json({
+            message:
+              'The current password you entered is wrong. Please try again.',
+          });
         }
 
         // Hash new password
@@ -100,12 +98,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Check if user has a phone number
       if (!user.phoneNumber) {
-        return res
-          .status(400)
-          .json({
-            message:
-              "This account doesn't have a phone number. Please contact support.",
-          });
+        return res.status(400).json({
+          message:
+            "This account doesn't have a phone number. Please contact support.",
+        });
       }
 
       // Generate 6-digit verification code
@@ -258,9 +254,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Start or stop hourly logging based on location history setting
       if (settings.locationHistoryEnabled !== undefined) {
         if (settings.locationHistoryEnabled) {
-          locationLogger.startHourlyLogging(userId.toString());
+          locationLogger.startHourlyLogging(userId);
         } else {
-          locationLogger.stopHourlyLogging(userId.toString());
+          locationLogger.stopHourlyLogging(userId);
         }
       }
 
@@ -754,7 +750,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     async (req: any, res) => {
       try {
         const userId = req.user.id;
-        locationLogger.startHourlyLogging(userId.toString());
+        locationLogger.startHourlyLogging(userId);
         res.json({ message: 'Hourly location logging started', success: true });
       } catch (error) {
         console.error('Error starting location logging:', error);
@@ -769,7 +765,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     async (req: any, res) => {
       try {
         const userId = req.user.id;
-        locationLogger.stopHourlyLogging(userId.toString());
+        locationLogger.stopHourlyLogging(userId);
         res.json({ message: 'Hourly location logging stopped', success: true });
       } catch (error) {
         console.error('Error stopping location logging:', error);
@@ -1115,7 +1111,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             .getUser(parseInt(data.userId))
             .then((user) => {
               if (user && user.locationHistoryEnabled) {
-                locationLogger.startHourlyLogging(data.userId.toString());
+                locationLogger.startHourlyLogging(parseInt(data.userId));
               }
             })
             .catch((error) => {
@@ -1139,7 +1135,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             `User ${userId} disconnected. Total clients: ${clients.size}`
           );
           // Stop hourly logging when user disconnects
-          locationLogger.stopHourlyLogging(userId);
+          locationLogger.stopHourlyLogging(parseInt(userId));
         }
       });
       console.log('WebSocket client disconnected');

@@ -134,6 +134,39 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
+  async upsertUser(userData: {
+    id: string;
+    email: string;
+    firstName?: string;
+    lastName?: string;
+    profileImageUrl?: string;
+  }): Promise<User> {
+    const existingUser = await this.getUserByEmail(userData.email);
+
+    if (existingUser) {
+      const [user] = await db
+        .update(users)
+        .set({
+          firstName: userData.firstName ?? existingUser.firstName,
+          lastName: userData.lastName ?? existingUser.lastName,
+          profileImageUrl:
+            userData.profileImageUrl ?? existingUser.profileImageUrl,
+          updatedAt: new Date(),
+        })
+        .where(eq(users.email, userData.email))
+        .returning();
+      return user;
+    } else {
+      return await this.createUser({
+        email: userData.email,
+        password: '', // Empty password for OAuth users
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        profileImageUrl: userData.profileImageUrl,
+      });
+    }
+  }
+
   // Location operations
   async saveLocation(location: InsertLocation): Promise<Location> {
     const [savedLocation] = await db
@@ -309,6 +342,21 @@ export class DatabaseStorage implements IStorage {
     });
 
     return groupedHistory;
+  }
+
+  async getUserLocationHistory(
+    userId: number,
+    limit: number = 50,
+    offset: number = 0
+  ): Promise<Location[]> {
+    const history = await db
+      .select()
+      .from(locations)
+      .where(eq(locations.userId, userId))
+      .orderBy(desc(locations.timestamp))
+      .limit(limit)
+      .offset(offset);
+    return history;
   }
 
   // Family connection operations

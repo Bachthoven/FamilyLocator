@@ -24,10 +24,9 @@ describe('useAuth', () => {
   });
 
   it('should throw error when used outside of AuthProvider', () => {
-    const { result } = renderHook(() => useAuth());
-    expect(result.error).toEqual(
-      new Error('useAuth must be used within an AuthProvider')
-    );
+    expect(() => {
+      renderHook(() => useAuth());
+    }).toThrow('useAuth must be used within an AuthProvider');
   });
 
   it('should initialize with no user and loading state', async () => {
