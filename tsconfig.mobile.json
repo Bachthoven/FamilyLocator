@@ -1,0 +1,33 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "jsx": "react-native",
+    "module": "esnext",
+    "target": "esnext",
+    "lib": ["esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "isolatedModules": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "types": ["react-native"]
+  },
+  "include": [
+    "App.tsx",
+    "mobile/**/*.ts",
+    "mobile/**/*.tsx",
+    "mobile/**/*.js",
+    "mobile/**/*.jsx"
+  ],
+  "exclude": [
+    "node_modules",
+    "babel.config.js",
+    "metro.config.js",
+    "client/**/*",
+    "server/**/*"
+  ]
+}

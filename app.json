@@ -1,0 +1,51 @@
+{
+  "expo": {
+    "name": "FamilyLocator",
+    "slug": "family-locator",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./mobile/assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./mobile/assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "platforms": ["ios", "android"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.familylocator.app",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "This app needs access to your location to share it with your family members.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "This app needs access to your location to share it with your family members even when the app is in the background."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./mobile/assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION"
+      ],
+      "package": "com.familylocator.app"
+    },
+    "web": {
+      "favicon": "./mobile/assets/favicon.png"
+    },
+    "packagerOpts": {
+      "port": 19000
+    },
+    "extra": {
+      "API_URL": "http://localhost:5000"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": [
+      "mobile/**/*"
+    ]
+  }
+}

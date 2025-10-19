@@ -29,6 +29,11 @@ async function comparePasswords(supplied: string, stored: string) {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Health check endpoint for mobile app
+  app.get('/api/health', (req, res) => {
+    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  });
+
   // Auth middleware
   setupAuth(app);
 
