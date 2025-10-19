@@ -42,7 +42,7 @@
       "API_URL": "http://localhost:5000"
     },
     "updates": {
-      "fallbackToCacheTimeout": 0
+      "enabled": false
     },
     "assetBundlePatterns": [
       "mobile/**/*"
