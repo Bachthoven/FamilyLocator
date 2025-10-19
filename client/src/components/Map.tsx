@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { User, Location, Place } from '@shared/schema';
@@ -103,6 +103,16 @@ function MapCenter({ center, shouldUpdate }: { center: [number, number]; shouldU
   return null;
 }
 
+function MapClickHandler({ onClick }: { onClick: (e: L.LeafletMouseEvent) => void }) {
+  useMapEvents({
+    click: (e) => {
+      onClick(e);
+    },
+  });
+  
+  return null;
+}
+
 export default function Map({ currentLocation, familyLocations, places, onLocationClick, onPlaceClick, focusLocation, onManualLocationRequest }: MapProps) {
   const mapRef = useRef<L.Map | null>(null);
   const [mapCenter, setMapCenter] = useState<[number, number]>([40.7128, -74.0060]); // Default to NYC
@@ -111,6 +121,7 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
   const [shouldUpdateCenter, setShouldUpdateCenter] = useState(false);
   const [hasInitialized, setHasInitialized] = useState(false);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
+  const [isSettingManualLocation, setIsSettingManualLocation] = useState(false);
   const { toast } = useToast();
 
   // Handle focus location from Family page
@@ -157,25 +168,16 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
         }
       },
       (error) => {
-        let errorMsg = "Unable to get your location. ";
-        switch (error.code) {
-          case error.PERMISSION_DENIED:
-            errorMsg += "Please allow location access in your browser.";
-            break;
-          case error.POSITION_UNAVAILABLE:
-            errorMsg += "Location services are unavailable. Make sure location is enabled in your system settings.";
-            break;
-          case error.TIMEOUT:
-            errorMsg += "Location request timed out. Please try again.";
-            break;
-        }
+        setIsGettingLocation(false);
+        
+        // Switch to manual location setting mode
+        setIsSettingManualLocation(true);
         
         toast({
-          title: "Location Error",
-          description: errorMsg,
-          variant: "destructive",
+          title: "Click on the Map",
+          description: "Since automatic location detection failed, please tap on the map where you are located to set your position.",
+          duration: 8000,
         });
-        setIsGettingLocation(false);
       },
       {
         enableHighAccuracy: false,
@@ -183,6 +185,38 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
         maximumAge: 0,
       }
     );
+  };
+
+  const handleMapClick = async (e: L.LeafletMouseEvent) => {
+    if (isSettingManualLocation && onManualLocationRequest) {
+      const { lat, lng } = e.latlng;
+      
+      toast({
+        title: "Location Set!",
+        description: "Your location has been set on the map.",
+      });
+      
+      // Save the location
+      try {
+        await apiRequest('POST', '/api/locations', {
+          latitude: lat,
+          longitude: lng,
+          accuracy: 100, // Approximate accuracy for manual location
+          type: 'manual',
+        });
+        
+        queryClient.invalidateQueries({ queryKey: ['/api/locations/family'] });
+        
+        setIsSettingManualLocation(false);
+      } catch (error) {
+        console.error('Failed to save manual location:', error);
+        toast({
+          title: "Error",
+          description: "Failed to save your location. Please try again.",
+          variant: "destructive",
+        });
+      }
+    }
   };
 
   const centerOnUser = () => {
@@ -225,6 +259,7 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
         )}
         
         <MapCenter center={mapCenter} shouldUpdate={shouldUpdateCenter} />
+        <MapClickHandler onClick={handleMapClick} />
         
         {/* Current user location */}
         {currentLocation && (
@@ -371,20 +406,39 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
       {/* Get My Location Banner (shown when location is not available) */}
       {!currentLocation && (
         <div className="absolute top-4 left-4 right-20 z-[1000]">
-          <div className="bg-white rounded-lg shadow-lg p-4 border-2 border-primary">
+          <div className={`rounded-lg shadow-lg p-4 border-2 ${
+            isSettingManualLocation ? 'bg-blue-50 border-blue-500 animate-pulse' : 'bg-white border-primary'
+          }`}>
             <div className="flex items-center justify-between gap-3">
               <div className="flex-1">
-                <p className="text-sm font-medium text-gray-900">Location not detected</p>
-                <p className="text-xs text-gray-500 mt-1">Enable location to see yourself on the map</p>
+                <p className="text-sm font-medium text-gray-900">
+                  {isSettingManualLocation ? '👆 Click on the map' : 'Location not detected'}
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  {isSettingManualLocation 
+                    ? 'Tap anywhere on the map to set your location' 
+                    : 'Enable location to see yourself on the map'}
+                </p>
               </div>
-              <button
-                onClick={getMyLocation}
-                disabled={isGettingLocation}
-                className="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
-                data-testid="button-get-location"
-              >
-                {isGettingLocation ? 'Getting...' : 'Get My Location'}
-              </button>
+              {!isSettingManualLocation && (
+                <button
+                  onClick={getMyLocation}
+                  disabled={isGettingLocation}
+                  className="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                  data-testid="button-get-location"
+                >
+                  {isGettingLocation ? 'Getting...' : 'Get My Location'}
+                </button>
+              )}
+              {isSettingManualLocation && (
+                <button
+                  onClick={() => setIsSettingManualLocation(false)}
+                  className="bg-gray-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-600 whitespace-nowrap"
+                  data-testid="button-cancel-manual-location"
+                >
+                  Cancel
+                </button>
+              )}
             </div>
           </div>
         </div>
