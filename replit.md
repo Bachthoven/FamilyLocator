@@ -13,6 +13,10 @@ Location accuracy: All location pins must use exact coordinates from Google Maps
 ### Frontend Architecture
 - **Web Application**: React 19.1 with TypeScript, Vite, Tailwind CSS (shadcn/ui), TanStack Query, Wouter, and Leaflet (React-Leaflet) for maps.
 - **Mobile Application**: React Native 0.81.4 with Expo SDK 54 and TypeScript, optimized for iOS and Android.
+  - **Navigation**: Custom tab navigation (pure React Native, no third-party library) with 5 tabs: Map, Family, Places, History, Settings
+  - **Maps**: react-native-maps with Google Maps provider for interactive mapping
+  - **Location**: expo-location for geolocation with proper permission handling
+  - **UI Components**: Ionicons for icons, SafeAreaProvider for device-safe areas
 
 ### Backend Architecture
 - **Runtime**: Node.js with Express.js.
@@ -61,6 +65,23 @@ Location accuracy: All location pins must use exact coordinates from Google Maps
 - **Peer Dependencies**: Using `.npmrc` with `legacy-peer-deps=true` as temporary workaround for packages not yet declaring React 19 support (Radix UI, react-day-picker)
 - **Node Version**: Requires Node >= 20.19.4 (currently on 20.19.3, minor difference acceptable)
 - **Testing**: Web app and Expo tunnel mode confirmed working with React 19
+- **Metro Config**: Using CommonJS (.cjs) for metro.config and babel.config due to ES modules in package.json
+- **Navigation**: Custom tab navigation after React Navigation v6/v7 caused Android casting errors
+
+### Mobile App Implementation Status
+- **Completed Features**:
+  - ✅ Custom tab navigation with 5 tabs (Map, Family, Places, History, Settings)
+  - ✅ Interactive map with react-native-maps and Google Maps tiles
+  - ✅ Location permission handling with expo-location
+  - ✅ Map controls (zoom in/out, center on user, map type toggle street/satellite)
+  - ✅ Custom markers for user (blue), family (green), and places (colored squares)
+  - ✅ Geolocation with high accuracy
+  - ✅ Permission request workflow
+- **Pending Features**:
+  - ⏳ API integration for family locations and saved places
+  - ⏳ Real-time WebSocket connectivity for location updates
+  - ⏳ Authentication flow
+  - ⏳ Full feature parity with web app (notifications, manual location, etc.)
 
 ### Authentication
 - **openid-client**: OpenID Connect implementation.
