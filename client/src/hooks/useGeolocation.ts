@@ -25,6 +25,8 @@ export function useGeolocation(options: UseGeolocationOptions = {}) {
   });
 
   const watchId = useRef<number | null>(null);
+  const retryCount = useRef(0);
+  const maxRetries = 3;
 
   const {
     enableHighAccuracy = true,
@@ -33,17 +35,13 @@ export function useGeolocation(options: UseGeolocationOptions = {}) {
     watch = false,
   } = options;
 
-  useEffect(() => {
-    if (!navigator.geolocation) {
-      setState({
-        location: null,
-        error: 'Geolocation is not supported by this browser',
-        loading: false,
-      });
-      return;
+  const attemptGeolocation = (isRetry = false) => {
+    if (!isRetry) {
+      retryCount.current = 0;
     }
 
     const onSuccess = (position: GeolocationPosition) => {
+      console.log('✅ Geolocation success:', position.coords);
       setState({
         location: {
           latitude: position.coords.latitude,
@@ -53,9 +51,11 @@ export function useGeolocation(options: UseGeolocationOptions = {}) {
         error: null,
         loading: false,
       });
+      retryCount.current = 0;
     };
 
     const onError = (error: GeolocationPositionError) => {
+      console.error('❌ Geolocation error:', error);
       let errorMessage = 'An unknown error occurred';
       
       switch (error.code) {
@@ -68,6 +68,30 @@ export function useGeolocation(options: UseGeolocationOptions = {}) {
         case error.TIMEOUT:
           errorMessage = 'Location request timed out';
           break;
+      }
+
+      // Retry with lower accuracy if high accuracy failed
+      if (retryCount.current < maxRetries && enableHighAccuracy) {
+        retryCount.current++;
+        console.log(`⏱️ Retrying geolocation (attempt ${retryCount.current}/${maxRetries}) with lower accuracy...`);
+        
+        // Try with lower accuracy settings
+        navigator.geolocation.getCurrentPosition(
+          onSuccess,
+          (retryError) => {
+            setState({
+              location: null,
+              error: errorMessage,
+              loading: false,
+            });
+          },
+          {
+            enableHighAccuracy: false,
+            timeout: timeout * 2, // Double the timeout
+            maximumAge: maximumAge,
+          }
+        );
+        return;
       }
 
       setState({
@@ -92,6 +116,19 @@ export function useGeolocation(options: UseGeolocationOptions = {}) {
     } else {
       navigator.geolocation.getCurrentPosition(onSuccess, onError, geoOptions);
     }
+  };
+
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      setState({
+        location: null,
+        error: 'Geolocation is not supported by this browser',
+        loading: false,
+      });
+      return;
+    }
+
+    attemptGeolocation();
 
     return () => {
       if (watchId.current !== null) {

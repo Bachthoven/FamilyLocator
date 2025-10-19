@@ -32,8 +32,33 @@ export default function Home() {
   const { 
     currentLocation, 
     locationError, 
-    isLoggingLocation 
+    isLoggingLocation,
+    saveLocation
   } = useLocationLogger();
+
+  // Handler for manual location request from Map component
+  const handleManualLocationRequest = () => {
+    // Request location manually
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        // Save the location immediately
+        saveLocation({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          accuracy: position.coords.accuracy,
+          type: 'manual',
+        });
+      },
+      (error) => {
+        console.error('Manual location request failed:', error);
+      },
+      {
+        enableHighAccuracy: false,
+        timeout: 30000,
+        maximumAge: 0,
+      }
+    );
+  };
 
   // WebSocket for real-time updates
   const { lastMessage, sendMessage } = useWebSocket();
@@ -178,6 +203,7 @@ export default function Home() {
           onLocationClick={handleLocationClick}
           onPlaceClick={handlePlaceClick}
           focusLocation={focusLocation}
+          onManualLocationRequest={handleManualLocationRequest}
         />
         
         {/* Top Header - Clean status indicator only */}

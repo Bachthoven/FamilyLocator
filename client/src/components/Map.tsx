@@ -88,6 +88,7 @@ interface MapProps {
   onLocationClick?: (location: Location & { user: User }) => void;
   onPlaceClick?: (place: Place) => void;
   focusLocation?: { latitude: number; longitude: number; userId: number } | null;
+  onManualLocationRequest?: () => void;
 }
 
 function MapCenter({ center, shouldUpdate }: { center: [number, number]; shouldUpdate: boolean }) {
@@ -102,13 +103,14 @@ function MapCenter({ center, shouldUpdate }: { center: [number, number]; shouldU
   return null;
 }
 
-export default function Map({ currentLocation, familyLocations, places, onLocationClick, onPlaceClick, focusLocation }: MapProps) {
+export default function Map({ currentLocation, familyLocations, places, onLocationClick, onPlaceClick, focusLocation, onManualLocationRequest }: MapProps) {
   const mapRef = useRef<L.Map | null>(null);
   const [mapCenter, setMapCenter] = useState<[number, number]>([40.7128, -74.0060]); // Default to NYC
   const [mapType, setMapType] = useState<'street' | 'satellite'>('street');
   const [isDragging, setIsDragging] = useState<number | null>(null);
   const [shouldUpdateCenter, setShouldUpdateCenter] = useState(false);
   const [hasInitialized, setHasInitialized] = useState(false);
+  const [isGettingLocation, setIsGettingLocation] = useState(false);
   const { toast } = useToast();
 
   // Handle focus location from Family page
@@ -138,6 +140,51 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
     }
   }, [currentLocation, hasInitialized, focusLocation]);
 
+  const getMyLocation = () => {
+    setIsGettingLocation(true);
+    
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        toast({
+          title: "Location Found!",
+          description: "Your location has been successfully detected.",
+        });
+        setIsGettingLocation(false);
+        
+        // Trigger the manual location callback
+        if (onManualLocationRequest) {
+          onManualLocationRequest();
+        }
+      },
+      (error) => {
+        let errorMsg = "Unable to get your location. ";
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            errorMsg += "Please allow location access in your browser.";
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMsg += "Location services are unavailable. Make sure location is enabled in your system settings.";
+            break;
+          case error.TIMEOUT:
+            errorMsg += "Location request timed out. Please try again.";
+            break;
+        }
+        
+        toast({
+          title: "Location Error",
+          description: errorMsg,
+          variant: "destructive",
+        });
+        setIsGettingLocation(false);
+      },
+      {
+        enableHighAccuracy: false,
+        timeout: 30000,
+        maximumAge: 0,
+      }
+    );
+  };
+
   const centerOnUser = () => {
     if (currentLocation) {
       setMapCenter([currentLocation.latitude, currentLocation.longitude]);
@@ -145,12 +192,8 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
       // Reset the flag after a short delay
       setTimeout(() => setShouldUpdateCenter(false), 100);
     } else {
-      // Show helpful message when location is not available
-      toast({
-        title: "Location Not Found",
-        description: "Please allow location access in your browser settings to see your location on the map.",
-        variant: "destructive",
-      });
+      // Try to get location manually
+      getMyLocation();
     }
   };
 
@@ -324,6 +367,28 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
       <div className="absolute top-4 right-4 z-[1000]">
         <NotificationBell />
       </div>
+
+      {/* Get My Location Banner (shown when location is not available) */}
+      {!currentLocation && (
+        <div className="absolute top-4 left-4 right-20 z-[1000]">
+          <div className="bg-white rounded-lg shadow-lg p-4 border-2 border-primary">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex-1">
+                <p className="text-sm font-medium text-gray-900">Location not detected</p>
+                <p className="text-xs text-gray-500 mt-1">Enable location to see yourself on the map</p>
+              </div>
+              <button
+                onClick={getMyLocation}
+                disabled={isGettingLocation}
+                className="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                data-testid="button-get-location"
+              >
+                {isGettingLocation ? 'Getting...' : 'Get My Location'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       
       {/* Map Controls */}
       <div className="absolute bottom-32 right-4 z-40 flex flex-col space-y-2">
