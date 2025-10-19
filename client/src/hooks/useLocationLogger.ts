@@ -58,6 +58,7 @@ export function useLocationLogger() {
       if (data) {
         console.log('🎉 Location saved successfully:', data);
         queryClient.invalidateQueries({ queryKey: ['/api/locations/family'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/locations/current'] });
       }
     },
     onError: (error: any) => {

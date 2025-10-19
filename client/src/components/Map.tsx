@@ -205,7 +205,9 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
           type: 'manual',
         });
         
+        // Refresh both family locations and current user location
         queryClient.invalidateQueries({ queryKey: ['/api/locations/family'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/locations/current'] });
         
         setIsSettingManualLocation(false);
       } catch (error) {

@@ -28,13 +28,22 @@ export default function Home() {
   // This component is now protected by authentication in App.tsx
   // No need for manual redirect logic
 
+  // Fetch user's current location from database
+  const { data: userCurrentLocation } = useQuery<{ latitude: number; longitude: number; accuracy: number }>({
+    queryKey: ['/api/locations/current'],
+    retry: false,
+  });
+
   // Use the location logger hook for automatic location tracking
   const { 
-    currentLocation, 
+    currentLocation: geoLocation, 
     locationError, 
     isLoggingLocation,
     saveLocation
   } = useLocationLogger();
+
+  // Prefer database location over geolocation API
+  const currentLocation = userCurrentLocation || geoLocation;
 
   // Handler for manual location request from Map component
   const handleManualLocationRequest = () => {
