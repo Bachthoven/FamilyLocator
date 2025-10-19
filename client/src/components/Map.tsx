@@ -144,6 +144,13 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
       setShouldUpdateCenter(true);
       // Reset the flag after a short delay
       setTimeout(() => setShouldUpdateCenter(false), 100);
+    } else {
+      // Show helpful message when location is not available
+      toast({
+        title: "Location Not Found",
+        description: "Please allow location access in your browser settings to see your location on the map.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -370,17 +377,20 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
         </button>
 
         {/* Center on user button */}
-        {currentLocation && (
-          <button
-            onClick={centerOnUser}
-            className="w-14 h-14 bg-primary rounded-lg shadow-lg flex items-center justify-center text-white hover:bg-primary/90 transition-colors"
-            title="Center on my location"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-            </svg>
-          </button>
-        )}
+        <button
+          onClick={centerOnUser}
+          className={`w-14 h-14 rounded-lg shadow-lg flex items-center justify-center text-white transition-colors ${
+            currentLocation 
+              ? 'bg-primary hover:bg-primary/90' 
+              : 'bg-gray-400 hover:bg-gray-500 cursor-pointer'
+          }`}
+          title={currentLocation ? "Center on my location" : "Location not available - click for help"}
+          data-testid="button-recenter"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+          </svg>
+        </button>
       </div>
     </div>
   );
