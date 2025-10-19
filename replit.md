@@ -11,8 +11,8 @@ Location accuracy: All location pins must use exact coordinates from Google Maps
 ## System Architecture
 
 ### Frontend Architecture
-- **Web Application**: React 18.2 with TypeScript, Vite, Tailwind CSS (shadcn/ui), TanStack Query, Wouter, and Leaflet (React-Leaflet) for maps.
-- **Mobile Application**: React Native 0.73.6 with Expo SDK 50 and TypeScript, optimized for iOS and Android.
+- **Web Application**: React 19.1 with TypeScript, Vite, Tailwind CSS (shadcn/ui), TanStack Query, Wouter, and Leaflet (React-Leaflet) for maps.
+- **Mobile Application**: React Native 0.81.4 with Expo SDK 54 and TypeScript, optimized for iOS and Android.
 
 ### Backend Architecture
 - **Runtime**: Node.js with Express.js.
@@ -48,10 +48,19 @@ Location accuracy: All location pins must use exact coordinates from Google Maps
 - **tailwindcss**: Utility-first CSS framework.
 
 ### Development Tools
-- **TypeScript**: Static type checking.
+- **TypeScript 5.9**: Static type checking.
 - **Vite**: Build tool and development server.
 - **drizzle-kit**: Database schema management.
 - **tsx**: TypeScript execution for server.
+
+### React 19 & Expo SDK 54 Upgrade Notes
+- **Upgrade Date**: October 19, 2025
+- **React Version**: Upgraded from 18.2 to 19.1 to support Expo SDK 54
+- **Expo SDK**: Upgraded from SDK 50 to SDK 54 (required by latest Expo Go)
+- **React Native**: Upgraded from 0.73 to 0.81.4
+- **Peer Dependencies**: Using `.npmrc` with `legacy-peer-deps=true` as temporary workaround for packages not yet declaring React 19 support (Radix UI, react-day-picker)
+- **Node Version**: Requires Node >= 20.19.4 (currently on 20.19.3, minor difference acceptable)
+- **Testing**: Web app and Expo tunnel mode confirmed working with React 19
 
 ### Authentication
 - **openid-client**: OpenID Connect implementation.
