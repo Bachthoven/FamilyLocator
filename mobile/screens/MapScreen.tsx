@@ -272,7 +272,7 @@ export default function MapScreen() {
 
       {/* Members Indicator - Top Center */}
       <View style={[styles.membersIndicator, { top: insets.top + 16 }]}>
-        <BlurView intensity={20} tint="light" style={styles.membersIndicatorBlur}>
+        <BlurView intensity={100} style={styles.membersIndicatorBlur}>
           <View style={styles.membersIndicatorContent}>
             <View style={styles.statusDot} />
             <Text style={styles.membersText}>
@@ -482,7 +482,6 @@ const styles = StyleSheet.create({
   membersIndicatorBlur: {
     borderRadius: 999,
     overflow: 'hidden',
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
   },
   membersIndicatorContent: {
     flexDirection: 'row',
