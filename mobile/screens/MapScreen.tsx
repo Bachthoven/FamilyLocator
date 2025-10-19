@@ -269,6 +269,16 @@ export default function MapScreen() {
         ))}
       </MapView>
 
+      {/* Members Indicator - Top Center */}
+      <View style={[styles.membersIndicator, { top: insets.top + 48 }]}>
+        <View style={styles.membersIndicatorContent}>
+          <View style={styles.statusDot} />
+          <Text style={styles.membersText}>
+            {familyLocations.length} member{familyLocations.length !== 1 ? 's' : ''} online
+          </Text>
+        </View>
+      </View>
+
       {/* Location Not Available Banner */}
       {!currentLocation && !isLoadingLocation && (
         <View style={[styles.banner, { top: insets.top + 16 }]}>
@@ -456,6 +466,40 @@ const styles = StyleSheet.create({
   calloutTime: {
     fontSize: 10,
     color: '#999',
+  },
+  
+  // Members Indicator Styles
+  membersIndicator: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    zIndex: 30,
+  },
+  membersIndicatorContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    borderRadius: 999,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    gap: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#34C759',
+  },
+  membersText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#333',
   },
   
   // Banner Styles
