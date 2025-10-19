@@ -4,6 +4,7 @@ import MapView, { Marker, Callout, PROVIDER_GOOGLE } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Location from 'expo-location';
+import { BlurView } from 'expo-blur';
 
 // Type definitions
 interface FamilyLocation {
@@ -270,13 +271,15 @@ export default function MapScreen() {
       </MapView>
 
       {/* Members Indicator - Top Center */}
-      <View style={[styles.membersIndicator, { top: insets.top + 48 }]}>
-        <View style={styles.membersIndicatorContent}>
-          <View style={styles.statusDot} />
-          <Text style={styles.membersText}>
-            {familyLocations.length} member{familyLocations.length !== 1 ? 's' : ''} online
-          </Text>
-        </View>
+      <View style={[styles.membersIndicator, { top: insets.top + 16 }]}>
+        <BlurView intensity={20} tint="light" style={styles.membersIndicatorBlur}>
+          <View style={styles.membersIndicatorContent}>
+            <View style={styles.statusDot} />
+            <Text style={styles.membersText}>
+              {familyLocations.length} member{familyLocations.length !== 1 ? 's' : ''} online
+            </Text>
+          </View>
+        </BlurView>
       </View>
 
       {/* Location Not Available Banner */}
@@ -476,30 +479,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     zIndex: 30,
   },
+  membersIndicatorBlur: {
+    borderRadius: 999,
+    overflow: 'hidden',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  },
   membersIndicatorContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
-    borderRadius: 999,
     paddingHorizontal: 16,
     paddingVertical: 8,
     gap: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
   },
   statusDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#34C759',
+    backgroundColor: '#22C55E',
   },
   membersText: {
     fontSize: 14,
     fontWeight: '500',
-    color: '#333',
+    color: '#1F2937',
   },
   
   // Banner Styles
