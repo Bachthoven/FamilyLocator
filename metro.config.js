@@ -1,8 +1,13 @@
-const { getDefaultConfig } = require('expo/metro-config');
+import { getDefaultConfig } from 'expo/metro-config';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const config = getDefaultConfig(__dirname);
 
-// Add SVG support to sourceExts
+// Add SVG support
 config.resolver.sourceExts = [...config.resolver.sourceExts, 'svg'];
 
 // Ensure proper module resolution
@@ -11,10 +16,10 @@ config.resolver.nodeModulesPaths = [
   './mobile/node_modules'
 ];
 
-// Configure server to run on different port to avoid conflicts with Express
+// Configure server port
 config.server = {
   ...config.server,
   port: 8081,
 };
 
-module.exports = config;
+export default config;
