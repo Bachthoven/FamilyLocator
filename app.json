@@ -46,9 +46,6 @@
     },
     "assetBundlePatterns": [
       "mobile/**/*"
-    ],
-    "plugins": [
-      "react-native-screens/expo"
     ]
   }
 }
