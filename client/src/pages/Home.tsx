@@ -126,8 +126,16 @@ export default function Home() {
     }
   }, [lastMessage, familyLocations, queryClient, toast]);
 
-  // Location errors are handled silently - app works without user location
-  // Users can still see family member locations and use all features
+  // Handle location errors
+  useEffect(() => {
+    if (locationError) {
+      toast({
+        title: "Location Error", 
+        description: locationError,
+        variant: "destructive",
+      });
+    }
+  }, [locationError, toast]);
 
   const handleLocationClick = (location: Location & { user: User }) => {
     setSelectedLocation(location);
