@@ -16,8 +16,8 @@ export function useLocationLogger() {
   const { user, isAuthenticated } = useAuth();
   const { location, error } = useGeolocation({ 
     watch: true, 
-    enableHighAccuracy: true,
-    timeout: 30000,
+    enableHighAccuracy: false, // Use WiFi/IP location (works better on desktops without GPS)
+    timeout: 60000, // 60 seconds timeout
     maximumAge: 300000 // 5 minutes
   });
   const { toast } = useToast();
