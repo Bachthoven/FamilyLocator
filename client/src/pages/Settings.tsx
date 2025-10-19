@@ -1,26 +1,26 @@
-import { useState } from 'react';
-import { useAuth } from '@/hooks/use-auth';
-import { useTheme } from '@/hooks/useTheme';
-import { useToast } from '@/hooks/use-toast';
-import BottomNavigation from '@/components/BottomNavigation';
-import { ProfileEditor } from '@/components/ProfileEditor';
-import { NotificationSettings } from '@/components/NotificationSettings';
-import { LocationSettings } from '../components/LocationSettings';
-import { ThemeToggle } from '@/components/ThemeToggle';
+import { useState } from "react";
+import { useAuth } from "@/hooks/use-auth";
+import { useTheme } from "@/hooks/useTheme";
+import { useToast } from "@/hooks/use-toast";
+import BottomNavigation from "@/components/BottomNavigation";
+import { ProfileEditor } from "@/components/ProfileEditor";
+import { NotificationSettings } from "@/components/NotificationSettings";
+import { LocationSettings } from "../components/LocationSettings";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
-import { 
-  Settings as SettingsIcon, 
-  User, 
-  HelpCircle, 
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import {
+  Settings as SettingsIcon,
+  User,
+  HelpCircle,
   LogOut,
   MapPin,
   Palette,
-  Bell
-} from 'lucide-react';
+  Bell,
+} from "lucide-react";
 
 export default function Settings() {
   const { user, logoutMutation } = useAuth();
@@ -28,10 +28,11 @@ export default function Settings() {
   const { toast } = useToast();
   const [profileEditorOpen, setProfileEditorOpen] = useState(false);
   const [locationSettingsOpen, setLocationSettingsOpen] = useState(false);
-  const [notificationSettingsOpen, setNotificationSettingsOpen] = useState(false);
+  const [notificationSettingsOpen, setNotificationSettingsOpen] =
+    useState(false);
 
   const handleLogout = () => {
-    if (confirm('Are you sure you want to log out?')) {
+    if (confirm("Are you sure you want to log out?")) {
       logoutMutation.mutate();
     }
   };
@@ -39,27 +40,31 @@ export default function Settings() {
   const settingsItems = [
     {
       icon: User,
-      label: 'Profile Information',
-      description: 'Update your personal details',
+      label: "Profile Information",
+      description: "Update your personal details",
       action: () => setProfileEditorOpen(true),
     },
     {
       icon: MapPin,
-      label: 'Location Settings',
-      description: 'Configure automatic location logging',
+      label: "Location Settings",
+      description: "Configure automatic location logging",
       action: () => setLocationSettingsOpen(true),
     },
     {
       icon: Bell,
-      label: 'Notification Settings',
-      description: 'Manage system notifications and alerts',
+      label: "Notification Settings",
+      description: "Manage system notifications and alerts",
       action: () => setNotificationSettingsOpen(true),
     },
     {
       icon: HelpCircle,
-      label: 'Help & Support',
-      description: 'Get help and contact support',
-      action: () => toast({ title: 'Support Contact', description: 'For support, contact: bachtoven.rules@gmail.com' }),
+      label: "Help & Support",
+      description: "Get help and contact support",
+      action: () =>
+        toast({
+          title: "Support Contact",
+          description: "For support, contact: bachtoven.rules@gmail.com",
+        }),
     },
   ];
 
@@ -93,26 +98,33 @@ export default function Settings() {
           <CardHeader>
             <div className="flex items-center space-x-4">
               <Avatar className="w-16 h-16">
-                <AvatarImage 
-                  src={user.profileImageUrl || undefined} 
+                <AvatarImage
+                  src={user.profileImageUrl || undefined}
                   alt={`${user.firstName || user.email}'s profile`}
                 />
                 <AvatarFallback className="text-lg">
-                  {user.firstName ? user.firstName[0].toUpperCase() : user.email?.[0].toUpperCase()}
+                  {user.firstName
+                    ? user.firstName[0].toUpperCase()
+                    : user.email?.[0].toUpperCase()}
                 </AvatarFallback>
               </Avatar>
-              
+
               <div className="flex-1">
                 <CardTitle className="text-xl">
-                  {user.firstName && user.lastName 
+                  {user.firstName && user.lastName
                     ? `${user.firstName} ${user.lastName}`
-                    : user.firstName || user.email
-                  }
+                    : user.firstName || user.email}
                 </CardTitle>
                 <p className="text-muted-foreground">{user.email}</p>
                 <div className="flex items-center space-x-2 mt-2">
-                  <Badge variant={user.locationSharingEnabled ? "default" : "secondary"}>
-                    {user.locationSharingEnabled ? "Location Sharing On" : "Location Sharing Off"}
+                  <Badge
+                    variant={
+                      user.locationSharingEnabled ? "default" : "secondary"
+                    }
+                  >
+                    {user.locationSharingEnabled
+                      ? "Location Sharing On"
+                      : "Location Sharing Off"}
                   </Badge>
                 </div>
               </div>
@@ -120,13 +132,16 @@ export default function Settings() {
           </CardHeader>
         </Card>
 
-
         {/* Settings Items */}
         <div className="space-y-2">
           {settingsItems.map((item) => {
             const Icon = item.icon;
             return (
-              <Card key={item.label} className="hover:shadow-md transition-shadow cursor-pointer" onClick={item.action}>
+              <Card
+                key={item.label}
+                className="hover:shadow-md transition-shadow cursor-pointer"
+                onClick={item.action}
+              >
                 <CardContent className="p-4">
                   <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
@@ -134,11 +149,23 @@ export default function Settings() {
                     </div>
                     <div className="flex-1">
                       <div className="font-medium">{item.label}</div>
-                      <div className="text-sm text-muted-foreground">{item.description}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {item.description}
+                      </div>
                     </div>
                     <div className="text-muted-foreground">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 5l7 7-7 7"
+                        />
                       </svg>
                     </div>
                   </div>
@@ -146,7 +173,7 @@ export default function Settings() {
               </Card>
             );
           })}
-          
+
           {/* Theme Toggle Card */}
           <Card className="hover:shadow-md transition-shadow">
             <CardContent className="p-4">
@@ -156,7 +183,9 @@ export default function Settings() {
                 </div>
                 <div className="flex-1">
                   <div className="font-medium">Appearance</div>
-                  <div className="text-sm text-muted-foreground">Choose light, dark, or system theme</div>
+                  <div className="text-sm text-muted-foreground">
+                    Choose light, dark, or system theme
+                  </div>
                 </div>
                 <ThemeToggle />
               </div>
@@ -191,13 +220,13 @@ export default function Settings() {
           user={user}
         />
       )}
-      
+
       {/* Location Settings Modal */}
       <LocationSettings
         open={locationSettingsOpen}
         onOpenChange={setLocationSettingsOpen}
       />
-      
+
       {/* Notification Settings Modal */}
       <NotificationSettings
         open={notificationSettingsOpen}

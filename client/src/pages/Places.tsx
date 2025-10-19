@@ -1,20 +1,41 @@
-import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
-import { apiRequest } from '@/lib/queryClient';
-import { isUnauthorizedError } from '@/lib/authUtils';
-import BottomNavigation from '@/components/BottomNavigation';
-import AddressAutocomplete from '@/components/AddressAutocomplete';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, Bookmark, MapPin, Home, Briefcase, GraduationCap, Trash2, Edit3 } from 'lucide-react';
-import { Place, User } from '@shared/schema';
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+import { isUnauthorizedError } from "@/lib/authUtils";
+import BottomNavigation from "@/components/BottomNavigation";
+import AddressAutocomplete from "@/components/AddressAutocomplete";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Plus,
+  Bookmark,
+  MapPin,
+  Home,
+  Briefcase,
+  GraduationCap,
+  Trash2,
+  Edit3,
+} from "lucide-react";
+import { Place, User } from "@shared/schema";
 
 const categoryIcons = {
   home: Home,
@@ -24,10 +45,10 @@ const categoryIcons = {
 };
 
 const categoryColors = {
-  home: 'text-blue-500',
-  work: 'text-green-500',
-  school: 'text-purple-500',
-  other: 'text-orange-500',
+  home: "text-blue-500",
+  work: "text-green-500",
+  school: "text-purple-500",
+  other: "text-orange-500",
 };
 
 export default function Places() {
@@ -36,20 +57,24 @@ export default function Places() {
   const queryClient = useQueryClient();
   const [addPlaceDialogOpen, setAddPlaceDialogOpen] = useState(false);
   const [editPlaceDialogOpen, setEditPlaceDialogOpen] = useState(false);
-  const [editingPlace, setEditingPlace] = useState<(Place & { user: User }) | null>(null);
+  const [editingPlace, setEditingPlace] = useState<
+    (Place & { user: User }) | null
+  >(null);
   const [newPlace, setNewPlace] = useState({
-    name: '',
-    address: '',
+    name: "",
+    address: "",
     latitude: 0,
     longitude: 0,
-    category: 'other' as const,
-    color: '#8b5cf6', // Default purple color
+    category: "other" as const,
+    color: "#8b5cf6", // Default purple color
   });
   const [useCurrentLocation, setUseCurrentLocation] = useState(false);
 
   // Fetch family places (now includes user info for each place)
-  const { data: places = [], isLoading } = useQuery<Array<Place & { user: User }>>({
-    queryKey: ['/api/places'],
+  const { data: places = [], isLoading } = useQuery<
+    Array<Place & { user: User }>
+  >({
+    queryKey: ["/api/places"],
     enabled: !!user,
   });
 
@@ -58,11 +83,11 @@ export default function Places() {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          setNewPlace(prev => ({
+          setNewPlace((prev) => ({
             ...prev,
             latitude: position.coords.latitude,
             longitude: position.coords.longitude,
-            address: `GPS: ${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`
+            address: `GPS: ${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`,
           }));
           setUseCurrentLocation(true);
           toast({
@@ -71,13 +96,13 @@ export default function Places() {
           });
         },
         (error) => {
-          console.error('Error getting location:', error);
+          console.error("Error getting location:", error);
           toast({
             title: "Location error",
             description: "Could not get your current location",
             variant: "destructive",
           });
-        }
+        },
       );
     } else {
       toast({
@@ -91,7 +116,7 @@ export default function Places() {
   // Add place mutation
   const addPlaceMutation = useMutation({
     mutationFn: async (placeData: typeof newPlace) => {
-      const response = await apiRequest('POST', '/api/places', placeData);
+      const response = await apiRequest("POST", "/api/places", placeData);
       return response.json();
     },
     onSuccess: () => {
@@ -101,15 +126,15 @@ export default function Places() {
       });
       setAddPlaceDialogOpen(false);
       setNewPlace({
-        name: '',
-        address: '',
+        name: "",
+        address: "",
         latitude: 0,
         longitude: 0,
-        category: 'other',
-        color: '#8b5cf6',
+        category: "other",
+        color: "#8b5cf6",
       });
       setUseCurrentLocation(false);
-      queryClient.invalidateQueries({ queryKey: ['/api/places'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/places"] });
       // Trigger a toast to indicate the place was added to the map
       setTimeout(() => {
         toast({
@@ -141,14 +166,14 @@ export default function Places() {
   // Delete place mutation
   const deletePlaceMutation = useMutation({
     mutationFn: async (placeId: number) => {
-      await apiRequest('DELETE', `/api/places/${placeId}`);
+      await apiRequest("DELETE", `/api/places/${placeId}`);
     },
     onSuccess: () => {
       toast({
         title: "Place deleted",
         description: "Your place has been deleted successfully.",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/places'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/places"] });
     },
     onError: (error) => {
       if (isUnauthorizedError(error)) {
@@ -172,12 +197,21 @@ export default function Places() {
 
   // Edit place mutation
   const editPlaceMutation = useMutation({
-    mutationFn: async (placeData: { id: number; name: string; category: string; color: string }) => {
-      const response = await apiRequest('PATCH', `/api/places/${placeData.id}`, {
-        name: placeData.name,
-        category: placeData.category,
-        color: placeData.color,
-      });
+    mutationFn: async (placeData: {
+      id: number;
+      name: string;
+      category: string;
+      color: string;
+    }) => {
+      const response = await apiRequest(
+        "PATCH",
+        `/api/places/${placeData.id}`,
+        {
+          name: placeData.name,
+          category: placeData.category,
+          color: placeData.color,
+        },
+      );
       return response.json();
     },
     onSuccess: () => {
@@ -187,7 +221,7 @@ export default function Places() {
       });
       setEditPlaceDialogOpen(false);
       setEditingPlace(null);
-      queryClient.invalidateQueries({ queryKey: ['/api/places'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/places"] });
     },
     onError: (error) => {
       if (isUnauthorizedError(error)) {
@@ -218,23 +252,24 @@ export default function Places() {
       });
       return;
     }
-    
+
     // Check if coordinates were set by autocomplete
     if (newPlace.latitude === 0 && newPlace.longitude === 0) {
       toast({
         title: "Location Not Found",
-        description: "Please select an address from the suggestions to get precise coordinates.",
+        description:
+          "Please select an address from the suggestions to get precise coordinates.",
         variant: "destructive",
       });
       return;
     }
-    
+
     addPlaceMutation.mutate(newPlace);
   };
 
   const handleDeletePlace = (placeId: number, placeName: string) => {
     if (confirm(`Are you sure you want to delete "${placeName}"?`)) {
-      console.log('Deleting place:', placeId, 'User ID:', user?.id);
+      console.log("Deleting place:", placeId, "User ID:", user?.id);
       deletePlaceMutation.mutate(placeId);
     }
   };
@@ -246,21 +281,27 @@ export default function Places() {
 
   const handleUpdatePlace = () => {
     if (!editingPlace) return;
-    
+
     editPlaceMutation.mutate({
       id: editingPlace.id,
       name: editingPlace.name,
-      category: editingPlace.category || 'other',
-      color: editingPlace.color || '#8b5cf6',
+      category: editingPlace.category || "other",
+      color: editingPlace.color || "#8b5cf6",
     });
   };
 
-  const groupedPlaces = places.reduce((acc: Record<string, Array<Place & { user: User }>>, place: Place & { user: User }) => {
-    const category = place.category || 'other';
-    if (!acc[category]) acc[category] = [];
-    acc[category].push(place);
-    return acc;
-  }, {});
+  const groupedPlaces = places.reduce(
+    (
+      acc: Record<string, Array<Place & { user: User }>>,
+      place: Place & { user: User },
+    ) => {
+      const category = place.category || "other";
+      if (!acc[category]) acc[category] = [];
+      acc[category].push(place);
+      return acc;
+    },
+    {},
+  );
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -276,8 +317,11 @@ export default function Places() {
               Manage your favorite and frequently visited places
             </p>
           </div>
-          
-          <Dialog open={addPlaceDialogOpen} onOpenChange={setAddPlaceDialogOpen}>
+
+          <Dialog
+            open={addPlaceDialogOpen}
+            onOpenChange={setAddPlaceDialogOpen}
+          >
             <DialogTrigger asChild>
               <Button>
                 <Plus className="w-4 h-4 mr-2" />
@@ -295,7 +339,9 @@ export default function Places() {
                     id="name"
                     placeholder="e.g. Home, Office, School"
                     value={newPlace.name}
-                    onChange={(e) => setNewPlace(prev => ({ ...prev, name: e.target.value }))}
+                    onChange={(e) =>
+                      setNewPlace((prev) => ({ ...prev, name: e.target.value }))
+                    }
                   />
                 </div>
                 <div>
@@ -315,13 +361,17 @@ export default function Places() {
                   {!useCurrentLocation ? (
                     <AddressAutocomplete
                       value={newPlace.address}
-                      onValueChange={(address) => setNewPlace(prev => ({ ...prev, address }))}
-                      onLocationSelect={(location) => setNewPlace(prev => ({
-                        ...prev,
-                        address: location.address,
-                        latitude: location.latitude,
-                        longitude: location.longitude,
-                      }))}
+                      onValueChange={(address) =>
+                        setNewPlace((prev) => ({ ...prev, address }))
+                      }
+                      onLocationSelect={(location) =>
+                        setNewPlace((prev) => ({
+                          ...prev,
+                          address: location.address,
+                          latitude: location.latitude,
+                          longitude: location.longitude,
+                        }))
+                      }
                       placeholder="Start typing an address..."
                     />
                   ) : (
@@ -337,7 +387,9 @@ export default function Places() {
                   <Label htmlFor="category">Category</Label>
                   <Select
                     value={newPlace.category}
-                    onValueChange={(value: any) => setNewPlace(prev => ({ ...prev, category: value }))}
+                    onValueChange={(value: any) =>
+                      setNewPlace((prev) => ({ ...prev, category: value }))
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select a category" />
@@ -350,27 +402,34 @@ export default function Places() {
                     </SelectContent>
                   </Select>
                 </div>
-                
+
                 <div>
                   <Label htmlFor="color">Pin Color</Label>
                   <div className="flex flex-wrap items-center gap-2 mt-2 w-full">
                     {/* Predefined color options */}
                     {[
-                      { name: 'Purple', value: '#8b5cf6' },
-                      { name: 'Blue', value: '#3b82f6' },
-                      { name: 'Green', value: '#10b981' },
-                      { name: 'Red', value: '#ef4444' },
-                      { name: 'Orange', value: '#f97316' },
-                      { name: 'Pink', value: '#ec4899' },
-                      { name: 'Yellow', value: '#eab308' },
-                      { name: 'Gray', value: '#6b7280' }
+                      { name: "Purple", value: "#8b5cf6" },
+                      { name: "Blue", value: "#3b82f6" },
+                      { name: "Green", value: "#10b981" },
+                      { name: "Red", value: "#ef4444" },
+                      { name: "Orange", value: "#f97316" },
+                      { name: "Pink", value: "#ec4899" },
+                      { name: "Yellow", value: "#eab308" },
+                      { name: "Gray", value: "#6b7280" },
                     ].map((color) => (
                       <button
                         key={color.value}
                         type="button"
-                        onClick={() => setNewPlace(prev => ({ ...prev, color: color.value }))}
+                        onClick={() =>
+                          setNewPlace((prev) => ({
+                            ...prev,
+                            color: color.value,
+                          }))
+                        }
                         className={`w-8 h-8 rounded-full border-2 flex-shrink-0 ${
-                          newPlace.color === color.value ? 'border-foreground' : 'border-gray-300'
+                          newPlace.color === color.value
+                            ? "border-foreground"
+                            : "border-gray-300"
                         }`}
                         style={{ backgroundColor: color.value }}
                         title={color.name}
@@ -380,7 +439,12 @@ export default function Places() {
                     <input
                       type="color"
                       value={newPlace.color}
-                      onChange={(e) => setNewPlace(prev => ({ ...prev, color: e.target.value }))}
+                      onChange={(e) =>
+                        setNewPlace((prev) => ({
+                          ...prev,
+                          color: e.target.value,
+                        }))
+                      }
                       className="w-8 h-8 rounded border border-gray-300 cursor-pointer flex-shrink-0"
                       title="Custom color"
                     />
@@ -389,7 +453,7 @@ export default function Places() {
                     Choose a color for your place pin on the map
                   </p>
                 </div>
-                
+
                 <div className="flex justify-end space-x-2 w-full pt-2">
                   <Button
                     variant="outline"
@@ -401,7 +465,7 @@ export default function Places() {
                     onClick={handleAddPlace}
                     disabled={addPlaceMutation.isPending}
                   >
-                    {addPlaceMutation.isPending ? 'Saving...' : 'Save Place'}
+                    {addPlaceMutation.isPending ? "Saving..." : "Save Place"}
                   </Button>
                 </div>
               </div>
@@ -409,7 +473,10 @@ export default function Places() {
           </Dialog>
 
           {/* Edit Place Dialog */}
-          <Dialog open={editPlaceDialogOpen} onOpenChange={setEditPlaceDialogOpen}>
+          <Dialog
+            open={editPlaceDialogOpen}
+            onOpenChange={setEditPlaceDialogOpen}
+          >
             <DialogContent className="max-w-[90vw] sm:max-w-md w-full mx-auto">
               <DialogHeader>
                 <DialogTitle>Edit Place</DialogTitle>
@@ -422,16 +489,24 @@ export default function Places() {
                       id="edit-name"
                       placeholder="e.g. Home, Office, School"
                       value={editingPlace.name}
-                      onChange={(e) => setEditingPlace(prev => prev ? ({ ...prev, name: e.target.value }) : null)}
+                      onChange={(e) =>
+                        setEditingPlace((prev) =>
+                          prev ? { ...prev, name: e.target.value } : null,
+                        )
+                      }
                       className="w-full"
                     />
                   </div>
-                  
+
                   <div className="w-full">
                     <Label htmlFor="edit-category">Category</Label>
-                    <Select 
-                      value={editingPlace.category || 'other'} 
-                      onValueChange={(value: any) => setEditingPlace(prev => prev ? ({ ...prev, category: value }) : null)}
+                    <Select
+                      value={editingPlace.category || "other"}
+                      onValueChange={(value: any) =>
+                        setEditingPlace((prev) =>
+                          prev ? { ...prev, category: value } : null,
+                        )
+                      }
                     >
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select a category" />
@@ -444,27 +519,33 @@ export default function Places() {
                       </SelectContent>
                     </Select>
                   </div>
-                  
+
                   <div className="w-full">
                     <Label htmlFor="edit-color">Pin Color</Label>
                     <div className="flex flex-wrap items-center gap-2 mt-2 w-full">
                       {/* Predefined color options */}
                       {[
-                        { name: 'Purple', value: '#8b5cf6' },
-                        { name: 'Blue', value: '#3b82f6' },
-                        { name: 'Green', value: '#10b981' },
-                        { name: 'Red', value: '#ef4444' },
-                        { name: 'Orange', value: '#f97316' },
-                        { name: 'Pink', value: '#ec4899' },
-                        { name: 'Yellow', value: '#eab308' },
-                        { name: 'Gray', value: '#6b7280' }
+                        { name: "Purple", value: "#8b5cf6" },
+                        { name: "Blue", value: "#3b82f6" },
+                        { name: "Green", value: "#10b981" },
+                        { name: "Red", value: "#ef4444" },
+                        { name: "Orange", value: "#f97316" },
+                        { name: "Pink", value: "#ec4899" },
+                        { name: "Yellow", value: "#eab308" },
+                        { name: "Gray", value: "#6b7280" },
                       ].map((color) => (
                         <button
                           key={color.value}
                           type="button"
-                          onClick={() => setEditingPlace(prev => prev ? ({ ...prev, color: color.value }) : null)}
+                          onClick={() =>
+                            setEditingPlace((prev) =>
+                              prev ? { ...prev, color: color.value } : null,
+                            )
+                          }
                           className={`w-8 h-8 rounded-full border-2 flex-shrink-0 ${
-                            editingPlace.color === color.value ? 'border-foreground' : 'border-gray-300'
+                            editingPlace.color === color.value
+                              ? "border-foreground"
+                              : "border-gray-300"
                           }`}
                           style={{ backgroundColor: color.value }}
                           title={color.name}
@@ -473,8 +554,12 @@ export default function Places() {
                       {/* Custom color picker */}
                       <input
                         type="color"
-                        value={editingPlace.color || '#8b5cf6'}
-                        onChange={(e) => setEditingPlace(prev => prev ? ({ ...prev, color: e.target.value }) : null)}
+                        value={editingPlace.color || "#8b5cf6"}
+                        onChange={(e) =>
+                          setEditingPlace((prev) =>
+                            prev ? { ...prev, color: e.target.value } : null,
+                          )
+                        }
                         className="w-8 h-8 rounded border border-gray-300 cursor-pointer flex-shrink-0"
                         title="Custom color"
                       />
@@ -483,7 +568,7 @@ export default function Places() {
                       Choose a color for your place pin on the map
                     </p>
                   </div>
-                  
+
                   <div className="flex justify-end space-x-2 w-full pt-2">
                     <Button
                       variant="outline"
@@ -495,7 +580,9 @@ export default function Places() {
                       onClick={handleUpdatePlace}
                       disabled={editPlaceMutation.isPending}
                     >
-                      {editPlaceMutation.isPending ? 'Updating...' : 'Update Place'}
+                      {editPlaceMutation.isPending
+                        ? "Updating..."
+                        : "Update Place"}
                     </Button>
                   </div>
                 </div>
@@ -545,34 +632,48 @@ export default function Places() {
         ) : (
           <div className="space-y-6">
             {Object.entries(groupedPlaces).map(([category, categoryPlaces]) => {
-              const Icon = categoryIcons[category as keyof typeof categoryIcons];
-              const colorClass = categoryColors[category as keyof typeof categoryColors];
-              
+              const Icon =
+                categoryIcons[category as keyof typeof categoryIcons];
+              const colorClass =
+                categoryColors[category as keyof typeof categoryColors];
+
               return (
                 <div key={category}>
                   <h2 className="text-lg font-semibold mb-4 flex items-center capitalize">
                     <Icon className={`w-5 h-5 mr-2 ${colorClass}`} />
                     {category}
                   </h2>
-                  
+
                   <div className="space-y-3">
                     {categoryPlaces.map((place: Place & { user: User }) => (
-                      <Card key={place.id} className="hover:shadow-md transition-shadow">
+                      <Card
+                        key={place.id}
+                        className="hover:shadow-md transition-shadow"
+                      >
                         <CardHeader className="pb-3">
                           <div className="flex items-center justify-between">
                             <div className="flex items-start space-x-3 flex-1 min-w-0">
-                              <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0`}>
-                                <Icon className={`w-4 h-4 sm:w-5 sm:h-5 ${colorClass}`} />
+                              <div
+                                className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0`}
+                              >
+                                <Icon
+                                  className={`w-4 h-4 sm:w-5 sm:h-5 ${colorClass}`}
+                                />
                               </div>
                               <div className="flex-1 min-w-0">
-                                <CardTitle className="text-sm sm:text-base truncate">{place.name}</CardTitle>
-                                <p className="text-xs sm:text-sm text-muted-foreground truncate">{place.address}</p>
+                                <CardTitle className="text-sm sm:text-base truncate">
+                                  {place.name}
+                                </CardTitle>
+                                <p className="text-xs sm:text-sm text-muted-foreground truncate">
+                                  {place.address}
+                                </p>
                                 <p className="text-xs text-muted-foreground mt-1 truncate">
-                                  Added by {place.user.firstName || place.user.email}
+                                  Added by{" "}
+                                  {place.user.firstName || place.user.email}
                                 </p>
                               </div>
                             </div>
-                            
+
                             {/* Action buttons */}
                             <div className="flex items-center space-x-1 flex-shrink-0 ml-2">
                               <Button
@@ -586,7 +687,9 @@ export default function Places() {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                onClick={() => handleDeletePlace(place.id, place.name)}
+                                onClick={() =>
+                                  handleDeletePlace(place.id, place.name)
+                                }
                                 className="text-red-500 hover:text-red-700 hover:bg-red-50 w-8 h-8 sm:w-10 sm:h-10 self-start mt-1"
                               >
                                 <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
@@ -607,7 +710,9 @@ export default function Places() {
         {places.length > 0 && (
           <div className="mt-8 grid grid-cols-2 gap-4">
             <div className="bg-card p-4 rounded-xl border text-center">
-              <div className="text-2xl font-bold text-primary">{places.length}</div>
+              <div className="text-2xl font-bold text-primary">
+                {places.length}
+              </div>
               <div className="text-sm text-muted-foreground">Total Places</div>
             </div>
             <div className="bg-card p-4 rounded-xl border text-center">

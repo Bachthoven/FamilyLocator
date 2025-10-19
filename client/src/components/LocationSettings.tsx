@@ -1,39 +1,49 @@
-import { useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/use-auth';
-import { useToast } from '@/hooks/use-toast';
-import { apiRequest } from '@/lib/queryClient';
+import { useState, useEffect } from "react";
+import { useAuth } from "@/hooks/use-auth";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { MapPin, Clock, Save } from 'lucide-react';
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { MapPin, Clock, Save } from "lucide-react";
 
 interface LocationSettingsProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export function LocationSettings({ open, onOpenChange }: LocationSettingsProps) {
+export function LocationSettings({
+  open,
+  onOpenChange,
+}: LocationSettingsProps) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [autoLocationEnabled, setAutoLocationEnabled] = useState(true);
-  const [locationInterval, setLocationInterval] = useState('60'); // in minutes
+  const [locationInterval, setLocationInterval] = useState("60"); // in minutes
 
   useEffect(() => {
     if (user && open) {
       // Initialize with user's current settings
       setAutoLocationEnabled(user.locationHistoryEnabled || true);
       // Get stored interval or default to 60 minutes
-      const storedInterval = localStorage.getItem('autoLocationInterval') || '60';
+      const storedInterval =
+        localStorage.getItem("autoLocationInterval") || "60";
       setLocationInterval(storedInterval);
     }
   }, [user, open]);
@@ -44,29 +54,32 @@ export function LocationSettings({ open, onOpenChange }: LocationSettingsProps) 
     setIsLoading(true);
     try {
       // Update user preferences
-      await apiRequest('PUT', '/api/user/preferences', {
+      await apiRequest("PUT", "/api/user/preferences", {
         locationHistoryEnabled: autoLocationEnabled,
       });
 
       // Store interval in localStorage for the location logger
-      localStorage.setItem('autoLocationInterval', locationInterval);
-      localStorage.setItem('autoLocationEnabled', autoLocationEnabled.toString());
-      
+      localStorage.setItem("autoLocationInterval", locationInterval);
+      localStorage.setItem(
+        "autoLocationEnabled",
+        autoLocationEnabled.toString(),
+      );
+
       // Trigger page reload to restart location logging with new settings
       window.location.reload();
 
       toast({
-        title: 'Settings saved',
-        description: 'Location logging preferences updated successfully',
+        title: "Settings saved",
+        description: "Location logging preferences updated successfully",
       });
 
       onOpenChange(false);
     } catch (error) {
-      console.error('Failed to save location settings:', error);
+      console.error("Failed to save location settings:", error);
       toast({
-        title: 'Error',
-        description: 'Failed to save location settings',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to save location settings",
+        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
@@ -74,12 +87,12 @@ export function LocationSettings({ open, onOpenChange }: LocationSettingsProps) 
   };
 
   const intervalOptions = [
-    { value: '15', label: '15 minutes' },
-    { value: '30', label: '30 minutes' },
-    { value: '60', label: '1 hour' },
-    { value: '120', label: '2 hours' },
-    { value: '240', label: '4 hours' },
-    { value: '480', label: '8 hours' },
+    { value: "15", label: "15 minutes" },
+    { value: "30", label: "30 minutes" },
+    { value: "60", label: "1 hour" },
+    { value: "120", label: "2 hours" },
+    { value: "240", label: "4 hours" },
+    { value: "480", label: "8 hours" },
   ];
 
   return (
@@ -106,7 +119,9 @@ export function LocationSettings({ open, onOpenChange }: LocationSettingsProps) 
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label className="text-sm font-medium">Enable auto-logging</Label>
+                  <Label className="text-sm font-medium">
+                    Enable auto-logging
+                  </Label>
                   <p className="text-xs text-muted-foreground">
                     Automatically save your location at regular intervals
                   </p>
@@ -119,8 +134,13 @@ export function LocationSettings({ open, onOpenChange }: LocationSettingsProps) 
 
               {autoLocationEnabled && (
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium">Logging interval</Label>
-                  <Select value={locationInterval} onValueChange={setLocationInterval}>
+                  <Label className="text-sm font-medium">
+                    Logging interval
+                  </Label>
+                  <Select
+                    value={locationInterval}
+                    onValueChange={setLocationInterval}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select interval" />
                     </SelectTrigger>
@@ -146,7 +166,7 @@ export function LocationSettings({ open, onOpenChange }: LocationSettingsProps) 
             </Button>
             <Button onClick={handleSave} disabled={isLoading}>
               <Save className="w-4 h-4 mr-2" />
-              {isLoading ? 'Saving...' : 'Save Changes'}
+              {isLoading ? "Saving..." : "Save Changes"}
             </Button>
           </div>
         </div>

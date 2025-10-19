@@ -1,32 +1,32 @@
-import { Link, useLocation } from 'wouter';
-import { Map, Users, Bookmark, Settings, Clock } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Link, useLocation } from "wouter";
+import { Map, Users, Bookmark, Settings, Clock } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const navItems = [
   {
-    path: '/home',
+    path: "/home",
     icon: Map,
-    label: 'Map',
+    label: "Map",
   },
   {
-    path: '/family',
+    path: "/family",
     icon: Users,
-    label: 'Family',
+    label: "Family",
   },
   {
-    path: '/places',
+    path: "/places",
     icon: Bookmark,
-    label: 'Places',
+    label: "Places",
   },
   {
-    path: '/history',
+    path: "/history",
     icon: Clock,
-    label: 'History',
+    label: "History",
   },
   {
-    path: '/settings',
+    path: "/settings",
     icon: Settings,
-    label: 'Settings',
+    label: "Settings",
   },
 ];
 
@@ -40,15 +40,21 @@ export default function BottomNavigation() {
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = location === item.path;
-            
+
             return (
               <Link key={item.path} href={item.path} className="flex-1">
-                <div className={cn(
-                  "flex flex-col items-center py-2 px-1 transition-colors cursor-pointer rounded-lg h-full justify-center",
-                  isActive ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                )}>
+                <div
+                  className={cn(
+                    "flex flex-col items-center py-2 px-1 transition-colors cursor-pointer rounded-lg h-full justify-center",
+                    isActive
+                      ? "text-primary bg-primary/10"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
+                  )}
+                >
                   <Icon className="w-5 h-5 mb-1" />
-                  <span className="text-xs font-medium truncate">{item.label}</span>
+                  <span className="text-xs font-medium truncate">
+                    {item.label}
+                  </span>
                 </div>
               </Link>
             );

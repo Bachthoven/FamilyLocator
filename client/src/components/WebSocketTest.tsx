@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Wifi, WifiOff } from 'lucide-react';
-import { useWebSocket } from '@/hooks/useWebSocket';
-import { useAuth } from '@/hooks/use-auth';
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Wifi, WifiOff } from "lucide-react";
+import { useWebSocket } from "@/hooks/useWebSocket";
+import { useAuth } from "@/hooks/use-auth";
 
 export function WebSocketTest() {
   const { isConnected, lastMessage, sendMessage } = useWebSocket();
@@ -12,16 +12,16 @@ export function WebSocketTest() {
 
   useEffect(() => {
     if (lastMessage) {
-      setMessages(prev => [...prev.slice(-4), lastMessage]); // Keep last 5 messages
+      setMessages((prev) => [...prev.slice(-4), lastMessage]); // Keep last 5 messages
     }
   }, [lastMessage]);
 
   const testConnection = () => {
     if (user && sendMessage) {
-      sendMessage({ 
-        type: 'test', 
-        message: 'Testing WebSocket connection',
-        timestamp: new Date().toISOString()
+      sendMessage({
+        type: "test",
+        message: "Testing WebSocket connection",
+        timestamp: new Date().toISOString(),
       });
     }
   };
@@ -41,14 +41,15 @@ export function WebSocketTest() {
       <CardContent className="space-y-4">
         <div className="space-y-2">
           <p className="text-sm">
-            <strong>Status:</strong> {isConnected ? 'Connected' : 'Disconnected'}
+            <strong>Status:</strong>{" "}
+            {isConnected ? "Connected" : "Disconnected"}
           </p>
           <p className="text-sm">
-            <strong>User ID:</strong> {user?.id || 'Not authenticated'}
+            <strong>User ID:</strong> {user?.id || "Not authenticated"}
           </p>
         </div>
 
-        <Button 
+        <Button
           onClick={testConnection}
           disabled={!isConnected || !user}
           className="w-full"

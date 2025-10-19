@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from "react";
 
 interface GeolocationState {
   location: {
@@ -41,7 +41,7 @@ export function useGeolocation(options: UseGeolocationOptions = {}) {
     }
 
     const onSuccess = (position: GeolocationPosition) => {
-      console.log('✅ Geolocation success:', position.coords);
+      console.log("✅ Geolocation success:", position.coords);
       setState({
         location: {
           latitude: position.coords.latitude,
@@ -55,26 +55,28 @@ export function useGeolocation(options: UseGeolocationOptions = {}) {
     };
 
     const onError = (error: GeolocationPositionError) => {
-      console.error('❌ Geolocation error:', error);
-      let errorMessage = 'An unknown error occurred';
-      
+      console.error("❌ Geolocation error:", error);
+      let errorMessage = "An unknown error occurred";
+
       switch (error.code) {
         case error.PERMISSION_DENIED:
-          errorMessage = 'Location access denied by user';
+          errorMessage = "Location access denied by user";
           break;
         case error.POSITION_UNAVAILABLE:
-          errorMessage = 'Location information is unavailable';
+          errorMessage = "Location information is unavailable";
           break;
         case error.TIMEOUT:
-          errorMessage = 'Location request timed out';
+          errorMessage = "Location request timed out";
           break;
       }
 
       // Retry with lower accuracy if high accuracy failed
       if (retryCount.current < maxRetries && enableHighAccuracy) {
         retryCount.current++;
-        console.log(`⏱️ Retrying geolocation (attempt ${retryCount.current}/${maxRetries}) with lower accuracy...`);
-        
+        console.log(
+          `⏱️ Retrying geolocation (attempt ${retryCount.current}/${maxRetries}) with lower accuracy...`,
+        );
+
         // Try with lower accuracy settings
         navigator.geolocation.getCurrentPosition(
           onSuccess,
@@ -89,7 +91,7 @@ export function useGeolocation(options: UseGeolocationOptions = {}) {
             enableHighAccuracy: false,
             timeout: timeout * 2, // Double the timeout
             maximumAge: maximumAge,
-          }
+          },
         );
         return;
       }
@@ -111,7 +113,7 @@ export function useGeolocation(options: UseGeolocationOptions = {}) {
       watchId.current = navigator.geolocation.watchPosition(
         onSuccess,
         onError,
-        geoOptions
+        geoOptions,
       );
     } else {
       navigator.geolocation.getCurrentPosition(onSuccess, onError, geoOptions);
@@ -122,7 +124,7 @@ export function useGeolocation(options: UseGeolocationOptions = {}) {
     if (!navigator.geolocation) {
       setState({
         location: null,
-        error: 'Geolocation is not supported by this browser',
+        error: "Geolocation is not supported by this browser",
         loading: false,
       });
       return;
@@ -138,8 +140,8 @@ export function useGeolocation(options: UseGeolocationOptions = {}) {
   }, [enableHighAccuracy, timeout, maximumAge, watch]);
 
   const getCurrentLocation = () => {
-    setState(prev => ({ ...prev, loading: true }));
-    
+    setState((prev) => ({ ...prev, loading: true }));
+
     navigator.geolocation.getCurrentPosition(
       (position) => {
         setState({
@@ -153,17 +155,17 @@ export function useGeolocation(options: UseGeolocationOptions = {}) {
         });
       },
       (error) => {
-        let errorMessage = 'An unknown error occurred';
-        
+        let errorMessage = "An unknown error occurred";
+
         switch (error.code) {
           case error.PERMISSION_DENIED:
-            errorMessage = 'Location access denied by user';
+            errorMessage = "Location access denied by user";
             break;
           case error.POSITION_UNAVAILABLE:
-            errorMessage = 'Location information is unavailable';
+            errorMessage = "Location information is unavailable";
             break;
           case error.TIMEOUT:
-            errorMessage = 'Location request timed out';
+            errorMessage = "Location request timed out";
             break;
         }
 
@@ -173,7 +175,7 @@ export function useGeolocation(options: UseGeolocationOptions = {}) {
           loading: false,
         });
       },
-      { enableHighAccuracy, timeout, maximumAge }
+      { enableHighAccuracy, timeout, maximumAge },
     );
   };
 

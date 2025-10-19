@@ -1,12 +1,18 @@
-import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
-import { apiRequest } from '@/lib/queryClient';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Clock, Play, Square, Activity } from 'lucide-react';
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Clock, Play, Square, Activity } from "lucide-react";
 
 interface LoggingSession {
   userId: string;
@@ -25,26 +31,31 @@ export default function LocationLogger() {
 
   // Get logging status
   const { data: status, isLoading } = useQuery<LoggingStatus>({
-    queryKey: ['/api/location-logging/status'],
+    queryKey: ["/api/location-logging/status"],
     refetchInterval: 30000, // Refresh every 30 seconds
   });
 
   // Start logging mutation
   const startLogging = useMutation({
-    mutationFn: () => apiRequest('/api/location-logging/start', {
-      method: 'POST',
-    }),
+    mutationFn: () =>
+      apiRequest("/api/location-logging/start", {
+        method: "POST",
+      }),
     onSuccess: () => {
       toast({
         title: "Location Logging Started",
-        description: "Your location will now be automatically logged every hour",
+        description:
+          "Your location will now be automatically logged every hour",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/location-logging/status'] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/location-logging/status"],
+      });
     },
     onError: (error: any) => {
       toast({
         title: "Failed to Start Logging",
-        description: error.message || "Could not start automatic location logging",
+        description:
+          error.message || "Could not start automatic location logging",
         variant: "destructive",
       });
     },
@@ -52,20 +63,24 @@ export default function LocationLogger() {
 
   // Stop logging mutation
   const stopLogging = useMutation({
-    mutationFn: () => apiRequest('/api/location-logging/stop', {
-      method: 'POST',
-    }),
+    mutationFn: () =>
+      apiRequest("/api/location-logging/stop", {
+        method: "POST",
+      }),
     onSuccess: () => {
       toast({
         title: "Location Logging Stopped",
         description: "Automatic hourly location logging has been disabled",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/location-logging/status'] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/location-logging/status"],
+      });
     },
     onError: (error: any) => {
       toast({
         title: "Failed to Stop Logging",
-        description: error.message || "Could not stop automatic location logging",
+        description:
+          error.message || "Could not stop automatic location logging",
         variant: "destructive",
       });
     },
@@ -73,8 +88,12 @@ export default function LocationLogger() {
 
   if (!user) return null;
 
-  const isUserLoggingActive = status?.activeSessions?.some(session => session.userId === user.id);
-  const userSession = status?.activeSessions?.find(session => session.userId === user.id);
+  const isUserLoggingActive = status?.activeSessions?.some(
+    (session) => session.userId === user.id,
+  );
+  const userSession = status?.activeSessions?.find(
+    (session) => session.userId === user.id,
+  );
 
   return (
     <Card>
@@ -84,7 +103,8 @@ export default function LocationLogger() {
           Automatic Location Logging
         </CardTitle>
         <CardDescription>
-          Automatically save your location every hour for location history tracking
+          Automatically save your location every hour for location history
+          tracking
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -96,7 +116,7 @@ export default function LocationLogger() {
               {isUserLoggingActive ? "Active" : "Inactive"}
             </Badge>
           </div>
-          
+
           {isUserLoggingActive ? (
             <Button
               variant="outline"
@@ -122,7 +142,8 @@ export default function LocationLogger() {
         {!user.locationHistoryEnabled && (
           <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
             <p className="text-sm text-yellow-800 dark:text-yellow-200">
-              Location history is disabled in your settings. Enable it to use automatic logging.
+              Location history is disabled in your settings. Enable it to use
+              automatic logging.
             </p>
           </div>
         )}

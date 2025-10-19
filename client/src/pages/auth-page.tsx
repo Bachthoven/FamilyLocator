@@ -41,17 +41,22 @@ const loginSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
-const registerSchema = z.object({
-  email: z.string().email("Please enter a valid email"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  confirmPassword: z.string().min(6, "Please confirm your password"),
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
-  phoneNumber: z.string().min(10, "Phone number must be at least 10 digits").regex(/^[\d\s\-\(\)]+$/, "Please enter a valid phone number"),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
+const registerSchema = z
+  .object({
+    email: z.string().email("Please enter a valid email"),
+    password: z.string().min(6, "Password must be at least 6 characters"),
+    confirmPassword: z.string().min(6, "Please confirm your password"),
+    firstName: z.string().min(1, "First name is required"),
+    lastName: z.string().min(1, "Last name is required"),
+    phoneNumber: z
+      .string()
+      .min(10, "Phone number must be at least 10 digits")
+      .regex(/^[\d\s\-\(\)]+$/, "Please enter a valid phone number"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
 
 type LoginFormData = z.infer<typeof loginSchema>;
 type RegisterFormData = z.infer<typeof registerSchema>;
@@ -61,15 +66,19 @@ export default function AuthPage() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
-  const [resetStep, setResetStep] = useState<'email' | 'code' | 'password'>('email');
-  const [resetEmail, setResetEmail] = useState('');
-  const [verificationCode, setVerificationCode] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmNewPassword, setConfirmNewPassword] = useState('');
+  const [resetStep, setResetStep] = useState<"email" | "code" | "password">(
+    "email",
+  );
+  const [resetEmail, setResetEmail] = useState("");
+  const [verificationCode, setVerificationCode] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
 
   const sendCodeMutation = useMutation({
     mutationFn: async (email: string) => {
-      const response = await apiRequest('POST', '/api/auth/forgot-password', { email });
+      const response = await apiRequest("POST", "/api/auth/forgot-password", {
+        email,
+      });
       return response.json();
     },
     onSuccess: () => {
@@ -77,7 +86,7 @@ export default function AuthPage() {
         title: "Verification Code Sent",
         description: "Check your phone for a verification code.",
       });
-      setResetStep('code');
+      setResetStep("code");
     },
     onError: (error: any) => {
       toast({
@@ -89,8 +98,16 @@ export default function AuthPage() {
   });
 
   const resetPasswordMutation = useMutation({
-    mutationFn: async (data: { email: string; code: string; newPassword: string }) => {
-      const response = await apiRequest('POST', '/api/auth/reset-password', data);
+    mutationFn: async (data: {
+      email: string;
+      code: string;
+      newPassword: string;
+    }) => {
+      const response = await apiRequest(
+        "POST",
+        "/api/auth/reset-password",
+        data,
+      );
       return response.json();
     },
     onSuccess: () => {
@@ -99,11 +116,11 @@ export default function AuthPage() {
         description: "Your password has been successfully reset.",
       });
       setForgotPasswordOpen(false);
-      setResetStep('email');
-      setResetEmail('');
-      setVerificationCode('');
-      setNewPassword('');
-      setConfirmNewPassword('');
+      setResetStep("email");
+      setResetEmail("");
+      setVerificationCode("");
+      setNewPassword("");
+      setConfirmNewPassword("");
     },
     onError: (error: any) => {
       toast({
@@ -116,8 +133,8 @@ export default function AuthPage() {
 
   // Get the tab parameter from URL
   const urlParams = new URLSearchParams(window.location.search);
-  const tabParam = urlParams.get('tab');
-  const defaultTab = tabParam === 'register' ? 'register' : 'login';
+  const tabParam = urlParams.get("tab");
+  const defaultTab = tabParam === "register" ? "register" : "login";
 
   // Redirect if already logged in
   useEffect(() => {
@@ -172,118 +189,154 @@ export default function AuthPage() {
         variant="ghost"
         size="icon"
         className="fixed top-4 right-4 z-20 h-10 w-10 rounded-full bg-white dark:bg-gray-800 shadow-lg hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600"
-        onClick={() => navigate('/')}
+        onClick={() => navigate("/")}
       >
         <X className="h-5 w-5" />
       </Button>
-      
+
       <div className="min-h-screen flex items-center justify-center p-4">
         <div className="w-full max-w-md space-y-8">
-        
-        <div className="text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
-            FamilyLocator
-          </h1>
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-            Stay connected with your family
-          </p>
-        </div>
+          <div className="text-center">
+            <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
+              FamilyLocator
+            </h1>
+            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+              Stay connected with your family
+            </p>
+          </div>
 
-        <Tabs defaultValue={defaultTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="login">Sign In</TabsTrigger>
-            <TabsTrigger value="register">Create Account</TabsTrigger>
-          </TabsList>
+          <Tabs defaultValue={defaultTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="login">Sign In</TabsTrigger>
+              <TabsTrigger value="register">Create Account</TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="login" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Welcome back</CardTitle>
-                <CardDescription>
-                  Sign in to your account to continue
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Form {...loginForm}>
-                  <form onSubmit={loginForm.handleSubmit(onLogin)} className="space-y-4">
-                    <FormField
-                      control={loginForm.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email</FormLabel>
-                          <FormControl>
-                            <Input placeholder="your@email.com" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={loginForm.control}
-                      name="password"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Password</FormLabel>
-                          <FormControl>
-                            <Input type="password" placeholder="Enter password" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <Button
-                      type="submit"
-                      className="w-full"
-                      disabled={loginMutation.isPending}
+            <TabsContent value="login" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Welcome back</CardTitle>
+                  <CardDescription>
+                    Sign in to your account to continue
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Form {...loginForm}>
+                    <form
+                      onSubmit={loginForm.handleSubmit(onLogin)}
+                      className="space-y-4"
                     >
-                      {loginMutation.isPending ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Signing in...
-                        </>
-                      ) : (
-                        "Sign In"
-                      )}
-                    </Button>
-                  </form>
-                </Form>
-                
-                {/* Forgot Password Link */}
-                <div className="text-center mt-4">
-                  <Button
-                    type="button"
-                    variant="link"
-                    className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200"
-                    onClick={() => setForgotPasswordOpen(true)}
-                  >
-                    Forgot your password?
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="register" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Create Account</CardTitle>
-                <CardDescription>
-                  Join FamilyLocator to stay connected with your family
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Form {...registerForm}>
-                  <form onSubmit={registerForm.handleSubmit(onRegister)} className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
                       <FormField
-                        control={registerForm.control}
-                        name="firstName"
+                        control={loginForm.control}
+                        name="email"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>First Name</FormLabel>
+                            <FormLabel>Email</FormLabel>
                             <FormControl>
-                              <Input placeholder="John" {...field} />
+                              <Input placeholder="your@email.com" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={loginForm.control}
+                        name="password"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Password</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="password"
+                                placeholder="Enter password"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <Button
+                        type="submit"
+                        className="w-full"
+                        disabled={loginMutation.isPending}
+                      >
+                        {loginMutation.isPending ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Signing in...
+                          </>
+                        ) : (
+                          "Sign In"
+                        )}
+                      </Button>
+                    </form>
+                  </Form>
+
+                  {/* Forgot Password Link */}
+                  <div className="text-center mt-4">
+                    <Button
+                      type="button"
+                      variant="link"
+                      className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-200"
+                      onClick={() => setForgotPasswordOpen(true)}
+                    >
+                      Forgot your password?
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="register" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Create Account</CardTitle>
+                  <CardDescription>
+                    Join FamilyLocator to stay connected with your family
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Form {...registerForm}>
+                    <form
+                      onSubmit={registerForm.handleSubmit(onRegister)}
+                      className="space-y-4"
+                    >
+                      <div className="grid grid-cols-2 gap-4">
+                        <FormField
+                          control={registerForm.control}
+                          name="firstName"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>First Name</FormLabel>
+                              <FormControl>
+                                <Input placeholder="John" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={registerForm.control}
+                          name="lastName"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Last Name</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Doe" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      <FormField
+                        control={registerForm.control}
+                        name="email"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Email</FormLabel>
+                            <FormControl>
+                              <Input placeholder="your@email.com" {...field} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -291,90 +344,71 @@ export default function AuthPage() {
                       />
                       <FormField
                         control={registerForm.control}
-                        name="lastName"
+                        name="phoneNumber"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Last Name</FormLabel>
+                            <FormLabel>Phone Number</FormLabel>
                             <FormControl>
-                              <Input placeholder="Doe" {...field} />
+                              <Input placeholder="(555) 123-4567" {...field} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
-                    </div>
-                    <FormField
-                      control={registerForm.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email</FormLabel>
-                          <FormControl>
-                            <Input placeholder="your@email.com" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={registerForm.control}
-                      name="phoneNumber"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Phone Number</FormLabel>
-                          <FormControl>
-                            <Input placeholder="(555) 123-4567" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={registerForm.control}
-                      name="password"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Password</FormLabel>
-                          <FormControl>
-                            <Input type="password" placeholder="Enter password" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={registerForm.control}
-                      name="confirmPassword"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Confirm Password</FormLabel>
-                          <FormControl>
-                            <Input type="password" placeholder="Confirm password" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <Button
-                      type="submit"
-                      className="w-full"
-                      disabled={registerMutation.isPending}
-                    >
-                      {registerMutation.isPending ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Creating account...
-                        </>
-                      ) : (
-                        "Create Account"
-                      )}
-                    </Button>
-                  </form>
-                </Form>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+                      <FormField
+                        control={registerForm.control}
+                        name="password"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Password</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="password"
+                                placeholder="Enter password"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={registerForm.control}
+                        name="confirmPassword"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Confirm Password</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="password"
+                                placeholder="Confirm password"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <Button
+                        type="submit"
+                        className="w-full"
+                        disabled={registerMutation.isPending}
+                      >
+                        {registerMutation.isPending ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Creating account...
+                          </>
+                        ) : (
+                          "Create Account"
+                        )}
+                      </Button>
+                    </form>
+                  </Form>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
 
@@ -387,14 +421,16 @@ export default function AuthPage() {
               Reset Password
             </DialogTitle>
             <DialogDescription>
-              {resetStep === 'email' && 'Enter your email address to receive a verification code'}
-              {resetStep === 'code' && 'Enter the verification code sent to your phone'}
-              {resetStep === 'password' && 'Enter your new password'}
+              {resetStep === "email" &&
+                "Enter your email address to receive a verification code"}
+              {resetStep === "code" &&
+                "Enter the verification code sent to your phone"}
+              {resetStep === "password" && "Enter your new password"}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
-            {resetStep === 'email' && (
+            {resetStep === "email" && (
               <>
                 <div>
                   <Label htmlFor="reset-email">Email Address</Label>
@@ -417,13 +453,13 @@ export default function AuthPage() {
                       Sending Code...
                     </>
                   ) : (
-                    'Send Verification Code'
+                    "Send Verification Code"
                   )}
                 </Button>
               </>
             )}
 
-            {resetStep === 'code' && (
+            {resetStep === "code" && (
               <>
                 <div>
                   <Label htmlFor="verification-code">Verification Code</Label>
@@ -447,7 +483,9 @@ export default function AuthPage() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="confirm-new-password">Confirm New Password</Label>
+                  <Label htmlFor="confirm-new-password">
+                    Confirm New Password
+                  </Label>
                   <Input
                     id="confirm-new-password"
                     type="password"
@@ -459,7 +497,7 @@ export default function AuthPage() {
                 <div className="flex gap-2">
                   <Button
                     variant="outline"
-                    onClick={() => setResetStep('email')}
+                    onClick={() => setResetStep("email")}
                     className="flex-1"
                   >
                     Back
@@ -485,10 +523,15 @@ export default function AuthPage() {
                       resetPasswordMutation.mutate({
                         email: resetEmail,
                         code: verificationCode,
-                        newPassword: newPassword
+                        newPassword: newPassword,
                       });
                     }}
-                    disabled={resetPasswordMutation.isPending || !verificationCode || !newPassword || !confirmNewPassword}
+                    disabled={
+                      resetPasswordMutation.isPending ||
+                      !verificationCode ||
+                      !newPassword ||
+                      !confirmNewPassword
+                    }
                     className="flex-1"
                   >
                     {resetPasswordMutation.isPending ? (
@@ -497,7 +540,7 @@ export default function AuthPage() {
                         Resetting...
                       </>
                     ) : (
-                      'Reset Password'
+                      "Reset Password"
                     )}
                   </Button>
                 </div>

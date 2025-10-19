@@ -1,10 +1,17 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
-import MapView, { Marker, Callout, PROVIDER_GOOGLE } from 'react-native-maps';
-import { Ionicons } from '@expo/vector-icons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import * as Location from 'expo-location';
-import { BlurView } from 'expo-blur';
+import React, { useState, useRef, useEffect } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ActivityIndicator,
+  Alert,
+} from "react-native";
+import MapView, { Marker, Callout, PROVIDER_GOOGLE } from "react-native-maps";
+import { Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import * as Location from "expo-location";
+import { BlurView } from "expo-blur";
 
 // Type definitions
 interface FamilyLocation {
@@ -27,7 +34,17 @@ interface Place {
 }
 
 // Custom marker components for different types
-const UserMarker = ({ latitude, longitude, name, onPress }: { latitude: number; longitude: number; name: string; onPress?: () => void }) => (
+const UserMarker = ({
+  latitude,
+  longitude,
+  name,
+  onPress,
+}: {
+  latitude: number;
+  longitude: number;
+  name: string;
+  onPress?: () => void;
+}) => (
   <Marker
     coordinate={{ latitude, longitude }}
     onPress={onPress}
@@ -46,10 +63,17 @@ const UserMarker = ({ latitude, longitude, name, onPress }: { latitude: number; 
   </Marker>
 );
 
-const FamilyMarker = ({ latitude, longitude, name, address, isRecent, onPress }: { 
-  latitude: number; 
-  longitude: number; 
-  name: string; 
+const FamilyMarker = ({
+  latitude,
+  longitude,
+  name,
+  address,
+  isRecent,
+  onPress,
+}: {
+  latitude: number;
+  longitude: number;
+  name: string;
   address?: string;
   isRecent: boolean;
   onPress?: () => void;
@@ -60,22 +84,34 @@ const FamilyMarker = ({ latitude, longitude, name, address, isRecent, onPress }:
     pinColor="#34C759"
   >
     <View style={styles.familyMarkerContainer}>
-      <View style={[styles.familyMarker, !isRecent && styles.familyMarkerOld]} />
+      <View
+        style={[styles.familyMarker, !isRecent && styles.familyMarkerOld]}
+      />
       {isRecent && <View style={styles.familyMarkerPulse} />}
     </View>
     <Callout>
       <View style={styles.callout}>
         <Text style={styles.calloutTitle}>{name}</Text>
-        <Text style={styles.calloutDescription}>{address || 'Unknown location'}</Text>
+        <Text style={styles.calloutDescription}>
+          {address || "Unknown location"}
+        </Text>
         <Text style={styles.calloutTime}>
-          {isRecent ? 'Active now' : 'Last seen recently'}
+          {isRecent ? "Active now" : "Last seen recently"}
         </Text>
       </View>
     </Callout>
   </Marker>
 );
 
-const PlaceMarker = ({ latitude, longitude, name, category, address, color, onPress }: {
+const PlaceMarker = ({
+  latitude,
+  longitude,
+  name,
+  category,
+  address,
+  color,
+  onPress,
+}: {
   latitude: number;
   longitude: number;
   name: string;
@@ -85,19 +121,16 @@ const PlaceMarker = ({ latitude, longitude, name, category, address, color, onPr
   onPress?: () => void;
 }) => {
   const categoryColors: Record<string, string> = {
-    home: '#9333EA',
-    work: '#F97316',
-    school: '#EAB308',
-    other: '#6B7280'
+    home: "#9333EA",
+    work: "#F97316",
+    school: "#EAB308",
+    other: "#6B7280",
   };
-  
-  const markerColor = color || categoryColors[category || 'other'] || '#6B7280';
-  
+
+  const markerColor = color || categoryColors[category || "other"] || "#6B7280";
+
   return (
-    <Marker
-      coordinate={{ latitude, longitude }}
-      onPress={onPress}
-    >
+    <Marker coordinate={{ latitude, longitude }} onPress={onPress}>
       <View style={[styles.placeMarker, { backgroundColor: markerColor }]}>
         <View style={styles.placeMarkerDot} />
       </View>
@@ -105,7 +138,10 @@ const PlaceMarker = ({ latitude, longitude, name, category, address, color, onPr
         <View style={styles.callout}>
           <Text style={styles.calloutTitle}>{name}</Text>
           <Text style={styles.calloutDescription}>
-            {category ? `${category.charAt(0).toUpperCase() + category.slice(1)} • ` : ''}Saved Place
+            {category
+              ? `${category.charAt(0).toUpperCase() + category.slice(1)} • `
+              : ""}
+            Saved Place
           </Text>
           {address && <Text style={styles.calloutTime}>{address}</Text>}
         </View>
@@ -117,12 +153,15 @@ const PlaceMarker = ({ latitude, longitude, name, category, address, color, onPr
 export default function MapScreen() {
   const insets = useSafeAreaInsets();
   const mapRef = useRef<MapView>(null);
-  const [mapType, setMapType] = useState<'standard' | 'satellite'>('standard');
-  const [currentLocation, setCurrentLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [mapType, setMapType] = useState<"standard" | "satellite">("standard");
+  const [currentLocation, setCurrentLocation] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const [region, setRegion] = useState({
     latitude: 40.7128,
-    longitude: -74.0060,
+    longitude: -74.006,
     latitudeDelta: 0.0922,
     longitudeDelta: 0.0421,
   });
@@ -143,16 +182,16 @@ export default function MapScreen() {
   const getCurrentLocation = async () => {
     try {
       setIsLoadingLocation(true);
-      
+
       // Request location permissions
       const { status } = await Location.requestForegroundPermissionsAsync();
-      
-      if (status !== 'granted') {
+
+      if (status !== "granted") {
         setIsLoadingLocation(false);
         Alert.alert(
-          'Permission Required',
-          'Please enable location permissions to see yourself on the map.',
-          [{ text: 'OK' }]
+          "Permission Required",
+          "Please enable location permissions to see yourself on the map.",
+          [{ text: "OK" }],
         );
         return;
       }
@@ -161,7 +200,7 @@ export default function MapScreen() {
       const location = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.High,
       });
-      
+
       const { latitude, longitude } = location.coords;
       setCurrentLocation({ latitude, longitude });
       setRegion({
@@ -171,32 +210,38 @@ export default function MapScreen() {
         longitudeDelta: 0.01,
       });
       setIsLoadingLocation(false);
-      
+
       // Center map on user location
-      mapRef.current?.animateToRegion({
-        latitude,
-        longitude,
-        latitudeDelta: 0.01,
-        longitudeDelta: 0.01,
-      }, 1000);
+      mapRef.current?.animateToRegion(
+        {
+          latitude,
+          longitude,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        },
+        1000,
+      );
     } catch (error) {
-      console.error('Location error:', error);
+      console.error("Location error:", error);
       setIsLoadingLocation(false);
       Alert.alert(
-        'Location Error',
-        'Unable to get your location. Please check your device settings.',
-        [{ text: 'OK' }]
+        "Location Error",
+        "Unable to get your location. Please check your device settings.",
+        [{ text: "OK" }],
       );
     }
   };
 
   const centerOnUser = () => {
     if (currentLocation) {
-      mapRef.current?.animateToRegion({
-        ...currentLocation,
-        latitudeDelta: 0.01,
-        longitudeDelta: 0.01,
-      }, 1000);
+      mapRef.current?.animateToRegion(
+        {
+          ...currentLocation,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        },
+        1000,
+      );
     } else {
       getCurrentLocation();
     }
@@ -205,7 +250,10 @@ export default function MapScreen() {
   const zoomIn = () => {
     mapRef.current?.getCamera().then((camera) => {
       if (camera.zoom !== undefined) {
-        mapRef.current?.animateCamera({ zoom: camera.zoom + 1 }, { duration: 300 });
+        mapRef.current?.animateCamera(
+          { zoom: camera.zoom + 1 },
+          { duration: 300 },
+        );
       }
     });
   };
@@ -213,13 +261,16 @@ export default function MapScreen() {
   const zoomOut = () => {
     mapRef.current?.getCamera().then((camera) => {
       if (camera.zoom !== undefined) {
-        mapRef.current?.animateCamera({ zoom: camera.zoom - 1 }, { duration: 300 });
+        mapRef.current?.animateCamera(
+          { zoom: camera.zoom - 1 },
+          { duration: 300 },
+        );
       }
     });
   };
 
   const toggleMapType = () => {
-    setMapType(mapType === 'standard' ? 'satellite' : 'standard');
+    setMapType(mapType === "standard" ? "satellite" : "standard");
   };
 
   return (
@@ -276,7 +327,8 @@ export default function MapScreen() {
           <View style={styles.membersIndicatorContent}>
             <View style={styles.statusDot} />
             <Text style={styles.membersText}>
-              {familyLocations.length} member{familyLocations.length !== 1 ? 's' : ''} online
+              {familyLocations.length} member
+              {familyLocations.length !== 1 ? "s" : ""} online
             </Text>
           </View>
         </BlurView>
@@ -320,7 +372,7 @@ export default function MapScreen() {
           activeOpacity={0.7}
         >
           <Ionicons
-            name={mapType === 'standard' ? 'earth-outline' : 'map-outline'}
+            name={mapType === "standard" ? "earth-outline" : "map-outline"}
             size={24}
             color="#333"
           />
@@ -368,11 +420,11 @@ const styles = StyleSheet.create({
   map: {
     flex: 1,
   },
-  
+
   // Custom Marker Styles
   userMarkerContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     width: 40,
     height: 40,
   },
@@ -380,27 +432,27 @@ const styles = StyleSheet.create({
     width: 16,
     height: 16,
     borderRadius: 8,
-    backgroundColor: '#007AFF',
+    backgroundColor: "#007AFF",
     borderWidth: 2,
-    borderColor: '#fff',
-    shadowColor: '#000',
+    borderColor: "#fff",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 5,
   },
   userMarkerPulse: {
-    position: 'absolute',
+    position: "absolute",
     width: 16,
     height: 16,
     borderRadius: 8,
-    backgroundColor: '#007AFF',
+    backgroundColor: "#007AFF",
     opacity: 0.3,
   },
-  
+
   familyMarkerContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     width: 40,
     height: 40,
   },
@@ -408,10 +460,10 @@ const styles = StyleSheet.create({
     width: 16,
     height: 16,
     borderRadius: 8,
-    backgroundColor: '#34C759',
+    backgroundColor: "#34C759",
     borderWidth: 2,
-    borderColor: '#fff',
-    shadowColor: '#000',
+    borderColor: "#fff",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
@@ -421,23 +473,23 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   familyMarkerPulse: {
-    position: 'absolute',
+    position: "absolute",
     width: 16,
     height: 16,
     borderRadius: 8,
-    backgroundColor: '#34C759',
+    backgroundColor: "#34C759",
     opacity: 0.3,
   },
-  
+
   placeMarker: {
     width: 24,
     height: 24,
     borderRadius: 4,
     borderWidth: 2,
-    borderColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
+    borderColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
@@ -447,9 +499,9 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
-  
+
   // Callout Styles
   callout: {
     padding: 8,
@@ -457,35 +509,35 @@ const styles = StyleSheet.create({
   },
   calloutTitle: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: "600",
+    color: "#333",
     marginBottom: 2,
   },
   calloutDescription: {
     fontSize: 12,
-    color: '#666',
+    color: "#666",
     marginBottom: 2,
   },
   calloutTime: {
     fontSize: 10,
-    color: '#999',
+    color: "#999",
   },
-  
+
   // Members Indicator Styles
   membersIndicator: {
-    position: 'absolute',
+    position: "absolute",
     left: 0,
     right: 0,
-    alignItems: 'center',
+    alignItems: "center",
     zIndex: 30,
   },
   membersIndicatorBlur: {
     borderRadius: 999,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   membersIndicatorContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 8,
     gap: 8,
@@ -494,32 +546,32 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#22C55E',
+    backgroundColor: "#22C55E",
   },
   membersText: {
     fontSize: 14,
-    fontWeight: '500',
-    color: '#1F2937',
+    fontWeight: "500",
+    color: "#1F2937",
   },
-  
+
   // Banner Styles
   banner: {
-    position: 'absolute',
+    position: "absolute",
     left: 16,
     right: 80,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 12,
     borderWidth: 2,
-    borderColor: '#007AFF',
-    shadowColor: '#000',
+    borderColor: "#007AFF",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 5,
   },
   bannerContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     padding: 16,
     gap: 12,
   },
@@ -528,38 +580,38 @@ const styles = StyleSheet.create({
   },
   bannerTitle: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: "600",
+    color: "#333",
     marginBottom: 4,
   },
   bannerDescription: {
     fontSize: 12,
-    color: '#666',
+    color: "#666",
   },
   bannerButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: "#007AFF",
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 8,
   },
   bannerButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: "600",
   },
-  
+
   // Loading Styles
   loadingContainer: {
-    position: 'absolute',
+    position: "absolute",
     left: 16,
     right: 16,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 12,
     padding: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 12,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
@@ -567,35 +619,35 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 14,
-    color: '#333',
-    fontWeight: '500',
+    color: "#333",
+    fontWeight: "500",
   },
-  
+
   // Control Buttons
   controls: {
-    position: 'absolute',
+    position: "absolute",
     right: 16,
     gap: 8,
   },
   controlButton: {
     width: 56,
     height: 56,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
+    borderColor: "#e0e0e0",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 5,
   },
   centerButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: "#007AFF",
   },
   centerButtonDisabled: {
-    backgroundColor: '#9CA3AF',
+    backgroundColor: "#9CA3AF",
   },
 });

@@ -44,8 +44,6 @@
     "updates": {
       "enabled": false
     },
-    "assetBundlePatterns": [
-      "mobile/**/*"
-    ]
+    "assetBundlePatterns": ["mobile/**/*"]
   }
 }

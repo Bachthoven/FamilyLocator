@@ -1,8 +1,14 @@
-import { useState, useEffect, useRef } from 'react';
-import { Input } from '@/components/ui/input';
-import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from '@/components/ui/command';
-import { MapPin, Loader2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { useState, useEffect, useRef } from "react";
+import { Input } from "@/components/ui/input";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { MapPin, Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface AddressSuggestion {
   display_name: string;
@@ -16,7 +22,11 @@ interface AddressSuggestion {
 interface AddressAutocompleteProps {
   value: string;
   onValueChange: (value: string) => void;
-  onLocationSelect: (location: { address: string; latitude: number; longitude: number }) => void;
+  onLocationSelect: (location: {
+    address: string;
+    latitude: number;
+    longitude: number;
+  }) => void;
   placeholder?: string;
   className?: string;
 }
@@ -32,7 +42,10 @@ export default function AddressAutocomplete({
   const [isLoading, setIsLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
-  const [userLocation, setUserLocation] = useState<{ lat: number; lon: number } | null>(null);
+  const [userLocation, setUserLocation] = useState<{
+    lat: number;
+    lon: number;
+  } | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout>();
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -47,14 +60,14 @@ export default function AddressAutocomplete({
           });
         },
         (error) => {
-          console.log('Location access denied or unavailable:', error);
+          console.log("Location access denied or unavailable:", error);
           // Fallback to no location bias
         },
         {
           enableHighAccuracy: false,
           timeout: 10000,
           maximumAge: 300000, // 5 minutes
-        }
+        },
       );
     }
   }, []);
@@ -68,12 +81,12 @@ export default function AddressAutocomplete({
 
     try {
       setIsLoading(true);
-      
+
       // Build the API URL with location biasing if user location is available
       let apiUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-        query
+        query,
       )}&limit=8&addressdetails=1&extratags=1`;
-      
+
       // Add viewbox parameter to bias results toward user's location
       if (userLocation) {
         // Create a bounding box around user's location (~20km radius)
@@ -83,48 +96,48 @@ export default function AddressAutocomplete({
           userLocation.lon - lonDelta, // left
           userLocation.lat + latDelta, // top
           userLocation.lon + lonDelta, // right
-          userLocation.lat - latDelta  // bottom
-        ].join(',');
-        
+          userLocation.lat - latDelta, // bottom
+        ].join(",");
+
         apiUrl += `&viewbox=${viewbox}&bounded=1`;
       }
 
       const response = await fetch(apiUrl, {
         headers: {
-          'User-Agent': 'FamilyLocator-App',
+          "User-Agent": "FamilyLocator-App",
         },
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch suggestions');
+        throw new Error("Failed to fetch suggestions");
       }
 
       let data: AddressSuggestion[] = await response.json();
-      
+
       // If user location is available, sort by distance from user
       if (userLocation && data.length > 0) {
         data = data.sort((a, b) => {
           const distanceA = calculateDistance(
-            userLocation.lat, 
-            userLocation.lon, 
-            parseFloat(a.lat), 
-            parseFloat(a.lon)
+            userLocation.lat,
+            userLocation.lon,
+            parseFloat(a.lat),
+            parseFloat(a.lon),
           );
           const distanceB = calculateDistance(
-            userLocation.lat, 
-            userLocation.lon, 
-            parseFloat(b.lat), 
-            parseFloat(b.lon)
+            userLocation.lat,
+            userLocation.lon,
+            parseFloat(b.lat),
+            parseFloat(b.lon),
           );
           return distanceA - distanceB;
         });
       }
-      
+
       setSuggestions(data.slice(0, 5)); // Show top 5 results
       setShowSuggestions(true);
       setSelectedIndex(-1);
     } catch (error) {
-      console.error('Error fetching address suggestions:', error);
+      console.error("Error fetching address suggestions:", error);
       setSuggestions([]);
     } finally {
       setIsLoading(false);
@@ -132,15 +145,22 @@ export default function AddressAutocomplete({
   };
 
   // Calculate distance between two points using Haversine formula
-  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+  const calculateDistance = (
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number,
+  ) => {
     const R = 6371; // Earth's radius in km
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = 
-      Math.sin(dLat/2) * Math.sin(dLat/2) +
-      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-      Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((lat1 * Math.PI) / 180) *
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   };
 
@@ -188,23 +208,23 @@ export default function AddressAutocomplete({
     if (!showSuggestions || suggestions.length === 0) return;
 
     switch (e.key) {
-      case 'ArrowDown':
+      case "ArrowDown":
         e.preventDefault();
-        setSelectedIndex(prev => 
-          prev < suggestions.length - 1 ? prev + 1 : prev
+        setSelectedIndex((prev) =>
+          prev < suggestions.length - 1 ? prev + 1 : prev,
         );
         break;
-      case 'ArrowUp':
+      case "ArrowUp":
         e.preventDefault();
-        setSelectedIndex(prev => prev > 0 ? prev - 1 : -1);
+        setSelectedIndex((prev) => (prev > 0 ? prev - 1 : -1));
         break;
-      case 'Enter':
+      case "Enter":
         e.preventDefault();
         if (selectedIndex >= 0 && selectedIndex < suggestions.length) {
           handleSuggestionClick(suggestions[selectedIndex]);
         }
         break;
-      case 'Escape':
+      case "Escape":
         setShowSuggestions(false);
         setSelectedIndex(-1);
         inputRef.current?.blur();
@@ -222,9 +242,9 @@ export default function AddressAutocomplete({
 
   const formatDisplayName = (displayName: string) => {
     // Clean up the display name for better readability
-    const parts = displayName.split(',');
+    const parts = displayName.split(",");
     if (parts.length > 4) {
-      return parts.slice(0, 4).join(', ') + '...';
+      return parts.slice(0, 4).join(", ") + "...";
     }
     return displayName;
   };
@@ -248,7 +268,9 @@ export default function AddressAutocomplete({
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           onBlur={handleBlur}
-          onFocus={() => value && suggestions.length > 0 && setShowSuggestions(true)}
+          onFocus={() =>
+            value && suggestions.length > 0 && setShowSuggestions(true)
+          }
           placeholder={placeholder}
           className={className}
         />
@@ -269,7 +291,7 @@ export default function AddressAutocomplete({
                     key={suggestion.place_id}
                     className={cn(
                       "cursor-pointer",
-                      index === selectedIndex && "bg-accent"
+                      index === selectedIndex && "bg-accent",
                     )}
                     onSelect={() => handleSuggestionClick(suggestion)}
                   >
@@ -280,16 +302,18 @@ export default function AddressAutocomplete({
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-xs text-muted-foreground capitalize">
-                          {suggestion.type?.replace('_', ' ') || 'Location'}
+                          {suggestion.type?.replace("_", " ") || "Location"}
                         </span>
                         {userLocation && (
                           <span className="text-xs text-muted-foreground">
-                            {formatDistance(calculateDistance(
-                              userLocation.lat,
-                              userLocation.lon,
-                              parseFloat(suggestion.lat),
-                              parseFloat(suggestion.lon)
-                            ))}
+                            {formatDistance(
+                              calculateDistance(
+                                userLocation.lat,
+                                userLocation.lon,
+                                parseFloat(suggestion.lat),
+                                parseFloat(suggestion.lon),
+                              ),
+                            )}
                           </span>
                         )}
                       </div>

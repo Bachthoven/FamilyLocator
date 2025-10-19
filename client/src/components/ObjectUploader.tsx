@@ -30,7 +30,9 @@ export function ObjectUploader({
     fileInputRef.current?.click();
   };
 
-  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -48,28 +50,28 @@ export function ObjectUploader({
 
     try {
       // Get upload URL
-      const uploadResponse = await fetch('/api/objects/upload', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const uploadResponse = await fetch("/api/objects/upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
       });
-      
+
       if (!uploadResponse.ok) {
-        throw new Error('Failed to get upload URL');
+        throw new Error("Failed to get upload URL");
       }
-      
+
       const { uploadURL } = await uploadResponse.json();
 
       // Upload the file directly to the presigned URL
       const uploadFileResponse = await fetch(uploadURL, {
-        method: 'PUT',
+        method: "PUT",
         body: file,
         headers: {
-          'Content-Type': file.type,
+          "Content-Type": file.type,
         },
       });
 
       if (!uploadFileResponse.ok) {
-        throw new Error('Failed to upload file');
+        throw new Error("Failed to upload file");
       }
 
       // Call the onComplete callback with the upload URL
@@ -79,9 +81,8 @@ export function ObjectUploader({
         title: "Upload successful",
         description: "Your image has been uploaded successfully!",
       });
-
     } catch (error) {
-      console.error('Upload error:', error);
+      console.error("Upload error:", error);
       toast({
         title: "Upload failed",
         description: "Failed to upload image. Please try again.",
@@ -91,7 +92,7 @@ export function ObjectUploader({
       setIsUploading(false);
       // Reset the input so the same file can be selected again
       if (fileInputRef.current) {
-        fileInputRef.current.value = '';
+        fileInputRef.current.value = "";
       }
     }
   };
@@ -103,15 +104,15 @@ export function ObjectUploader({
         type="file"
         accept={accept}
         onChange={handleFileSelect}
-        style={{ display: 'none' }}
+        style={{ display: "none" }}
       />
-      <Button 
+      <Button
         type="button"
         onClick={handleButtonClick}
         className={buttonClassName}
         disabled={isUploading}
       >
-        {isUploading ? 'Uploading...' : children}
+        {isUploading ? "Uploading..." : children}
       </Button>
     </div>
   );

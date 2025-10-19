@@ -1,19 +1,25 @@
-import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
-import { apiRequest } from '@/lib/queryClient';
-import { isUnauthorizedError } from '@/lib/authUtils';
-import FamilyMemberCard from '@/components/FamilyMemberCard';
-import BottomNavigation from '@/components/BottomNavigation';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Plus, Users, Copy, QrCode, KeyRound } from 'lucide-react';
-import { User, InvitationCode, Location } from '@shared/schema';
-import { useLocation } from 'wouter';
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+import { isUnauthorizedError } from "@/lib/authUtils";
+import FamilyMemberCard from "@/components/FamilyMemberCard";
+import BottomNavigation from "@/components/BottomNavigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Plus, Users, Copy, QrCode, KeyRound } from "lucide-react";
+import { User, InvitationCode, Location } from "@shared/schema";
+import { useLocation } from "wouter";
 
 export default function Family() {
   const { user } = useAuth();
@@ -22,55 +28,72 @@ export default function Family() {
   const [, setLocation] = useLocation();
 
   const [joinDialogOpen, setJoinDialogOpen] = useState(false);
-  const [joinCode, setJoinCode] = useState('');
+  const [joinCode, setJoinCode] = useState("");
   const [codeDialogOpen, setCodeDialogOpen] = useState(false);
-  const [generatedCode, setGeneratedCode] = useState('');
+  const [generatedCode, setGeneratedCode] = useState("");
 
   // Fetch family members
-  const { data: familyMembers = [], isLoading: familyLoading, error: familyError } = useQuery<User[]>({
-    queryKey: ['/api/family'],
+  const {
+    data: familyMembers = [],
+    isLoading: familyLoading,
+    error: familyError,
+  } = useQuery<User[]>({
+    queryKey: ["/api/family"],
     enabled: !!user,
     retry: 1,
   });
 
   // Fetch invitation codes
-  const { data: invitationCodes = [], isLoading: codesLoading, error: codesError } = useQuery<InvitationCode[]>({
-    queryKey: ['/api/family/codes'],
+  const {
+    data: invitationCodes = [],
+    isLoading: codesLoading,
+    error: codesError,
+  } = useQuery<InvitationCode[]>({
+    queryKey: ["/api/family/codes"],
     enabled: !!user,
     retry: 1,
   });
 
   // Debug logging
-  console.log('Family component state:', {
+  console.log("Family component state:", {
     user: !!user,
     familyMembers: familyMembers.length,
     invitationCodes: invitationCodes.length,
     familyLoading,
     codesLoading,
     familyError,
-    codesError
+    codesError,
   });
 
   // Fetch family locations for status
-  const { data: familyLocations = [] } = useQuery<Array<{ user: User; latitude: number; longitude: number; timestamp: Date | null; }>>({
-    queryKey: ['/api/locations/family'],
+  const { data: familyLocations = [] } = useQuery<
+    Array<{
+      user: User;
+      latitude: number;
+      longitude: number;
+      timestamp: Date | null;
+    }>
+  >({
+    queryKey: ["/api/locations/family"],
     enabled: !!user,
   });
 
   // Generate invitation code mutation
   const generateCodeMutation = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest('POST', '/api/family/generate-code');
+      const response = await apiRequest("POST", "/api/family/generate-code");
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to generate invitation code');
+        throw new Error(
+          errorData.message || "Failed to generate invitation code",
+        );
       }
       return response.json();
     },
     onSuccess: (data) => {
       setGeneratedCode(data.code);
       setCodeDialogOpen(true);
-      queryClient.invalidateQueries({ queryKey: ['/api/family/codes'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/family/codes"] });
     },
     onError: (error: any) => {
       if (isUnauthorizedError(error)) {
@@ -84,7 +107,7 @@ export default function Family() {
         }, 500);
         return;
       }
-      
+
       toast({
         title: "Error",
         description: "Failed to generate invitation code. Please try again.",
@@ -96,10 +119,10 @@ export default function Family() {
   // Join family mutation
   const joinFamilyMutation = useMutation({
     mutationFn: async (code: string) => {
-      const response = await apiRequest('POST', '/api/family/join', { code });
+      const response = await apiRequest("POST", "/api/family/join", { code });
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to join family');
+        throw new Error(errorData.message || "Failed to join family");
       }
       return response.json();
     },
@@ -109,8 +132,8 @@ export default function Family() {
         description: "You have successfully joined the family.",
       });
       setJoinDialogOpen(false);
-      setJoinCode('');
-      queryClient.invalidateQueries({ queryKey: ['/api/family'] });
+      setJoinCode("");
+      queryClient.invalidateQueries({ queryKey: ["/api/family"] });
     },
     onError: (error: any) => {
       if (isUnauthorizedError(error)) {
@@ -124,10 +147,11 @@ export default function Family() {
         }, 500);
         return;
       }
-      
+
       toast({
         title: "Error",
-        description: error.message || "Failed to join family. Please try again.",
+        description:
+          error.message || "Failed to join family. Please try again.",
         variant: "destructive",
       });
     },
@@ -143,13 +167,13 @@ export default function Family() {
     });
   };
 
-
-
   const formatExpiration = (expiresAt: Date) => {
     const now = new Date();
     const expiry = new Date(expiresAt);
-    const hoursLeft = Math.ceil((expiry.getTime() - now.getTime()) / (1000 * 60 * 60));
-    
+    const hoursLeft = Math.ceil(
+      (expiry.getTime() - now.getTime()) / (1000 * 60 * 60),
+    );
+
     if (hoursLeft <= 0) return "Expired";
     if (hoursLeft === 1) return "Expires in 1 hour";
     return `Expires in ${hoursLeft} hours`;
@@ -158,15 +182,15 @@ export default function Family() {
   // Remove family member mutation
   const removeMutation = useMutation({
     mutationFn: async (memberId: string) => {
-      await apiRequest('DELETE', `/api/family/${memberId}`);
+      await apiRequest("DELETE", `/api/family/${memberId}`);
     },
     onSuccess: () => {
       toast({
         title: "Member removed",
         description: "Family member has been removed successfully.",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/family'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/locations/family'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/family"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/locations/family"] });
     },
     onError: (error) => {
       if (isUnauthorizedError(error)) {
@@ -189,22 +213,25 @@ export default function Family() {
   });
 
   const handleRemove = (memberId: string) => {
-    if (confirm('Are you sure you want to remove this family member?')) {
+    if (confirm("Are you sure you want to remove this family member?")) {
       removeMutation.mutate(memberId);
     }
   };
 
   const handleViewLocation = (location: Location) => {
     // Store the location data in sessionStorage to pass to the map
-    sessionStorage.setItem('focusLocation', JSON.stringify({
-      latitude: location.latitude,
-      longitude: location.longitude,
-      userId: location.userId
-    }));
-    
+    sessionStorage.setItem(
+      "focusLocation",
+      JSON.stringify({
+        latitude: location.latitude,
+        longitude: location.longitude,
+        userId: location.userId,
+      }),
+    );
+
     // Navigate to the map page
-    setLocation('/home');
-    
+    setLocation("/home");
+
     toast({
       title: "Navigating to map",
       description: "Centering on family member's location",
@@ -225,15 +252,17 @@ export default function Family() {
               Manage your family connections and location sharing
             </p>
           </div>
-          
+
           <div className="flex flex-col sm:flex-row gap-3">
-            <Button 
-              onClick={() => generateCodeMutation.mutate()} 
+            <Button
+              onClick={() => generateCodeMutation.mutate()}
               className="gap-2 flex-1 sm:flex-none"
               disabled={generateCodeMutation.isPending}
             >
               <QrCode className="w-4 h-4" />
-              {generateCodeMutation.isPending ? "Generating..." : "Generate Code"}
+              {generateCodeMutation.isPending
+                ? "Generating..."
+                : "Generate Code"}
             </Button>
             <Dialog open={joinDialogOpen} onOpenChange={setJoinDialogOpen}>
               <DialogTrigger asChild>
@@ -256,7 +285,9 @@ export default function Family() {
                       id="code"
                       placeholder="Enter 6-character code"
                       value={joinCode}
-                      onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+                      onChange={(e) =>
+                        setJoinCode(e.target.value.toUpperCase())
+                      }
                       maxLength={6}
                     />
                   </div>
@@ -269,9 +300,13 @@ export default function Family() {
                     </Button>
                     <Button
                       onClick={() => joinFamilyMutation.mutate(joinCode)}
-                      disabled={joinCode.length !== 6 || joinFamilyMutation.isPending}
+                      disabled={
+                        joinCode.length !== 6 || joinFamilyMutation.isPending
+                      }
                     >
-                      {joinFamilyMutation.isPending ? "Joining..." : "Join Family"}
+                      {joinFamilyMutation.isPending
+                        ? "Joining..."
+                        : "Join Family"}
                     </Button>
                   </div>
                 </div>
@@ -289,7 +324,10 @@ export default function Family() {
             </h2>
             <div className="space-y-2">
               {invitationCodes.map((invitation) => (
-                <div key={invitation.id} className="flex items-center justify-between bg-background p-3 rounded-lg border">
+                <div
+                  key={invitation.id}
+                  className="flex items-center justify-between bg-background p-3 rounded-lg border"
+                >
                   <div>
                     <div className="font-mono text-lg font-bold text-primary">
                       {invitation.code}
@@ -318,7 +356,10 @@ export default function Family() {
           {familyLoading ? (
             // Loading skeletons
             Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="flex items-center space-x-3 p-4 bg-card rounded-xl border">
+              <div
+                key={i}
+                className="flex items-center space-x-3 p-4 bg-card rounded-xl border"
+              >
                 <Skeleton className="w-12 h-12 rounded-full" />
                 <div className="flex-1">
                   <Skeleton className="w-32 h-4 mb-2" />
@@ -330,17 +371,23 @@ export default function Family() {
           ) : familyMembers.length === 0 ? (
             <div className="text-center py-16">
               <Users className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium mb-2">No family members yet</h3>
+              <h3 className="text-lg font-medium mb-2">
+                No family members yet
+              </h3>
               <p className="text-muted-foreground mb-6">
-                Generate an invitation code to invite family members, or join using someone else's code.
+                Generate an invitation code to invite family members, or join
+                using someone else's code.
               </p>
               <div className="flex gap-2 justify-center">
-                <Button onClick={() => generateCodeMutation.mutate()} className="gap-2">
+                <Button
+                  onClick={() => generateCodeMutation.mutate()}
+                  className="gap-2"
+                >
                   <QrCode className="w-4 h-4" />
                   Generate Code
                 </Button>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={() => setJoinDialogOpen(true)}
                   className="gap-2"
                 >
@@ -351,25 +398,31 @@ export default function Family() {
             </div>
           ) : (
             familyMembers.map((member: User) => {
-              const locationData = familyLocations.find((loc: any) => loc.user?.id === member.id);
+              const locationData = familyLocations.find(
+                (loc: any) => loc.user?.id === member.id,
+              );
               // Transform location data to match expected format
-              const location = locationData ? {
-                id: 0,
-                userId: member.id,
-                latitude: locationData.latitude,
-                longitude: locationData.longitude,
-                accuracy: null,
-                address: null,
-                type: 'manual' as const,
-                timestamp: locationData.timestamp || null,
-              } : undefined;
-              
+              const location = locationData
+                ? {
+                    id: 0,
+                    userId: member.id,
+                    latitude: locationData.latitude,
+                    longitude: locationData.longitude,
+                    accuracy: null,
+                    address: null,
+                    type: "manual" as const,
+                    timestamp: locationData.timestamp || null,
+                  }
+                : undefined;
+
               return (
                 <FamilyMemberCard
                   key={member.id}
                   user={member}
                   location={location}
-                  onViewLocation={location ? () => handleViewLocation(location) : undefined}
+                  onViewLocation={
+                    location ? () => handleViewLocation(location) : undefined
+                  }
                   onRemove={() => handleRemove(member.id.toString())}
                 />
               );
@@ -381,11 +434,15 @@ export default function Family() {
         {familyMembers.length > 0 && (
           <div className="mt-8 grid grid-cols-2 gap-4">
             <div className="bg-card p-4 rounded-xl border text-center">
-              <div className="text-2xl font-bold text-primary">{familyMembers.length}</div>
+              <div className="text-2xl font-bold text-primary">
+                {familyMembers.length}
+              </div>
               <div className="text-sm text-muted-foreground">Total Members</div>
             </div>
             <div className="bg-card p-4 rounded-xl border text-center">
-              <div className="text-2xl font-bold text-green-500">{familyLocations.length}</div>
+              <div className="text-2xl font-bold text-green-500">
+                {familyLocations.length}
+              </div>
               <div className="text-sm text-muted-foreground">Online Now</div>
             </div>
           </div>
@@ -453,7 +510,9 @@ export default function Family() {
               <div className="flex gap-2">
                 <Button
                   onClick={() => joinFamilyMutation.mutate(joinCode)}
-                  disabled={joinCode.length !== 6 || joinFamilyMutation.isPending}
+                  disabled={
+                    joinCode.length !== 6 || joinFamilyMutation.isPending
+                  }
                   className="flex-1"
                 >
                   {joinFamilyMutation.isPending ? "Joining..." : "Join Family"}
@@ -462,7 +521,7 @@ export default function Family() {
                   variant="outline"
                   onClick={() => {
                     setJoinDialogOpen(false);
-                    setJoinCode('');
+                    setJoinCode("");
                   }}
                   className="flex-1"
                 >

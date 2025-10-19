@@ -40,7 +40,7 @@ async function comparePasswords(supplied: string, stored: string) {
 
 export function setupAuth(app: Express) {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
-  
+
   // Use memory store for sessions with better persistence settings
   const MemStore = MemoryStore(session);
   const sessionStore = new MemStore({
@@ -53,7 +53,9 @@ export function setupAuth(app: Express) {
   });
 
   const sessionSettings: session.SessionOptions = {
-    secret: process.env.SESSION_SECRET || "fallback-secret-key-for-development-very-long-key",
+    secret:
+      process.env.SESSION_SECRET ||
+      "fallback-secret-key-for-development-very-long-key",
     resave: false,
     saveUninitialized: false,
     store: sessionStore,
@@ -62,9 +64,9 @@ export function setupAuth(app: Express) {
       httpOnly: true,
       secure: false, // Set to false for development
       maxAge: sessionTtl,
-      sameSite: 'lax', // Allow cross-site requests but maintain security
+      sameSite: "lax", // Allow cross-site requests but maintain security
     },
-    name: 'familylocator.sid', // Custom session name
+    name: "familylocator.sid", // Custom session name
   };
 
   app.set("trust proxy", 1);
@@ -74,7 +76,7 @@ export function setupAuth(app: Express) {
 
   passport.use(
     new LocalStrategy(
-      { usernameField: 'email' },
+      { usernameField: "email" },
       async (email, password, done) => {
         try {
           const user = await storage.getUserByEmail(email);
@@ -86,8 +88,8 @@ export function setupAuth(app: Express) {
         } catch (error) {
           return done(error);
         }
-      }
-    )
+      },
+    ),
   );
 
   passport.serializeUser((user, done) => done(null, user.id));
@@ -103,9 +105,11 @@ export function setupAuth(app: Express) {
   app.post("/api/register", async (req, res, next) => {
     try {
       const { email, password, firstName, lastName } = req.body;
-      
+
       if (!email || !password) {
-        return res.status(400).json({ message: "Email and password are required" });
+        return res
+          .status(400)
+          .json({ message: "Email and password are required" });
       }
 
       const existingUser = await storage.getUserByEmail(email);

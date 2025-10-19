@@ -1,9 +1,9 @@
-import { useState } from 'react';
-import { useAuth } from '@/hooks/use-auth';
-import { useToast } from '@/hooks/use-toast';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiRequest } from '@/lib/queryClient';
-import { ObjectUploader } from './ObjectUploader';
+import { useState } from "react";
+import { useAuth } from "@/hooks/use-auth";
+import { useToast } from "@/hooks/use-toast";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { ObjectUploader } from "./ObjectUploader";
 
 import {
   Dialog,
@@ -11,12 +11,12 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { User, Camera, Save, X } from 'lucide-react';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { User, Camera, Save, X } from "lucide-react";
 
 interface ProfileEditorProps {
   open: boolean;
@@ -31,25 +31,29 @@ interface ProfileEditorProps {
   };
 }
 
-export function ProfileEditor({ open, onOpenChange, user }: ProfileEditorProps) {
+export function ProfileEditor({
+  open,
+  onOpenChange,
+  user,
+}: ProfileEditorProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  
+
   const [formData, setFormData] = useState({
-    firstName: user.firstName || '',
-    lastName: user.lastName || '',
+    firstName: user.firstName || "",
+    lastName: user.lastName || "",
     email: user.email,
-    phoneNumber: user.phoneNumber || '',
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
+    phoneNumber: user.phoneNumber || "",
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
   });
-  
+
   const [profileImageUrl, setProfileImageUrl] = useState(user.profileImageUrl);
 
   const updateProfileMutation = useMutation({
     mutationFn: async (data: any) => {
-      const response = await apiRequest('PUT', '/api/user/profile', data);
+      const response = await apiRequest("PUT", "/api/user/profile", data);
       return response.json();
     },
     onSuccess: () => {
@@ -57,17 +61,21 @@ export function ProfileEditor({ open, onOpenChange, user }: ProfileEditorProps) 
         title: "Profile Updated",
         description: "Your profile has been successfully updated.",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/user'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user"] });
       onOpenChange(false);
     },
     onError: (error: any) => {
       // Show user-friendly error messages
       let errorTitle = "Update Failed";
       let errorMessage = "Failed to update profile. Please try again.";
-      
-      if (error.message?.includes("current password") || error.message?.includes("wrong")) {
+
+      if (
+        error.message?.includes("current password") ||
+        error.message?.includes("wrong")
+      ) {
         errorTitle = "Wrong Password";
-        errorMessage = "The current password you entered is incorrect. Please check and try again.";
+        errorMessage =
+          "The current password you entered is incorrect. Please check and try again.";
       } else if (error.message?.includes("password")) {
         errorTitle = "Password Error";
         errorMessage = error.message;
@@ -77,7 +85,7 @@ export function ProfileEditor({ open, onOpenChange, user }: ProfileEditorProps) 
       } else if (error.message) {
         errorMessage = error.message;
       }
-      
+
       toast({
         title: errorTitle,
         description: errorMessage,
@@ -89,25 +97,25 @@ export function ProfileEditor({ open, onOpenChange, user }: ProfileEditorProps) 
   const handleUploadComplete = async (uploadUrl: string) => {
     try {
       // Set the ACL policy for the image
-      const response = await apiRequest('PUT', '/api/profile-image', {
-        profileImageURL: uploadUrl
+      const response = await apiRequest("PUT", "/api/profile-image", {
+        profileImageURL: uploadUrl,
       });
-      
+
       const data = await response.json();
-      
+
       // Update the user's profile with the new image immediately
-      const profileUpdate = await apiRequest('PUT', '/api/user/profile', {
-        profileImageUrl: data.objectPath
+      const profileUpdate = await apiRequest("PUT", "/api/user/profile", {
+        profileImageUrl: data.objectPath,
       });
-      
+
       const updatedUser = await profileUpdate.json();
-      
+
       // Update local state to show the new image
       setProfileImageUrl(data.objectPath);
-      
+
       // Update the query cache so the Settings page shows the new image
-      queryClient.setQueryData(['/api/user'], updatedUser);
-      
+      queryClient.setQueryData(["/api/user"], updatedUser);
+
       toast({
         title: "Image Updated",
         description: "Profile image has been updated successfully!",
@@ -123,7 +131,7 @@ export function ProfileEditor({ open, onOpenChange, user }: ProfileEditorProps) 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validate passwords if changing password
     if (formData.newPassword) {
       if (!formData.currentPassword) {
@@ -134,7 +142,7 @@ export function ProfileEditor({ open, onOpenChange, user }: ProfileEditorProps) 
         });
         return;
       }
-      
+
       if (formData.newPassword !== formData.confirmPassword) {
         toast({
           title: "Password Mismatch",
@@ -143,7 +151,7 @@ export function ProfileEditor({ open, onOpenChange, user }: ProfileEditorProps) 
         });
         return;
       }
-      
+
       if (formData.newPassword.length < 6) {
         toast({
           title: "Password Too Short",
@@ -174,7 +182,7 @@ export function ProfileEditor({ open, onOpenChange, user }: ProfileEditorProps) 
   };
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   return (
@@ -186,7 +194,8 @@ export function ProfileEditor({ open, onOpenChange, user }: ProfileEditorProps) 
             Edit Profile
           </DialogTitle>
           <DialogDescription>
-            Update your profile information, upload a new profile picture, or change your password.
+            Update your profile information, upload a new profile picture, or
+            change your password.
           </DialogDescription>
         </DialogHeader>
 
@@ -194,15 +203,17 @@ export function ProfileEditor({ open, onOpenChange, user }: ProfileEditorProps) 
           {/* Profile Picture Section */}
           <div className="flex flex-col items-center space-y-4">
             <Avatar className="w-24 h-24">
-              <AvatarImage 
-                src={profileImageUrl || undefined} 
+              <AvatarImage
+                src={profileImageUrl || undefined}
                 alt="Profile picture"
               />
               <AvatarFallback className="text-2xl">
-                {formData.firstName ? formData.firstName[0].toUpperCase() : formData.email[0].toUpperCase()}
+                {formData.firstName
+                  ? formData.firstName[0].toUpperCase()
+                  : formData.email[0].toUpperCase()}
               </AvatarFallback>
             </Avatar>
-            
+
             <ObjectUploader
               onComplete={handleUploadComplete}
               buttonClassName="bg-blue-500 hover:bg-blue-600"
@@ -224,7 +235,7 @@ export function ProfileEditor({ open, onOpenChange, user }: ProfileEditorProps) 
                 id="firstName"
                 type="text"
                 value={formData.firstName}
-                onChange={(e) => handleInputChange('firstName', e.target.value)}
+                onChange={(e) => handleInputChange("firstName", e.target.value)}
                 placeholder="Enter first name"
               />
             </div>
@@ -234,7 +245,7 @@ export function ProfileEditor({ open, onOpenChange, user }: ProfileEditorProps) 
                 id="lastName"
                 type="text"
                 value={formData.lastName}
-                onChange={(e) => handleInputChange('lastName', e.target.value)}
+                onChange={(e) => handleInputChange("lastName", e.target.value)}
                 placeholder="Enter last name"
               />
             </div>
@@ -247,7 +258,7 @@ export function ProfileEditor({ open, onOpenChange, user }: ProfileEditorProps) 
               id="email"
               type="email"
               value={formData.email}
-              onChange={(e) => handleInputChange('email', e.target.value)}
+              onChange={(e) => handleInputChange("email", e.target.value)}
               placeholder="Enter email"
             />
           </div>
@@ -259,7 +270,7 @@ export function ProfileEditor({ open, onOpenChange, user }: ProfileEditorProps) 
               id="phoneNumber"
               type="tel"
               value={formData.phoneNumber}
-              onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
+              onChange={(e) => handleInputChange("phoneNumber", e.target.value)}
               placeholder="(555) 123-4567"
             />
           </div>
@@ -273,7 +284,9 @@ export function ProfileEditor({ open, onOpenChange, user }: ProfileEditorProps) 
                 id="currentPassword"
                 type="password"
                 value={formData.currentPassword}
-                onChange={(e) => handleInputChange('currentPassword', e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("currentPassword", e.target.value)
+                }
                 placeholder="Enter current password"
               />
             </div>
@@ -283,7 +296,9 @@ export function ProfileEditor({ open, onOpenChange, user }: ProfileEditorProps) 
                 id="newPassword"
                 type="password"
                 value={formData.newPassword}
-                onChange={(e) => handleInputChange('newPassword', e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("newPassword", e.target.value)
+                }
                 placeholder="Enter new password"
               />
             </div>
@@ -293,7 +308,9 @@ export function ProfileEditor({ open, onOpenChange, user }: ProfileEditorProps) 
                 id="confirmPassword"
                 type="password"
                 value={formData.confirmPassword}
-                onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("confirmPassword", e.target.value)
+                }
                 placeholder="Confirm new password"
               />
             </div>
@@ -317,7 +334,7 @@ export function ProfileEditor({ open, onOpenChange, user }: ProfileEditorProps) 
               className="order-1 sm:order-2"
             >
               <Save className="w-4 h-4 mr-2" />
-              {updateProfileMutation.isPending ? 'Saving...' : 'Save Changes'}
+              {updateProfileMutation.isPending ? "Saving..." : "Save Changes"}
             </Button>
           </div>
         </form>

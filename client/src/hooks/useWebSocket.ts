@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
-import { useAuth } from './useAuth';
+import { useEffect, useRef, useState } from "react";
+import { useAuth } from "./useAuth";
 
 interface WebSocketMessage {
   type: string;
@@ -21,15 +21,15 @@ export function useWebSocket() {
     ws.current = new WebSocket(wsUrl);
 
     ws.current.onopen = () => {
-      console.log('WebSocket opened, authenticating...');
+      console.log("WebSocket opened, authenticating...");
       setIsConnected(true);
       // Authenticate the WebSocket connection
       if (ws.current) {
         const authMessage = {
-          type: 'auth',
+          type: "auth",
           userId: (user as any)?.id,
         };
-        console.log('Sending auth message:', authMessage);
+        console.log("Sending auth message:", authMessage);
         ws.current.send(JSON.stringify(authMessage));
       }
     };
@@ -37,34 +37,41 @@ export function useWebSocket() {
     ws.current.onmessage = (event) => {
       try {
         const message = JSON.parse(event.data);
-        console.log('WebSocket message received:', message);
-        
+        console.log("WebSocket message received:", message);
+
         // If it's a geofence message, try to show a system notification immediately
-        if (message.type === 'geofence' && Notification.permission === 'granted') {
-          console.log('Attempting to show system notification for geofence event');
+        if (
+          message.type === "geofence" &&
+          Notification.permission === "granted"
+        ) {
+          console.log(
+            "Attempting to show system notification for geofence event",
+          );
           // Import the helper dynamically to avoid circular dependency
-          import('@/utils/notificationHelper').then(({ showNotification }) => {
-            showNotification(message.message, {
-              body: '',
-              icon: '/favicon.ico',
-              tag: 'geofence-notification',
-              requireInteraction: false,
-              vibrate: [200, 100, 200],
-            }).then(success => {
-              if (success) {
-                console.log('Geofence notification shown successfully');
-              } else {
-                console.error('Failed to show geofence notification');
-              }
+          import("@/utils/notificationHelper")
+            .then(({ showNotification }) => {
+              showNotification(message.message, {
+                body: "",
+                icon: "/favicon.ico",
+                tag: "geofence-notification",
+                requireInteraction: false,
+                vibrate: [200, 100, 200],
+              }).then((success) => {
+                if (success) {
+                  console.log("Geofence notification shown successfully");
+                } else {
+                  console.error("Failed to show geofence notification");
+                }
+              });
+            })
+            .catch((error) => {
+              console.error("Error loading notification helper:", error);
             });
-          }).catch(error => {
-            console.error('Error loading notification helper:', error);
-          });
         }
-        
+
         setLastMessage(message);
       } catch (error) {
-        console.error('Failed to parse WebSocket message:', error);
+        console.error("Failed to parse WebSocket message:", error);
       }
     };
 
@@ -73,7 +80,7 @@ export function useWebSocket() {
     };
 
     ws.current.onerror = (error) => {
-      console.error('WebSocket error:', error);
+      console.error("WebSocket error:", error);
       setIsConnected(false);
     };
 
@@ -86,10 +93,10 @@ export function useWebSocket() {
 
   const sendMessage = (message: WebSocketMessage) => {
     if (ws.current && ws.current.readyState === WebSocket.OPEN) {
-      console.log('Sending WebSocket message:', message);
+      console.log("Sending WebSocket message:", message);
       ws.current.send(JSON.stringify(message));
     } else {
-      console.warn('WebSocket not connected, cannot send message:', message);
+      console.warn("WebSocket not connected, cannot send message:", message);
     }
   };
 

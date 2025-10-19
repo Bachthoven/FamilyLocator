@@ -46,8 +46,12 @@ export const users = pgTable("users", {
 // Family connections table
 export const familyConnections = pgTable("family_connections", {
   id: serial("id").primaryKey(),
-  userId: serial("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  familyMemberId: serial("family_member_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  userId: serial("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  familyMemberId: serial("family_member_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   status: varchar("status").notNull().default("pending"), // pending, accepted, blocked
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -55,7 +59,9 @@ export const familyConnections = pgTable("family_connections", {
 // Locations table for tracking user locations
 export const locations = pgTable("locations", {
   id: serial("id").primaryKey(),
-  userId: serial("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  userId: serial("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   latitude: doublePrecision("latitude").notNull(),
   longitude: doublePrecision("longitude").notNull(),
   accuracy: doublePrecision("accuracy"),
@@ -67,7 +73,9 @@ export const locations = pgTable("locations", {
 // Places table for saved/favorite places
 export const places = pgTable("places", {
   id: serial("id").primaryKey(),
-  userId: serial("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  userId: serial("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   name: varchar("name").notNull(),
   address: text("address"),
   latitude: doublePrecision("latitude").notNull(),
@@ -81,17 +89,23 @@ export const places = pgTable("places", {
 export const invitationCodes = pgTable("invitation_codes", {
   id: serial("id").primaryKey(),
   code: varchar("code", { length: 6 }).unique().notNull(), // 6-character code
-  userId: serial("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  userId: serial("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   expiresAt: timestamp("expires_at").notNull(), // Codes expire after 24 hours
   usedAt: timestamp("used_at"),
-  usedById: integer("used_by_id").references(() => users.id, { onDelete: "set null" }),
+  usedById: integer("used_by_id").references(() => users.id, {
+    onDelete: "set null",
+  }),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
 // Notifications table for storing user notifications
 export const notifications = pgTable("notifications", {
   id: serial("id").primaryKey(),
-  userId: serial("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  userId: serial("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   type: varchar("type").notNull(), // 'geofence_enter', 'geofence_exit', 'family_invite', etc.
   title: varchar("title").notNull(),
   message: text("message").notNull(),
@@ -114,24 +128,31 @@ export const passwordResetCodes = pgTable("password_reset_codes", {
 export const usersRelations = relations(users, ({ many }) => ({
   locations: many(locations),
   places: many(places),
-  familyConnections: many(familyConnections, { relationName: "userConnections" }),
-  familyMemberConnections: many(familyConnections, { relationName: "memberConnections" }),
+  familyConnections: many(familyConnections, {
+    relationName: "userConnections",
+  }),
+  familyMemberConnections: many(familyConnections, {
+    relationName: "memberConnections",
+  }),
   invitationCodes: many(invitationCodes),
   notifications: many(notifications),
 }));
 
-export const familyConnectionsRelations = relations(familyConnections, ({ one }) => ({
-  user: one(users, {
-    fields: [familyConnections.userId],
-    references: [users.id],
-    relationName: "userConnections",
+export const familyConnectionsRelations = relations(
+  familyConnections,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [familyConnections.userId],
+      references: [users.id],
+      relationName: "userConnections",
+    }),
+    familyMember: one(users, {
+      fields: [familyConnections.familyMemberId],
+      references: [users.id],
+      relationName: "memberConnections",
+    }),
   }),
-  familyMember: one(users, {
-    fields: [familyConnections.familyMemberId],
-    references: [users.id],
-    relationName: "memberConnections",
-  }),
-}));
+);
 
 export const locationsRelations = relations(locations, ({ one }) => ({
   user: one(users, {
@@ -147,18 +168,21 @@ export const placesRelations = relations(places, ({ one }) => ({
   }),
 }));
 
-export const invitationCodesRelations = relations(invitationCodes, ({ one }) => ({
-  user: one(users, {
-    fields: [invitationCodes.userId],
-    references: [users.id],
-    relationName: "invitationCreator",
+export const invitationCodesRelations = relations(
+  invitationCodes,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [invitationCodes.userId],
+      references: [users.id],
+      relationName: "invitationCreator",
+    }),
+    usedBy: one(users, {
+      fields: [invitationCodes.usedById],
+      references: [users.id],
+      relationName: "invitationUser",
+    }),
   }),
-  usedBy: one(users, {
-    fields: [invitationCodes.usedById],
-    references: [users.id],
-    relationName: "invitationUser",
-  }),
-}));
+);
 
 export const notificationsRelations = relations(notifications, ({ one }) => ({
   user: one(users, {
@@ -184,12 +208,16 @@ export const insertPlaceSchema = createInsertSchema(places).omit({
   createdAt: true,
 });
 
-export const insertFamilyConnectionSchema = createInsertSchema(familyConnections).omit({
+export const insertFamilyConnectionSchema = createInsertSchema(
+  familyConnections,
+).omit({
   id: true,
   createdAt: true,
 });
 
-export const insertInvitationCodeSchema = createInsertSchema(invitationCodes).omit({
+export const insertInvitationCodeSchema = createInsertSchema(
+  invitationCodes,
+).omit({
   id: true,
   createdAt: true,
   usedAt: true,
@@ -201,7 +229,9 @@ export const insertNotificationSchema = createInsertSchema(notifications).omit({
   createdAt: true,
 });
 
-export const insertPasswordResetCodeSchema = createInsertSchema(passwordResetCodes).omit({
+export const insertPasswordResetCodeSchema = createInsertSchema(
+  passwordResetCodes,
+).omit({
   id: true,
   createdAt: true,
   usedAt: true,
@@ -215,10 +245,14 @@ export type InsertLocation = z.infer<typeof insertLocationSchema>;
 export type Place = typeof places.$inferSelect;
 export type InsertPlace = z.infer<typeof insertPlaceSchema>;
 export type FamilyConnection = typeof familyConnections.$inferSelect;
-export type InsertFamilyConnection = z.infer<typeof insertFamilyConnectionSchema>;
+export type InsertFamilyConnection = z.infer<
+  typeof insertFamilyConnectionSchema
+>;
 export type InvitationCode = typeof invitationCodes.$inferSelect;
 export type InsertInvitationCode = z.infer<typeof insertInvitationCodeSchema>;
 export type Notification = typeof notifications.$inferSelect;
 export type InsertNotification = z.infer<typeof insertNotificationSchema>;
 export type PasswordResetCode = typeof passwordResetCodes.$inferSelect;
-export type InsertPasswordResetCode = z.infer<typeof insertPasswordResetCodeSchema>;
+export type InsertPasswordResetCode = z.infer<
+  typeof insertPasswordResetCodeSchema
+>;

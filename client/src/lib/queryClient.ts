@@ -3,7 +3,7 @@ import { QueryClient, QueryFunction } from "@tanstack/react-query";
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
     let errorMessage = res.statusText;
-    
+
     try {
       const text = await res.text();
       if (text) {
@@ -19,7 +19,7 @@ async function throwIfResNotOk(res: Response) {
       // Use status text as fallback
       errorMessage = res.statusText;
     }
-    
+
     throw new Error(errorMessage);
   }
 }

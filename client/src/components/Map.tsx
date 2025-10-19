@@ -1,42 +1,53 @@
-import { useEffect, useRef, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
-import { User, Location, Place } from '@shared/schema';
-import { useToast } from '@/hooks/use-toast';
-import { apiRequest, queryClient } from '@/lib/queryClient';
-import { NotificationBell } from '@/components/NotificationBell';
+import { useEffect, useRef, useState } from "react";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  useMap,
+  useMapEvents,
+} from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+import { User, Location, Place } from "@shared/schema";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { NotificationBell } from "@/components/NotificationBell";
 
 // Fix for default markers in react-leaflet
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+  iconRetinaUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
+  iconUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
+  shadowUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
 });
 
 // Custom marker icons
-const createUserIcon = (color: string, isRecent: boolean = true) => new L.DivIcon({
-  html: `
+const createUserIcon = (color: string, isRecent: boolean = true) =>
+  new L.DivIcon({
+    html: `
     <div class="relative">
-      <div class="w-4 h-4 bg-${color}-500 rounded-full border-2 border-white shadow-lg ${isRecent ? '' : 'opacity-60'}"></div>
-      ${isRecent ? `<div class="absolute inset-0 w-4 h-4 bg-${color}-500 rounded-full animate-ping opacity-75"></div>` : ''}
-      ${!isRecent ? '<div class="absolute -top-1 -right-1 w-2 h-2 bg-gray-400 rounded-full border border-white"></div>' : ''}
+      <div class="w-4 h-4 bg-${color}-500 rounded-full border-2 border-white shadow-lg ${isRecent ? "" : "opacity-60"}"></div>
+      ${isRecent ? `<div class="absolute inset-0 w-4 h-4 bg-${color}-500 rounded-full animate-ping opacity-75"></div>` : ""}
+      ${!isRecent ? '<div class="absolute -top-1 -right-1 w-2 h-2 bg-gray-400 rounded-full border border-white"></div>' : ""}
     </div>
   `,
-  className: 'custom-marker',
-  iconSize: [16, 16],
-  iconAnchor: [8, 8],
-});
+    className: "custom-marker",
+    iconSize: [16, 16],
+    iconAnchor: [8, 8],
+  });
 
-const currentUserIcon = createUserIcon('blue');
+const currentUserIcon = createUserIcon("blue");
 
 // Helper function to check if location is recent (within last 15 minutes)
 const isLocationRecent = (timestamp: string | Date) => {
   const locationTime = new Date(timestamp).getTime();
   const now = new Date().getTime();
   const fifteenMinutes = 15 * 60 * 1000; // 15 minutes in milliseconds
-  return (now - locationTime) < fifteenMinutes;
+  return now - locationTime < fifteenMinutes;
 };
 
 // Helper function to format time since last seen
@@ -44,10 +55,11 @@ const formatTimeSince = (timestamp: string | Date) => {
   const locationTime = new Date(timestamp).getTime();
   const now = new Date().getTime();
   const diffMinutes = Math.floor((now - locationTime) / (1000 * 60));
-  
+
   if (diffMinutes < 60) {
     return `${diffMinutes}m ago`;
-  } else if (diffMinutes < 1440) { // Less than 24 hours
+  } else if (diffMinutes < 1440) {
+    // Less than 24 hours
     const hours = Math.floor(diffMinutes / 60);
     return `${hours}h ago`;
   } else {
@@ -59,14 +71,17 @@ const formatTimeSince = (timestamp: string | Date) => {
 // Create place marker icons based on category and custom color
 const createPlaceIcon = (category: string, customColor?: string) => {
   const categoryColors = {
-    home: 'purple',
-    work: 'orange', 
-    school: 'yellow',
-    other: 'gray'
+    home: "purple",
+    work: "orange",
+    school: "yellow",
+    other: "gray",
   };
-  
-  const color = customColor || categoryColors[category as keyof typeof categoryColors] || 'gray';
-  
+
+  const color =
+    customColor ||
+    categoryColors[category as keyof typeof categoryColors] ||
+    "gray";
+
   return new L.DivIcon({
     html: `
       <div class="relative">
@@ -75,7 +90,7 @@ const createPlaceIcon = (category: string, customColor?: string) => {
         </div>
       </div>
     `,
-    className: 'custom-place-marker',
+    className: "custom-place-marker",
     iconSize: [24, 24],
     iconAnchor: [12, 12],
   });
@@ -87,36 +102,60 @@ interface MapProps {
   places: Place[];
   onLocationClick?: (location: Location & { user: User }) => void;
   onPlaceClick?: (place: Place) => void;
-  focusLocation?: { latitude: number; longitude: number; userId: number } | null;
+  focusLocation?: {
+    latitude: number;
+    longitude: number;
+    userId: number;
+  } | null;
   onManualLocationRequest?: () => void;
 }
 
-function MapCenter({ center, shouldUpdate }: { center: [number, number]; shouldUpdate: boolean }) {
+function MapCenter({
+  center,
+  shouldUpdate,
+}: {
+  center: [number, number];
+  shouldUpdate: boolean;
+}) {
   const map = useMap();
-  
+
   useEffect(() => {
     if (shouldUpdate) {
       map.setView(center, map.getZoom());
     }
   }, [center, map, shouldUpdate]);
-  
+
   return null;
 }
 
-function MapClickHandler({ onClick }: { onClick: (e: L.LeafletMouseEvent) => void }) {
+function MapClickHandler({
+  onClick,
+}: {
+  onClick: (e: L.LeafletMouseEvent) => void;
+}) {
   useMapEvents({
     click: (e) => {
       onClick(e);
     },
   });
-  
+
   return null;
 }
 
-export default function Map({ currentLocation, familyLocations, places, onLocationClick, onPlaceClick, focusLocation, onManualLocationRequest }: MapProps) {
+export default function Map({
+  currentLocation,
+  familyLocations,
+  places,
+  onLocationClick,
+  onPlaceClick,
+  focusLocation,
+  onManualLocationRequest,
+}: MapProps) {
   const mapRef = useRef<L.Map | null>(null);
-  const [mapCenter, setMapCenter] = useState<[number, number]>([40.7128, -74.0060]); // Default to NYC
-  const [mapType, setMapType] = useState<'street' | 'satellite'>('street');
+  const [mapCenter, setMapCenter] = useState<[number, number]>([
+    40.7128, -74.006,
+  ]); // Default to NYC
+  const [mapType, setMapType] = useState<"street" | "satellite">("street");
   const [isDragging, setIsDragging] = useState<number | null>(null);
   const [shouldUpdateCenter, setShouldUpdateCenter] = useState(false);
   const [hasInitialized, setHasInitialized] = useState(false);
@@ -130,17 +169,20 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
       setMapCenter([focusLocation.latitude, focusLocation.longitude]);
       setShouldUpdateCenter(true);
       setHasInitialized(true);
-      
+
       // Set the map zoom to a good level for viewing the family member
       if (mapRef.current) {
-        mapRef.current.setView([focusLocation.latitude, focusLocation.longitude], 16);
+        mapRef.current.setView(
+          [focusLocation.latitude, focusLocation.longitude],
+          16,
+        );
       }
-      
+
       // Reset the flag after a short delay
       setTimeout(() => setShouldUpdateCenter(false), 100);
       return; // Exit early so we don't set center to current location
     }
-    
+
     // Set initial center once when location first becomes available (and no focus location)
     if (currentLocation && !hasInitialized) {
       setMapCenter([currentLocation.latitude, currentLocation.longitude]);
@@ -153,7 +195,7 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
 
   const getMyLocation = () => {
     setIsGettingLocation(true);
-    
+
     navigator.geolocation.getCurrentPosition(
       (position) => {
         toast({
@@ -161,7 +203,7 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
           description: "Your location has been successfully detected.",
         });
         setIsGettingLocation(false);
-        
+
         // Trigger the manual location callback
         if (onManualLocationRequest) {
           onManualLocationRequest();
@@ -169,13 +211,14 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
       },
       (error) => {
         setIsGettingLocation(false);
-        
+
         // Switch to manual location setting mode
         setIsSettingManualLocation(true);
-        
+
         toast({
           title: "Click on the Map",
-          description: "Since automatic location detection failed, please tap on the map where you are located to set your position.",
+          description:
+            "Since automatic location detection failed, please tap on the map where you are located to set your position.",
           duration: 8000,
         });
       },
@@ -183,35 +226,35 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
         enableHighAccuracy: false,
         timeout: 30000,
         maximumAge: 0,
-      }
+      },
     );
   };
 
   const handleMapClick = async (e: L.LeafletMouseEvent) => {
     if (isSettingManualLocation && onManualLocationRequest) {
       const { lat, lng } = e.latlng;
-      
+
       toast({
         title: "Location Set!",
         description: "Your location has been set on the map.",
       });
-      
+
       // Save the location
       try {
-        await apiRequest('POST', '/api/locations', {
+        await apiRequest("POST", "/api/locations", {
           latitude: lat,
           longitude: lng,
           accuracy: 100, // Approximate accuracy for manual location
-          type: 'manual',
+          type: "manual",
         });
-        
+
         // Refresh both family locations and current user location
-        queryClient.invalidateQueries({ queryKey: ['/api/locations/family'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/locations/current'] });
-        
+        queryClient.invalidateQueries({ queryKey: ["/api/locations/family"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/locations/current"] });
+
         setIsSettingManualLocation(false);
       } catch (error) {
-        console.error('Failed to save manual location:', error);
+        console.error("Failed to save manual location:", error);
         toast({
           title: "Error",
           description: "Failed to save your location. Please try again.",
@@ -244,7 +287,7 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
         ref={mapRef}
         zoomControl={false}
       >
-        {mapType === 'street' ? (
+        {mapType === "street" ? (
           <TileLayer
             url="https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
             attribution='&copy; <a href="https://maps.google.com">Google Maps</a>'
@@ -259,10 +302,10 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
             maxNativeZoom={20}
           />
         )}
-        
+
         <MapCenter center={mapCenter} shouldUpdate={shouldUpdateCenter} />
         <MapClickHandler onClick={handleMapClick} />
-        
+
         {/* Current user location */}
         {currentLocation && (
           <Marker
@@ -277,12 +320,12 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
             </Popup>
           </Marker>
         )}
-        
+
         {/* Family member locations */}
         {familyLocations.map((location) => {
           const isRecent = isLocationRecent(location.timestamp!);
-          const familyMemberIcon = createUserIcon('green', isRecent);
-          
+          const familyMemberIcon = createUserIcon("green", isRecent);
+
           return (
             <Marker
               key={location.id}
@@ -298,11 +341,14 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
                     {location.user.firstName || location.user.email}
                   </div>
                   <div className="text-sm text-gray-500">
-                    {location.address || 'Unknown location'}
+                    {location.address || "Unknown location"}
                   </div>
                   <div className="text-xs text-gray-400">
                     {isRecent ? (
-                      <>Active now • {new Date(location.timestamp!).toLocaleTimeString()}</>
+                      <>
+                        Active now •{" "}
+                        {new Date(location.timestamp!).toLocaleTimeString()}
+                      </>
                     ) : (
                       <>Last seen {formatTimeSince(location.timestamp!)}</>
                     )}
@@ -318,7 +364,10 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
           <Marker
             key={`place-${place.id || Math.random()}`}
             position={[place.latitude, place.longitude]}
-            icon={createPlaceIcon(place.category || 'other', place.color || undefined)}
+            icon={createPlaceIcon(
+              place.category || "other",
+              place.color || undefined,
+            )}
             draggable={!!place.id}
             eventHandlers={{
               click: () => onPlaceClick?.(place),
@@ -330,10 +379,10 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
               dragend: async (event) => {
                 const marker = event.target;
                 const position = marker.getLatLng();
-                
+
                 // Check if place has an ID before making API call
                 if (!place.id) {
-                  console.error('Cannot update place without ID');
+                  console.error("Cannot update place without ID");
                   toast({
                     title: "Cannot update location",
                     description: "This place needs to be saved first",
@@ -343,35 +392,41 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
                   setIsDragging(null);
                   return;
                 }
-                
+
                 try {
-                  console.log(`Updating place ${place.id} to ${position.lat}, ${position.lng}`);
-                  await apiRequest('PATCH', `/api/places/${place.id}/location`, {
-                    latitude: position.lat,
-                    longitude: position.lng,
-                  });
-                  
+                  console.log(
+                    `Updating place ${place.id} to ${position.lat}, ${position.lng}`,
+                  );
+                  await apiRequest(
+                    "PATCH",
+                    `/api/places/${place.id}/location`,
+                    {
+                      latitude: position.lat,
+                      longitude: position.lng,
+                    },
+                  );
+
                   // Update the place data locally on success
                   place.latitude = position.lat;
                   place.longitude = position.lng;
-                  
+
                   // Invalidate places query to refresh the data
-                  queryClient.invalidateQueries({ queryKey: ['/api/places'] });
-                  
+                  queryClient.invalidateQueries({ queryKey: ["/api/places"] });
+
                   toast({
                     title: "Location updated",
                     description: `${place.name} has been moved to the new position`,
                   });
                 } catch (error: any) {
-                  console.error('Failed to update place location:', error);
+                  console.error("Failed to update place location:", error);
                   const errorMessage = error?.message || "Please try again";
-                  
+
                   toast({
                     title: "Failed to update location",
                     description: errorMessage,
                     variant: "destructive",
                   });
-                  
+
                   // Reset marker to original position on error
                   marker.setLatLng([place.latitude, place.longitude]);
                 } finally {
@@ -386,12 +441,12 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
                 <div className="text-sm text-gray-500 capitalize">
                   {place.category} • Saved Place
                 </div>
-                <div className="text-xs text-gray-400">
-                  {place.address}
-                </div>
+                <div className="text-xs text-gray-400">{place.address}</div>
                 {place.id && (
                   <div className="text-xs text-blue-600 mt-2 font-medium">
-                    {isDragging === place.id ? "Drag to reposition" : "Drag pin to adjust location"}
+                    {isDragging === place.id
+                      ? "Drag to reposition"
+                      : "Drag pin to adjust location"}
                   </div>
                 )}
               </div>
@@ -399,7 +454,7 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
           </Marker>
         ))}
       </MapContainer>
-      
+
       {/* Top Left Controls - Notification Bell */}
       <div className="absolute top-4 right-4 z-[1000]">
         <NotificationBell />
@@ -408,18 +463,24 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
       {/* Get My Location Banner (shown when location is not available) */}
       {!currentLocation && (
         <div className="absolute top-4 left-4 right-20 z-[1000]">
-          <div className={`rounded-lg shadow-lg p-4 border-2 ${
-            isSettingManualLocation ? 'bg-blue-50 border-blue-500 animate-pulse' : 'bg-white border-primary'
-          }`}>
+          <div
+            className={`rounded-lg shadow-lg p-4 border-2 ${
+              isSettingManualLocation
+                ? "bg-blue-50 border-blue-500 animate-pulse"
+                : "bg-white border-primary"
+            }`}
+          >
             <div className="flex items-center justify-between gap-3">
               <div className="flex-1">
                 <p className="text-sm font-medium text-gray-900">
-                  {isSettingManualLocation ? '👆 Click on the map' : 'Location not detected'}
+                  {isSettingManualLocation
+                    ? "👆 Click on the map"
+                    : "Location not detected"}
                 </p>
                 <p className="text-xs text-gray-500 mt-1">
-                  {isSettingManualLocation 
-                    ? 'Tap anywhere on the map to set your location' 
-                    : 'Enable location to see yourself on the map'}
+                  {isSettingManualLocation
+                    ? "Tap anywhere on the map to set your location"
+                    : "Enable location to see yourself on the map"}
                 </p>
               </div>
               {!isSettingManualLocation && (
@@ -429,7 +490,7 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
                   className="bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                   data-testid="button-get-location"
                 >
-                  {isGettingLocation ? 'Getting...' : 'Get My Location'}
+                  {isGettingLocation ? "Getting..." : "Get My Location"}
                 </button>
               )}
               {isSettingManualLocation && (
@@ -445,22 +506,48 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
           </div>
         </div>
       )}
-      
+
       {/* Map Controls */}
       <div className="absolute bottom-32 right-4 z-40 flex flex-col space-y-2">
         {/* Map Type Toggle */}
         <button
-          onClick={() => setMapType(mapType === 'street' ? 'satellite' : 'street')}
+          onClick={() =>
+            setMapType(mapType === "street" ? "satellite" : "street")
+          }
           className="w-14 h-14 bg-white border border-gray-300 rounded-lg shadow-lg flex items-center justify-center hover:bg-gray-50 transition-colors"
-          title={mapType === 'street' ? 'Switch to satellite view' : 'Switch to street view'}
+          title={
+            mapType === "street"
+              ? "Switch to satellite view"
+              : "Switch to street view"
+          }
         >
-          {mapType === 'street' ? (
-            <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          {mapType === "street" ? (
+            <svg
+              className="w-6 h-6 text-gray-700"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
             </svg>
           ) : (
-            <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+            <svg
+              className="w-6 h-6 text-gray-700"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
+              />
             </svg>
           )}
         </button>
@@ -476,8 +563,18 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
           className="w-14 h-14 bg-white border border-gray-300 rounded-lg shadow-lg flex items-center justify-center hover:bg-gray-50 transition-colors"
           title="Zoom in"
         >
-          <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          <svg
+            className="w-6 h-6 text-gray-700"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 4v16m8-8H4"
+            />
           </svg>
         </button>
 
@@ -492,8 +589,18 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
           className="w-14 h-14 bg-white border border-gray-300 rounded-lg shadow-lg flex items-center justify-center hover:bg-gray-50 transition-colors"
           title="Zoom out"
         >
-          <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+          <svg
+            className="w-6 h-6 text-gray-700"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M20 12H4"
+            />
           </svg>
         </button>
 
@@ -501,15 +608,29 @@ export default function Map({ currentLocation, familyLocations, places, onLocati
         <button
           onClick={centerOnUser}
           className={`w-14 h-14 rounded-lg shadow-lg flex items-center justify-center text-white transition-colors ${
-            currentLocation 
-              ? 'bg-primary hover:bg-primary/90' 
-              : 'bg-gray-400 hover:bg-gray-500 cursor-pointer'
+            currentLocation
+              ? "bg-primary hover:bg-primary/90"
+              : "bg-gray-400 hover:bg-gray-500 cursor-pointer"
           }`}
-          title={currentLocation ? "Center on my location" : "Location not available - click for help"}
+          title={
+            currentLocation
+              ? "Center on my location"
+              : "Location not available - click for help"
+          }
           data-testid="button-recenter"
         >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+            />
           </svg>
         </button>
       </div>
