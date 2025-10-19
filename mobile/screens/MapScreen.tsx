@@ -1,24 +1,338 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import MapView, { Marker, Callout, PROVIDER_GOOGLE } from 'react-native-maps';
+import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Geolocation from '@react-native-community/geolocation';
+
+// Type definitions
+interface FamilyLocation {
+  id: number;
+  latitude: number;
+  longitude: number;
+  name: string;
+  address?: string;
+  isRecent: boolean;
+}
+
+interface Place {
+  id: number;
+  latitude: number;
+  longitude: number;
+  name: string;
+  category?: string;
+  address?: string;
+  color?: string;
+}
+
+// Custom marker components for different types
+const UserMarker = ({ latitude, longitude, name, onPress }: { latitude: number; longitude: number; name: string; onPress?: () => void }) => (
+  <Marker
+    coordinate={{ latitude, longitude }}
+    onPress={onPress}
+    pinColor="#007AFF"
+  >
+    <View style={styles.userMarkerContainer}>
+      <View style={styles.userMarker} />
+      <View style={styles.userMarkerPulse} />
+    </View>
+    <Callout>
+      <View style={styles.callout}>
+        <Text style={styles.calloutTitle}>{name}</Text>
+        <Text style={styles.calloutDescription}>Current location</Text>
+      </View>
+    </Callout>
+  </Marker>
+);
+
+const FamilyMarker = ({ latitude, longitude, name, address, isRecent, onPress }: { 
+  latitude: number; 
+  longitude: number; 
+  name: string; 
+  address?: string;
+  isRecent: boolean;
+  onPress?: () => void;
+}) => (
+  <Marker
+    coordinate={{ latitude, longitude }}
+    onPress={onPress}
+    pinColor="#34C759"
+  >
+    <View style={styles.familyMarkerContainer}>
+      <View style={[styles.familyMarker, !isRecent && styles.familyMarkerOld]} />
+      {isRecent && <View style={styles.familyMarkerPulse} />}
+    </View>
+    <Callout>
+      <View style={styles.callout}>
+        <Text style={styles.calloutTitle}>{name}</Text>
+        <Text style={styles.calloutDescription}>{address || 'Unknown location'}</Text>
+        <Text style={styles.calloutTime}>
+          {isRecent ? 'Active now' : 'Last seen recently'}
+        </Text>
+      </View>
+    </Callout>
+  </Marker>
+);
+
+const PlaceMarker = ({ latitude, longitude, name, category, address, color, onPress }: {
+  latitude: number;
+  longitude: number;
+  name: string;
+  category?: string;
+  address?: string;
+  color?: string;
+  onPress?: () => void;
+}) => {
+  const categoryColors: Record<string, string> = {
+    home: '#9333EA',
+    work: '#F97316',
+    school: '#EAB308',
+    other: '#6B7280'
+  };
+  
+  const markerColor = color || categoryColors[category || 'other'] || '#6B7280';
+  
+  return (
+    <Marker
+      coordinate={{ latitude, longitude }}
+      onPress={onPress}
+    >
+      <View style={[styles.placeMarker, { backgroundColor: markerColor }]}>
+        <View style={styles.placeMarkerDot} />
+      </View>
+      <Callout>
+        <View style={styles.callout}>
+          <Text style={styles.calloutTitle}>{name}</Text>
+          <Text style={styles.calloutDescription}>
+            {category ? `${category.charAt(0).toUpperCase() + category.slice(1)} • ` : ''}Saved Place
+          </Text>
+          {address && <Text style={styles.calloutTime}>{address}</Text>}
+        </View>
+      </Callout>
+    </Marker>
+  );
+};
 
 export default function MapScreen() {
   const insets = useSafeAreaInsets();
+  const mapRef = useRef<MapView>(null);
+  const [mapType, setMapType] = useState<'standard' | 'satellite'>('standard');
+  const [currentLocation, setCurrentLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+  const [region, setRegion] = useState({
+    latitude: 40.7128,
+    longitude: -74.0060,
+    latitudeDelta: 0.0922,
+    longitudeDelta: 0.0421,
+  });
+
+  // Mock data for demonstration - replace with actual API calls
+  const familyLocations: FamilyLocation[] = [
+    // { id: 1, latitude: 40.7580, longitude: -73.9855, name: 'John Doe', address: 'Times Square, NYC', isRecent: true },
+  ];
+
+  const places: Place[] = [
+    // { id: 1, latitude: 40.7589, longitude: -73.9851, name: 'Home', category: 'home', address: '123 Main St' },
+  ];
+
+  useEffect(() => {
+    getCurrentLocation();
+  }, []);
+
+  const getCurrentLocation = () => {
+    setIsLoadingLocation(true);
+    Geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        setCurrentLocation({ latitude, longitude });
+        setRegion({
+          latitude,
+          longitude,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        });
+        setIsLoadingLocation(false);
+        
+        // Center map on user location
+        mapRef.current?.animateToRegion({
+          latitude,
+          longitude,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        }, 1000);
+      },
+      (error) => {
+        console.error('Location error:', error);
+        setIsLoadingLocation(false);
+        Alert.alert(
+          'Location Access',
+          'Unable to get your location. Please enable location services in your device settings.',
+          [{ text: 'OK' }]
+        );
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 10000,
+      }
+    );
+  };
+
+  const centerOnUser = () => {
+    if (currentLocation) {
+      mapRef.current?.animateToRegion({
+        ...currentLocation,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      }, 1000);
+    } else {
+      getCurrentLocation();
+    }
+  };
+
+  const zoomIn = () => {
+    mapRef.current?.getCamera().then((camera) => {
+      if (camera.zoom !== undefined) {
+        mapRef.current?.animateCamera({ zoom: camera.zoom + 1 }, { duration: 300 });
+      }
+    });
+  };
+
+  const zoomOut = () => {
+    mapRef.current?.getCamera().then((camera) => {
+      if (camera.zoom !== undefined) {
+        mapRef.current?.animateCamera({ zoom: camera.zoom - 1 }, { duration: 300 });
+      }
+    });
+  };
+
+  const toggleMapType = () => {
+    setMapType(mapType === 'standard' ? 'satellite' : 'standard');
+  };
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
-      <View style={styles.header}>
-        <Text style={styles.headerText}>Map</Text>
-      </View>
-      <ScrollView style={styles.content}>
-        <View style={styles.placeholder}>
-          <Text style={styles.placeholderText}>🗺️</Text>
-          <Text style={styles.title}>Interactive Map</Text>
-          <Text style={styles.description}>
-            Real-time family location tracking will be displayed here
-          </Text>
+    <View style={styles.container}>
+      <MapView
+        ref={mapRef}
+        style={styles.map}
+        provider={PROVIDER_GOOGLE}
+        mapType={mapType}
+        initialRegion={region}
+        showsUserLocation={false}
+        showsMyLocationButton={false}
+        showsCompass={false}
+        showsScale={false}
+        toolbarEnabled={false}
+      >
+        {/* Current User Marker */}
+        {currentLocation && (
+          <UserMarker
+            latitude={currentLocation.latitude}
+            longitude={currentLocation.longitude}
+            name="You"
+          />
+        )}
+
+        {/* Family Member Markers */}
+        {familyLocations.map((location) => (
+          <FamilyMarker
+            key={location.id}
+            latitude={location.latitude}
+            longitude={location.longitude}
+            name={location.name}
+            address={location.address}
+            isRecent={location.isRecent}
+          />
+        ))}
+
+        {/* Saved Places Markers */}
+        {places.map((place) => (
+          <PlaceMarker
+            key={place.id}
+            latitude={place.latitude}
+            longitude={place.longitude}
+            name={place.name}
+            category={place.category}
+            address={place.address}
+          />
+        ))}
+      </MapView>
+
+      {/* Location Not Available Banner */}
+      {!currentLocation && !isLoadingLocation && (
+        <View style={[styles.banner, { top: insets.top + 16 }]}>
+          <View style={styles.bannerContent}>
+            <View style={styles.bannerTextContainer}>
+              <Text style={styles.bannerTitle}>Location not detected</Text>
+              <Text style={styles.bannerDescription}>
+                Enable location to see yourself on the map
+              </Text>
+            </View>
+            <TouchableOpacity
+              onPress={getCurrentLocation}
+              style={styles.bannerButton}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.bannerButtonText}>Get Location</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </ScrollView>
+      )}
+
+      {/* Loading Indicator */}
+      {isLoadingLocation && (
+        <View style={[styles.loadingContainer, { top: insets.top + 16 }]}>
+          <ActivityIndicator size="large" color="#007AFF" />
+          <Text style={styles.loadingText}>Getting your location...</Text>
+        </View>
+      )}
+
+      {/* Map Controls */}
+      <View style={[styles.controls, { bottom: 100 }]}>
+        {/* Map Type Toggle */}
+        <TouchableOpacity
+          onPress={toggleMapType}
+          style={styles.controlButton}
+          activeOpacity={0.7}
+        >
+          <Ionicons
+            name={mapType === 'standard' ? 'earth-outline' : 'map-outline'}
+            size={24}
+            color="#333"
+          />
+        </TouchableOpacity>
+
+        {/* Zoom In */}
+        <TouchableOpacity
+          onPress={zoomIn}
+          style={styles.controlButton}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="add" size={24} color="#333" />
+        </TouchableOpacity>
+
+        {/* Zoom Out */}
+        <TouchableOpacity
+          onPress={zoomOut}
+          style={styles.controlButton}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="remove" size={24} color="#333" />
+        </TouchableOpacity>
+
+        {/* Center on User */}
+        <TouchableOpacity
+          onPress={centerOnUser}
+          style={[
+            styles.controlButton,
+            styles.centerButton,
+            !currentLocation && styles.centerButtonDisabled,
+          ]}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="navigate" size={24} color="#fff" />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -26,43 +340,207 @@ export default function MapScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
-  header: {
-    backgroundColor: '#fff',
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-  },
-  headerText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  content: {
+  map: {
     flex: 1,
   },
-  placeholder: {
-    padding: 40,
+  
+  // Custom Marker Styles
+  userMarkerContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 60,
+    width: 40,
+    height: 40,
   },
-  placeholderText: {
-    fontSize: 64,
-    marginBottom: 16,
+  userMarker: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: '#007AFF',
+    borderWidth: 2,
+    borderColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
   },
-  title: {
-    fontSize: 20,
+  userMarkerPulse: {
+    position: 'absolute',
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: '#007AFF',
+    opacity: 0.3,
+  },
+  
+  familyMarkerContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 40,
+    height: 40,
+  },
+  familyMarker: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: '#34C759',
+    borderWidth: 2,
+    borderColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  familyMarkerOld: {
+    opacity: 0.6,
+  },
+  familyMarkerPulse: {
+    position: 'absolute',
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: '#34C759',
+    opacity: 0.3,
+  },
+  
+  placeMarker: {
+    width: 24,
+    height: 24,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  placeMarkerDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#fff',
+  },
+  
+  // Callout Styles
+  callout: {
+    padding: 8,
+    minWidth: 120,
+  },
+  calloutTitle: {
+    fontSize: 14,
     fontWeight: '600',
     color: '#333',
-    marginBottom: 8,
+    marginBottom: 2,
   },
-  description: {
-    fontSize: 14,
+  calloutDescription: {
+    fontSize: 12,
     color: '#666',
-    textAlign: 'center',
-    lineHeight: 20,
+    marginBottom: 2,
+  },
+  calloutTime: {
+    fontSize: 10,
+    color: '#999',
+  },
+  
+  // Banner Styles
+  banner: {
+    position: 'absolute',
+    left: 16,
+    right: 80,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#007AFF',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  bannerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    gap: 12,
+  },
+  bannerTextContainer: {
+    flex: 1,
+  },
+  bannerTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 4,
+  },
+  bannerDescription: {
+    fontSize: 12,
+    color: '#666',
+  },
+  bannerButton: {
+    backgroundColor: '#007AFF',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  bannerButtonText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  
+  // Loading Styles
+  loadingContainer: {
+    position: 'absolute',
+    left: 16,
+    right: 16,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  loadingText: {
+    fontSize: 14,
+    color: '#333',
+    fontWeight: '500',
+  },
+  
+  // Control Buttons
+  controls: {
+    position: 'absolute',
+    right: 16,
+    gap: 8,
+  },
+  controlButton: {
+    width: 56,
+    height: 56,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  centerButton: {
+    backgroundColor: '#007AFF',
+  },
+  centerButtonDisabled: {
+    backgroundColor: '#9CA3AF',
   },
 });
