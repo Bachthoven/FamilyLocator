@@ -13,6 +13,12 @@ config.resolver.nodeModulesPaths = [
   './mobile/node_modules'
 ];
 
+// Configure transformer with asset registry path
+config.transformer = {
+  ...config.transformer,
+  assetRegistryPath: '@react-native/assets-registry/registry',
+};
+
 // Configure server to run on different port to avoid conflicts with Express
 config.server = {
   ...config.server,
