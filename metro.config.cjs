@@ -1,6 +1,6 @@
-import { getDefaultConfig } from 'expo/metro-config.js';
+const { getDefaultConfig } = require('expo/metro-config');
 
-const config = getDefaultConfig(import.meta.dirname || process.cwd());
+const config = getDefaultConfig(__dirname);
 
 // Configure Metro to handle TypeScript and React Native
 config.resolver.sourceExts = [...config.resolver.sourceExts, 'ts', 'tsx'];
@@ -30,4 +30,4 @@ config.server.enhanceMiddleware = (middleware) => {
   };
 };
 
-export default config;
+module.exports = config;
