@@ -1,6 +1,6 @@
-import { getDefaultConfig } from 'expo/metro-config.js';
+const { getDefaultConfig } = require('expo/metro-config');
 
-const config = getDefaultConfig(import.meta.dirname || process.cwd());
+const config = getDefaultConfig(__dirname);
 
 // Add SVG support to sourceExts
 config.resolver.sourceExts = [...config.resolver.sourceExts, 'svg'];
@@ -17,4 +17,4 @@ config.server = {
   port: 8081,
 };
 
-export default config;
+module.exports = config;
