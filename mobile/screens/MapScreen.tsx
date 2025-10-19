@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Alert } fr
 import MapView, { Marker, Callout, PROVIDER_GOOGLE } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Geolocation from '@react-native-community/geolocation';
+import * as Location from 'expo-location';
 
 // Type definitions
 interface FamilyLocation {
@@ -139,43 +139,54 @@ export default function MapScreen() {
     getCurrentLocation();
   }, []);
 
-  const getCurrentLocation = () => {
-    setIsLoadingLocation(true);
-    Geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        setCurrentLocation({ latitude, longitude });
-        setRegion({
-          latitude,
-          longitude,
-          latitudeDelta: 0.01,
-          longitudeDelta: 0.01,
-        });
-        setIsLoadingLocation(false);
-        
-        // Center map on user location
-        mapRef.current?.animateToRegion({
-          latitude,
-          longitude,
-          latitudeDelta: 0.01,
-          longitudeDelta: 0.01,
-        }, 1000);
-      },
-      (error) => {
-        console.error('Location error:', error);
+  const getCurrentLocation = async () => {
+    try {
+      setIsLoadingLocation(true);
+      
+      // Request location permissions
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      
+      if (status !== 'granted') {
         setIsLoadingLocation(false);
         Alert.alert(
-          'Location Access',
-          'Unable to get your location. Please enable location services in your device settings.',
+          'Permission Required',
+          'Please enable location permissions to see yourself on the map.',
           [{ text: 'OK' }]
         );
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 15000,
-        maximumAge: 10000,
+        return;
       }
-    );
+
+      // Get current location
+      const location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.High,
+      });
+      
+      const { latitude, longitude } = location.coords;
+      setCurrentLocation({ latitude, longitude });
+      setRegion({
+        latitude,
+        longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      });
+      setIsLoadingLocation(false);
+      
+      // Center map on user location
+      mapRef.current?.animateToRegion({
+        latitude,
+        longitude,
+        latitudeDelta: 0.01,
+        longitudeDelta: 0.01,
+      }, 1000);
+    } catch (error) {
+      console.error('Location error:', error);
+      setIsLoadingLocation(false);
+      Alert.alert(
+        'Location Error',
+        'Unable to get your location. Please check your device settings.',
+        [{ text: 'OK' }]
+      );
+    }
   };
 
   const centerOnUser = () => {
