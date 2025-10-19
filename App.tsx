@@ -1,45 +1,50 @@
-import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import React, { useState } from 'react';
+import { View, StyleSheet } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import CustomTabBar from './mobile/components/CustomTabBar';
 import MapScreen from './mobile/screens/MapScreen';
 import FamilyScreen from './mobile/screens/FamilyScreen';
 import PlacesScreen from './mobile/screens/PlacesScreen';
 import HistoryScreen from './mobile/screens/HistoryScreen';
 import SettingsScreen from './mobile/screens/SettingsScreen';
 
-const Tab = createBottomTabNavigator();
+type TabName = 'Map' | 'Family' | 'Places' | 'History' | 'Settings';
 
 export default function App() {
+  const [activeTab, setActiveTab] = useState<TabName>('Map');
+
+  const renderScreen = () => {
+    switch (activeTab) {
+      case 'Map':
+        return <MapScreen />;
+      case 'Family':
+        return <FamilyScreen />;
+      case 'Places':
+        return <PlacesScreen />;
+      case 'History':
+        return <HistoryScreen />;
+      case 'Settings':
+        return <SettingsScreen />;
+      default:
+        return <MapScreen />;
+    }
+  };
+
   return (
-    <NavigationContainer>
-      <Tab.Navigator
-        screenOptions={{
-          headerShown: false,
-        }}
-      >
-        <Tab.Screen 
-          name="Map" 
-          component={MapScreen}
-        />
-        <Tab.Screen 
-          name="Family" 
-          component={FamilyScreen}
-        />
-        <Tab.Screen 
-          name="Places" 
-          component={PlacesScreen}
-        />
-        <Tab.Screen 
-          name="History" 
-          component={HistoryScreen}
-        />
-        <Tab.Screen 
-          name="Settings" 
-          component={SettingsScreen}
-        />
-      </Tab.Navigator>
-      <StatusBar style="auto" />
-    </NavigationContainer>
+    <SafeAreaProvider>
+      <View style={styles.container}>
+        {renderScreen()}
+        <CustomTabBar activeTab={activeTab} onTabPress={setActiveTab} />
+        <StatusBar style="auto" />
+      </View>
+    </SafeAreaProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+});
