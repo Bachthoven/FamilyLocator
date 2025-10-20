@@ -149,15 +149,22 @@ export function setupAuth(app: Express) {
   });
 
   app.post("/api/login", (req, res, next) => {
+    // Debug logging
+    console.log("[Login] Request body:", JSON.stringify(req.body, null, 2));
+    
     passport.authenticate("local", (err: any, user: any, info: any) => {
       if (err) {
+        console.error("[Login] Error:", err);
         return next(err);
       }
       if (!user) {
+        console.log("[Login] Authentication failed - no user returned");
         return res.status(401).json({ message: "Invalid email or password" });
       }
+      console.log("[Login] User authenticated:", user.email);
       req.login(user, (err) => {
         if (err) {
+          console.error("[Login] Session error:", err);
           return next(err);
         }
         res.status(200).json({
