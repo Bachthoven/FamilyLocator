@@ -388,6 +388,11 @@ The application is deployed on Replit and uses Replit's built-in deployment feat
   - Phone number validation
   - Password confirmation matching
   - Real-time error display
+- **Network Configuration Fixes**:
+  - Fixed "Network request failed" error by auto-detecting Replit domain
+  - Mobile app now uses HTTPS for Replit domains instead of localhost
+  - Fixed loading screen hang by disabling retries on 401 responses
+  - Added debug logging for API URL detection and auth state
 
 ## 📄 License
 

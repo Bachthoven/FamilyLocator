@@ -37,15 +37,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     data: user,
     error,
     isLoading,
-  } = useQuery<User | undefined, Error>({
+    isFetching,
+  } = useQuery<User | null, Error>({
     queryKey: ["/api/user"],
     queryFn: getQueryFn({ on401: "returnNull" }),
     enabled: isInitialized,
+    retry: false, // Don't retry on 401
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
   useEffect(() => {
     setIsInitialized(true);
   }, []);
+
+  // Debug logging
+  useEffect(() => {
+    if (__DEV__) {
+      console.log("[AuthContext] isInitialized:", isInitialized);
+      console.log("[AuthContext] isLoading:", isLoading);
+      console.log("[AuthContext] isFetching:", isFetching);
+      console.log("[AuthContext] user:", user);
+      console.log("[AuthContext] error:", error);
+    }
+  }, [isInitialized, isLoading, isFetching, user, error]);
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginData) => {
@@ -90,7 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider
       value={{
         user: user ?? null,
-        isLoading: !isInitialized || isLoading,
+        isLoading: !isInitialized || (isLoading && isFetching),
         error,
         loginMutation,
         logoutMutation,
