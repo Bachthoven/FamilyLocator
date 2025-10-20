@@ -73,6 +73,7 @@
     "expo": "^54.0.13",
     "expo-blur": "^15.0.7",
     "expo-location": "^19.0.7",
+    "expo-secure-store": "^15.0.7",
     "expo-status-bar": "~3.0.8",
     "express": "^4.21.2",
     "express-session": "^1.18.1",
