@@ -420,7 +420,7 @@ export default function MapScreen({
       )}
 
       {/* Map Controls */}
-      <View style={[styles.controls, { bottom: 100 }]}>
+      <View style={[styles.controls, { bottom: 80 + insets.bottom }]}>
         {/* Map Type Toggle */}
         <TouchableOpacity
           onPress={toggleMapType}
