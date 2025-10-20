@@ -8,8 +8,8 @@ import {
   Modal,
   TextInput,
   Alert,
-  ActivityIndicator,
   Clipboard,
+  Platform,
 } from "react-native";
 import { BlurView } from "expo-blur";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -19,7 +19,15 @@ import { useAuth } from "../src/contexts/AuthContext";
 import { apiRequest } from "../src/lib/queryClient";
 import { User, InvitationCode } from "../../shared/schema";
 
-export default function FamilyScreen() {
+interface FamilyScreenProps {
+  onNavigateToMap?: (location: {
+    latitude: number;
+    longitude: number;
+    userId: number;
+  }) => void;
+}
+
+export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -34,6 +42,15 @@ export default function FamilyScreen() {
     User[]
   >({
     queryKey: ["/api/family"],
+    enabled: !!user,
+    retry: 1,
+  });
+
+  // Fetch invitation codes
+  const { data: invitationCodes = [], isLoading: codesLoading } = useQuery<
+    InvitationCode[]
+  >({
+    queryKey: ["/api/family/codes"],
     enabled: !!user,
     retry: 1,
   });
@@ -62,7 +79,7 @@ export default function FamilyScreen() {
       setCodeDialogOpen(true);
       queryClient.invalidateQueries({ queryKey: ["/api/family/codes"] });
     },
-    onError: (error: Error) => {
+    onError: () => {
       Alert.alert("Error", "Failed to generate invitation code");
     },
   });
@@ -95,6 +112,7 @@ export default function FamilyScreen() {
         "Family member has been removed successfully"
       );
       queryClient.invalidateQueries({ queryKey: ["/api/family"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/locations/family"] });
     },
     onError: () => {
       Alert.alert("Error", "Failed to remove family member");
@@ -106,10 +124,10 @@ export default function FamilyScreen() {
     Alert.alert("Copied!", "Invitation code copied to clipboard");
   };
 
-  const handleRemove = (memberId: string) => {
+  const handleRemove = (memberId: string, memberName: string) => {
     Alert.alert(
       "Remove Family Member",
-      "Are you sure you want to remove this family member?",
+      `Are you sure you want to remove ${memberName}?`,
       [
         { text: "Cancel", style: "cancel" },
         {
@@ -119,6 +137,36 @@ export default function FamilyScreen() {
         },
       ]
     );
+  };
+
+  const handleViewLocation = (member: User) => {
+    const locationData = familyLocations.find(
+      (loc: any) => loc.user?.id === member.id
+    );
+
+    if (locationData && onNavigateToMap) {
+      onNavigateToMap({
+        latitude: locationData.latitude,
+        longitude: locationData.longitude,
+        userId: member.id,
+      });
+      Alert.alert(
+        "Navigating to map",
+        `Centering on ${member.firstName || member.email}'s location`
+      );
+    }
+  };
+
+  const formatExpiration = (expiresAt: Date) => {
+    const now = new Date();
+    const expiry = new Date(expiresAt);
+    const hoursLeft = Math.ceil(
+      (expiry.getTime() - now.getTime()) / (1000 * 60 * 60)
+    );
+
+    if (hoursLeft <= 0) return "Expired";
+    if (hoursLeft === 1) return "Expires in 1 hour";
+    return `Expires in ${hoursLeft} hours`;
   };
 
   const getStatusInfo = (member: User) => {
@@ -259,71 +307,132 @@ export default function FamilyScreen() {
             </View>
           </View>
         ) : (
-          // Family members list
-          <View style={styles.membersList}>
-            {familyMembers.map((member) => {
-              const statusInfo = getStatusInfo(member);
-              const locationData = familyLocations.find(
-                (loc: any) => loc.user?.id === member.id
-              );
-              const canViewLocation =
-                locationData && member.locationSharingEnabled;
-
-              return (
-                <View
-                  key={member.id}
-                  style={styles.memberCard}
-                  data-testid={`card-member-${member.id}`}
-                >
-                  <View style={styles.memberInfo}>
-                    <View style={styles.avatar}>
-                      <Text style={styles.avatarText}>
-                        {member.firstName
-                          ? member.firstName[0].toUpperCase()
-                          : member.email?.[0].toUpperCase()}
-                      </Text>
-                    </View>
-                    <View style={styles.memberDetails}>
-                      <Text style={styles.memberName}>
-                        {member.firstName && member.lastName
-                          ? `${member.firstName} ${member.lastName}`
-                          : member.firstName || member.email}
-                      </Text>
-                      <View style={styles.statusRow}>
-                        <View
-                          style={[
-                            styles.statusDot,
-                            { backgroundColor: statusInfo.color },
-                          ]}
-                        />
-                        <Text style={styles.statusText}>
-                          {statusInfo.status}: {statusInfo.message}
-                        </Text>
-                      </View>
-                    </View>
-                  </View>
-                  <View style={styles.memberActions}>
-                    {canViewLocation ? (
-                      <TouchableOpacity
-                        style={styles.actionButton}
-                        data-testid={`button-view-location-${member.id}`}
-                      >
-                        <Ionicons name="location" size={16} color="#3B82F6" />
-                        <Text style={styles.actionButtonText}>View</Text>
-                      </TouchableOpacity>
-                    ) : (
-                      <View style={styles.actionButtonDisabled}>
-                        <Ionicons name="eye-off" size={16} color="#9CA3AF" />
-                        <Text style={styles.actionButtonTextDisabled}>
-                          Hidden
-                        </Text>
-                      </View>
-                    )}
-                  </View>
+          <>
+            {/* Active Invitation Codes Section */}
+            {invitationCodes.length > 0 && (
+              <View style={styles.section}>
+                <View style={styles.sectionHeader}>
+                  <Ionicons name="ticket-outline" size={20} color="#6B7280" />
+                  <Text style={styles.sectionTitle}>
+                    Active Invitation Codes
+                  </Text>
                 </View>
-              );
-            })}
-          </View>
+                {invitationCodes.map((code) => (
+                  <View
+                    key={code.id}
+                    style={styles.codeCard}
+                    data-testid={`card-code-${code.code}`}
+                  >
+                    <View style={styles.codeCardContent}>
+                      <View style={styles.codeInfo}>
+                        <Text style={styles.codeValue}>{code.code}</Text>
+                        <Text style={styles.codeExpiry}>
+                          {formatExpiration(code.expiresAt)}
+                        </Text>
+                      </View>
+                      <TouchableOpacity
+                        style={styles.copyButton}
+                        onPress={() => copyToClipboard(code.code)}
+                        data-testid={`button-copy-${code.code}`}
+                      >
+                        <Ionicons
+                          name="copy-outline"
+                          size={20}
+                          color="#3B82F6"
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                ))}
+              </View>
+            )}
+
+            {/* Family members list */}
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <Ionicons name="people-outline" size={20} color="#6B7280" />
+                <Text style={styles.sectionTitle}>
+                  Family Members ({familyMembers.length})
+                </Text>
+              </View>
+              {familyMembers.map((member) => {
+                const statusInfo = getStatusInfo(member);
+                const locationData = familyLocations.find(
+                  (loc: any) => loc.user?.id === member.id
+                );
+                const canViewLocation =
+                  locationData && member.locationSharingEnabled;
+                const memberName =
+                  member.firstName && member.lastName
+                    ? `${member.firstName} ${member.lastName}`
+                    : member.firstName || member.email;
+
+                return (
+                  <View
+                    key={member.id}
+                    style={styles.memberCard}
+                    data-testid={`card-member-${member.id}`}
+                  >
+                    <View style={styles.memberInfo}>
+                      <View style={styles.avatar}>
+                        <Text style={styles.avatarText}>
+                          {member.firstName
+                            ? member.firstName[0].toUpperCase()
+                            : member.email?.[0].toUpperCase()}
+                        </Text>
+                      </View>
+                      <View style={styles.memberDetails}>
+                        <Text style={styles.memberName}>{memberName}</Text>
+                        <View style={styles.statusRow}>
+                          <View
+                            style={[
+                              styles.statusDot,
+                              { backgroundColor: statusInfo.color },
+                            ]}
+                          />
+                          <Text style={styles.statusText}>
+                            {statusInfo.status}: {statusInfo.message}
+                          </Text>
+                        </View>
+                      </View>
+                    </View>
+                    <View style={styles.memberActions}>
+                      {canViewLocation ? (
+                        <TouchableOpacity
+                          style={styles.actionButton}
+                          onPress={() => handleViewLocation(member)}
+                          data-testid={`button-view-location-${member.id}`}
+                        >
+                          <Ionicons name="location" size={16} color="#3B82F6" />
+                          <Text style={styles.actionButtonText}>View</Text>
+                        </TouchableOpacity>
+                      ) : (
+                        <View style={styles.actionButtonDisabled}>
+                          <Ionicons name="eye-off" size={16} color="#9CA3AF" />
+                          <Text style={styles.actionButtonTextDisabled}>
+                            Hidden
+                          </Text>
+                        </View>
+                      )}
+                      <TouchableOpacity
+                        style={styles.removeButton}
+                        onPress={() =>
+                          handleRemove(member.id.toString(), memberName)
+                        }
+                        data-testid={`button-remove-${member.id}`}
+                      >
+                        <Ionicons
+                          name="trash-outline"
+                          size={16}
+                          color="#EF4444"
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                );
+              })}
+            </View>
+          </>
         )}
       </ScrollView>
 
@@ -412,6 +521,8 @@ export default function FamilyScreen() {
                     styles.button,
                     styles.primaryButton,
                     styles.modalButton,
+                    (joinFamilyMutation.isPending || joinCode.length !== 6) &&
+                      styles.buttonDisabled,
                   ]}
                   onPress={() => joinFamilyMutation.mutate(joinCode)}
                   disabled={
@@ -504,6 +615,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#D1D5DB",
   },
+  buttonDisabled: {
+    opacity: 0.5,
+  },
   primaryButtonText: {
     color: "#fff",
     fontSize: 14,
@@ -513,6 +627,51 @@ const styles = StyleSheet.create({
     color: "#3B82F6",
     fontSize: 14,
     fontWeight: "600",
+  },
+  section: {
+    padding: 16,
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 12,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#374151",
+  },
+  codeCard: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+  },
+  codeCardContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  codeInfo: {
+    flex: 1,
+  },
+  codeValue: {
+    fontSize: 20,
+    fontWeight: "700",
+    fontFamily: Platform.select({ ios: "Courier", android: "monospace" }),
+    color: "#3B82F6",
+    letterSpacing: 2,
+    marginBottom: 4,
+  },
+  codeExpiry: {
+    fontSize: 12,
+    color: "#6B7280",
+  },
+  copyButton: {
+    padding: 8,
   },
   skeletonsContainer: {
     padding: 16,
@@ -572,9 +731,6 @@ const styles = StyleSheet.create({
     gap: 12,
     width: "100%",
   },
-  membersList: {
-    padding: 16,
-  },
   memberCard: {
     flexDirection: "row",
     alignItems: "center",
@@ -627,6 +783,9 @@ const styles = StyleSheet.create({
     color: "#6B7280",
   },
   memberActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
     marginLeft: 12,
   },
   actionButton: {
@@ -652,6 +811,9 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#9CA3AF",
     fontWeight: "600",
+  },
+  removeButton: {
+    padding: 8,
   },
   modalOverlay: {
     flex: 1,

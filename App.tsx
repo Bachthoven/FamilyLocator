@@ -18,6 +18,11 @@ type TabName = "Map" | "Family" | "Places" | "History" | "Settings";
 function AppContent() {
   const { user, isLoading } = useAuth();
   const [activeTab, setActiveTab] = useState<TabName>("Map");
+  const [focusLocation, setFocusLocation] = useState<{
+    latitude: number;
+    longitude: number;
+    userId: number;
+  } | null>(null);
 
   // Show loading screen while checking authentication
   if (isLoading) {
@@ -33,13 +38,28 @@ function AppContent() {
     return <AuthScreen />;
   }
 
+  // Handle navigation from Family to Map with location focus
+  const handleNavigateToMap = (location: {
+    latitude: number;
+    longitude: number;
+    userId: number;
+  }) => {
+    setFocusLocation(location);
+    setActiveTab("Map");
+  };
+
   // Show main app if logged in
   const renderScreen = () => {
     switch (activeTab) {
       case "Map":
-        return <MapScreen />;
+        return (
+          <MapScreen
+            focusLocation={focusLocation}
+            onLocationFocused={() => setFocusLocation(null)}
+          />
+        );
       case "Family":
-        return <FamilyScreen />;
+        return <FamilyScreen onNavigateToMap={handleNavigateToMap} />;
       case "Places":
         return <PlacesScreen />;
       case "History":
