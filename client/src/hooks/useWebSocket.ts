@@ -45,7 +45,7 @@ export function useWebSocket() {
           Notification.permission === "granted"
         ) {
           console.log(
-            "Attempting to show system notification for geofence event",
+            "Attempting to show system notification for geofence event"
           );
           // Import the helper dynamically to avoid circular dependency
           import("@/utils/notificationHelper")

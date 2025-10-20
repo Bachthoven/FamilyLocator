@@ -62,7 +62,7 @@ export function LocationSettings({
       localStorage.setItem("autoLocationInterval", locationInterval);
       localStorage.setItem(
         "autoLocationEnabled",
-        autoLocationEnabled.toString(),
+        autoLocationEnabled.toString()
       );
 
       // Trigger page reload to restart location logging with new settings

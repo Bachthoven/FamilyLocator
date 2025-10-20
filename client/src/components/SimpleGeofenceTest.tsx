@@ -27,7 +27,7 @@ export function SimpleGeofenceTest() {
     window.dispatchEvent(
       new CustomEvent("test-geofence-notification", {
         detail: testNotification,
-      }),
+      })
     );
 
     toast({

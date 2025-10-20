@@ -48,7 +48,7 @@ export default function BottomNavigation() {
                     "flex flex-col items-center py-2 px-1 transition-colors cursor-pointer rounded-lg h-full justify-center",
                     isActive
                       ? "text-primary bg-primary/10"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50",
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
                   )}
                 >
                   <Icon className="w-5 h-5 mb-1" />

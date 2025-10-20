@@ -88,8 +88,8 @@ export function setupAuth(app: Express) {
         } catch (error) {
           return done(error);
         }
-      },
-    ),
+      }
+    )
   );
 
   passport.serializeUser((user, done) => done(null, user.id));

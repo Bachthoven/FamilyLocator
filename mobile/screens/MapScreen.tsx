@@ -191,7 +191,7 @@ export default function MapScreen() {
         Alert.alert(
           "Permission Required",
           "Please enable location permissions to see yourself on the map.",
-          [{ text: "OK" }],
+          [{ text: "OK" }]
         );
         return;
       }
@@ -219,7 +219,7 @@ export default function MapScreen() {
           latitudeDelta: 0.01,
           longitudeDelta: 0.01,
         },
-        1000,
+        1000
       );
     } catch (error) {
       console.error("Location error:", error);
@@ -227,7 +227,7 @@ export default function MapScreen() {
       Alert.alert(
         "Location Error",
         "Unable to get your location. Please check your device settings.",
-        [{ text: "OK" }],
+        [{ text: "OK" }]
       );
     }
   };
@@ -240,7 +240,7 @@ export default function MapScreen() {
           latitudeDelta: 0.01,
           longitudeDelta: 0.01,
         },
-        1000,
+        1000
       );
     } else {
       getCurrentLocation();
@@ -252,7 +252,7 @@ export default function MapScreen() {
       if (camera.zoom !== undefined) {
         mapRef.current?.animateCamera(
           { zoom: camera.zoom + 1 },
-          { duration: 300 },
+          { duration: 300 }
         );
       }
     });
@@ -263,7 +263,7 @@ export default function MapScreen() {
       if (camera.zoom !== undefined) {
         mapRef.current?.animateCamera(
           { zoom: camera.zoom - 1 },
-          { duration: 300 },
+          { duration: 300 }
         );
       }
     });

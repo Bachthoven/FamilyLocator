@@ -96,12 +96,12 @@ export default function History() {
     const date = new Date(timestamp);
     const now = new Date();
     const diffInHours = Math.floor(
-      (now.getTime() - date.getTime()) / (1000 * 60 * 60),
+      (now.getTime() - date.getTime()) / (1000 * 60 * 60)
     );
 
     if (diffInHours < 1) {
       const diffInMinutes = Math.floor(
-        (now.getTime() - date.getTime()) / (1000 * 60),
+        (now.getTime() - date.getTime()) / (1000 * 60)
       );
       return diffInMinutes < 1 ? "Just now" : `${diffInMinutes}m ago`;
     }
@@ -131,7 +131,7 @@ export default function History() {
   const familyMembers = Object.entries(locationHistory);
   const totalLocations = familyMembers.reduce(
     (sum, [_, data]) => sum + data.locations.length,
-    0,
+    0
   );
 
   // Prepare all locations for map view
@@ -141,7 +141,7 @@ export default function History() {
       userId: parseInt(userId),
       userName: data.user.firstName || data.user.email,
       color: getColorForUser(parseInt(userId)),
-    })),
+    }))
   );
 
   // Calculate map center from all locations
@@ -293,7 +293,7 @@ export default function History() {
                       .filter(
                         (location) =>
                           selectedMember === null ||
-                          location.userId === selectedMember,
+                          location.userId === selectedMember
                       )
                       .map((location, index) => (
                         <CircleMarker
@@ -368,8 +368,7 @@ export default function History() {
             {familyMembers
               .filter(
                 ([userId]) =>
-                  selectedMember === null ||
-                  selectedMember === parseInt(userId),
+                  selectedMember === null || selectedMember === parseInt(userId)
               )
               .map(([userId, data]) => (
                 <Card key={userId}>
@@ -404,7 +403,7 @@ export default function History() {
                         ) : (
                           data.locations.map((location, index) => {
                             const accuracy = getLocationAccuracy(
-                              location.accuracy,
+                              location.accuracy
                             );
                             return (
                               <div key={location.id} className="relative">
@@ -416,7 +415,7 @@ export default function History() {
                                     className="w-2 h-2 rounded-full mt-2 flex-shrink-0"
                                     style={{
                                       backgroundColor: getColorForUser(
-                                        parseInt(userId),
+                                        parseInt(userId)
                                       ),
                                     }}
                                   />
@@ -428,7 +427,7 @@ export default function History() {
                                         </p>
                                         <p className="text-xs text-muted-foreground">
                                           {new Date(
-                                            location.timestamp,
+                                            location.timestamp
                                           ).toLocaleString()}
                                         </p>
                                       </div>

@@ -2,7 +2,7 @@
 
 export const isMobileDevice = () => {
   return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-    navigator.userAgent,
+    navigator.userAgent
   );
 };
 
@@ -70,7 +70,7 @@ export interface NotificationOptions {
 
 export const showNotification = async (
   title: string,
-  options: NotificationOptions = {},
+  options: NotificationOptions = {}
 ): Promise<boolean> => {
   // Check permission first
   if (Notification.permission !== "granted") {

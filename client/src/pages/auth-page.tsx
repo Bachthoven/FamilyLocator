@@ -67,7 +67,7 @@ export default function AuthPage() {
   const { toast } = useToast();
   const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
   const [resetStep, setResetStep] = useState<"email" | "code" | "password">(
-    "email",
+    "email"
   );
   const [resetEmail, setResetEmail] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
@@ -106,7 +106,7 @@ export default function AuthPage() {
       const response = await apiRequest(
         "POST",
         "/api/auth/reset-password",
-        data,
+        data
       );
       return response.json();
     },

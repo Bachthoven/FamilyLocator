@@ -49,7 +49,7 @@ class LocationLogger {
       const user = await storage.getUser(userId);
       if (!user || !user.locationHistoryEnabled) {
         log(
-          `Skipping automatic location log for user ${userId} - history disabled`,
+          `Skipping automatic location log for user ${userId} - history disabled`
         );
         return;
       }
@@ -65,7 +65,7 @@ class LocationLogger {
       const twoHoursAgo = new Date(Date.now() - 2 * this.HOUR_IN_MS);
       if (latestLocation.timestamp < twoHoursAgo) {
         log(
-          `Latest location for user ${userId} is too old, skipping automatic log`,
+          `Latest location for user ${userId} is too old, skipping automatic log`
         );
         return;
       }

@@ -89,10 +89,10 @@ export default function LocationLogger() {
   if (!user) return null;
 
   const isUserLoggingActive = status?.activeSessions?.some(
-    (session) => session.userId === user.id,
+    (session) => session.userId === user.id
   );
   const userSession = status?.activeSessions?.find(
-    (session) => session.userId === user.id,
+    (session) => session.userId === user.id
   );
 
   return (

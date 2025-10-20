@@ -23,6 +23,7 @@ A cross-platform application designed for families to securely share real-time l
 ## 🛠️ Technology Stack
 
 ### Frontend
+
 - **Web**: React 19.1, TypeScript, Vite, Tailwind CSS, shadcn/ui components
 - **Mobile**: React Native 0.81.4, Expo SDK 54, react-native-maps
 - **State Management**: TanStack Query (React Query) v5
@@ -31,6 +32,7 @@ A cross-platform application designed for families to securely share real-time l
 - **Location**: Geolocation API (web), expo-location (mobile)
 
 ### Backend
+
 - **Runtime**: Node.js with Express.js
 - **Language**: TypeScript with ES modules
 - **Database**: PostgreSQL with Drizzle ORM
@@ -39,6 +41,7 @@ A cross-platform application designed for families to securely share real-time l
 - **Session Management**: Express sessions with PostgreSQL store
 
 ### Testing & CI/CD
+
 - **Test Framework**: Vitest with React Testing Library
 - **Test Count**: 42 tests across 7 test files
 - **CI/CD**: GitHub Actions workflow for automated testing
@@ -73,6 +76,7 @@ npx expo start --tunnel
 ```
 
 Scan the QR code with:
+
 - **iOS**: Camera app
 - **Android**: Expo Go app
 
@@ -129,29 +133,34 @@ npx prettier --check .
 ### Key Features Implementation
 
 #### Authentication
+
 - Replit Auth (OpenID Connect) for secure login
 - PostgreSQL-backed sessions with HTTP-only cookies
 - Passport.js middleware for authentication
 
 #### Location Services
+
 - High-accuracy geolocation on both platforms
 - Real-time updates via WebSockets
 - Granular privacy controls (enable/disable sharing)
 - Optional location history tracking
 
 #### Family Management
+
 - Invite-based system with 6-character codes
 - Code expiration (24 hours)
 - Status tracking (pending, accepted, blocked)
 - Bi-directional relationships
 
 #### Places System
+
 - Custom saved locations with categories
 - Color-coded place markers
 - Geofencing with 20m radius
 - Real-time entry/exit notifications
 
 #### Geofencing
+
 - Precise location detection using Haversine formula
 - 20m radius for accurate notifications
 - State tracking to prevent duplicate notifications
@@ -201,11 +210,13 @@ npx prettier --check .
 ### Test Coverage
 
 **Backend Tests** (`server/__tests__/`):
+
 - `storage.test.ts` - Storage data structure validation
 - `routes.test.ts` - API request/response structure tests
 - `geofencing.test.ts` - Distance calculation and state management
 
 **Frontend Tests** (`client/src/__tests__/`):
+
 - `utils.test.ts` - Utility function tests
 - `hooks/useAuth.test.ts` - Authentication validation logic
 - `components/BottomNavigation.test.tsx` - Navigation rendering
@@ -218,6 +229,7 @@ npx prettier --check .
 **Triggers**: Pull requests from `dev` → `main` branch
 
 **Jobs**:
+
 1. **Test Job**: Prettier formatting, TypeScript check, unit tests, coverage upload to Codecov
 2. **Lint Job**: Code formatting verification
 3. **Build Job**: Production build verification
@@ -228,6 +240,7 @@ npx prettier --check .
 **Current State**: Foundation tests validate data structures and basic logic
 
 **Next Steps for Comprehensive Coverage**:
+
 1. Integration tests using supertest for actual API endpoints
 2. Component tests with real dependencies and providers (React Query, routing)
 3. Storage tests with in-memory database adapters
@@ -241,6 +254,7 @@ See `TEST_README.md` for detailed testing documentation.
 ### Implementation Status
 
 **Completed Features**:
+
 - ✅ Custom tab navigation with 5 tabs (Map, Family, Places, History, Settings)
 - ✅ Interactive map with react-native-maps and Google Maps tiles
 - ✅ Location permission handling with expo-location
@@ -251,6 +265,7 @@ See `TEST_README.md` for detailed testing documentation.
 - ✅ Members indicator with BlurView (intensity={100}) matching web app
 
 **Pending Features**:
+
 - ⏳ API integration for family locations and saved places
 - ⏳ Real-time WebSocket connectivity for location updates
 - ⏳ Authentication flow
@@ -267,6 +282,7 @@ See `TEST_README.md` for detailed testing documentation.
 ### Environment Variables
 
 The application uses the following environment variables (automatically provided by Replit):
+
 - `DATABASE_URL` - PostgreSQL connection string
 - `PGHOST`, `PGPORT`, `PGUSER`, `PGPASSWORD`, `PGDATABASE` - Database credentials
 - `DEFAULT_OBJECT_STORAGE_BUCKET_ID` - Object storage bucket ID (if enabled)
@@ -275,6 +291,7 @@ The application uses the following environment variables (automatically provided
 ### Prettier Configuration
 
 Code formatting is managed by Prettier with the configuration in `.prettierrc`:
+
 - 2 spaces for indentation
 - Single quotes
 - Trailing commas where valid
@@ -302,6 +319,7 @@ Code formatting is managed by Prettier with the configuration in `.prettierrc`:
 ## 🚀 Deployment
 
 The application is deployed on Replit and uses Replit's built-in deployment features:
+
 - Automatic deployment from the main branch
 - PostgreSQL database provided by Replit
 - Environment variables managed through Replit
@@ -317,7 +335,7 @@ The application is deployed on Replit and uses Replit's built-in deployment feat
 - **leaflet**: Interactive map functionality (web)
 - **react-native-maps**: Native maps (mobile)
 - **wouter**: Lightweight routing (web)
-- **@radix-ui/***: Accessible UI components
+- **@radix-ui/\***: Accessible UI components
 - **tailwindcss**: Utility-first CSS framework
 
 ### Development Tools
@@ -361,5 +379,6 @@ This is a personal/family project. If you have suggestions or find bugs, please 
 ## 📋 Changelog
 
 ### 2025-10-20
+
 - **Documentation Migration**: Moved all documentation from `replit.md` to `README.md`
 - **Workflow Update**: All future changes will be formatted with Prettier and documented in README.md

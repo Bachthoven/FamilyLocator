@@ -174,7 +174,7 @@ export default function Map({
       if (mapRef.current) {
         mapRef.current.setView(
           [focusLocation.latitude, focusLocation.longitude],
-          16,
+          16
         );
       }
 
@@ -226,7 +226,7 @@ export default function Map({
         enableHighAccuracy: false,
         timeout: 30000,
         maximumAge: 0,
-      },
+      }
     );
   };
 
@@ -366,7 +366,7 @@ export default function Map({
             position={[place.latitude, place.longitude]}
             icon={createPlaceIcon(
               place.category || "other",
-              place.color || undefined,
+              place.color || undefined
             )}
             draggable={!!place.id}
             eventHandlers={{
@@ -395,7 +395,7 @@ export default function Map({
 
                 try {
                   console.log(
-                    `Updating place ${place.id} to ${position.lat}, ${position.lng}`,
+                    `Updating place ${place.id} to ${position.lat}, ${position.lng}`
                   );
                   await apiRequest(
                     "PATCH",
@@ -403,7 +403,7 @@ export default function Map({
                     {
                       latitude: position.lat,
                       longitude: position.lng,
-                    },
+                    }
                   );
 
                   // Update the place data locally on success

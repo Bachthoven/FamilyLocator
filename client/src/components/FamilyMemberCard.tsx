@@ -29,7 +29,7 @@ function getTimeAgo(timestamp: Date): string {
 
 function getStatusInfo(
   location?: Location,
-  user?: User,
+  user?: User
 ): { color: string; status: string; message: string } {
   if (!location || !user?.locationSharingEnabled) {
     return {

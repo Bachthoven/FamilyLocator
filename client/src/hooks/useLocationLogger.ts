@@ -46,7 +46,7 @@ export function useLocationLogger() {
         const response = await apiRequest(
           "POST",
           "/api/locations",
-          locationData,
+          locationData
         );
         console.log("✅ Location save response:", response);
 
@@ -85,7 +85,7 @@ export function useLocationLogger() {
   // Helper function to check if location is significantly different
   const isLocationSignificantlyDifferent = (
     newLat: number,
-    newLng: number,
+    newLng: number
   ): boolean => {
     if (!lastSavedLocationRef.current) return true;
 
@@ -136,7 +136,7 @@ export function useLocationLogger() {
     const autoLocationEnabled =
       localStorage.getItem("autoLocationEnabled") === "true";
     const intervalMinutes = parseInt(
-      localStorage.getItem("autoLocationInterval") || "60",
+      localStorage.getItem("autoLocationInterval") || "60"
     );
 
     if (!autoLocationEnabled || !isAuthenticated || !user || !location) {
@@ -144,7 +144,7 @@ export function useLocationLogger() {
     }
 
     console.log(
-      `🕰️ Setting up auto-location logging every ${intervalMinutes} minutes`,
+      `🕰️ Setting up auto-location logging every ${intervalMinutes} minutes`
     );
 
     const interval = setInterval(
@@ -159,7 +159,7 @@ export function useLocationLogger() {
           });
         }
       },
-      intervalMinutes * 60 * 1000,
+      intervalMinutes * 60 * 1000
     ); // Convert minutes to milliseconds
 
     return () => {

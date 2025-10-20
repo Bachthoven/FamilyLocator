@@ -69,6 +69,7 @@ npm run format:check
 ### Test Setup (`test/setup.ts`)
 
 Global test configuration including:
+
 - Testing Library cleanup
 - Mock implementations for ResizeObserver
 - Mock implementations for window.matchMedia
@@ -81,6 +82,7 @@ Global test configuration including:
 The pipeline runs on every pull request to `main` branch and includes:
 
 #### 1. **Test Job**
+
 - Runs on Node.js 20.x
 - Installs dependencies
 - Runs Prettier formatting check
@@ -89,20 +91,24 @@ The pipeline runs on every pull request to `main` branch and includes:
 - Uploads coverage reports to Codecov
 
 #### 2. **Lint Job**
+
 - Checks code formatting with Prettier
 - Verifies no uncommitted changes after formatting
 
 #### 3. **Build Job**
+
 - Builds the application for production
 - Verifies build artifacts are created
 
 #### 4. **Security Job**
+
 - Runs npm security audit
 - Checks for known vulnerabilities
 
 ### Workflow Triggers
 
 The CI pipeline runs when:
+
 - A pull request is created targeting `main` branch
 - A pull request is updated with new commits
 - Ignores changes to: `*.md`, `.gitignore`, `LICENSE`
@@ -112,6 +118,7 @@ The CI pipeline runs when:
 Tests cover:
 
 ✅ **Backend:**
+
 - User registration and authentication validation
 - Location data structure and coordinate validation
 - Place creation and category validation
@@ -121,6 +128,7 @@ Tests cover:
 - Notification data validation
 
 ✅ **Frontend:**
+
 - Component rendering (BottomNavigation, FamilyMemberCard)
 - User color generation utilities
 - Location coordinate validation
@@ -128,6 +136,7 @@ Tests cover:
 - Authentication validation logic (email, password, phone)
 
 ✅ **Code Quality:**
+
 - Prettier formatting checks
 - TypeScript type checking
 - Build verification
@@ -169,12 +178,14 @@ describe('ComponentName', () => {
 ### Tests Failing Locally
 
 1. **Clear cache and reinstall**:
+
    ```bash
    rm -rf node_modules package-lock.json
    npm install
    ```
 
 2. **Check TypeScript types**:
+
    ```bash
    npm run check
    ```

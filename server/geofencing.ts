@@ -5,7 +5,7 @@ function calculateDistance(
   lat1: number,
   lon1: number,
   lat2: number,
-  lon2: number,
+  lon2: number
 ): number {
   const R = 6371; // Earth's radius in kilometers
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
@@ -26,7 +26,7 @@ function isWithinGeofence(
   userLon: number,
   placeLat: number,
   placeLon: number,
-  radiusMeters = 20,
+  radiusMeters = 20
 ): boolean {
   const distance = calculateDistance(userLat, userLon, placeLat, placeLon);
   return distance <= radiusMeters;
@@ -38,18 +38,18 @@ const userGeofenceStates = new Map<string, Set<number>>(); // userId -> Set of p
 export async function checkGeofenceTransitions(
   userId: number,
   newLat: number,
-  newLon: number,
+  newLon: number
 ) {
   try {
     // Get all family members' places (not just user's own places)
     const familyPlaces = await storage.getFamilyPlaces(userId);
 
     console.log(
-      `Checking geofences for user ${userId} at ${newLat}, ${newLon}`,
+      `Checking geofences for user ${userId} at ${newLat}, ${newLon}`
     );
     console.log(
       `Found ${familyPlaces?.length || 0} places to check:`,
-      familyPlaces?.map((p) => p.name),
+      familyPlaces?.map((p) => p.name)
     );
 
     if (!familyPlaces || familyPlaces.length === 0) {
@@ -64,7 +64,7 @@ export async function checkGeofenceTransitions(
 
     console.log(
       `Current geofence states for user ${userId}:`,
-      Array.from(currentGeofences),
+      Array.from(currentGeofences)
     );
 
     // Check current position against all places
@@ -73,17 +73,17 @@ export async function checkGeofenceTransitions(
         newLat,
         newLon,
         place.latitude,
-        place.longitude,
+        place.longitude
       );
       const isCurrentlyInside = isWithinGeofence(
         newLat,
         newLon,
         place.latitude,
-        place.longitude,
+        place.longitude
       );
 
       console.log(
-        `Place "${place.name}": ${distance.toFixed(1)}m away, inside=${isCurrentlyInside} (20m radius)`,
+        `Place "${place.name}": ${distance.toFixed(1)}m away, inside=${isCurrentlyInside} (20m radius)`
       );
 
       if (isCurrentlyInside) {
@@ -93,20 +93,20 @@ export async function checkGeofenceTransitions(
       const wasInside = currentGeofences.has(place.id);
 
       console.log(
-        `Place "${place.name}": wasInside=${wasInside}, isCurrentlyInside=${isCurrentlyInside}`,
+        `Place "${place.name}": wasInside=${wasInside}, isCurrentlyInside=${isCurrentlyInside}`
       );
 
       // Detect transitions (only send one notification per transition)
       if (isCurrentlyInside && !wasInside) {
         // User entered the place
         console.log(
-          `🚨 User ${userId} entered place ${place.name} (${place.id})`,
+          `🚨 User ${userId} entered place ${place.name} (${place.id})`
         );
         await sendGeofenceNotification(userId, place, "entered");
       } else if (!isCurrentlyInside && wasInside) {
         // User exited the place
         console.log(
-          `🚨 User ${userId} exited place ${place.name} (${place.id})`,
+          `🚨 User ${userId} exited place ${place.name} (${place.id})`
         );
         await sendGeofenceNotification(userId, place, "exited");
       }
@@ -122,7 +122,7 @@ export async function checkGeofenceTransitions(
 async function sendGeofenceNotification(
   userId: number,
   place: any,
-  action: "entered" | "exited",
+  action: "entered" | "exited"
 ) {
   try {
     const user = await storage.getUser(userId);

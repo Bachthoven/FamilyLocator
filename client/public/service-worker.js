@@ -24,7 +24,7 @@ self.addEventListener("notificationclick", (event) => {
       if (clients.openWindow) {
         return clients.openWindow("/");
       }
-    }),
+    })
   );
 });
 
@@ -50,6 +50,6 @@ self.addEventListener("push", (event) => {
   };
 
   event.waitUntil(
-    self.registration.showNotification("FamilyLocator Alert", options),
+    self.registration.showNotification("FamilyLocator Alert", options)
   );
 });

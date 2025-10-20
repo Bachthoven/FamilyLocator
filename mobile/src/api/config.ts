@@ -40,7 +40,7 @@ export const API_ENDPOINTS = {
 // Helper function for API requests
 export async function apiRequest(
   endpoint: string,
-  options: RequestInit = {},
+  options: RequestInit = {}
 ): Promise<Response> {
   const defaultOptions: RequestInit = {
     headers: {

@@ -70,7 +70,7 @@ export default function Home() {
         enableHighAccuracy: false,
         timeout: 30000,
         maximumAge: 0,
-      },
+      }
     );
   };
 
@@ -163,7 +163,7 @@ export default function Home() {
 
       // Show notification for location updates
       const updatedUser = familyLocations.find(
-        (loc) => loc.userId === lastMessage.userId,
+        (loc) => loc.userId === lastMessage.userId
       )?.user;
       if (updatedUser) {
         toast({

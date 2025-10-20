@@ -33,10 +33,10 @@ export interface IStorage {
   saveLocation(location: InsertLocation): Promise<Location>;
   getUserLatestLocation(userId: number): Promise<Location | undefined>;
   getFamilyMembersLocations(
-    userId: number,
+    userId: number
   ): Promise<Array<Location & { user: User }>>;
   getFamilyLocationHistory(
-    userId: number,
+    userId: number
   ): Promise<
     Record<string, { user: User; locations: Array<Location & { user: User }> }>
   >;
@@ -44,14 +44,14 @@ export interface IStorage {
   // Family connection operations
   getFamilyMembers(userId: number): Promise<Array<User>>;
   getPendingInvitations(
-    userId: number,
+    userId: number
   ): Promise<Array<FamilyConnection & { user: User }>>;
   addFamilyMember(
-    connection: InsertFamilyConnection,
+    connection: InsertFamilyConnection
   ): Promise<FamilyConnection>;
   acceptFamilyConnection(
     userId: number,
-    familyMemberId: number,
+    familyMemberId: number
   ): Promise<FamilyConnection>;
   removeFamilyMember(userId: number, familyMemberId: number): Promise<void>;
 
@@ -62,16 +62,16 @@ export interface IStorage {
   updatePlaceLocation(
     placeId: number,
     latitude: number,
-    longitude: number,
+    longitude: number
   ): Promise<void>;
   updatePlace(
     placeId: number,
-    updates: { name?: string; category?: string; color?: string },
+    updates: { name?: string; category?: string; color?: string }
   ): Promise<void>;
 
   // Invitation code operations
   createInvitationCode(
-    invitation: InsertInvitationCode,
+    invitation: InsertInvitationCode
   ): Promise<InvitationCode>;
   getInvitationByCode(code: string): Promise<InvitationCode | undefined>;
   useInvitationCode(code: string, userId: number): Promise<InvitationCode>;
@@ -104,7 +104,7 @@ export class DatabaseStorage implements IStorage {
 
   async updateUserSettings(
     userId: number,
-    settings: Partial<User>,
+    settings: Partial<User>
   ): Promise<User> {
     const [user] = await db
       .update(users)
@@ -116,7 +116,7 @@ export class DatabaseStorage implements IStorage {
 
   async updateUserProfile(
     userId: number,
-    profile: Partial<User>,
+    profile: Partial<User>
   ): Promise<User> {
     const updateData: any = { ...profile, updatedAt: new Date() };
 
@@ -172,8 +172,8 @@ export class DatabaseStorage implements IStorage {
       .where(
         and(
           eq(familyConnections.userId, userId),
-          eq(familyConnections.status, "accepted"),
-        ),
+          eq(familyConnections.status, "accepted")
+        )
       );
 
     const familyMemberIds = [
@@ -193,7 +193,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getFamilyMembersLocations(
-    userId: number,
+    userId: number
   ): Promise<Array<Location & { user: User }>> {
     const result = await db
       .select({
@@ -214,8 +214,8 @@ export class DatabaseStorage implements IStorage {
         and(
           eq(familyConnections.familyMemberId, locations.userId),
           eq(familyConnections.userId, userId),
-          eq(familyConnections.status, "accepted"),
-        ),
+          eq(familyConnections.status, "accepted")
+        )
       )
       .where(eq(users.locationSharingEnabled, true))
       .orderBy(desc(locations.timestamp));
@@ -232,7 +232,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getFamilyLocationHistory(
-    userId: number,
+    userId: number
   ): Promise<
     Record<string, { user: User; locations: Array<Location & { user: User }> }>
   > {
@@ -257,14 +257,14 @@ export class DatabaseStorage implements IStorage {
         and(
           eq(familyConnections.familyMemberId, locations.userId),
           eq(familyConnections.userId, userId),
-          eq(familyConnections.status, "accepted"),
-        ),
+          eq(familyConnections.status, "accepted")
+        )
       )
       .where(
         and(
           eq(users.locationSharingEnabled, true),
-          sql`${locations.timestamp} >= ${twentyFourHoursAgo}`,
-        ),
+          sql`${locations.timestamp} >= ${twentyFourHoursAgo}`
+        )
       )
       .orderBy(desc(locations.timestamp));
 
@@ -293,7 +293,7 @@ export class DatabaseStorage implements IStorage {
 
       userHistory.locations.forEach((location) => {
         const locationTime = new Date(
-          location.timestamp || new Date(),
+          location.timestamp || new Date()
         ).getTime();
         const timeDiff = Math.abs(locationTime - lastIncludedTime);
         const oneHour = 60 * 60 * 1000;
@@ -320,15 +320,15 @@ export class DatabaseStorage implements IStorage {
       .where(
         and(
           eq(familyConnections.userId, userId),
-          eq(familyConnections.status, "accepted"),
-        ),
+          eq(familyConnections.status, "accepted")
+        )
       );
 
     return result.map((r) => r.user);
   }
 
   async getPendingInvitations(
-    userId: number,
+    userId: number
   ): Promise<Array<FamilyConnection & { user: User }>> {
     const result = await db
       .select({
@@ -344,15 +344,15 @@ export class DatabaseStorage implements IStorage {
       .where(
         and(
           eq(familyConnections.familyMemberId, userId),
-          eq(familyConnections.status, "pending"),
-        ),
+          eq(familyConnections.status, "pending")
+        )
       );
 
     return result;
   }
 
   async addFamilyMember(
-    connection: InsertFamilyConnection,
+    connection: InsertFamilyConnection
   ): Promise<FamilyConnection> {
     const [familyConnection] = await db
       .insert(familyConnections)
@@ -363,7 +363,7 @@ export class DatabaseStorage implements IStorage {
 
   async acceptFamilyConnection(
     userId: number,
-    familyMemberId: number,
+    familyMemberId: number
   ): Promise<FamilyConnection> {
     const [connection] = await db
       .update(familyConnections)
@@ -372,8 +372,8 @@ export class DatabaseStorage implements IStorage {
         and(
           eq(familyConnections.userId, familyMemberId),
           eq(familyConnections.familyMemberId, userId),
-          eq(familyConnections.status, "pending"),
-        ),
+          eq(familyConnections.status, "pending")
+        )
       )
       .returning();
     return connection;
@@ -381,7 +381,7 @@ export class DatabaseStorage implements IStorage {
 
   async removeFamilyMember(
     userId: number,
-    familyMemberId: number,
+    familyMemberId: number
   ): Promise<void> {
     await db
       .delete(familyConnections)
@@ -389,13 +389,13 @@ export class DatabaseStorage implements IStorage {
         or(
           and(
             eq(familyConnections.userId, userId),
-            eq(familyConnections.familyMemberId, familyMemberId),
+            eq(familyConnections.familyMemberId, familyMemberId)
           ),
           and(
             eq(familyConnections.userId, familyMemberId),
-            eq(familyConnections.familyMemberId, userId),
-          ),
-        ),
+            eq(familyConnections.familyMemberId, userId)
+          )
+        )
       );
   }
 
@@ -409,7 +409,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getFamilyPlaces(
-    userId: number,
+    userId: number
   ): Promise<Array<Place & { user: User }>> {
     // Get all family members
     const familyMembers = await this.getFamilyMembers(userId);
@@ -453,7 +453,7 @@ export class DatabaseStorage implements IStorage {
   async updatePlaceLocation(
     placeId: number,
     latitude: number,
-    longitude: number,
+    longitude: number
   ): Promise<void> {
     await db
       .update(places)
@@ -463,14 +463,14 @@ export class DatabaseStorage implements IStorage {
 
   async updatePlace(
     placeId: number,
-    updates: { name?: string; category?: string; color?: string },
+    updates: { name?: string; category?: string; color?: string }
   ): Promise<void> {
     await db.update(places).set(updates).where(eq(places.id, placeId));
   }
 
   // Invitation code operations
   async createInvitationCode(
-    invitation: InsertInvitationCode,
+    invitation: InsertInvitationCode
   ): Promise<InvitationCode> {
     const [code] = await db
       .insert(invitationCodes)
@@ -489,7 +489,7 @@ export class DatabaseStorage implements IStorage {
 
   async useInvitationCode(
     code: string,
-    userId: number,
+    userId: number
   ): Promise<InvitationCode> {
     const [usedCode] = await db
       .update(invitationCodes)
@@ -510,14 +510,14 @@ export class DatabaseStorage implements IStorage {
         and(
           eq(invitationCodes.userId, userId),
           sql`${invitationCodes.usedAt} IS NULL`,
-          sql`${invitationCodes.expiresAt} > NOW()`,
-        ),
+          sql`${invitationCodes.expiresAt} > NOW()`
+        )
       );
   }
 
   // Notification operations
   async createNotification(
-    notification: InsertNotification,
+    notification: InsertNotification
   ): Promise<Notification> {
     const [newNotification] = await db
       .insert(notifications)
@@ -528,7 +528,7 @@ export class DatabaseStorage implements IStorage {
 
   async getUserNotifications(
     userId: number,
-    limit = 50,
+    limit = 50
   ): Promise<Notification[]> {
     return await db
       .select()
@@ -540,7 +540,7 @@ export class DatabaseStorage implements IStorage {
 
   async markNotificationAsRead(
     userId: number,
-    notificationId: number,
+    notificationId: number
   ): Promise<void> {
     await db
       .update(notifications)
@@ -548,8 +548,8 @@ export class DatabaseStorage implements IStorage {
       .where(
         and(
           eq(notifications.id, notificationId),
-          eq(notifications.userId, userId),
-        ),
+          eq(notifications.userId, userId)
+        )
       );
   }
 
@@ -565,7 +565,7 @@ export class DatabaseStorage implements IStorage {
       .select({ count: sql<number>`count(*)` })
       .from(notifications)
       .where(
-        and(eq(notifications.userId, userId), eq(notifications.isRead, false)),
+        and(eq(notifications.userId, userId), eq(notifications.isRead, false))
       );
     return result.count;
   }

@@ -24,7 +24,7 @@ export const sessions = pgTable(
     sess: jsonb("sess").notNull(),
     expire: timestamp("expire").notNull(),
   },
-  (table) => [index("IDX_session_expire").on(table.expire)],
+  (table) => [index("IDX_session_expire").on(table.expire)]
 );
 
 // User storage table
@@ -151,7 +151,7 @@ export const familyConnectionsRelations = relations(
       references: [users.id],
       relationName: "memberConnections",
     }),
-  }),
+  })
 );
 
 export const locationsRelations = relations(locations, ({ one }) => ({
@@ -181,7 +181,7 @@ export const invitationCodesRelations = relations(
       references: [users.id],
       relationName: "invitationUser",
     }),
-  }),
+  })
 );
 
 export const notificationsRelations = relations(notifications, ({ one }) => ({
@@ -209,14 +209,14 @@ export const insertPlaceSchema = createInsertSchema(places).omit({
 });
 
 export const insertFamilyConnectionSchema = createInsertSchema(
-  familyConnections,
+  familyConnections
 ).omit({
   id: true,
   createdAt: true,
 });
 
 export const insertInvitationCodeSchema = createInsertSchema(
-  invitationCodes,
+  invitationCodes
 ).omit({
   id: true,
   createdAt: true,
@@ -230,7 +230,7 @@ export const insertNotificationSchema = createInsertSchema(notifications).omit({
 });
 
 export const insertPasswordResetCodeSchema = createInsertSchema(
-  passwordResetCodes,
+  passwordResetCodes
 ).omit({
   id: true,
   createdAt: true,

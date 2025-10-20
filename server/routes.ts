@@ -67,17 +67,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
           !user ||
           !(await comparePasswords(profileData.currentPassword, user.password))
         ) {
-          return res
-            .status(400)
-            .json({
-              message:
-                "The current password you entered is wrong. Please try again.",
-            });
+          return res.status(400).json({
+            message:
+              "The current password you entered is wrong. Please try again.",
+          });
         }
 
         // Hash new password
         profileData.currentPassword = await hashPassword(
-          profileData.newPassword,
+          profileData.newPassword
         );
         delete profileData.newPassword;
       }
@@ -105,12 +103,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Check if user has a phone number
       if (!user.phoneNumber) {
-        return res
-          .status(400)
-          .json({
-            message:
-              "This account doesn't have a phone number. Please contact support.",
-          });
+        return res.status(400).json({
+          message:
+            "This account doesn't have a phone number. Please contact support.",
+        });
       }
 
       // Generate 6-digit verification code
@@ -127,7 +123,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // TODO: In a real implementation, you would send the code via SMS
       // For now, we'll just log it to console for testing
       console.log(
-        `Password reset code for ${email} (${user.phoneNumber}): ${code}`,
+        `Password reset code for ${email} (${user.phoneNumber}): ${code}`
       );
 
       res.json({
@@ -160,8 +156,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             eq(passwordResetCodes.email, email),
             eq(passwordResetCodes.code, code),
             gte(passwordResetCodes.expiresAt, new Date()),
-            sql`${passwordResetCodes.usedAt} IS NULL`,
-          ),
+            sql`${passwordResetCodes.usedAt} IS NULL`
+          )
         );
 
       if (!resetCode) {
@@ -221,7 +217,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         {
           owner: userId.toString(),
           visibility: "public", // Profile images are public
-        },
+        }
       );
 
       res.status(200).json({
@@ -238,7 +234,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const objectStorageService = new ObjectStorageService();
       const objectFile = await objectStorageService.getObjectEntityFile(
-        req.path,
+        req.path
       );
       objectStorageService.downloadObject(objectFile, res);
     } catch (error) {
@@ -323,7 +319,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               isRead: false,
             });
             console.log(
-              `Created location notification for family member ${familyMember.id}`,
+              `Created location notification for family member ${familyMember.id}`
             );
 
             // Broadcast notification via WebSocket for real-time updates
@@ -339,7 +335,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           } catch (notificationError) {
             console.error(
               `Failed to create location notification for user ${familyMember.id}:`,
-              notificationError,
+              notificationError
             );
           }
         }
@@ -349,7 +345,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await checkGeofenceTransitions(
         userId,
         location.latitude,
-        location.longitude,
+        location.longitude
       );
 
       // Broadcast location update to family members via WebSocket
@@ -398,7 +394,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(
         "Location history result:",
         Object.keys(history).length,
-        "family members",
+        "family members"
       );
       res.json(history);
     } catch (error) {
@@ -487,7 +483,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.error("Error generating invitation code:", error);
         res.status(500).json({ message: "Failed to generate invitation code" });
       }
-    },
+    }
   );
 
   // Get user's invitation codes
@@ -545,7 +541,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Get all family members of the inviter to connect the new user to everyone
       const inviterFamilyMembers = await storage.getFamilyMembers(
-        invitation.userId,
+        invitation.userId
       );
 
       // Create connections between the new user and the inviter
@@ -611,14 +607,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         const connection = await storage.acceptFamilyConnection(
           userId,
-          parseInt(memberId),
+          parseInt(memberId)
         );
         res.json(connection);
       } catch (error) {
         console.error("Error accepting family connection:", error);
         res.status(500).json({ message: "Failed to accept family connection" });
       }
-    },
+    }
   );
 
   app.delete(
@@ -635,7 +631,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.error("Error removing family member:", error);
         res.status(500).json({ message: "Failed to remove family member" });
       }
-    },
+    }
   );
 
   // Places routes
@@ -742,14 +738,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await storage.updatePlaceLocation(placeId, latitude, longitude);
 
         console.log(
-          `Updated place ${placeId} location to ${latitude}, ${longitude}`,
+          `Updated place ${placeId} location to ${latitude}, ${longitude}`
         );
         res.json({ message: "Place location updated successfully" });
       } catch (error) {
         console.error("Error updating place location:", error);
         res.status(500).json({ message: "Failed to update place location" });
       }
-    },
+    }
   );
 
   // Hourly location logging control routes
@@ -765,7 +761,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.error("Error starting location logging:", error);
         res.status(500).json({ message: "Failed to start location logging" });
       }
-    },
+    }
   );
 
   app.post(
@@ -780,7 +776,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.error("Error stopping location logging:", error);
         res.status(500).json({ message: "Failed to stop location logging" });
       }
-    },
+    }
   );
 
   app.get(
@@ -794,7 +790,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.error("Error getting logging status:", error);
         res.status(500).json({ message: "Failed to get logging status" });
       }
-    },
+    }
   );
 
   // Clear user geofence state (for testing)
@@ -867,7 +863,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.error("Error creating test notification:", error);
         res.status(500).json({ message: "Failed to create test notification" });
       }
-    },
+    }
   );
 
   // Notification routes
@@ -912,7 +908,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .status(500)
           .json({ message: "Failed to get unread notification count" });
       }
-    },
+    }
   );
 
   app.patch(
@@ -930,7 +926,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .status(500)
           .json({ message: "Failed to mark notification as read" });
       }
-    },
+    }
   );
 
   app.patch(
@@ -947,7 +943,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .status(500)
           .json({ message: "Failed to mark all notifications as read" });
       }
-    },
+    }
   );
 
   const httpServer = createServer(app);
@@ -966,7 +962,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (data.type === "auth" && data.userId) {
           clients.set(data.userId.toString(), ws);
           console.log(
-            `User ${data.userId} registered for WebSocket updates. Total clients: ${clients.size}`,
+            `User ${data.userId} registered for WebSocket updates. Total clients: ${clients.size}`
           );
 
           // Auto-start hourly location logging for users with location history enabled
@@ -980,7 +976,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             .catch((error) => {
               console.error(
                 `Error checking user settings for ${data.userId}:`,
-                error,
+                error
               );
             });
         }
@@ -995,7 +991,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (client === ws) {
           clients.delete(userId);
           console.log(
-            `User ${userId} disconnected. Total clients: ${clients.size}`,
+            `User ${userId} disconnected. Total clients: ${clients.size}`
           );
           // Stop hourly logging when user disconnects
           locationLogger.stopHourlyLogging(userId);
@@ -1021,7 +1017,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               type: "locationUpdate",
               userId,
               location,
-            }),
+            })
           );
         }
       });
@@ -1032,7 +1028,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   (global as any).broadcastNotification = function (notification: any) {
     console.log(
       `Broadcasting notification to ${clients.size} connected clients:`,
-      notification,
+      notification
     );
     clients.forEach((client, userId) => {
       if (client.readyState === WebSocket.OPEN) {

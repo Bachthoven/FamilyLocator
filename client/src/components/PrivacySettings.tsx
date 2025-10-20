@@ -38,7 +38,7 @@ export default function PrivacySettings({
       const response = await apiRequest(
         "PATCH",
         "/api/user/settings",
-        newSettings,
+        newSettings
       );
       return response.json();
     },

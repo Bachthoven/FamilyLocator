@@ -85,7 +85,7 @@ export default function Family() {
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(
-          errorData.message || "Failed to generate invitation code",
+          errorData.message || "Failed to generate invitation code"
         );
       }
       return response.json();
@@ -171,7 +171,7 @@ export default function Family() {
     const now = new Date();
     const expiry = new Date(expiresAt);
     const hoursLeft = Math.ceil(
-      (expiry.getTime() - now.getTime()) / (1000 * 60 * 60),
+      (expiry.getTime() - now.getTime()) / (1000 * 60 * 60)
     );
 
     if (hoursLeft <= 0) return "Expired";
@@ -226,7 +226,7 @@ export default function Family() {
         latitude: location.latitude,
         longitude: location.longitude,
         userId: location.userId,
-      }),
+      })
     );
 
     // Navigate to the map page
@@ -399,7 +399,7 @@ export default function Family() {
           ) : (
             familyMembers.map((member: User) => {
               const locationData = familyLocations.find(
-                (loc: any) => loc.user?.id === member.id,
+                (loc: any) => loc.user?.id === member.id
               );
               // Transform location data to match expected format
               const location = locationData

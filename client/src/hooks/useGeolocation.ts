@@ -74,7 +74,7 @@ export function useGeolocation(options: UseGeolocationOptions = {}) {
       if (retryCount.current < maxRetries && enableHighAccuracy) {
         retryCount.current++;
         console.log(
-          `⏱️ Retrying geolocation (attempt ${retryCount.current}/${maxRetries}) with lower accuracy...`,
+          `⏱️ Retrying geolocation (attempt ${retryCount.current}/${maxRetries}) with lower accuracy...`
         );
 
         // Try with lower accuracy settings
@@ -91,7 +91,7 @@ export function useGeolocation(options: UseGeolocationOptions = {}) {
             enableHighAccuracy: false,
             timeout: timeout * 2, // Double the timeout
             maximumAge: maximumAge,
-          },
+          }
         );
         return;
       }
@@ -113,7 +113,7 @@ export function useGeolocation(options: UseGeolocationOptions = {}) {
       watchId.current = navigator.geolocation.watchPosition(
         onSuccess,
         onError,
-        geoOptions,
+        geoOptions
       );
     } else {
       navigator.geolocation.getCurrentPosition(onSuccess, onError, geoOptions);
@@ -175,7 +175,7 @@ export function useGeolocation(options: UseGeolocationOptions = {}) {
           loading: false,
         });
       },
-      { enableHighAccuracy, timeout, maximumAge },
+      { enableHighAccuracy, timeout, maximumAge }
     );
   };
 

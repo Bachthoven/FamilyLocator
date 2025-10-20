@@ -102,7 +102,7 @@ export default function Places() {
             description: "Could not get your current location",
             variant: "destructive",
           });
-        },
+        }
       );
     } else {
       toast({
@@ -210,7 +210,7 @@ export default function Places() {
           name: placeData.name,
           category: placeData.category,
           color: placeData.color,
-        },
+        }
       );
       return response.json();
     },
@@ -293,14 +293,14 @@ export default function Places() {
   const groupedPlaces = places.reduce(
     (
       acc: Record<string, Array<Place & { user: User }>>,
-      place: Place & { user: User },
+      place: Place & { user: User }
     ) => {
       const category = place.category || "other";
       if (!acc[category]) acc[category] = [];
       acc[category].push(place);
       return acc;
     },
-    {},
+    {}
   );
 
   return (
@@ -491,7 +491,7 @@ export default function Places() {
                       value={editingPlace.name}
                       onChange={(e) =>
                         setEditingPlace((prev) =>
-                          prev ? { ...prev, name: e.target.value } : null,
+                          prev ? { ...prev, name: e.target.value } : null
                         )
                       }
                       className="w-full"
@@ -504,7 +504,7 @@ export default function Places() {
                       value={editingPlace.category || "other"}
                       onValueChange={(value: any) =>
                         setEditingPlace((prev) =>
-                          prev ? { ...prev, category: value } : null,
+                          prev ? { ...prev, category: value } : null
                         )
                       }
                     >
@@ -539,7 +539,7 @@ export default function Places() {
                           type="button"
                           onClick={() =>
                             setEditingPlace((prev) =>
-                              prev ? { ...prev, color: color.value } : null,
+                              prev ? { ...prev, color: color.value } : null
                             )
                           }
                           className={`w-8 h-8 rounded-full border-2 flex-shrink-0 ${
@@ -557,7 +557,7 @@ export default function Places() {
                         value={editingPlace.color || "#8b5cf6"}
                         onChange={(e) =>
                           setEditingPlace((prev) =>
-                            prev ? { ...prev, color: e.target.value } : null,
+                            prev ? { ...prev, color: e.target.value } : null
                           )
                         }
                         className="w-8 h-8 rounded border border-gray-300 cursor-pointer flex-shrink-0"

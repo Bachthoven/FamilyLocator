@@ -67,7 +67,7 @@ export default function AddressAutocomplete({
           enableHighAccuracy: false,
           timeout: 10000,
           maximumAge: 300000, // 5 minutes
-        },
+        }
       );
     }
   }, []);
@@ -84,7 +84,7 @@ export default function AddressAutocomplete({
 
       // Build the API URL with location biasing if user location is available
       let apiUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-        query,
+        query
       )}&limit=8&addressdetails=1&extratags=1`;
 
       // Add viewbox parameter to bias results toward user's location
@@ -121,13 +121,13 @@ export default function AddressAutocomplete({
             userLocation.lat,
             userLocation.lon,
             parseFloat(a.lat),
-            parseFloat(a.lon),
+            parseFloat(a.lon)
           );
           const distanceB = calculateDistance(
             userLocation.lat,
             userLocation.lon,
             parseFloat(b.lat),
-            parseFloat(b.lon),
+            parseFloat(b.lon)
           );
           return distanceA - distanceB;
         });
@@ -149,7 +149,7 @@ export default function AddressAutocomplete({
     lat1: number,
     lon1: number,
     lat2: number,
-    lon2: number,
+    lon2: number
   ) => {
     const R = 6371; // Earth's radius in km
     const dLat = ((lat2 - lat1) * Math.PI) / 180;
@@ -211,7 +211,7 @@ export default function AddressAutocomplete({
       case "ArrowDown":
         e.preventDefault();
         setSelectedIndex((prev) =>
-          prev < suggestions.length - 1 ? prev + 1 : prev,
+          prev < suggestions.length - 1 ? prev + 1 : prev
         );
         break;
       case "ArrowUp":
@@ -291,7 +291,7 @@ export default function AddressAutocomplete({
                     key={suggestion.place_id}
                     className={cn(
                       "cursor-pointer",
-                      index === selectedIndex && "bg-accent",
+                      index === selectedIndex && "bg-accent"
                     )}
                     onSelect={() => handleSuggestionClick(suggestion)}
                   >
@@ -311,8 +311,8 @@ export default function AddressAutocomplete({
                                 userLocation.lat,
                                 userLocation.lon,
                                 parseFloat(suggestion.lat),
-                                parseFloat(suggestion.lon),
-                              ),
+                                parseFloat(suggestion.lon)
+                              )
                             )}
                           </span>
                         )}

@@ -110,7 +110,7 @@ interface NotificationManagerProps {
 
 export function NotificationManager({ children }: NotificationManagerProps) {
   const [notifications, setNotifications] = useState<GeofenceNotification[]>(
-    [],
+    []
   );
   const { lastMessage } = useWebSocket();
 
@@ -137,7 +137,7 @@ export function NotificationManager({ children }: NotificationManagerProps) {
       console.log("Adding geofence notification from WebSocket:", notification);
       console.log(
         "Current notifications count before add:",
-        notifications.length,
+        notifications.length
       );
       setNotifications((prev) => {
         const updated = [...prev, notification];
@@ -148,7 +148,7 @@ export function NotificationManager({ children }: NotificationManagerProps) {
       console.log(
         "Message type not matching geofence criteria:",
         lastMessage.type,
-        lastMessage,
+        lastMessage
       );
     }
   }, [lastMessage]);
@@ -162,13 +162,13 @@ export function NotificationManager({ children }: NotificationManagerProps) {
 
     window.addEventListener(
       "test-geofence-notification",
-      handleTestNotification as EventListener,
+      handleTestNotification as EventListener
     );
 
     return () => {
       window.removeEventListener(
         "test-geofence-notification",
-        handleTestNotification as EventListener,
+        handleTestNotification as EventListener
       );
     };
   }, []);
@@ -180,7 +180,7 @@ export function NotificationManager({ children }: NotificationManagerProps) {
 
   console.log(
     "NotificationManager render: notifications count =",
-    notifications.length,
+    notifications.length
   );
 
   return (
