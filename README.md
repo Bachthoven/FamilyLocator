@@ -389,10 +389,16 @@ The application is deployed on Replit and uses Replit's built-in deployment feat
   - Password confirmation matching
   - Real-time error display
 - **Network Configuration Fixes**:
-  - Fixed "Network request failed" error by auto-detecting Replit domain
-  - Mobile app now uses HTTPS for Replit domains instead of localhost
+  - Fixed "Network request failed" error by using Replit backend domain
+  - Mobile app now connects to `https://[replit-domain].replit.dev` instead of Expo tunnel
+  - The Expo tunnel (`exp.direct`) is only for Metro bundler, not backend API
   - Fixed loading screen hang by disabling retries on 401 responses
   - Added debug logging for API URL detection and auth state
+- **Authentication Issues Resolved**:
+  - Fixed password verification in passport authentication
+  - Added detailed logging for debugging authentication failures
+  - Restored original user accounts with proper credentials
+  - Confirmed login/register flows working on mobile app
 
 ## 📄 License
 
