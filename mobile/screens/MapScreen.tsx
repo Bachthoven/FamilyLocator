@@ -150,15 +150,34 @@ const PlaceMarker = ({
   );
 };
 
-export default function MapScreen() {
-  const insets = useSafeAreaInsets();
-  const mapRef = useRef<MapView>(null);
-  const [mapType, setMapType] = useState<"standard" | "satellite">("standard");
-  const [currentLocation, setCurrentLocation] = useState<{
+interface MapScreenProps {
+  focusLocation?: {
     latitude: number;
     longitude: number;
-  } | null>(null);
+    userId: number;
+  } | null;
+  onLocationFocused?: () => void;
+  userLocation?: { latitude: number; longitude: number } | null;
+  onLocationUpdate?: (location: {
+    latitude: number;
+    longitude: number;
+  }) => void;
+}
+
+export default function MapScreen({
+  focusLocation,
+  onLocationFocused,
+  userLocation: userLocationProp,
+  onLocationUpdate,
+}: MapScreenProps) {
+  const insets = useSafeAreaInsets();
+  const mapRef = useRef<MapView>(null);
+  const hasInitializedLocation = useRef(false);
+  const [mapType, setMapType] = useState<"standard" | "satellite">("standard");
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+
+  // Use prop location if provided, otherwise use local state
+  const currentLocation = userLocationProp;
   const [region, setRegion] = useState({
     latitude: 40.7128,
     longitude: -74.006,
@@ -176,7 +195,21 @@ export default function MapScreen() {
   ];
 
   useEffect(() => {
-    getCurrentLocation();
+    // Only get location on first mount, not when returning from other tabs
+    if (!hasInitializedLocation.current && !currentLocation) {
+      getCurrentLocation();
+      hasInitializedLocation.current = true;
+    } else if (currentLocation && mapRef.current) {
+      // If we already have location, just recenter the map when returning
+      mapRef.current.animateToRegion(
+        {
+          ...currentLocation,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        },
+        500
+      );
+    }
   }, []);
 
   const getCurrentLocation = async () => {
@@ -202,7 +235,12 @@ export default function MapScreen() {
       });
 
       const { latitude, longitude } = location.coords;
-      setCurrentLocation({ latitude, longitude });
+
+      // Update location via prop callback to persist across tab switches
+      if (onLocationUpdate) {
+        onLocationUpdate({ latitude, longitude });
+      }
+
       setRegion({
         latitude,
         longitude,

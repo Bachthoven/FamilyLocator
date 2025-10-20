@@ -23,6 +23,10 @@ function AppContent() {
     longitude: number;
     userId: number;
   } | null>(null);
+  const [userLocation, setUserLocation] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
 
   // Show loading screen while checking authentication
   if (isLoading) {
@@ -56,6 +60,8 @@ function AppContent() {
           <MapScreen
             focusLocation={focusLocation}
             onLocationFocused={() => setFocusLocation(null)}
+            userLocation={userLocation}
+            onLocationUpdate={setUserLocation}
           />
         );
       case "Family":
