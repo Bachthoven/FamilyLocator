@@ -210,9 +210,9 @@ export default function MapScreen({
     // { id: 1, latitude: 40.7589, longitude: -73.9851, name: 'Home', category: 'home', address: '123 Main St' },
   ];
 
-  // Get location only once on first mount
+  // Get location only if we don't have a saved region and no current location
   useEffect(() => {
-    if (!hasInitializedLocation.current && !currentLocation) {
+    if (!hasInitializedLocation.current && !currentLocation && !savedRegion) {
       getCurrentLocation();
       hasInitializedLocation.current = true;
     }
