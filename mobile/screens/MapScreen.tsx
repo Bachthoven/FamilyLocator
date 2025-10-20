@@ -194,23 +194,31 @@ export default function MapScreen({
     // { id: 1, latitude: 40.7589, longitude: -73.9851, name: 'Home', category: 'home', address: '123 Main St' },
   ];
 
+  // Get location only once on first mount
   useEffect(() => {
-    // Only get location on first mount, not when returning from other tabs
     if (!hasInitializedLocation.current && !currentLocation) {
       getCurrentLocation();
       hasInitializedLocation.current = true;
-    } else if (currentLocation && mapRef.current) {
-      // If we already have location, just recenter the map when returning
-      mapRef.current.animateToRegion(
-        {
-          ...currentLocation,
-          latitudeDelta: 0.01,
-          longitudeDelta: 0.01,
-        },
-        500
-      );
     }
   }, []);
+
+  // Recenter map whenever component mounts/remounts with existing location
+  useEffect(() => {
+    if (currentLocation && mapRef.current) {
+      // Small delay to ensure map is ready
+      const timer = setTimeout(() => {
+        mapRef.current?.animateToRegion(
+          {
+            ...currentLocation,
+            latitudeDelta: 0.01,
+            longitudeDelta: 0.01,
+          },
+          300
+        );
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [currentLocation]);
 
   const getCurrentLocation = async () => {
     try {
