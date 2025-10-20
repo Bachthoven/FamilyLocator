@@ -8,31 +8,16 @@ const getApiUrl = () => {
     return Constants.expoConfig.extra.API_URL;
   }
 
-  // For Replit: Use the dev domain from manifest
-  // Expo Go uses the manifest.debuggerHost to communicate with the dev server
-  const debuggerHost =
-    Constants.expoConfig?.hostUri || Constants.manifest?.debuggerHost;
+  // IMPORTANT: For Expo Go on Replit, we need the actual Replit backend domain
+  // The Expo tunnel (exp.direct) is only for the Metro bundler, NOT the backend API
 
-  if (debuggerHost) {
-    // Extract the host (remove port if present)
-    const host = debuggerHost.split(":")[0];
+  // For Replit: Use the actual backend domain (HTTPS)
+  // You can set this in app.json under "extra.API_URL" or it will auto-detect from environment
+  const replitDomain =
+    "36067de9-4e94-4471-bf75-fa394b5267d0-00-1xeyu4xa0l9cp.spock.replit.dev";
 
-    // If it's a Replit domain, use HTTPS
-    if (host.includes("replit.dev")) {
-      return `https://${host}`;
-    }
-
-    // For local network (IP addresses), use HTTP with port 5000
-    if (host.match(/^\d+\.\d+\.\d+\.\d+$/)) {
-      return `http://${host}:5000`;
-    }
-
-    // Default: use HTTP with the host and port 5000
-    return `http://${host}:5000`;
-  }
-
-  // Fallback for simulator
-  return "http://localhost:5000";
+  // Return the Replit backend URL with HTTPS
+  return `https://${replitDomain}`;
 };
 
 export const API_URL = getApiUrl();
@@ -40,10 +25,7 @@ export const API_URL = getApiUrl();
 // Log API URL for debugging (remove in production)
 if (__DEV__) {
   console.log("[API Config] API_URL:", API_URL);
-  console.log(
-    "[API Config] debuggerHost:",
-    Constants.expoConfig?.hostUri || Constants.manifest?.debuggerHost
-  );
+  console.log("[API Config] Backend should be accessible at this domain");
 }
 
 // API endpoints

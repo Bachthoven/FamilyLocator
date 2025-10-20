@@ -44,6 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     enabled: isInitialized,
     retry: false, // Don't retry on 401
     staleTime: 1000 * 60 * 5, // 5 minutes
+    gcTime: 1000 * 60 * 10, // 10 minutes (previously cacheTime)
   });
 
   useEffect(() => {
