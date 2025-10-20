@@ -162,6 +162,18 @@ interface MapScreenProps {
     latitude: number;
     longitude: number;
   }) => void;
+  savedRegion?: {
+    latitude: number;
+    longitude: number;
+    latitudeDelta: number;
+    longitudeDelta: number;
+  } | null;
+  onRegionChange?: (region: {
+    latitude: number;
+    longitude: number;
+    latitudeDelta: number;
+    longitudeDelta: number;
+  }) => void;
 }
 
 export default function MapScreen({
@@ -169,6 +181,8 @@ export default function MapScreen({
   onLocationFocused,
   userLocation: userLocationProp,
   onLocationUpdate,
+  savedRegion,
+  onRegionChange,
 }: MapScreenProps) {
   const insets = useSafeAreaInsets();
   const mapRef = useRef<MapView>(null);
@@ -178,12 +192,14 @@ export default function MapScreen({
 
   // Use prop location if provided, otherwise use local state
   const currentLocation = userLocationProp;
-  const [region, setRegion] = useState({
+
+  // Use saved region if available, otherwise use default
+  const initialRegion = savedRegion || {
     latitude: 40.7128,
     longitude: -74.006,
     latitudeDelta: 0.0922,
     longitudeDelta: 0.0421,
-  });
+  };
 
   // Mock data for demonstration - replace with actual API calls
   const familyLocations: FamilyLocation[] = [
@@ -202,23 +218,21 @@ export default function MapScreen({
     }
   }, []);
 
-  // Recenter map whenever component mounts/remounts with existing location
+  // Only recenter when focusLocation changes (navigation from Family screen)
   useEffect(() => {
-    if (currentLocation && mapRef.current) {
-      // Small delay to ensure map is ready
-      const timer = setTimeout(() => {
-        mapRef.current?.animateToRegion(
-          {
-            ...currentLocation,
-            latitudeDelta: 0.01,
-            longitudeDelta: 0.01,
-          },
-          300
-        );
-      }, 100);
-      return () => clearTimeout(timer);
+    if (focusLocation && mapRef.current) {
+      mapRef.current.animateToRegion(
+        {
+          latitude: focusLocation.latitude,
+          longitude: focusLocation.longitude,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        },
+        500
+      );
+      onLocationFocused?.();
     }
-  }, [currentLocation]);
+  }, [focusLocation]);
 
   const getCurrentLocation = async () => {
     try {
@@ -249,24 +263,19 @@ export default function MapScreen({
         onLocationUpdate({ latitude, longitude });
       }
 
-      setRegion({
+      const newRegion = {
         latitude,
         longitude,
         latitudeDelta: 0.01,
         longitudeDelta: 0.01,
-      });
+      };
+
+      // Save region to parent
+      onRegionChange?.(newRegion);
       setIsLoadingLocation(false);
 
       // Center map on user location
-      mapRef.current?.animateToRegion(
-        {
-          latitude,
-          longitude,
-          latitudeDelta: 0.01,
-          longitudeDelta: 0.01,
-        },
-        1000
-      );
+      mapRef.current?.animateToRegion(newRegion, 1000);
     } catch (error) {
       console.error("Location error:", error);
       setIsLoadingLocation(false);
@@ -326,7 +335,8 @@ export default function MapScreen({
         style={styles.map}
         provider={PROVIDER_GOOGLE}
         mapType={mapType}
-        initialRegion={region}
+        initialRegion={initialRegion}
+        onRegionChangeComplete={(region) => onRegionChange?.(region)}
         showsUserLocation={false}
         showsMyLocationButton={false}
         showsCompass={false}

@@ -27,6 +27,12 @@ function AppContent() {
     latitude: number;
     longitude: number;
   } | null>(null);
+  const [mapRegion, setMapRegion] = useState<{
+    latitude: number;
+    longitude: number;
+    latitudeDelta: number;
+    longitudeDelta: number;
+  } | null>(null);
 
   // Show loading screen while checking authentication
   if (isLoading) {
@@ -62,6 +68,8 @@ function AppContent() {
             onLocationFocused={() => setFocusLocation(null)}
             userLocation={userLocation}
             onLocationUpdate={setUserLocation}
+            savedRegion={mapRegion}
+            onRegionChange={setMapRegion}
           />
         );
       case "Family":
