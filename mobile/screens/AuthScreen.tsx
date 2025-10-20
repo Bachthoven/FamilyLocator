@@ -200,7 +200,10 @@ export default function AuthScreen() {
                   <View style={styles.inputGroup}>
                     <Text style={styles.label}>Email</Text>
                     <TextInput
-                      style={[styles.input, loginErrors.email && styles.inputError]}
+                      style={[
+                        styles.input,
+                        loginErrors.email && styles.inputError,
+                      ]}
                       placeholder="your@email.com"
                       value={loginEmail}
                       onChangeText={setLoginEmail}
@@ -217,7 +220,10 @@ export default function AuthScreen() {
                   <View style={styles.inputGroup}>
                     <Text style={styles.label}>Password</Text>
                     <TextInput
-                      style={[styles.input, loginErrors.password && styles.inputError]}
+                      style={[
+                        styles.input,
+                        loginErrors.password && styles.inputError,
+                      ]}
                       placeholder="Enter password"
                       value={loginPassword}
                       onChangeText={setLoginPassword}
@@ -226,7 +232,9 @@ export default function AuthScreen() {
                       autoCorrect={false}
                     />
                     {loginErrors.password && (
-                      <Text style={styles.errorText}>{loginErrors.password}</Text>
+                      <Text style={styles.errorText}>
+                        {loginErrors.password}
+                      </Text>
                     )}
                   </View>
 
@@ -317,7 +325,9 @@ export default function AuthScreen() {
                       autoCorrect={false}
                     />
                     {registerErrors.email && (
-                      <Text style={styles.errorText}>{registerErrors.email}</Text>
+                      <Text style={styles.errorText}>
+                        {registerErrors.email}
+                      </Text>
                     )}
                   </View>
 
@@ -397,7 +407,9 @@ export default function AuthScreen() {
                     {registerMutation.isPending ? (
                       <View style={styles.buttonContent}>
                         <ActivityIndicator size="small" color="#fff" />
-                        <Text style={styles.buttonText}>Creating account...</Text>
+                        <Text style={styles.buttonText}>
+                          Creating account...
+                        </Text>
                       </View>
                     ) : (
                       <Text style={styles.buttonText}>Create Account</Text>

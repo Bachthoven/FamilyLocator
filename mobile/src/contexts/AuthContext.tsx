@@ -81,7 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       queryClient.setQueryData(["/api/user"], null);
       queryClient.clear();
     },
-    onError: (error: Error) {
+    onError: (error: Error) => {
       Alert.alert("Logout Failed", error.message);
     },
   });
