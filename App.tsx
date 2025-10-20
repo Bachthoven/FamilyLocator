@@ -1,19 +1,39 @@
-import React, { useState } from "react";
-import { View, StyleSheet } from "react-native";
+import { useState } from "react";
+import { View, StyleSheet, ActivityIndicator } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { queryClient } from "./mobile/src/lib/queryClient";
+import { AuthProvider, useAuth } from "./mobile/src/contexts/AuthContext";
 import CustomTabBar from "./mobile/components/CustomTabBar";
 import MapScreen from "./mobile/screens/MapScreen";
 import FamilyScreen from "./mobile/screens/FamilyScreen";
 import PlacesScreen from "./mobile/screens/PlacesScreen";
 import HistoryScreen from "./mobile/screens/HistoryScreen";
 import SettingsScreen from "./mobile/screens/SettingsScreen";
+import AuthScreen from "./mobile/screens/AuthScreen";
 
 type TabName = "Map" | "Family" | "Places" | "History" | "Settings";
 
-export default function App() {
+function AppContent() {
+  const { user, isLoading } = useAuth();
   const [activeTab, setActiveTab] = useState<TabName>("Map");
 
+  // Show loading screen while checking authentication
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#3b82f6" />
+      </View>
+    );
+  }
+
+  // Show authentication screen if not logged in
+  if (!user) {
+    return <AuthScreen />;
+  }
+
+  // Show main app if logged in
   const renderScreen = () => {
     switch (activeTab) {
       case "Map":
@@ -32,19 +52,35 @@ export default function App() {
   };
 
   return (
-    <SafeAreaProvider>
-      <View style={styles.container}>
-        {renderScreen()}
-        <CustomTabBar activeTab={activeTab} onTabPress={setActiveTab} />
-        <StatusBar style="auto" />
-      </View>
-    </SafeAreaProvider>
+    <View style={styles.container}>
+      {renderScreen()}
+      <CustomTabBar activeTab={activeTab} onTabPress={setActiveTab} />
+      <StatusBar style="auto" />
+    </View>
+  );
+}
+
+export default function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <SafeAreaProvider>
+          <AppContent />
+        </SafeAreaProvider>
+      </AuthProvider>
+    </QueryClientProvider>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#fff",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
     backgroundColor: "#fff",
   },
 });
