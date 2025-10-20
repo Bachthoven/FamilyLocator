@@ -3,15 +3,48 @@ import Constants from "expo-constants";
 
 // Get API URL from Expo config or use default
 const getApiUrl = () => {
-  // In Expo Go, we need to use your computer's IP address
-  // Replace with your actual IP when testing on physical device
-  const devUrl = "http://localhost:5000"; // For simulator
-  // const devUrl = 'http://192.168.1.XXX:5000'; // For physical device - replace XXX with your IP
+  // Check if we have a custom API URL from Expo config
+  if (Constants.expoConfig?.extra?.API_URL) {
+    return Constants.expoConfig.extra.API_URL;
+  }
 
-  return Constants.expoConfig?.extra?.API_URL || devUrl;
+  // For Replit: Use the dev domain from manifest
+  // Expo Go uses the manifest.debuggerHost to communicate with the dev server
+  const debuggerHost =
+    Constants.expoConfig?.hostUri || Constants.manifest?.debuggerHost;
+
+  if (debuggerHost) {
+    // Extract the host (remove port if present)
+    const host = debuggerHost.split(":")[0];
+
+    // If it's a Replit domain, use HTTPS
+    if (host.includes("replit.dev")) {
+      return `https://${host}`;
+    }
+
+    // For local network (IP addresses), use HTTP with port 5000
+    if (host.match(/^\d+\.\d+\.\d+\.\d+$/)) {
+      return `http://${host}:5000`;
+    }
+
+    // Default: use HTTP with the host and port 5000
+    return `http://${host}:5000`;
+  }
+
+  // Fallback for simulator
+  return "http://localhost:5000";
 };
 
 export const API_URL = getApiUrl();
+
+// Log API URL for debugging (remove in production)
+if (__DEV__) {
+  console.log("[API Config] API_URL:", API_URL);
+  console.log(
+    "[API Config] debuggerHost:",
+    Constants.expoConfig?.hostUri || Constants.manifest?.debuggerHost
+  );
+}
 
 // API endpoints
 export const API_ENDPOINTS = {

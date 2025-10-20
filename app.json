@@ -39,7 +39,9 @@
       "port": 19000
     },
     "extra": {
-      "API_URL": "http://localhost:5000"
+      "eas": {
+        "projectId": "family-locator"
+      }
     },
     "updates": {
       "enabled": false
