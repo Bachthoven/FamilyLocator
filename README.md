@@ -478,6 +478,11 @@ This is a personal/family project. If you have suggestions or find bugs, please 
   - **Dynamic status bar**: White system icons in hybrid mode, black in standard mode
   - Status bar changes automatically when toggling map type
   - Works regardless of app theme (light or dark mode)
+- **Map Position Persistence (Mobile)**: Map now remembers position across tab switches
+  - Map position and zoom level are automatically saved as you pan/zoom
+  - When navigating away from Map tab and returning, position is restored instantly
+  - No more resetting to default location when switching tabs
+  - Restoration happens with zero animation for instant return to saved view
 
 ### 2025-10-20
 

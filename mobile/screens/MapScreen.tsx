@@ -222,6 +222,17 @@ export default function MapScreen({
     }
   }, []);
 
+  // Restore saved region when component mounts (e.g., when navigating back to Map tab)
+  useEffect(() => {
+    if (savedRegion && mapRef.current && !focusLocation) {
+      // Use a small delay to ensure map is ready
+      const timer = setTimeout(() => {
+        mapRef.current?.animateToRegion(savedRegion, 0);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
   // Only recenter when focusLocation changes (navigation from Family screen)
   useEffect(() => {
     if (focusLocation && mapRef.current) {
@@ -274,12 +285,13 @@ export default function MapScreen({
         longitudeDelta: 0.01,
       };
 
-      // Save region to parent
-      onRegionChange?.(newRegion);
       setIsLoadingLocation(false);
 
       // Center map on user location
       mapRef.current?.animateToRegion(newRegion, 1000);
+
+      // Save region to parent after animation starts
+      onRegionChange?.(newRegion);
     } catch (error) {
       console.error("Location error:", error);
       setIsLoadingLocation(false);
