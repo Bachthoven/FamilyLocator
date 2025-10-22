@@ -709,6 +709,7 @@ const styles = StyleSheet.create({
   },
   centerButton: {
     backgroundColor: "#007AFF",
+    borderWidth: 0,
   },
   centerButtonDisabled: {
     backgroundColor: "#9CA3AF",
