@@ -356,6 +356,8 @@ export default function MapScreen({
         showsMyLocationButton={false}
         showsCompass={false}
         showsScale={false}
+        showsPointsOfInterest={true}
+        showsBuildings={true}
         toolbarEnabled={false}
       >
         {/* Current User Marker */}
