@@ -325,6 +325,10 @@ export default function MapScreen({
     });
   };
 
+  const resetNorth = () => {
+    mapRef.current?.animateCamera({ heading: 0 }, { duration: 300 });
+  };
+
   const toggleMapType = () => {
     setMapType(mapType === "standard" ? "satellite" : "standard");
   };
@@ -381,6 +385,18 @@ export default function MapScreen({
       {/* Notification Bell - Top Right */}
       <View style={[styles.notificationBell, { top: insets.top + 16 }]}>
         <NotificationBell />
+      </View>
+
+      {/* Compass Button - Bottom Left */}
+      <View style={[styles.compassButton, { bottom: 72, left: 16 }]}>
+        <TouchableOpacity
+          onPress={resetNorth}
+          style={styles.compassButtonInner}
+          activeOpacity={0.7}
+          data-testid="button-compass"
+        >
+          <Ionicons name="compass-outline" size={20} color="#333" />
+        </TouchableOpacity>
       </View>
 
       {/* Members Indicator - Top Center */}
@@ -597,6 +613,25 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: 16,
     zIndex: 40,
+  },
+
+  // Compass Button Styles
+  compassButton: {
+    position: "absolute",
+    zIndex: 40,
+  },
+  compassButtonInner: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
   },
 
   // Members Indicator Styles

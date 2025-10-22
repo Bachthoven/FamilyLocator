@@ -461,6 +461,13 @@ This is a personal/family project. If you have suggestions or find bugs, please 
   - Light mode: Black system indicators (time, battery, signal)
   - Dark mode ready: Will show white indicators when dark mode is implemented
   - Uses expo-status-bar with "dark" style for light mode
+- **Compass Button (Mobile Map)**: Added compass control to reset map orientation
+  - Positioned at bottom left corner (mirroring notification bell position)
+  - Same size and shape as notification bell (44x44px, rounded)
+  - White background with black compass icon (theme-aware for future dark mode)
+  - Tapping compass reorients map to north-up (heading: 0°)
+  - Smooth 300ms animation when resetting orientation
+  - Matches alignment spacing (16px from edges, 72px from bottom)
 
 ### 2025-10-20
 
