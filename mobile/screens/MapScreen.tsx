@@ -13,6 +13,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Location from "expo-location";
 import { BlurView } from "expo-blur";
 import NotificationBell from "../components/NotificationBell";
+import Compass from "../components/Compass";
 
 // Type definitions
 interface FamilyLocation {
@@ -190,6 +191,7 @@ export default function MapScreen({
   const hasInitializedLocation = useRef(false);
   const [mapType, setMapType] = useState<"standard" | "satellite">("standard");
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+  const [mapHeading, setMapHeading] = useState(0); // Track map rotation
 
   // Use prop location if provided, otherwise use local state
   const currentLocation = userLocationProp;
@@ -341,7 +343,13 @@ export default function MapScreen({
         provider={PROVIDER_GOOGLE}
         mapType={mapType}
         initialRegion={initialRegion}
-        onRegionChangeComplete={(region) => onRegionChange?.(region)}
+        onRegionChangeComplete={(region) => {
+          onRegionChange?.(region);
+          // Update compass heading
+          mapRef.current?.getCamera().then((camera) => {
+            setMapHeading(camera.heading || 0);
+          });
+        }}
         showsUserLocation={false}
         showsMyLocationButton={false}
         showsCompass={false}
@@ -389,14 +397,7 @@ export default function MapScreen({
 
       {/* Compass Button - Bottom Left */}
       <View style={[styles.compassButton, { bottom: 72, left: 16 }]}>
-        <TouchableOpacity
-          onPress={resetNorth}
-          style={styles.compassButtonInner}
-          activeOpacity={0.7}
-          data-testid="button-compass"
-        >
-          <Ionicons name="compass-outline" size={20} color="#333" />
-        </TouchableOpacity>
+        <Compass heading={mapHeading} onPress={resetNorth} />
       </View>
 
       {/* Members Indicator - Top Center */}
@@ -619,19 +620,6 @@ const styles = StyleSheet.create({
   compassButton: {
     position: "absolute",
     zIndex: 40,
-  },
-  compassButtonInner: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
   },
 
   // Members Indicator Styles
