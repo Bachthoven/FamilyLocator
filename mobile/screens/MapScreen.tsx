@@ -424,10 +424,8 @@ export default function MapScreen({
         style={{
           position: "absolute",
           right: 16,
-          bottom: 70,
+          bottom: 72,
           gap: 8,
-          backgroundColor: "yellow",
-          padding: 4,
         }}
       >
         {/* Map Type Toggle */}
