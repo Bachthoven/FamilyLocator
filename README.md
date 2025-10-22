@@ -478,11 +478,12 @@ This is a personal/family project. If you have suggestions or find bugs, please 
   - **Dynamic status bar**: White system icons in hybrid mode, black in standard mode
   - Status bar changes automatically when toggling map type
   - Works regardless of app theme (light or dark mode)
-- **Map Position Persistence (Mobile)**: Map now remembers position across tab switches
-  - Map position and zoom level are automatically saved as you pan/zoom
-  - When navigating away from Map tab and returning, position is restored instantly
-  - No more resetting to default location when switching tabs
-  - Restoration happens with zero animation for instant return to saved view
+- **Map Position Persistence (Mobile)**: Map stays exactly where you left it
+  - All screens remain mounted but hidden when switching tabs
+  - MapScreen never unmounts, preserving map position, zoom, and rotation naturally
+  - No restoration logic needed - position is maintained automatically
+  - Inactive screens use `opacity: 0` and `pointerEvents: "none"` to hide them
+  - Switching back to Map tab shows the exact view you left
 
 ### 2025-10-20
 

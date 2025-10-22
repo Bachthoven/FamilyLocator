@@ -222,17 +222,6 @@ export default function MapScreen({
     }
   }, []);
 
-  // Restore saved region when component mounts (e.g., when navigating back to Map tab)
-  useEffect(() => {
-    if (savedRegion && mapRef.current && !focusLocation) {
-      // Use a small delay to ensure map is ready
-      const timer = setTimeout(() => {
-        mapRef.current?.animateToRegion(savedRegion, 0);
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, []);
-
   // Only recenter when focusLocation changes (navigation from Family screen)
   useEffect(() => {
     if (focusLocation && mapRef.current) {

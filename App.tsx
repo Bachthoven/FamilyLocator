@@ -59,35 +59,39 @@ function AppContent() {
   };
 
   // Show main app if logged in
-  const renderScreen = () => {
-    switch (activeTab) {
-      case "Map":
-        return (
-          <MapScreen
-            focusLocation={focusLocation}
-            onLocationFocused={() => setFocusLocation(null)}
-            userLocation={userLocation}
-            onLocationUpdate={setUserLocation}
-            savedRegion={mapRegion}
-            onRegionChange={setMapRegion}
-          />
-        );
-      case "Family":
-        return <FamilyScreen onNavigateToMap={handleNavigateToMap} />;
-      case "Places":
-        return <PlacesScreen />;
-      case "History":
-        return <HistoryScreen />;
-      case "Settings":
-        return <SettingsScreen />;
-      default:
-        return <MapScreen />;
-    }
-  };
-
   return (
     <View style={styles.container}>
-      {renderScreen()}
+      {/* Keep all screens mounted but hide inactive ones to preserve state */}
+      <View style={activeTab === "Map" ? styles.screen : styles.hiddenScreen}>
+        <MapScreen
+          focusLocation={focusLocation}
+          onLocationFocused={() => setFocusLocation(null)}
+          userLocation={userLocation}
+          onLocationUpdate={setUserLocation}
+          savedRegion={mapRegion}
+          onRegionChange={setMapRegion}
+        />
+      </View>
+      <View
+        style={activeTab === "Family" ? styles.screen : styles.hiddenScreen}
+      >
+        <FamilyScreen onNavigateToMap={handleNavigateToMap} />
+      </View>
+      <View
+        style={activeTab === "Places" ? styles.screen : styles.hiddenScreen}
+      >
+        <PlacesScreen />
+      </View>
+      <View
+        style={activeTab === "History" ? styles.screen : styles.hiddenScreen}
+      >
+        <HistoryScreen />
+      </View>
+      <View
+        style={activeTab === "Settings" ? styles.screen : styles.hiddenScreen}
+      >
+        <SettingsScreen />
+      </View>
       <CustomTabBar activeTab={activeTab} onTabPress={setActiveTab} />
       {/* dark = black icons for light mode, light = white icons for dark mode */}
       <StatusBar style="dark" />
@@ -117,5 +121,18 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#fff",
+  },
+  screen: {
+    flex: 1,
+  },
+  hiddenScreen: {
+    flex: 1,
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    opacity: 0,
+    pointerEvents: "none",
   },
 });
