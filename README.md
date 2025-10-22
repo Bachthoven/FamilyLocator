@@ -464,12 +464,12 @@ This is a personal/family project. If you have suggestions or find bugs, please 
 - **Compass Component (Mobile Map)**: Added interactive compass showing map orientation
   - Positioned at bottom left corner (mirroring notification bell position)
   - Same size and shape as notification bell (44x44px, rounded)
-  - **Custom design with red north needle** - clearly shows current map heading
+  - **Red needle always points to true north** - rotates opposite to map rotation
   - **Instant real-time rotation** - compass needle tracks map rotation with zero lag
   - **No animation delay** - uses direct value updates for immediate responsiveness
-  - **Animated reset to north** - tapping compass smoothly swings needle to point up
-  - Ultra-clean minimalist design: connected red/gray needles without border or circle
-  - Needles connect seamlessly at their base with no gaps
+  - **Animated reset to north** - tapping compass smoothly swings map back to north-up
+  - Ultra-clean minimalist design: red/gray needles with small gap, no border or circle
+  - Counter-rotates as map turns to maintain north reference
   - Uses `onRegionChange` + `setValue()` for instant visual feedback
   - Matches alignment spacing (16px from edges, 72px from bottom)
 

@@ -15,9 +15,10 @@ export default function Compass({ heading, onPress }: CompassProps) {
     rotateAnim.setValue(heading);
   }, [heading]);
 
+  // Rotate in opposite direction to keep north pointing up
   const rotation = rotateAnim.interpolate({
     inputRange: [0, 360],
-    outputRange: ["0deg", "360deg"],
+    outputRange: ["0deg", "-360deg"],
   });
 
   return (
@@ -73,13 +74,13 @@ const styles = StyleSheet.create({
     borderStyle: "solid",
     borderLeftWidth: 6,
     borderRightWidth: 6,
-    borderBottomWidth: 16,
+    borderBottomWidth: 14,
     borderLeftColor: "transparent",
     borderRightColor: "transparent",
     borderBottomColor: "#FF3B30",
-    top: 0,
+    top: 2,
   },
-  // Gray south needle (pointing down, connected at base)
+  // Gray south needle (pointing down, with gap at base)
   needleSouth: {
     position: "absolute",
     width: 0,
@@ -88,10 +89,10 @@ const styles = StyleSheet.create({
     borderStyle: "solid",
     borderLeftWidth: 6,
     borderRightWidth: 6,
-    borderTopWidth: 16,
+    borderTopWidth: 14,
     borderLeftColor: "transparent",
     borderRightColor: "transparent",
     borderTopColor: "#666",
-    bottom: 0,
+    bottom: 2,
   },
 });
