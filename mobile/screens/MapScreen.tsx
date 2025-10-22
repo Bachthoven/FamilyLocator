@@ -419,8 +419,17 @@ export default function MapScreen({
         </View>
       )}
 
-      {/* Map Controls */}
-      <View style={[styles.controls, { bottom: 80 }]}>
+      {/* Map Controls - positioned for equal spacing */}
+      <View
+        style={{
+          position: "absolute",
+          right: 16,
+          bottom: 70,
+          gap: 8,
+          backgroundColor: "yellow",
+          padding: 4,
+        }}
+      >
         {/* Map Type Toggle */}
         <TouchableOpacity
           onPress={toggleMapType}
