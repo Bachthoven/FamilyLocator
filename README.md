@@ -457,6 +457,10 @@ This is a personal/family project. If you have suggestions or find bugs, please 
   - Updated loading indicators
   - Updated notification indicators and unread states
   - All color-coded elements now use new theme color
+- **Status Bar Configuration**: Configured Android system status bar for theme-aware display
+  - Light mode: Black system indicators (time, battery, signal)
+  - Dark mode ready: Will show white indicators when dark mode is implemented
+  - Uses expo-status-bar with "dark" style for light mode
 
 ### 2025-10-20
 

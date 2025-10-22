@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { View, StyleSheet, ActivityIndicator } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -38,7 +38,7 @@ function AppContent() {
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#3b82f6" />
+        <ActivityIndicator size="large" color="#1d89f1" />
       </View>
     );
   }
@@ -89,7 +89,8 @@ function AppContent() {
     <View style={styles.container}>
       {renderScreen()}
       <CustomTabBar activeTab={activeTab} onTabPress={setActiveTab} />
-      <StatusBar style="auto" />
+      {/* dark = black icons for light mode, light = white icons for dark mode */}
+      <StatusBar style="dark" />
     </View>
   );
 }
