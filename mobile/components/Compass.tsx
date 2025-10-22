@@ -11,11 +11,8 @@ export default function Compass({ heading, onPress }: CompassProps) {
   const rotateAnim = useRef(new Animated.Value(heading)).current;
 
   useEffect(() => {
-    Animated.timing(rotateAnim, {
-      toValue: heading,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
+    // No animation for instant real-time updates
+    rotateAnim.setValue(heading);
   }, [heading]);
 
   const rotation = rotateAnim.interpolate({
@@ -30,21 +27,19 @@ export default function Compass({ heading, onPress }: CompassProps) {
       activeOpacity={0.7}
       data-testid="button-compass"
     >
-      <View style={styles.compassCircle}>
-        <Animated.View
-          style={[
-            styles.compassInner,
-            {
-              transform: [{ rotate: rotation }],
-            },
-          ]}
-        >
-          {/* North needle (red) */}
-          <View style={styles.needleNorth} />
-          {/* South needle (gray) */}
-          <View style={styles.needleSouth} />
-        </Animated.View>
-      </View>
+      <Animated.View
+        style={[
+          styles.needleContainer,
+          {
+            transform: [{ rotate: rotation }],
+          },
+        ]}
+      >
+        {/* North needle (red) - pointing up */}
+        <View style={styles.needleNorth} />
+        {/* South needle (gray) - pointing down */}
+        <View style={styles.needleSouth} />
+      </Animated.View>
     </TouchableOpacity>
   );
 }
@@ -63,17 +58,7 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 5,
   },
-  compassCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "#f5f5f5",
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 2,
-    borderColor: "#333",
-  },
-  compassInner: {
+  needleContainer: {
     width: 32,
     height: 32,
     alignItems: "center",
@@ -86,27 +71,27 @@ const styles = StyleSheet.create({
     height: 0,
     backgroundColor: "transparent",
     borderStyle: "solid",
-    borderLeftWidth: 5,
-    borderRightWidth: 5,
-    borderBottomWidth: 14,
+    borderLeftWidth: 6,
+    borderRightWidth: 6,
+    borderBottomWidth: 16,
     borderLeftColor: "transparent",
     borderRightColor: "transparent",
     borderBottomColor: "#FF3B30",
-    top: 1,
+    top: 0,
   },
-  // Gray/white south needle (pointing down)
+  // Gray south needle (pointing down, connected at base)
   needleSouth: {
     position: "absolute",
     width: 0,
     height: 0,
     backgroundColor: "transparent",
     borderStyle: "solid",
-    borderLeftWidth: 5,
-    borderRightWidth: 5,
-    borderTopWidth: 14,
+    borderLeftWidth: 6,
+    borderRightWidth: 6,
+    borderTopWidth: 16,
     borderLeftColor: "transparent",
     borderRightColor: "transparent",
     borderTopColor: "#666",
-    bottom: 1,
+    bottom: 0,
   },
 });

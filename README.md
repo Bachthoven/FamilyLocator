@@ -465,11 +465,12 @@ This is a personal/family project. If you have suggestions or find bugs, please 
   - Positioned at bottom left corner (mirroring notification bell position)
   - Same size and shape as notification bell (44x44px, rounded)
   - **Custom design with red north needle** - clearly shows current map heading
-  - **Real-time rotation** - compass needle rotates smoothly WHILE rotating the map
+  - **Instant real-time rotation** - compass needle tracks map rotation with zero lag
+  - **No animation delay** - uses direct value updates for immediate responsiveness
   - **Animated reset to north** - tapping compass smoothly swings needle to point up
-  - Clean minimalist design with just red (north) and gray (south) needles
-  - Black border circle for clear visibility
-  - Uses `onRegionChange` for instant real-time feedback during rotation
+  - Ultra-clean minimalist design: connected red/gray needles without border or circle
+  - Needles connect seamlessly at their base with no gaps
+  - Uses `onRegionChange` + `setValue()` for instant visual feedback
   - Matches alignment spacing (16px from edges, 72px from bottom)
 
 ### 2025-10-20
