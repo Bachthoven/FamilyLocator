@@ -468,10 +468,16 @@ This is a personal/family project. If you have suggestions or find bugs, please 
   - **Instant real-time rotation** - compass needle tracks map rotation with zero lag
   - **No animation delay** - uses direct value updates for immediate responsiveness
   - **Animated reset to north** - tapping compass smoothly swings map back to north-up
-  - Ultra-clean minimalist design: red/gray needles with small gap, no border or circle
+  - Ultra-clean minimalist design: red/gray needles with 4px gap, no border or circle
   - Counter-rotates as map turns to maintain north reference
   - Uses `onRegionChange` + `setValue()` for instant visual feedback
   - Matches alignment spacing (16px from edges, 72px from bottom)
+- **Map Type Toggle & POI Fix (Mobile)**: Improved satellite view experience
+  - Changed satellite mode to use "hybrid" map type (satellite imagery + labels/POIs)
+  - POI icons now stay visible in satellite view instead of flashing and disappearing
+  - **Dynamic status bar**: White system icons in hybrid mode, black in standard mode
+  - Status bar changes automatically when toggling map type
+  - Works regardless of app theme (light or dark mode)
 
 ### 2025-10-20
 

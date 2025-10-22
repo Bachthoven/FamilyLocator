@@ -12,6 +12,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Location from "expo-location";
 import { BlurView } from "expo-blur";
+import { StatusBar } from "expo-status-bar";
 import NotificationBell from "../components/NotificationBell";
 import Compass from "../components/Compass";
 
@@ -189,7 +190,7 @@ export default function MapScreen({
   const insets = useSafeAreaInsets();
   const mapRef = useRef<MapView>(null);
   const hasInitializedLocation = useRef(false);
-  const [mapType, setMapType] = useState<"standard" | "satellite">("standard");
+  const [mapType, setMapType] = useState<"standard" | "hybrid">("standard");
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const [mapHeading, setMapHeading] = useState(0); // Track map rotation
 
@@ -332,11 +333,13 @@ export default function MapScreen({
   };
 
   const toggleMapType = () => {
-    setMapType(mapType === "standard" ? "satellite" : "standard");
+    setMapType(mapType === "standard" ? "hybrid" : "standard");
   };
 
   return (
     <View style={styles.container}>
+      {/* Status Bar - white icons in satellite/hybrid mode */}
+      <StatusBar style={mapType === "standard" ? "dark" : "light"} />
       <MapView
         ref={mapRef}
         style={styles.map}
