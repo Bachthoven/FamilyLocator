@@ -12,6 +12,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Location from "expo-location";
 import { BlurView } from "expo-blur";
+import NotificationBell from "../components/NotificationBell";
 
 // Type definitions
 interface FamilyLocation {
@@ -377,6 +378,11 @@ export default function MapScreen({
         ))}
       </MapView>
 
+      {/* Notification Bell - Top Right */}
+      <View style={[styles.notificationBell, { top: insets.top + 16 }]}>
+        <NotificationBell />
+      </View>
+
       {/* Members Indicator - Top Center */}
       <View style={[styles.membersIndicator, { top: insets.top + 16 }]}>
         <BlurView intensity={100} style={styles.membersIndicatorBlur}>
@@ -584,6 +590,13 @@ const styles = StyleSheet.create({
   calloutTime: {
     fontSize: 10,
     color: "#999",
+  },
+
+  // Notification Bell Styles
+  notificationBell: {
+    position: "absolute",
+    right: 16,
+    zIndex: 40,
   },
 
   // Members Indicator Styles
