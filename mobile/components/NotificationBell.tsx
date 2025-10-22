@@ -134,7 +134,7 @@ export default function NotificationBell() {
         activeOpacity={0.7}
         data-testid="button-notifications"
       >
-        <BlurView intensity={100} style={styles.bellBlur}>
+        <View style={styles.bellBlur}>
           <Ionicons name="notifications" size={20} color="#fff" />
           {unreadCount > 0 && (
             <View style={styles.badge}>
@@ -143,7 +143,7 @@ export default function NotificationBell() {
               </Text>
             </View>
           )}
-        </BlurView>
+        </View>
       </TouchableOpacity>
 
       {/* Notifications Modal */}

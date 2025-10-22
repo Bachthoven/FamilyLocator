@@ -444,12 +444,13 @@ This is a personal/family project. If you have suggestions or find bugs, please 
 ### 2025-10-22
 
 - **NotificationBell Component (Mobile)**: Added real-time notification center to mobile map
-  - Positioned at top-right with theme color background (#1d89f1)
+  - Positioned at top-right with solid theme color background (#1d89f1)
   - White bell icon with red badge showing unread count
   - Full modal with color-coded notification icons
   - Auto-refreshes every 5-10 seconds
   - Mark as read functionality (individual and bulk)
   - Matches web app notification center exactly
+  - Fixed: Removed blur effect for consistent color matching across all UI elements
 - **Theme Color Update**: Changed primary color from #007AFF to #1d89f1 across entire mobile app
   - Updated all interactive elements (buttons, icons, markers)
   - Updated tab bar active states
