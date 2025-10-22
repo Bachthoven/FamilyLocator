@@ -419,67 +419,61 @@ export default function MapScreen({
         </View>
       )}
 
-      {/* Map Type Toggle - bottom right */}
-      <TouchableOpacity
-        onPress={toggleMapType}
+      {/* Map Controls - positioned for equal spacing */}
+      <View
         style={{
           position: "absolute",
           right: 16,
-          bottom: 200,
-          ...styles.controlButton,
+          bottom: 50,
+          gap: 8,
+          borderWidth: 2,
+          borderColor: 'blue',
         }}
-        activeOpacity={0.7}
       >
-        <Ionicons
-          name={mapType === "standard" ? "earth-outline" : "map-outline"}
-          size={24}
-          color="#333"
-        />
-      </TouchableOpacity>
+        {/* Map Type Toggle */}
+        <TouchableOpacity
+          onPress={toggleMapType}
+          style={styles.controlButton}
+          activeOpacity={0.7}
+        >
+          <Ionicons
+            name={mapType === "standard" ? "earth-outline" : "map-outline"}
+            size={24}
+            color="#333"
+          />
+        </TouchableOpacity>
 
-      {/* Zoom In */}
-      <TouchableOpacity
-        onPress={zoomIn}
-        style={{
-          position: "absolute",
-          right: 16,
-          bottom: 144,
-          ...styles.controlButton,
-        }}
-        activeOpacity={0.7}
-      >
-        <Ionicons name="add" size={24} color="#333" />
-      </TouchableOpacity>
+        {/* Zoom In */}
+        <TouchableOpacity
+          onPress={zoomIn}
+          style={styles.controlButton}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="add" size={24} color="#333" />
+        </TouchableOpacity>
 
-      {/* Zoom Out */}
-      <TouchableOpacity
-        onPress={zoomOut}
-        style={{
-          position: "absolute",
-          right: 16,
-          bottom: 88,
-          ...styles.controlButton,
-        }}
-        activeOpacity={0.7}
-      >
-        <Ionicons name="remove" size={24} color="#333" />
-      </TouchableOpacity>
+        {/* Zoom Out */}
+        <TouchableOpacity
+          onPress={zoomOut}
+          style={styles.controlButton}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="remove" size={24} color="#333" />
+        </TouchableOpacity>
 
-      {/* Center on User */}
-      <TouchableOpacity
-        onPress={centerOnUser}
-        style={{
-          position: "absolute",
-          right: 16,
-          bottom: 32,
-          ...styles.controlButton,
-          ...styles.centerButton,
-          ...(!currentLocation ? styles.centerButtonDisabled : {}),
-        }}
-        activeOpacity={0.7}
-      >
-        <Ionicons name="navigate" size={24} color="#fff" />
-      </TouchableOpacity>
+        {/* Center on User */}
+        <TouchableOpacity
+          onPress={centerOnUser}
+          style={[
+            styles.controlButton,
+            styles.centerButton,
+            !currentLocation && styles.centerButtonDisabled,
+          ]}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="navigate" size={24} color="#fff" />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
