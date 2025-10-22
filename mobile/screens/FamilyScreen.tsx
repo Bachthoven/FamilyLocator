@@ -253,7 +253,7 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
             onPress={() => setJoinDialogOpen(true)}
             data-testid="button-join-family"
           >
-            <Ionicons name="key-outline" size={18} color="#3B82F6" />
+            <Ionicons name="key-outline" size={18} color="#1d89f1" />
             <Text style={styles.secondaryButtonText}>Join Family</Text>
           </TouchableOpacity>
         </View>
@@ -301,7 +301,7 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                 onPress={() => setJoinDialogOpen(true)}
                 data-testid="button-join-family-empty"
               >
-                <Ionicons name="key-outline" size={18} color="#3B82F6" />
+                <Ionicons name="key-outline" size={18} color="#1d89f1" />
                 <Text style={styles.secondaryButtonText}>Join Family</Text>
               </TouchableOpacity>
             </View>
@@ -338,7 +338,7 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                         <Ionicons
                           name="copy-outline"
                           size={20}
-                          color="#3B82F6"
+                          color="#1d89f1"
                         />
                       </TouchableOpacity>
                     </View>
@@ -403,7 +403,7 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                           onPress={() => handleViewLocation(member)}
                           data-testid={`button-view-location-${member.id}`}
                         >
-                          <Ionicons name="location" size={16} color="#3B82F6" />
+                          <Ionicons name="location" size={16} color="#1d89f1" />
                           <Text style={styles.actionButtonText}>View</Text>
                         </TouchableOpacity>
                       ) : (
@@ -608,7 +608,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   primaryButton: {
-    backgroundColor: "#3B82F6",
+    backgroundColor: "#1d89f1",
   },
   secondaryButton: {
     backgroundColor: "transparent",
@@ -624,7 +624,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   secondaryButtonText: {
-    color: "#3B82F6",
+    color: "#1d89f1",
     fontSize: 14,
     fontWeight: "600",
   },
@@ -662,7 +662,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "700",
     fontFamily: Platform.select({ ios: "Courier", android: "monospace" }),
-    color: "#3B82F6",
+    color: "#1d89f1",
     letterSpacing: 2,
     marginBottom: 4,
   },

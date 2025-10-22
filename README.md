@@ -441,6 +441,22 @@ This is a personal/family project. If you have suggestions or find bugs, please 
 
 ## 📋 Changelog
 
+### 2025-10-22
+
+- **NotificationBell Component (Mobile)**: Added real-time notification center to mobile map
+  - Positioned at top-right with theme color background (#1d89f1)
+  - White bell icon with red badge showing unread count
+  - Full modal with color-coded notification icons
+  - Auto-refreshes every 5-10 seconds
+  - Mark as read functionality (individual and bulk)
+  - Matches web app notification center exactly
+- **Theme Color Update**: Changed primary color from #007AFF to #1d89f1 across entire mobile app
+  - Updated all interactive elements (buttons, icons, markers)
+  - Updated tab bar active states
+  - Updated loading indicators
+  - Updated notification indicators and unread states
+  - All color-coded elements now use new theme color
+
 ### 2025-10-20
 
 - **Documentation Migration**: Moved all documentation from `replit.md` to `README.md`

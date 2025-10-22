@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -118,11 +118,11 @@ export default function NotificationBell() {
       titleStr.includes("family") ||
       titleStr.includes("member")
     ) {
-      return { name: "people" as const, color: "#007AFF" };
+      return { name: "people" as const, color: "#1d89f1" };
     }
 
     // Default info icon
-    return { name: "information-circle" as const, color: "#007AFF" };
+    return { name: "information-circle" as const, color: "#1d89f1" };
   };
 
   return (
@@ -135,11 +135,7 @@ export default function NotificationBell() {
         data-testid="button-notifications"
       >
         <BlurView intensity={100} style={styles.bellBlur}>
-          <Ionicons
-            name="notifications"
-            size={20}
-            color={unreadCount > 0 ? "#fff" : "#333"}
-          />
+          <Ionicons name="notifications" size={20} color="#fff" />
           {unreadCount > 0 && (
             <View style={styles.badge}>
               <Text style={styles.badgeText}>
@@ -206,7 +202,7 @@ export default function NotificationBell() {
             <ScrollView style={styles.notificationsList}>
               {isLoading ? (
                 <View style={styles.loadingContainer}>
-                  <ActivityIndicator size="large" color="#007AFF" />
+                  <ActivityIndicator size="large" color="#1d89f1" />
                   <Text style={styles.loadingText}>
                     Loading notifications...
                   </Text>
@@ -326,7 +322,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    backgroundColor: "#1d89f1",
   },
   badge: {
     position: "absolute",
@@ -395,7 +391,7 @@ const styles = StyleSheet.create({
   markAllButton: {
     paddingHorizontal: 12,
     paddingVertical: 6,
-    backgroundColor: "#007AFF",
+    backgroundColor: "#1d89f1",
     borderRadius: 8,
   },
   markAllText: {
@@ -421,6 +417,9 @@ const styles = StyleSheet.create({
     marginTop: 16,
     fontSize: 14,
     color: "#666",
+  },
+  loadingIndicator: {
+    color: "#1d89f1",
   },
   emptyState: {
     padding: 60,
@@ -462,9 +461,9 @@ const styles = StyleSheet.create({
   },
   notificationItemUnread: {
     backgroundColor: "#EBF5FF",
-    borderLeftColor: "#007AFF",
+    borderLeftColor: "#1d89f1",
     borderWidth: 1,
-    borderColor: "#007AFF",
+    borderColor: "#1d89f1",
   },
   unreadDot: {
     position: "absolute",
