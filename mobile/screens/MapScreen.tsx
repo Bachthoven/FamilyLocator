@@ -343,12 +343,14 @@ export default function MapScreen({
         provider={PROVIDER_GOOGLE}
         mapType={mapType}
         initialRegion={initialRegion}
-        onRegionChangeComplete={(region) => {
-          onRegionChange?.(region);
-          // Update compass heading
+        onRegionChange={(region) => {
+          // Update compass heading in real-time while rotating
           mapRef.current?.getCamera().then((camera) => {
             setMapHeading(camera.heading || 0);
           });
+        }}
+        onRegionChangeComplete={(region) => {
+          onRegionChange?.(region);
         }}
         showsUserLocation={false}
         showsMyLocationButton={false}

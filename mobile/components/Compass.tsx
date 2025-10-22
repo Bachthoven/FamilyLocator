@@ -41,17 +41,9 @@ export default function Compass({ heading, onPress }: CompassProps) {
         >
           {/* North needle (red) */}
           <View style={styles.needleNorth} />
-          {/* South needle (white/gray) */}
+          {/* South needle (gray) */}
           <View style={styles.needleSouth} />
-          {/* East-West line */}
-          <View style={styles.crossLineHorizontal} />
-          {/* North-South line base */}
-          <View style={styles.crossLineVertical} />
         </Animated.View>
-        {/* Cardinal directions - these stay fixed */}
-        <View style={styles.cardinalN}>
-          <View style={styles.cardinalDot} />
-        </View>
       </View>
     </TouchableOpacity>
   );
@@ -116,30 +108,5 @@ const styles = StyleSheet.create({
     borderRightColor: "transparent",
     borderTopColor: "#666",
     bottom: 1,
-  },
-  // Horizontal line (E-W)
-  crossLineHorizontal: {
-    position: "absolute",
-    width: 20,
-    height: 2,
-    backgroundColor: "#333",
-  },
-  // Vertical line (N-S)
-  crossLineVertical: {
-    position: "absolute",
-    width: 2,
-    height: 20,
-    backgroundColor: "#333",
-  },
-  // North indicator dot (fixed position at top)
-  cardinalN: {
-    position: "absolute",
-    top: 2,
-  },
-  cardinalDot: {
-    width: 3,
-    height: 3,
-    borderRadius: 1.5,
-    backgroundColor: "#333",
   },
 });
