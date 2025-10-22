@@ -70,6 +70,7 @@ function AppContent() {
           onLocationUpdate={setUserLocation}
           savedRegion={mapRegion}
           onRegionChange={setMapRegion}
+          isActive={activeTab === "Map"}
         />
       </View>
       <View

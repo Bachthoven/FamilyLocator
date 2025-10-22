@@ -177,6 +177,7 @@ interface MapScreenProps {
     latitudeDelta: number;
     longitudeDelta: number;
   }) => void;
+  isActive?: boolean;
 }
 
 export default function MapScreen({
@@ -186,6 +187,7 @@ export default function MapScreen({
   onLocationUpdate,
   savedRegion,
   onRegionChange,
+  isActive = true,
 }: MapScreenProps) {
   const insets = useSafeAreaInsets();
   const mapRef = useRef<MapView>(null);
@@ -354,7 +356,10 @@ export default function MapScreen({
           });
         }}
         onRegionChangeComplete={(region) => {
-          onRegionChange?.(region);
+          // Only save region when Map tab is active to prevent saving incorrect positions
+          if (isActive) {
+            onRegionChange?.(region);
+          }
         }}
         showsUserLocation={false}
         showsMyLocationButton={false}

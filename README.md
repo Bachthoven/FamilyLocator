@@ -481,9 +481,10 @@ This is a personal/family project. If you have suggestions or find bugs, please 
 - **Map Position Persistence (Mobile)**: Map stays exactly where you left it
   - All screens remain mounted but hidden when switching tabs
   - MapScreen never unmounts, preserving map position, zoom, and rotation naturally
-  - No restoration logic needed - position is maintained automatically
+  - Region changes only saved when Map tab is active (prevents saving incorrect positions)
+  - `isActive` prop prevents `onRegionChangeComplete` from triggering when screen is hidden
   - Inactive screens use `opacity: 0` and `pointerEvents: "none"` to hide them
-  - Switching back to Map tab shows the exact view you left
+  - Map position, zoom, and rotation are perfectly preserved when switching tabs
 
 ### 2025-10-20
 
