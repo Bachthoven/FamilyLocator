@@ -475,9 +475,11 @@ This is a personal/family project. If you have suggestions or find bugs, please 
 - **Map Type Toggle & POI Fix (Mobile)**: Improved satellite view experience
   - Changed satellite mode to use "hybrid" map type (satellite imagery + labels/POIs)
   - POI icons now stay visible in satellite view instead of flashing and disappearing
-  - **Dynamic status bar**: White system icons in hybrid mode, black in standard mode
-  - Status bar changes automatically when toggling map type
-  - Works regardless of app theme (light or dark mode)
+  - **Dynamic status bar**: Status bar automatically adapts to map type
+  - White system icons (light style) in hybrid/satellite mode for better visibility
+  - Black system icons (dark style) in standard mode
+  - Status bar changes instantly when toggling map type
+  - Works across all screens (mapType state lifted to App.tsx)
 - **Map Position Persistence (Mobile)**: Map stays exactly where you left it
   - All screens remain mounted but hidden when switching tabs
   - MapScreen never unmounts, preserving map position, zoom, and rotation naturally

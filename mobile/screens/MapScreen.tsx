@@ -178,6 +178,8 @@ interface MapScreenProps {
     longitudeDelta: number;
   }) => void;
   isActive?: boolean;
+  mapType?: "standard" | "hybrid";
+  onMapTypeChange?: (mapType: "standard" | "hybrid") => void;
 }
 
 export default function MapScreen({
@@ -188,13 +190,27 @@ export default function MapScreen({
   savedRegion,
   onRegionChange,
   isActive = true,
+  mapType: mapTypeProp,
+  onMapTypeChange,
 }: MapScreenProps) {
   const insets = useSafeAreaInsets();
   const mapRef = useRef<MapView>(null);
   const hasInitializedLocation = useRef(false);
-  const [mapType, setMapType] = useState<"standard" | "hybrid">("standard");
+  const [localMapType, setLocalMapType] = useState<"standard" | "hybrid">(
+    "standard"
+  );
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const [mapHeading, setMapHeading] = useState(0); // Track map rotation
+
+  // Use prop mapType if provided, otherwise use local state
+  const mapType = mapTypeProp !== undefined ? mapTypeProp : localMapType;
+  const setMapType = (type: "standard" | "hybrid") => {
+    if (onMapTypeChange) {
+      onMapTypeChange(type);
+    } else {
+      setLocalMapType(type);
+    }
+  };
 
   // Use prop location if provided, otherwise use local state
   const currentLocation = userLocationProp;

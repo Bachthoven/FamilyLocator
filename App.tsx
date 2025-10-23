@@ -33,6 +33,7 @@ function AppContent() {
     latitudeDelta: number;
     longitudeDelta: number;
   } | null>(null);
+  const [mapType, setMapType] = useState<"standard" | "hybrid">("standard");
 
   // Show loading screen while checking authentication
   if (isLoading) {
@@ -71,6 +72,8 @@ function AppContent() {
           savedRegion={mapRegion}
           onRegionChange={setMapRegion}
           isActive={activeTab === "Map"}
+          mapType={mapType}
+          onMapTypeChange={setMapType}
         />
       </View>
       <View
@@ -94,8 +97,8 @@ function AppContent() {
         <SettingsScreen />
       </View>
       <CustomTabBar activeTab={activeTab} onTabPress={setActiveTab} />
-      {/* dark = black icons for light mode, light = white icons for dark mode */}
-      <StatusBar style="dark" />
+      {/* dark = black icons for standard map, light = white icons for hybrid/satellite map */}
+      <StatusBar style={mapType === "hybrid" ? "light" : "dark"} />
     </View>
   );
 }
