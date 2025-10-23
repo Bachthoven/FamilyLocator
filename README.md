@@ -443,6 +443,14 @@ This is a personal/family project. If you have suggestions or find bugs, please 
 
 ### 2025-10-22
 
+- **Custom Themed Dialogs (Mobile)**: Replaced all native alerts with custom-styled dialogs
+  - Created AlertDialog component matching app's design system
+  - Theme color (#1d89f1) with consistent button styles, icons, and rounded corners
+  - Smooth fade-in animations and backdrop blur
+  - Custom icons for different alert types (success, error, confirmation, info)
+  - Applied to: family member removal, location permissions, join family, clipboard copy, navigation
+  - Consistent user experience across all confirmation/alert dialogs
+
 - **NotificationBell Component (Mobile)**: Added real-time notification center to mobile map
   - Positioned at top-right with solid theme color background (#1d89f1)
   - White bell icon with red badge showing unread count

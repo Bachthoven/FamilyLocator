@@ -5,7 +5,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
-  Alert,
 } from "react-native";
 import MapView, { Marker, Callout, PROVIDER_GOOGLE } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
@@ -15,6 +14,7 @@ import { BlurView } from "expo-blur";
 import { StatusBar } from "expo-status-bar";
 import NotificationBell from "../components/NotificationBell";
 import Compass from "../components/Compass";
+import AlertDialog from "../components/AlertDialog";
 
 // Type definitions
 interface FamilyLocation {
@@ -202,6 +202,15 @@ export default function MapScreen({
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const [mapHeading, setMapHeading] = useState(0); // Track map rotation
 
+  // Alert dialog state
+  const [alertConfig, setAlertConfig] = useState<{
+    visible: boolean;
+    title?: string;
+    message?: string;
+    icon?: keyof typeof Ionicons.glyphMap;
+    iconColor?: string;
+  }>({ visible: false });
+
   // Use prop mapType if provided, otherwise use local state
   const mapType = mapTypeProp !== undefined ? mapTypeProp : localMapType;
   const setMapType = (type: "standard" | "hybrid") => {
@@ -265,11 +274,14 @@ export default function MapScreen({
 
       if (status !== "granted") {
         setIsLoadingLocation(false);
-        Alert.alert(
-          "Permission Required",
-          "Please enable location permissions to see yourself on the map.",
-          [{ text: "OK" }]
-        );
+        setAlertConfig({
+          visible: true,
+          title: "Permission Required",
+          message:
+            "Please enable location permissions to see yourself on the map.",
+          icon: "location",
+          iconColor: "#FF3B30",
+        });
         return;
       }
 
@@ -302,11 +314,14 @@ export default function MapScreen({
     } catch (error) {
       console.error("Location error:", error);
       setIsLoadingLocation(false);
-      Alert.alert(
-        "Location Error",
-        "Unable to get your location. Please check your device settings.",
-        [{ text: "OK" }]
-      );
+      setAlertConfig({
+        visible: true,
+        title: "Location Error",
+        message:
+          "Unable to get your location. Please check your device settings.",
+        icon: "alert-circle",
+        iconColor: "#FF3B30",
+      });
     }
   };
 
@@ -524,6 +539,17 @@ export default function MapScreen({
           <Ionicons name="navigate" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
+
+      {/* Custom Alert Dialog */}
+      <AlertDialog
+        visible={alertConfig.visible}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        icon={alertConfig.icon}
+        iconColor={alertConfig.iconColor}
+        buttons={[{ text: "OK" }]}
+        onDismiss={() => setAlertConfig({ visible: false })}
+      />
     </View>
   );
 }

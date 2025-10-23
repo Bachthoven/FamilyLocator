@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   Modal,
   TextInput,
-  Alert,
   Clipboard,
   Platform,
 } from "react-native";
@@ -18,6 +17,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../src/contexts/AuthContext";
 import { apiRequest } from "../src/lib/queryClient";
 import { User, InvitationCode } from "../../shared/schema";
+import AlertDialog from "../components/AlertDialog";
 
 interface FamilyScreenProps {
   onNavigateToMap?: (location: {
@@ -36,6 +36,20 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
   const [joinCode, setJoinCode] = useState("");
   const [codeDialogOpen, setCodeDialogOpen] = useState(false);
   const [generatedCode, setGeneratedCode] = useState("");
+
+  // Alert dialog states
+  const [alertConfig, setAlertConfig] = useState<{
+    visible: boolean;
+    title?: string;
+    message?: string;
+    icon?: keyof typeof Ionicons.glyphMap;
+    iconColor?: string;
+    buttons?: Array<{
+      text: string;
+      onPress?: () => void;
+      style?: "default" | "cancel" | "destructive";
+    }>;
+  }>({ visible: false });
 
   // Fetch family members
   const { data: familyMembers = [], isLoading: familyLoading } = useQuery<
@@ -80,7 +94,14 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
       queryClient.invalidateQueries({ queryKey: ["/api/family/codes"] });
     },
     onError: () => {
-      Alert.alert("Error", "Failed to generate invitation code");
+      setAlertConfig({
+        visible: true,
+        title: "Error",
+        message: "Failed to generate invitation code",
+        icon: "alert-circle",
+        iconColor: "#FF3B30",
+        buttons: [{ text: "OK" }],
+      });
     },
   });
 
@@ -91,13 +112,27 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
       return await res.json();
     },
     onSuccess: () => {
-      Alert.alert("Success!", "You have successfully joined the family");
+      setAlertConfig({
+        visible: true,
+        title: "Success!",
+        message: "You have successfully joined the family",
+        icon: "checkmark-circle",
+        iconColor: "#10B981",
+        buttons: [{ text: "OK" }],
+      });
       setJoinDialogOpen(false);
       setJoinCode("");
       queryClient.invalidateQueries({ queryKey: ["/api/family"] });
     },
     onError: (error: Error) => {
-      Alert.alert("Error", error.message || "Failed to join family");
+      setAlertConfig({
+        visible: true,
+        title: "Error",
+        message: error.message || "Failed to join family",
+        icon: "alert-circle",
+        iconColor: "#FF3B30",
+        buttons: [{ text: "OK" }],
+      });
     },
   });
 
@@ -107,36 +142,57 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
       await apiRequest("DELETE", `/api/family/${memberId}`);
     },
     onSuccess: () => {
-      Alert.alert(
-        "Member removed",
-        "Family member has been removed successfully"
-      );
+      setAlertConfig({
+        visible: true,
+        title: "Member removed",
+        message: "Family member has been removed successfully",
+        icon: "checkmark-circle",
+        iconColor: "#10B981",
+        buttons: [{ text: "OK" }],
+      });
       queryClient.invalidateQueries({ queryKey: ["/api/family"] });
       queryClient.invalidateQueries({ queryKey: ["/api/locations/family"] });
     },
     onError: () => {
-      Alert.alert("Error", "Failed to remove family member");
+      setAlertConfig({
+        visible: true,
+        title: "Error",
+        message: "Failed to remove family member",
+        icon: "alert-circle",
+        iconColor: "#FF3B30",
+        buttons: [{ text: "OK" }],
+      });
     },
   });
 
   const copyToClipboard = (code: string) => {
     Clipboard.setString(code);
-    Alert.alert("Copied!", "Invitation code copied to clipboard");
+    setAlertConfig({
+      visible: true,
+      title: "Copied!",
+      message: "Invitation code copied to clipboard",
+      icon: "clipboard",
+      iconColor: "#1d89f1",
+      buttons: [{ text: "OK" }],
+    });
   };
 
   const handleRemove = (memberId: string, memberName: string) => {
-    Alert.alert(
-      "Remove Family Member",
-      `Are you sure you want to remove ${memberName}?`,
-      [
+    setAlertConfig({
+      visible: true,
+      title: "Remove Family Member",
+      message: `Are you sure you want to remove ${memberName}?`,
+      icon: "person-remove",
+      iconColor: "#FF3B30",
+      buttons: [
         { text: "Cancel", style: "cancel" },
         {
           text: "Remove",
           style: "destructive",
           onPress: () => removeMutation.mutate(memberId),
         },
-      ]
-    );
+      ],
+    });
   };
 
   const handleViewLocation = (member: User) => {
@@ -150,10 +206,14 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
         longitude: locationData.longitude,
         userId: member.id,
       });
-      Alert.alert(
-        "Navigating to map",
-        `Centering on ${member.firstName || member.email}'s location`
-      );
+      setAlertConfig({
+        visible: true,
+        title: "Navigating to map",
+        message: `Centering on ${member.firstName || member.email}'s location`,
+        icon: "navigate",
+        iconColor: "#1d89f1",
+        buttons: [{ text: "OK" }],
+      });
     }
   };
 
@@ -555,6 +615,17 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
           </BlurView>
         </View>
       </Modal>
+
+      {/* Custom Alert Dialog */}
+      <AlertDialog
+        visible={alertConfig.visible}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        icon={alertConfig.icon}
+        iconColor={alertConfig.iconColor}
+        buttons={alertConfig.buttons}
+        onDismiss={() => setAlertConfig({ visible: false })}
+      />
     </View>
   );
 }

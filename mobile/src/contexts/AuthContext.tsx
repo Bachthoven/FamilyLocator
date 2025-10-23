@@ -12,7 +12,8 @@ import {
 } from "@tanstack/react-query";
 import { User, InsertUser } from "../../../shared/schema";
 import { getQueryFn, apiRequest, queryClient } from "../lib/queryClient";
-import { Alert } from "react-native";
+import AlertDialog from "../../components/AlertDialog";
+import { Ionicons } from "@expo/vector-icons";
 
 type AuthContextType = {
   user: User | null;
@@ -32,6 +33,13 @@ export const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isInitialized, setIsInitialized] = useState(false);
+  const [alertConfig, setAlertConfig] = useState<{
+    visible: boolean;
+    title?: string;
+    message?: string;
+    icon?: keyof typeof Ionicons.glyphMap;
+    iconColor?: string;
+  }>({ visible: false });
 
   const {
     data: user,
@@ -71,7 +79,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       queryClient.setQueryData(["/api/user"], user);
     },
     onError: (error: Error) => {
-      Alert.alert("Login Failed", error.message);
+      setAlertConfig({
+        visible: true,
+        title: "Login Failed",
+        message: error.message,
+        icon: "alert-circle",
+        iconColor: "#FF3B30",
+      });
     },
   });
 
@@ -84,7 +98,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       queryClient.setQueryData(["/api/user"], user);
     },
     onError: (error: Error) => {
-      Alert.alert("Registration Failed", error.message);
+      setAlertConfig({
+        visible: true,
+        title: "Registration Failed",
+        message: error.message,
+        icon: "alert-circle",
+        iconColor: "#FF3B30",
+      });
     },
   });
 
@@ -97,7 +117,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       queryClient.clear();
     },
     onError: (error: Error) => {
-      Alert.alert("Logout Failed", error.message);
+      setAlertConfig({
+        visible: true,
+        title: "Logout Failed",
+        message: error.message,
+        icon: "alert-circle",
+        iconColor: "#FF3B30",
+      });
     },
   });
 
@@ -113,6 +139,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }}
     >
       {children}
+
+      {/* Custom Alert Dialog */}
+      <AlertDialog
+        visible={alertConfig.visible}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        icon={alertConfig.icon}
+        iconColor={alertConfig.iconColor}
+        buttons={[{ text: "OK" }]}
+        onDismiss={() => setAlertConfig({ visible: false })}
+      />
     </AuthContext.Provider>
   );
 }
