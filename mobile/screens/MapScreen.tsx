@@ -251,23 +251,39 @@ export default function MapScreen({
   };
 
   // Convert API data to FamilyLocation format for markers
-  const familyLocations: FamilyLocation[] = familyLocationsData.map((loc) => {
+  const familyLocations: FamilyLocation[] = familyLocationsData
+    .filter((loc) => {
+      // Only show markers for users with location sharing enabled
+      return loc.user.locationSharingEnabled;
+    })
+    .map((loc) => {
+      const now = new Date();
+      const timestamp = loc.timestamp ? new Date(loc.timestamp) : new Date(0);
+      const minutesAgo = Math.floor(
+        (now.getTime() - timestamp.getTime()) / (1000 * 60)
+      );
+      const isRecent = minutesAgo < 15; // Active within 15 minutes
+
+      return {
+        id: loc.user.id,
+        latitude: loc.latitude,
+        longitude: loc.longitude,
+        name: loc.user.firstName || loc.user.email,
+        address: `Last seen ${minutesAgo < 1 ? "just now" : `${minutesAgo} min ago`}`,
+        isRecent,
+      };
+    });
+
+  // Count only truly "online" members (< 5 minutes, location sharing enabled)
+  const onlineMembersCount = familyLocationsData.filter((loc) => {
+    if (!loc.user.locationSharingEnabled || !loc.timestamp) return false;
     const now = new Date();
-    const timestamp = loc.timestamp ? new Date(loc.timestamp) : new Date(0);
+    const timestamp = new Date(loc.timestamp);
     const minutesAgo = Math.floor(
       (now.getTime() - timestamp.getTime()) / (1000 * 60)
     );
-    const isRecent = minutesAgo < 15; // Active within 15 minutes
-
-    return {
-      id: loc.user.id,
-      latitude: loc.latitude,
-      longitude: loc.longitude,
-      name: loc.user.firstName || loc.user.email,
-      address: `Last seen ${minutesAgo < 1 ? "just now" : `${minutesAgo} min ago`}`,
-      isRecent,
-    };
-  });
+    return minutesAgo < 5; // Only count as online if active within last 5 minutes
+  }).length;
 
   const places: Place[] = [
     // { id: 1, latitude: 40.7589, longitude: -73.9851, name: 'Home', category: 'home', address: '123 Main St' },
@@ -482,8 +498,8 @@ export default function MapScreen({
           <View style={styles.membersIndicatorContent}>
             <View style={styles.statusDot} />
             <Text style={styles.membersText}>
-              {familyLocations.length} member
-              {familyLocations.length !== 1 ? "s" : ""} online
+              {onlineMembersCount} member
+              {onlineMembersCount !== 1 ? "s" : ""} online
             </Text>
           </View>
         </BlurView>
