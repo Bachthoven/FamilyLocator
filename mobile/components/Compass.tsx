@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
     borderLeftColor: "transparent",
     borderRightColor: "transparent",
     borderBottomColor: "#FF3B30",
-    top: 7,
+    top: 3,
   },
   // Gray south needle (pointing down, with gap at base)
   needleSouth: {
@@ -93,6 +93,6 @@ const styles = StyleSheet.create({
     borderLeftColor: "transparent",
     borderRightColor: "transparent",
     borderTopColor: "#666",
-    bottom: 7,
+    bottom: 3,
   },
 });
