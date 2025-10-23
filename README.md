@@ -450,6 +450,12 @@ This is a personal/family project. If you have suggestions or find bugs, please 
   - Custom icons for different alert types (success, error, confirmation, info)
   - Applied to: family member removal, location permissions, join family, clipboard copy, navigation
   - Consistent user experience across all confirmation/alert dialogs
+- **Members Indicator (Mobile Map)**: Fixed to show real-time family member count
+  - Fetches actual family location data from API every 10 seconds
+  - Shows count of family members who have shared location recently (within 15 minutes)
+  - Displays family member markers on map with real location data
+  - Includes "last seen" timestamps in marker callouts
+  - Green pulsing markers for active members, gray for inactive
 
 - **NotificationBell Component (Mobile)**: Added real-time notification center to mobile map
   - Positioned at top-right with solid theme color background (#1d89f1)

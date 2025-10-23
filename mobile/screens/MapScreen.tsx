@@ -12,6 +12,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Location from "expo-location";
 import { BlurView } from "expo-blur";
 import { StatusBar } from "expo-status-bar";
+import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "../src/contexts/AuthContext";
+import { User } from "../../shared/schema";
 import NotificationBell from "../components/NotificationBell";
 import Compass from "../components/Compass";
 import AlertDialog from "../components/AlertDialog";
@@ -201,6 +204,7 @@ export default function MapScreen({
   );
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const [mapHeading, setMapHeading] = useState(0); // Track map rotation
+  const { user } = useAuth();
 
   // Alert dialog state
   const [alertConfig, setAlertConfig] = useState<{
@@ -210,6 +214,20 @@ export default function MapScreen({
     icon?: keyof typeof Ionicons.glyphMap;
     iconColor?: string;
   }>({ visible: false });
+
+  // Fetch family locations for the map
+  const { data: familyLocationsData = [] } = useQuery<
+    Array<{
+      user: User;
+      latitude: number;
+      longitude: number;
+      timestamp: Date | null;
+    }>
+  >({
+    queryKey: ["/api/locations/family"],
+    enabled: !!user && isActive,
+    refetchInterval: 10000, // Refresh every 10 seconds
+  });
 
   // Use prop mapType if provided, otherwise use local state
   const mapType = mapTypeProp !== undefined ? mapTypeProp : localMapType;
@@ -232,10 +250,24 @@ export default function MapScreen({
     longitudeDelta: 0.0421,
   };
 
-  // Mock data for demonstration - replace with actual API calls
-  const familyLocations: FamilyLocation[] = [
-    // { id: 1, latitude: 40.7580, longitude: -73.9855, name: 'John Doe', address: 'Times Square, NYC', isRecent: true },
-  ];
+  // Convert API data to FamilyLocation format for markers
+  const familyLocations: FamilyLocation[] = familyLocationsData.map((loc) => {
+    const now = new Date();
+    const timestamp = loc.timestamp ? new Date(loc.timestamp) : new Date(0);
+    const minutesAgo = Math.floor(
+      (now.getTime() - timestamp.getTime()) / (1000 * 60)
+    );
+    const isRecent = minutesAgo < 15; // Active within 15 minutes
+
+    return {
+      id: loc.user.id,
+      latitude: loc.latitude,
+      longitude: loc.longitude,
+      name: loc.user.firstName || loc.user.email,
+      address: `Last seen ${minutesAgo < 1 ? "just now" : `${minutesAgo} min ago`}`,
+      isRecent,
+    };
+  });
 
   const places: Place[] = [
     // { id: 1, latitude: 40.7589, longitude: -73.9851, name: 'Home', category: 'home', address: '123 Main St' },
