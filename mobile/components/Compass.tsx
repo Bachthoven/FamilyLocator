@@ -74,11 +74,11 @@ const styles = StyleSheet.create({
     borderStyle: "solid",
     borderLeftWidth: 6,
     borderRightWidth: 6,
-    borderBottomWidth: 14,
+    borderBottomWidth: 12,
     borderLeftColor: "transparent",
     borderRightColor: "transparent",
     borderBottomColor: "#FF3B30",
-    top: 7,
+    top: 2,
   },
   // Gray south needle (pointing down, with gap at base)
   needleSouth: {
@@ -89,10 +89,10 @@ const styles = StyleSheet.create({
     borderStyle: "solid",
     borderLeftWidth: 6,
     borderRightWidth: 6,
-    borderTopWidth: 14,
+    borderTopWidth: 12,
     borderLeftColor: "transparent",
     borderRightColor: "transparent",
     borderTopColor: "#666",
-    bottom: 7,
+    bottom: 2,
   },
 });
