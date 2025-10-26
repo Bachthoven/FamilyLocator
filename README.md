@@ -443,8 +443,8 @@ This is a personal/family project. If you have suggestions or find bugs, please 
 
 ### 2025-10-26
 
-- **Theme Color Refresh**: Updated primary theme color to darker deep sky blue (#0891B2)
-  - Changed from #1d89f1 to #0891B2 (darker deep sky blue, balanced tone)
+- **Theme Color Update**: Updated primary theme color to darker deep sky blue (#0EA5E9)
+  - Changed from #1d89f1 to #0EA5E9 (darker deep sky blue)
   - Updated across all mobile components: buttons, icons, markers, tab bar
   - Updated notification bell, alert dialogs, loading indicators
   - Updated interactive elements and active states
@@ -452,7 +452,7 @@ This is a personal/family project. If you have suggestions or find bugs, please 
 
 - **Family Tab UI Enhancements (Mobile)**:
   - Removed family member count indicator from section header
-  - Updated profile avatars to use blue theme color (#0891B2) instead of gray
+  - Updated profile avatars to use blue theme color (#0EA5E9) instead of gray
   - Profile avatars now show both first and last initials (e.g., "JD" for John Doe)
   - Added logged-in user to family members list with "You" badge
   - Logged-in user shows as "Active: Currently active" with green status
@@ -464,7 +464,7 @@ This is a personal/family project. If you have suggestions or find bugs, please 
 
 - **Custom Themed Dialogs (Mobile)**: Replaced all native alerts with custom-styled dialogs
   - Created AlertDialog component matching app's design system
-  - Theme color (#0891B2) with consistent button styles, icons, and rounded corners
+  - Theme color (#0EA5E9) with consistent button styles, icons, and rounded corners
   - Smooth fade-in animations and backdrop blur
   - Custom icons for different alert types (success, error, confirmation, info)
   - Applied to: family member removal, location permissions, join family, clipboard copy, navigation
@@ -479,7 +479,7 @@ This is a personal/family project. If you have suggestions or find bugs, please 
   - Includes "last seen" timestamps in marker callouts
 
 - **NotificationBell Component (Mobile)**: Added real-time notification center to mobile map
-  - Positioned at top-right with solid theme color background (#0891B2)
+  - Positioned at top-right with solid theme color background (#0EA5E9)
   - White bell icon with red badge showing unread count
   - Full modal with color-coded notification icons
   - Auto-refreshes every 5-10 seconds
@@ -489,11 +489,11 @@ This is a personal/family project. If you have suggestions or find bugs, please 
 - **Family Tab Statistics (Mobile)**: Added real-time family statistics at bottom of Family tab
   - **Copied EXACTLY from web app's Family tab UI**
   - Two cards in a row showing Total Members and Online Now counts
-  - Total Members: Large primary color number (#0891B2) with count of all family members
+  - Total Members: Large primary color number (#0EA5E9) with count of all family members
   - Online Now: Large green number (#10B981) counting members active within last 5 minutes
   - Cards have white background, border, rounded corners, and centered text
   - Matches web app styling: grid layout, card design, colors, and typography
-- **Theme Color Update**: Changed primary color from #007AFF to #0891B2 across entire mobile app
+- **Theme Color Update**: Changed primary color from #007AFF to #0EA5E9 across entire mobile app
   - Updated all interactive elements (buttons, icons, markers)
   - Updated tab bar active states
   - Updated loading indicators
