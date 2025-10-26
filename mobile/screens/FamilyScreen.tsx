@@ -411,10 +411,55 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
                 <Ionicons name="people-outline" size={20} color="#6B7280" />
-                <Text style={styles.sectionTitle}>
-                  Family Members ({familyMembers.length})
-                </Text>
+                <Text style={styles.sectionTitle}>Family Members</Text>
               </View>
+              {/* Logged-in user */}
+              {user && (
+                <View
+                  style={styles.memberCard}
+                  data-testid={`card-member-${user.id}`}
+                >
+                  <View style={styles.memberInfo}>
+                    <View style={styles.avatar}>
+                      <Text style={styles.avatarText}>
+                        {user.firstName && user.lastName
+                          ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
+                          : user.firstName
+                            ? user.firstName[0].toUpperCase()
+                            : user.email?.[0].toUpperCase()}
+                      </Text>
+                    </View>
+                    <View style={styles.memberDetails}>
+                      <View style={styles.memberNameRow}>
+                        <Text style={styles.memberName}>
+                          {user.firstName && user.lastName
+                            ? `${user.firstName} ${user.lastName}`
+                            : user.firstName || user.email}
+                        </Text>
+                        <View style={styles.youBadge}>
+                          <Text style={styles.youBadgeText}>You</Text>
+                        </View>
+                      </View>
+                      <View style={styles.statusRow}>
+                        <View
+                          style={[
+                            styles.statusDot,
+                            { backgroundColor: "#10B981" },
+                          ]}
+                        />
+                        <Text style={styles.statusText}>
+                          Active: Currently active
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+                  <View style={styles.memberActions}>
+                    <View style={styles.actionButtonDisabled}>
+                      <Text style={styles.actionButtonTextDisabled}>You</Text>
+                    </View>
+                  </View>
+                </View>
+              )}
               {familyMembers.map((member) => {
                 const statusInfo = getStatusInfo(member);
                 const locationData = familyLocations.find(
@@ -436,9 +481,11 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                     <View style={styles.memberInfo}>
                       <View style={styles.avatar}>
                         <Text style={styles.avatarText}>
-                          {member.firstName
-                            ? member.firstName[0].toUpperCase()
-                            : member.email?.[0].toUpperCase()}
+                          {member.firstName && member.lastName
+                            ? `${member.firstName[0]}${member.lastName[0]}`.toUpperCase()
+                            : member.firstName
+                              ? member.firstName[0].toUpperCase()
+                              : member.email?.[0].toUpperCase()}
                         </Text>
                       </View>
                       <View style={styles.memberDetails}>
@@ -496,12 +543,14 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
             {/* Statistics */}
             <View style={styles.statistics}>
               <View style={styles.statCard}>
-                <Text style={styles.statNumber}>{familyMembers.length}</Text>
+                <Text style={styles.statNumber}>
+                  {familyMembers.length + 1}
+                </Text>
                 <Text style={styles.statLabel}>Total Members</Text>
               </View>
               <View style={styles.statCard}>
                 <Text style={styles.statNumberOnline}>
-                  {
+                  {1 +
                     familyLocations.filter((loc) => {
                       if (!loc.user.locationSharingEnabled || !loc.timestamp)
                         return false;
@@ -511,8 +560,7 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                         (now.getTime() - timestamp.getTime()) / (1000 * 60)
                       );
                       return minutesAgo < 5;
-                    }).length
-                  }
+                    }).length}
                 </Text>
                 <Text style={styles.statLabel}>Online Now</Text>
               </View>
@@ -845,24 +893,41 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: "#E5E7EB",
+    backgroundColor: "#0891B2",
     alignItems: "center",
     justifyContent: "center",
   },
   avatarText: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#6B7280",
+    color: "#fff",
   },
   memberDetails: {
     marginLeft: 12,
     flex: 1,
+  },
+  memberNameRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 4,
   },
   memberName: {
     fontSize: 16,
     fontWeight: "600",
     color: "#111827",
     marginBottom: 4,
+  },
+  youBadge: {
+    backgroundColor: "#0891B2",
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  youBadgeText: {
+    color: "#fff",
+    fontSize: 11,
+    fontWeight: "600",
   },
   statusRow: {
     flexDirection: "row",
