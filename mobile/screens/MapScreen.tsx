@@ -253,8 +253,17 @@ export default function MapScreen({
   // Convert API data to FamilyLocation format for markers
   const familyLocations: FamilyLocation[] = familyLocationsData
     .filter((loc) => {
-      // Only show markers for users with location sharing enabled
-      return loc.user.locationSharingEnabled;
+      // Only show markers for users with location sharing enabled AND recent locations (< 24 hours)
+      if (!loc.user.locationSharingEnabled || !loc.timestamp) return false;
+
+      const now = new Date();
+      const timestamp = loc.timestamp ? new Date(loc.timestamp) : new Date(0);
+      const hoursAgo = Math.floor(
+        (now.getTime() - timestamp.getTime()) / (1000 * 60 * 60)
+      );
+
+      // Don't show markers for locations older than 24 hours
+      return hoursAgo < 24;
     })
     .map((loc) => {
       const now = new Date();
@@ -262,7 +271,7 @@ export default function MapScreen({
       const minutesAgo = Math.floor(
         (now.getTime() - timestamp.getTime()) / (1000 * 60)
       );
-      const isRecent = minutesAgo < 15; // Active within 15 minutes
+      const isRecent = minutesAgo < 15; // Green pulse for active within 15 minutes
 
       return {
         id: loc.user.id,

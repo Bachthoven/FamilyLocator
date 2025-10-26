@@ -455,9 +455,9 @@ This is a personal/family project. If you have suggestions or find bugs, please 
   - Fetches actual family location data from API every 10 seconds
   - Counts family members active within last 5 minutes (sharing enabled + recent timestamp)
   - Total count = logged-in user + active family members
-  - Displays family member markers on map (only for users with sharing enabled)
+  - **Map markers**: Only shows locations from last 24 hours (prevents old stale markers)
+  - Green pulsing markers for active members (< 15 min), gray for older markers
   - Includes "last seen" timestamps in marker callouts
-  - Green pulsing markers for active members (< 15 min), gray for inactive
 
 - **NotificationBell Component (Mobile)**: Added real-time notification center to mobile map
   - Positioned at top-right with solid theme color background (#1d89f1)
