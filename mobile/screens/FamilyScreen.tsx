@@ -172,7 +172,7 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
       title: "Copied!",
       message: "Invitation code copied to clipboard",
       icon: "clipboard",
-      iconColor: "#0EA5E9",
+      iconColor: "#0891B2",
       buttons: [{ text: "OK" }],
     });
   };
@@ -211,7 +211,7 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
         title: "Navigating to map",
         message: `Centering on ${member.firstName || member.email}'s location`,
         icon: "navigate",
-        iconColor: "#0EA5E9",
+        iconColor: "#0891B2",
         buttons: [{ text: "OK" }],
       });
     }
@@ -313,7 +313,7 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
             onPress={() => setJoinDialogOpen(true)}
             data-testid="button-join-family"
           >
-            <Ionicons name="key-outline" size={18} color="#0EA5E9" />
+            <Ionicons name="key-outline" size={18} color="#0891B2" />
             <Text style={styles.secondaryButtonText}>Join Family</Text>
           </TouchableOpacity>
         </View>
@@ -361,7 +361,7 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                 onPress={() => setJoinDialogOpen(true)}
                 data-testid="button-join-family-empty"
               >
-                <Ionicons name="key-outline" size={18} color="#0EA5E9" />
+                <Ionicons name="key-outline" size={18} color="#0891B2" />
                 <Text style={styles.secondaryButtonText}>Join Family</Text>
               </TouchableOpacity>
             </View>
@@ -398,7 +398,7 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                         <Ionicons
                           name="copy-outline"
                           size={20}
-                          color="#0EA5E9"
+                          color="#0891B2"
                         />
                       </TouchableOpacity>
                     </View>
@@ -463,7 +463,7 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                           onPress={() => handleViewLocation(member)}
                           data-testid={`button-view-location-${member.id}`}
                         >
-                          <Ionicons name="location" size={16} color="#0EA5E9" />
+                          <Ionicons name="location" size={16} color="#0891B2" />
                           <Text style={styles.actionButtonText}>View</Text>
                         </TouchableOpacity>
                       ) : (
@@ -704,7 +704,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   primaryButton: {
-    backgroundColor: "#0EA5E9",
+    backgroundColor: "#0891B2",
   },
   secondaryButton: {
     backgroundColor: "transparent",
@@ -720,7 +720,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   secondaryButtonText: {
-    color: "#0EA5E9",
+    color: "#0891B2",
     fontSize: 14,
     fontWeight: "600",
   },
@@ -758,7 +758,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "700",
     fontFamily: Platform.select({ ios: "Courier", android: "monospace" }),
-    color: "#0EA5E9",
+    color: "#0891B2",
     letterSpacing: 2,
     marginBottom: 4,
   },
@@ -1013,7 +1013,7 @@ const styles = StyleSheet.create({
   statNumber: {
     fontSize: 28,
     fontWeight: "700",
-    color: "#0EA5E9",
+    color: "#0891B2",
     marginBottom: 4,
   },
   statNumberOnline: {
