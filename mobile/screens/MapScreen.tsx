@@ -54,7 +54,7 @@ const UserMarker = ({
   <Marker
     coordinate={{ latitude, longitude }}
     onPress={onPress}
-    pinColor="#1d89f1"
+    pinColor="#20D0FF"
   >
     <View style={styles.userMarkerContainer}>
       <View style={styles.userMarker} />
@@ -541,7 +541,7 @@ export default function MapScreen({
       {/* Loading Indicator */}
       {isLoadingLocation && (
         <View style={[styles.loadingContainer, { top: insets.top + 16 }]}>
-          <ActivityIndicator size="large" color="#1d89f1" />
+          <ActivityIndicator size="large" color="#20D0FF" />
           <Text style={styles.loadingText}>Getting your location...</Text>
         </View>
       )}
@@ -633,7 +633,7 @@ const styles = StyleSheet.create({
     width: 16,
     height: 16,
     borderRadius: 8,
-    backgroundColor: "#1d89f1",
+    backgroundColor: "#20D0FF",
     borderWidth: 2,
     borderColor: "#fff",
     shadowColor: "#000",
@@ -647,7 +647,7 @@ const styles = StyleSheet.create({
     width: 16,
     height: 16,
     borderRadius: 8,
-    backgroundColor: "#1d89f1",
+    backgroundColor: "#20D0FF",
     opacity: 0.3,
   },
 
@@ -803,7 +803,7 @@ const styles = StyleSheet.create({
     color: "#666",
   },
   bannerButton: {
-    backgroundColor: "#1d89f1",
+    backgroundColor: "#20D0FF",
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 8,
@@ -859,7 +859,7 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   centerButton: {
-    backgroundColor: "#1d89f1",
+    backgroundColor: "#20D0FF",
     borderWidth: 0,
   },
   centerButtonDisabled: {

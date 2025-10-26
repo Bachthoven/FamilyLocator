@@ -118,11 +118,11 @@ export default function NotificationBell() {
       titleStr.includes("family") ||
       titleStr.includes("member")
     ) {
-      return { name: "people" as const, color: "#1d89f1" };
+      return { name: "people" as const, color: "#20D0FF" };
     }
 
     // Default info icon
-    return { name: "information-circle" as const, color: "#1d89f1" };
+    return { name: "information-circle" as const, color: "#20D0FF" };
   };
 
   return (
@@ -202,7 +202,7 @@ export default function NotificationBell() {
             <ScrollView style={styles.notificationsList}>
               {isLoading ? (
                 <View style={styles.loadingContainer}>
-                  <ActivityIndicator size="large" color="#1d89f1" />
+                  <ActivityIndicator size="large" color="#20D0FF" />
                   <Text style={styles.loadingText}>
                     Loading notifications...
                   </Text>
@@ -322,7 +322,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#1d89f1",
+    backgroundColor: "#20D0FF",
   },
   badge: {
     position: "absolute",
@@ -391,7 +391,7 @@ const styles = StyleSheet.create({
   markAllButton: {
     paddingHorizontal: 12,
     paddingVertical: 6,
-    backgroundColor: "#1d89f1",
+    backgroundColor: "#20D0FF",
     borderRadius: 8,
   },
   markAllText: {
@@ -419,7 +419,7 @@ const styles = StyleSheet.create({
     color: "#666",
   },
   loadingIndicator: {
-    color: "#1d89f1",
+    color: "#20D0FF",
   },
   emptyState: {
     padding: 60,
@@ -461,9 +461,9 @@ const styles = StyleSheet.create({
   },
   notificationItemUnread: {
     backgroundColor: "#EBF5FF",
-    borderLeftColor: "#1d89f1",
+    borderLeftColor: "#20D0FF",
     borderWidth: 1,
-    borderColor: "#1d89f1",
+    borderColor: "#20D0FF",
   },
   unreadDot: {
     position: "absolute",

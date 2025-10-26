@@ -30,7 +30,7 @@ export default function AlertDialog({
   title,
   message,
   icon,
-  iconColor = "#1d89f1",
+  iconColor = "#20D0FF",
   buttons = [{ text: "OK", style: "default" }],
   onDismiss,
 }: AlertDialogProps) {
@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
   },
   button: {
     flex: 1,
-    backgroundColor: "#1d89f1",
+    backgroundColor: "#20D0FF",
     paddingVertical: 14,
     paddingHorizontal: 20,
     borderRadius: 12,

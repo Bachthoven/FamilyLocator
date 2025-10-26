@@ -441,11 +441,20 @@ This is a personal/family project. If you have suggestions or find bugs, please 
 
 ## 📋 Changelog
 
+### 2025-10-26
+
+- **Theme Color Refresh**: Updated primary theme color to lighter blue (#20D0FF)
+  - Changed from #1d89f1 to #20D0FF (lighter blue, close to deep sky blue)
+  - Updated across all mobile components: buttons, icons, markers, tab bar
+  - Updated notification bell, alert dialogs, loading indicators
+  - Updated interactive elements and active states
+  - Consistent lighter blue theme throughout entire mobile app
+
 ### 2025-10-22
 
 - **Custom Themed Dialogs (Mobile)**: Replaced all native alerts with custom-styled dialogs
   - Created AlertDialog component matching app's design system
-  - Theme color (#1d89f1) with consistent button styles, icons, and rounded corners
+  - Theme color (#20D0FF) with consistent button styles, icons, and rounded corners
   - Smooth fade-in animations and backdrop blur
   - Custom icons for different alert types (success, error, confirmation, info)
   - Applied to: family member removal, location permissions, join family, clipboard copy, navigation
@@ -460,7 +469,7 @@ This is a personal/family project. If you have suggestions or find bugs, please 
   - Includes "last seen" timestamps in marker callouts
 
 - **NotificationBell Component (Mobile)**: Added real-time notification center to mobile map
-  - Positioned at top-right with solid theme color background (#1d89f1)
+  - Positioned at top-right with solid theme color background (#20D0FF)
   - White bell icon with red badge showing unread count
   - Full modal with color-coded notification icons
   - Auto-refreshes every 5-10 seconds
@@ -470,11 +479,11 @@ This is a personal/family project. If you have suggestions or find bugs, please 
 - **Family Tab Statistics (Mobile)**: Added real-time family statistics at bottom of Family tab
   - **Copied EXACTLY from web app's Family tab UI**
   - Two cards in a row showing Total Members and Online Now counts
-  - Total Members: Large primary color number (#1d89f1) with count of all family members
+  - Total Members: Large primary color number (#20D0FF) with count of all family members
   - Online Now: Large green number (#10B981) counting members active within last 5 minutes
   - Cards have white background, border, rounded corners, and centered text
   - Matches web app styling: grid layout, card design, colors, and typography
-- **Theme Color Update**: Changed primary color from #007AFF to #1d89f1 across entire mobile app
+- **Theme Color Update**: Changed primary color from #007AFF to #20D0FF across entire mobile app
   - Updated all interactive elements (buttons, icons, markers)
   - Updated tab bar active states
   - Updated loading indicators
