@@ -447,9 +447,7 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                             { backgroundColor: "#10B981" },
                           ]}
                         />
-                        <Text style={styles.statusText}>
-                          Active: Currently active
-                        </Text>
+                        <Text style={styles.statusText}>Currently active</Text>
                       </View>
                     </View>
                   </View>
@@ -498,7 +496,7 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                             ]}
                           />
                           <Text style={styles.statusText}>
-                            {statusInfo.status}: {statusInfo.message}
+                            {statusInfo.message}
                           </Text>
                         </View>
                       </View>

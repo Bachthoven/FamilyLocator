@@ -455,10 +455,11 @@ This is a personal/family project. If you have suggestions or find bugs, please 
   - Updated profile avatars to use blue theme color (#0EA5E9) instead of gray
   - Profile avatars now show both first and last initials (e.g., "JD" for John Doe)
   - Added logged-in user to family members list with "You" badge
-  - Logged-in user shows as "Active: Currently active" with green status
+  - Logged-in user shows as "Currently active" with green status
   - Statistics now accurately count logged-in user in Total Members and Online Now
   - Blue badge with white text indicating current user
   - Improved visual hierarchy and consistency across family member cards
+  - Simplified status messages: "Currently active", "2 min ago", "Offline for 3h", etc. (removed redundant status prefix)
 
 ### 2025-10-22
 
