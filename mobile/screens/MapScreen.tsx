@@ -274,8 +274,8 @@ export default function MapScreen({
       };
     });
 
-  // Count only truly "online" members (< 5 minutes, location sharing enabled)
-  const onlineMembersCount = familyLocationsData.filter((loc) => {
+  // Count online members: logged-in user is always online + family members active within 5 minutes
+  const familyMembersOnline = familyLocationsData.filter((loc) => {
     if (!loc.user.locationSharingEnabled || !loc.timestamp) return false;
     const now = new Date();
     const timestamp = new Date(loc.timestamp);
@@ -284,6 +284,9 @@ export default function MapScreen({
     );
     return minutesAgo < 5; // Only count as online if active within last 5 minutes
   }).length;
+
+  // Always include the logged-in user as online (viewing the app = online)
+  const onlineMembersCount = familyMembersOnline + 1;
 
   const places: Place[] = [
     // { id: 1, latitude: 40.7589, longitude: -73.9851, name: 'Home', category: 'home', address: '123 Main St' },

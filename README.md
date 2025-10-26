@@ -451,9 +451,10 @@ This is a personal/family project. If you have suggestions or find bugs, please 
   - Applied to: family member removal, location permissions, join family, clipboard copy, navigation
   - Consistent user experience across all confirmation/alert dialogs
 - **Members Indicator (Mobile Map)**: Fixed to show accurate real-time online count
+  - **Always counts logged-in user as online** (viewing app = online)
   - Fetches actual family location data from API every 10 seconds
-  - **Strict "online" definition**: Only counts members active within last 5 minutes
-  - Requires location sharing to be enabled + recent location update
+  - Counts family members active within last 5 minutes (sharing enabled + recent timestamp)
+  - Total count = logged-in user + active family members
   - Displays family member markers on map (only for users with sharing enabled)
   - Includes "last seen" timestamps in marker callouts
   - Green pulsing markers for active members (< 15 min), gray for inactive
