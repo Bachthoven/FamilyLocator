@@ -467,6 +467,13 @@ This is a personal/family project. If you have suggestions or find bugs, please 
   - Mark as read functionality (individual and bulk)
   - Matches web app notification center exactly
   - Fixed: Removed blur effect for consistent color matching across all UI elements
+- **Family Tab Statistics (Mobile)**: Added real-time family statistics at bottom of Family tab
+  - **Copied EXACTLY from web app's Family tab UI**
+  - Two cards in a row showing Total Members and Online Now counts
+  - Total Members: Large primary color number (#1d89f1) with count of all family members
+  - Online Now: Large green number (#10B981) counting members active within last 5 minutes
+  - Cards have white background, border, rounded corners, and centered text
+  - Matches web app styling: grid layout, card design, colors, and typography
 - **Theme Color Update**: Changed primary color from #007AFF to #1d89f1 across entire mobile app
   - Updated all interactive elements (buttons, icons, markers)
   - Updated tab bar active states

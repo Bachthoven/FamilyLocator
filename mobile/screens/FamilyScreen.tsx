@@ -492,6 +492,31 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                 );
               })}
             </View>
+
+            {/* Statistics */}
+            <View style={styles.statistics}>
+              <View style={styles.statCard}>
+                <Text style={styles.statNumber}>{familyMembers.length}</Text>
+                <Text style={styles.statLabel}>Total Members</Text>
+              </View>
+              <View style={styles.statCard}>
+                <Text style={styles.statNumberOnline}>
+                  {
+                    familyLocations.filter((loc) => {
+                      if (!loc.user.locationSharingEnabled || !loc.timestamp)
+                        return false;
+                      const now = new Date();
+                      const timestamp = new Date(loc.timestamp);
+                      const minutesAgo = Math.floor(
+                        (now.getTime() - timestamp.getTime()) / (1000 * 60)
+                      );
+                      return minutesAgo < 5;
+                    }).length
+                  }
+                </Text>
+                <Text style={styles.statLabel}>Online Now</Text>
+              </View>
+            </View>
           </>
         )}
       </ScrollView>
@@ -968,5 +993,38 @@ const styles = StyleSheet.create({
   },
   modalButton: {
     flex: 1,
+  },
+  statistics: {
+    flexDirection: "row",
+    gap: 16,
+    marginTop: 32,
+    marginBottom: 20,
+    paddingHorizontal: 20,
+  },
+  statCard: {
+    flex: 1,
+    backgroundColor: "#fff",
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    alignItems: "center",
+  },
+  statNumber: {
+    fontSize: 28,
+    fontWeight: "700",
+    color: "#1d89f1",
+    marginBottom: 4,
+  },
+  statNumberOnline: {
+    fontSize: 28,
+    fontWeight: "700",
+    color: "#10B981",
+    marginBottom: 4,
+  },
+  statLabel: {
+    fontSize: 12,
+    color: "#6B7280",
+    textAlign: "center",
   },
 });
