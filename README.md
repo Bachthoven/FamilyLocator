@@ -460,6 +460,18 @@ This is a personal/family project. If you have suggestions or find bugs, please 
   - Blue badge with white text indicating current user
   - Improved visual hierarchy and consistency across family member cards
   - Simplified status messages: "Currently active", "2 min ago", "Offline for 3h", etc. (removed redundant status prefix)
+  - Updated "View" button text color to match theme (#0EA5E9)
+
+- **Map Screen Enhancements (Mobile)**:
+  - **Avatar Markers**: Family member markers now display initials (first + last) in circular avatars matching Family tab design
+  - Markers are larger (44x44) with white borders and stay consistent size when zooming
+  - Blue avatars (#0EA5E9) for active members, gray (#9CA3AF) for offline members
+  - **Offline Members**: All family members with location data now appear on map, including offline members
+  - Offline members shown in gray at their last known location (no 24-hour cutoff)
+  - **Conversation Bubble**: Tap any member marker to show name and status in a conversation bubble
+  - Bubble appears above map with arrow pointer, displays member name and current status
+  - Close button to dismiss bubble, replaces old popup-style callout
+  - Real-time status updates: "Currently active", "Inactive for 15 min", "Offline for 2h", "Offline for 3d"
 
 ### 2025-10-22
 
