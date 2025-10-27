@@ -85,10 +85,8 @@ const UserMarker = ({
       coordinate={{ latitude, longitude }}
       onPress={onPress}
       tracksViewChanges={tracksViewChanges}
-      anchor={{ x: 0.5, y: 0.5 }}
     >
       <View style={styles.markerContainer}>
-        <View style={[styles.pulseCircle, { backgroundColor: "#0EA5E9" }]} />
         <View style={[styles.avatarCircle, { backgroundColor: "#0EA5E9" }]}>
           <Text style={styles.avatarInitials}>{initials}</Text>
         </View>
@@ -147,14 +145,8 @@ const FamilyMarker = ({
       coordinate={{ latitude, longitude }}
       onPress={onPress}
       tracksViewChanges={tracksViewChanges}
-      anchor={{ x: 0.5, y: 0.5 }}
     >
       <View style={styles.markerContainer}>
-        {showPulse && (
-          <View
-            style={[styles.pulseCircle, { backgroundColor: markerColor }]}
-          />
-        )}
         <View style={[styles.avatarCircle, { backgroundColor: markerColor }]}>
           <Text style={styles.avatarInitials}>{initials}</Text>
         </View>
@@ -736,23 +728,13 @@ const styles = StyleSheet.create({
 
   // Custom Marker Styles
   markerContainer: {
-    width: 120,
-    height: 120,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "transparent",
-  },
-  pulseCircle: {
-    position: "absolute",
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    opacity: 0.2,
   },
   avatarCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 3,
@@ -760,7 +742,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#0EA5E9",
   },
   avatarInitials: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: "700",
     color: "#ffffff",
     textAlign: "center",
