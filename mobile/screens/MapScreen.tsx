@@ -60,6 +60,13 @@ const UserMarker = ({
   lastName?: string;
   onPress?: () => void;
 }) => {
+  const [tracksViewChanges, setTracksViewChanges] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setTracksViewChanges(false), 1500);
+    return () => clearTimeout(timer);
+  }, []);
+
   // Get initials for current user
   const getInitials = () => {
     if (firstName && lastName) {
@@ -74,12 +81,16 @@ const UserMarker = ({
   const initials = getInitials();
 
   return (
-    <Marker coordinate={{ latitude, longitude }} onPress={onPress}>
-      <View style={styles.simpleMarkerOuterContainer}>
-        <View
-          style={[styles.simpleMarkerInner, { backgroundColor: "#0EA5E9" }]}
-        >
-          <Text style={styles.simpleMarkerText}>{initials}</Text>
+    <Marker
+      coordinate={{ latitude, longitude }}
+      onPress={onPress}
+      tracksViewChanges={tracksViewChanges}
+      anchor={{ x: 0.5, y: 0.5 }}
+    >
+      <View style={styles.markerContainer}>
+        <View style={[styles.pulseCircle, { backgroundColor: "#0EA5E9" }]} />
+        <View style={[styles.avatarCircle, { backgroundColor: "#0EA5E9" }]}>
+          <Text style={styles.avatarInitials}>{initials}</Text>
         </View>
       </View>
     </Marker>
@@ -109,6 +120,13 @@ const FamilyMarker = ({
   status: string;
   onPress?: () => void;
 }) => {
+  const [tracksViewChanges, setTracksViewChanges] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setTracksViewChanges(false), 1500);
+    return () => clearTimeout(timer);
+  }, []);
+
   // Get initials
   const getInitials = () => {
     if (firstName && lastName) {
@@ -122,14 +140,23 @@ const FamilyMarker = ({
 
   const initials = getInitials();
   const markerColor = isOffline ? "#9CA3AF" : "#0EA5E9";
+  const showPulse = isRecent && !isOffline;
 
   return (
-    <Marker coordinate={{ latitude, longitude }} onPress={onPress}>
-      <View style={styles.simpleMarkerOuterContainer}>
-        <View
-          style={[styles.simpleMarkerInner, { backgroundColor: markerColor }]}
-        >
-          <Text style={styles.simpleMarkerText}>{initials}</Text>
+    <Marker
+      coordinate={{ latitude, longitude }}
+      onPress={onPress}
+      tracksViewChanges={tracksViewChanges}
+      anchor={{ x: 0.5, y: 0.5 }}
+    >
+      <View style={styles.markerContainer}>
+        {showPulse && (
+          <View
+            style={[styles.pulseCircle, { backgroundColor: markerColor }]}
+          />
+        )}
+        <View style={[styles.avatarCircle, { backgroundColor: markerColor }]}>
+          <Text style={styles.avatarInitials}>{initials}</Text>
         </View>
       </View>
     </Marker>
@@ -708,25 +735,32 @@ const styles = StyleSheet.create({
   },
 
   // Custom Marker Styles
-  simpleMarkerOuterContainer: {
-    width: 100,
-    height: 100,
+  markerContainer: {
+    width: 120,
+    height: 120,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "transparent",
   },
-  simpleMarkerInner: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+  pulseCircle: {
+    position: "absolute",
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    opacity: 0.2,
+  },
+  avatarCircle: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 3,
     borderColor: "#ffffff",
     backgroundColor: "#0EA5E9",
   },
-  simpleMarkerText: {
-    fontSize: 15,
+  avatarInitials: {
+    fontSize: 16,
     fontWeight: "700",
     color: "#ffffff",
     textAlign: "center",
