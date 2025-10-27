@@ -73,20 +73,14 @@ const UserMarker = ({
   const initials = getInitials();
 
   return (
-    <Marker
-      coordinate={{ latitude, longitude }}
-      onPress={onPress}
-      anchor={{ x: 0.5, y: 0.5 }}
-    >
-      <View style={styles.userMarkerContainer}>
+    <Marker coordinate={{ latitude, longitude }} onPress={onPress}>
+      <View style={styles.markerWrapper}>
+        <View style={styles.familyMarkerPulse} />
         <View
           style={[styles.familyMarkerAvatar, { backgroundColor: "#0EA5E9" }]}
         >
           <Text style={styles.familyMarkerInitials}>{initials}</Text>
         </View>
-        <View
-          style={[styles.familyMarkerPulse, { backgroundColor: "#0EA5E9" }]}
-        />
       </View>
     </Marker>
   );
@@ -130,22 +124,18 @@ const FamilyMarker = ({
   const markerColor = isOffline ? "#9CA3AF" : "#0EA5E9";
 
   return (
-    <Marker
-      coordinate={{ latitude, longitude }}
-      onPress={onPress}
-      anchor={{ x: 0.5, y: 0.5 }}
-    >
-      <View style={styles.familyMarkerContainer}>
-        <View
-          style={[styles.familyMarkerAvatar, { backgroundColor: markerColor }]}
-        >
-          <Text style={styles.familyMarkerInitials}>{initials}</Text>
-        </View>
+    <Marker coordinate={{ latitude, longitude }} onPress={onPress}>
+      <View style={styles.markerWrapper}>
         {isRecent && !isOffline && (
           <View
             style={[styles.familyMarkerPulse, { backgroundColor: markerColor }]}
           />
         )}
+        <View
+          style={[styles.familyMarkerAvatar, { backgroundColor: markerColor }]}
+        >
+          <Text style={styles.familyMarkerInitials}>{initials}</Text>
+        </View>
       </View>
     </Marker>
   );
@@ -723,44 +713,33 @@ const styles = StyleSheet.create({
   },
 
   // Custom Marker Styles
-  userMarkerContainer: {
+  markerWrapper: {
+    width: 56,
+    height: 56,
     alignItems: "center",
     justifyContent: "center",
-    width: 60,
-    height: 60,
-  },
-
-  familyMarkerContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    width: 60,
-    height: 60,
   },
   familyMarkerAvatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 3,
+    borderWidth: 4,
     borderColor: "#fff",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 5,
   },
   familyMarkerInitials: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "700",
     color: "#fff",
   },
   familyMarkerPulse: {
     position: "absolute",
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    opacity: 0.2,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: "#0EA5E9",
+    opacity: 0.15,
   },
 
   placeMarker: {
