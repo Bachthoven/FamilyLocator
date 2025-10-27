@@ -48,30 +48,49 @@ const UserMarker = ({
   latitude,
   longitude,
   name,
+  firstName,
+  lastName,
   onPress,
 }: {
   latitude: number;
   longitude: number;
   name: string;
+  firstName?: string;
+  lastName?: string;
   onPress?: () => void;
-}) => (
-  <Marker
-    coordinate={{ latitude, longitude }}
-    onPress={onPress}
-    pinColor="#0EA5E9"
-  >
-    <View style={styles.userMarkerContainer}>
-      <View style={styles.userMarker} />
-      <View style={styles.userMarkerPulse} />
-    </View>
-    <Callout>
-      <View style={styles.callout}>
-        <Text style={styles.calloutTitle}>{name}</Text>
-        <Text style={styles.calloutDescription}>Current location</Text>
+}) => {
+  // Get initials for current user
+  const getInitials = () => {
+    if (firstName && lastName) {
+      return `${firstName[0]}${lastName[0]}`.toUpperCase();
+    } else if (firstName) {
+      return firstName[0].toUpperCase();
+    } else {
+      return "ME";
+    }
+  };
+
+  const initials = getInitials();
+
+  return (
+    <Marker
+      coordinate={{ latitude, longitude }}
+      onPress={onPress}
+      anchor={{ x: 0.5, y: 0.5 }}
+    >
+      <View style={styles.userMarkerContainer}>
+        <View
+          style={[styles.familyMarkerAvatar, { backgroundColor: "#0EA5E9" }]}
+        >
+          <Text style={styles.familyMarkerInitials}>{initials}</Text>
+        </View>
+        <View
+          style={[styles.familyMarkerPulse, { backgroundColor: "#0EA5E9" }]}
+        />
       </View>
-    </Callout>
-  </Marker>
-);
+    </Marker>
+  );
+};
 
 const FamilyMarker = ({
   latitude,
@@ -509,6 +528,8 @@ export default function MapScreen({
             latitude={currentLocation.latitude}
             longitude={currentLocation.longitude}
             name="You"
+            firstName={user?.firstName ?? undefined}
+            lastName={user?.lastName ?? undefined}
           />
         )}
 
@@ -705,29 +726,8 @@ const styles = StyleSheet.create({
   userMarkerContainer: {
     alignItems: "center",
     justifyContent: "center",
-    width: 40,
-    height: 40,
-  },
-  userMarker: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: "#0EA5E9",
-    borderWidth: 2,
-    borderColor: "#fff",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  userMarkerPulse: {
-    position: "absolute",
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: "#0EA5E9",
-    opacity: 0.3,
+    width: 60,
+    height: 60,
   },
 
   familyMarkerContainer: {
