@@ -728,6 +728,8 @@ const styles = StyleSheet.create({
 
   // Custom Marker Styles
   markerContainer: {
+    width: 200,
+    height: 200,
     alignItems: "center",
     justifyContent: "center",
   },
