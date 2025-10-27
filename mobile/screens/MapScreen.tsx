@@ -44,34 +44,6 @@ interface Place {
   color?: string;
 }
 
-// Cache for marker images
-const markerImageCache = new Map<string, any>();
-
-// Function to create SVG marker as data URI
-const createMarkerImage = (initials: string, backgroundColor: string) => {
-  const cacheKey = `${initials}-${backgroundColor}`;
-
-  if (markerImageCache.has(cacheKey)) {
-    return markerImageCache.get(cacheKey);
-  }
-
-  const svg = `
-    <svg width="56" height="56" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="28" cy="28" r="25" fill="${backgroundColor}" stroke="white" stroke-width="3"/>
-      <text x="28" y="28" text-anchor="middle" dominant-baseline="central" 
-            fill="white" font-size="17" font-weight="700" font-family="system-ui">
-        ${initials}
-      </text>
-    </svg>
-  `;
-
-  const imageUri = `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
-  const imageSource = { uri: imageUri };
-
-  markerImageCache.set(cacheKey, imageSource);
-  return imageSource;
-};
-
 // Custom marker components for different types
 const UserMarker = ({
   latitude,
@@ -100,16 +72,21 @@ const UserMarker = ({
   };
 
   const initials = getInitials();
-  const markerImage = createMarkerImage(initials, "#0EA5E9");
 
   return (
     <Marker
       coordinate={{ latitude, longitude }}
       onPress={onPress}
-      image={markerImage}
-      anchor={{ x: 0.5, y: 0.5 }}
       tracksViewChanges={false}
-    />
+    >
+      <View style={styles.markerWrapper}>
+        <View style={styles.markerOuter}>
+          <View style={styles.markerInner}>
+            <Text style={styles.markerText}>{initials}</Text>
+          </View>
+        </View>
+      </View>
+    </Marker>
   );
 };
 
@@ -149,16 +126,21 @@ const FamilyMarker = ({
 
   const initials = getInitials();
   const markerColor = isOffline ? "#9CA3AF" : "#0EA5E9";
-  const markerImage = createMarkerImage(initials, markerColor);
 
   return (
     <Marker
       coordinate={{ latitude, longitude }}
       onPress={onPress}
-      image={markerImage}
-      anchor={{ x: 0.5, y: 0.5 }}
       tracksViewChanges={false}
-    />
+    >
+      <View style={styles.markerWrapper}>
+        <View style={styles.markerOuter}>
+          <View style={[styles.markerInner, { backgroundColor: markerColor }]}>
+            <Text style={styles.markerText}>{initials}</Text>
+          </View>
+        </View>
+      </View>
+    </Marker>
   );
 };
 
@@ -733,6 +715,35 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
+  // Marker styles - using triple-nested structure to prevent Android clipping
+  markerWrapper: {
+    width: 70,
+    height: 70,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  markerOuter: {
+    width: 56,
+    height: 56,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "white",
+    borderRadius: 28,
+  },
+  markerInner: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: "#0EA5E9",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  markerText: {
+    fontSize: 17,
+    fontWeight: "700",
+    color: "#ffffff",
+    textAlign: "center",
+  },
 
   placeMarker: {
     width: 24,
