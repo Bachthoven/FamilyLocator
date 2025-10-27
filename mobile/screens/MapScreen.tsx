@@ -75,20 +75,12 @@ const UserMarker = ({
 
   return (
     <Marker coordinate={{ latitude, longitude }} onPress={onPress}>
-      <View
-        style={[
-          styles.markerWrapper,
-          Platform.OS === "android" && styles.androidMarkerPadding,
-        ]}
-      >
+      <View style={styles.simpleMarkerOuterContainer}>
         <View
-          style={[styles.familyMarkerAvatar, { backgroundColor: "#0EA5E9" }]}
+          style={[styles.simpleMarkerInner, { backgroundColor: "#0EA5E9" }]}
         >
-          <Text style={styles.familyMarkerInitials}>{initials}</Text>
+          <Text style={styles.simpleMarkerText}>{initials}</Text>
         </View>
-        <View
-          style={[styles.familyMarkerPulse, { backgroundColor: "#0EA5E9" }]}
-        />
       </View>
     </Marker>
   );
@@ -133,22 +125,12 @@ const FamilyMarker = ({
 
   return (
     <Marker coordinate={{ latitude, longitude }} onPress={onPress}>
-      <View
-        style={[
-          styles.markerWrapper,
-          Platform.OS === "android" && styles.androidMarkerPadding,
-        ]}
-      >
+      <View style={styles.simpleMarkerOuterContainer}>
         <View
-          style={[styles.familyMarkerAvatar, { backgroundColor: markerColor }]}
+          style={[styles.simpleMarkerInner, { backgroundColor: markerColor }]}
         >
-          <Text style={styles.familyMarkerInitials}>{initials}</Text>
+          <Text style={styles.simpleMarkerText}>{initials}</Text>
         </View>
-        {isRecent && !isOffline && (
-          <View
-            style={[styles.familyMarkerPulse, { backgroundColor: markerColor }]}
-          />
-        )}
       </View>
     </Marker>
   );
@@ -726,37 +708,28 @@ const styles = StyleSheet.create({
   },
 
   // Custom Marker Styles
-  markerWrapper: {
-    width: 48,
-    height: 48,
+  simpleMarkerOuterContainer: {
+    width: 100,
+    height: 100,
     alignItems: "center",
     justifyContent: "center",
+    backgroundColor: "transparent",
   },
-  androidMarkerPadding: {
-    padding: 20,
-  },
-  familyMarkerAvatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+  simpleMarkerInner: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 3,
-    borderColor: "#fff",
-    overflow: "hidden",
+    borderColor: "#ffffff",
+    backgroundColor: "#0EA5E9",
   },
-  familyMarkerInitials: {
-    fontSize: 16,
+  simpleMarkerText: {
+    fontSize: 15,
     fontWeight: "700",
-    color: "#fff",
-  },
-  familyMarkerPulse: {
-    position: "absolute",
-    width: 58,
-    height: 58,
-    borderRadius: 29,
-    opacity: 0.2,
-    zIndex: -1,
+    color: "#ffffff",
+    textAlign: "center",
   },
 
   placeMarker: {
