@@ -5,6 +5,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
+  Platform,
 } from "react-native";
 import MapView, { Marker, Callout, PROVIDER_GOOGLE } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
@@ -74,13 +75,20 @@ const UserMarker = ({
 
   return (
     <Marker coordinate={{ latitude, longitude }} onPress={onPress}>
-      <View style={styles.markerWrapper}>
-        <View style={styles.familyMarkerPulse} />
+      <View
+        style={[
+          styles.markerWrapper,
+          Platform.OS === "android" && styles.androidMarkerPadding,
+        ]}
+      >
         <View
           style={[styles.familyMarkerAvatar, { backgroundColor: "#0EA5E9" }]}
         >
           <Text style={styles.familyMarkerInitials}>{initials}</Text>
         </View>
+        <View
+          style={[styles.familyMarkerPulse, { backgroundColor: "#0EA5E9" }]}
+        />
       </View>
     </Marker>
   );
@@ -125,17 +133,22 @@ const FamilyMarker = ({
 
   return (
     <Marker coordinate={{ latitude, longitude }} onPress={onPress}>
-      <View style={styles.markerWrapper}>
-        {isRecent && !isOffline && (
-          <View
-            style={[styles.familyMarkerPulse, { backgroundColor: markerColor }]}
-          />
-        )}
+      <View
+        style={[
+          styles.markerWrapper,
+          Platform.OS === "android" && styles.androidMarkerPadding,
+        ]}
+      >
         <View
           style={[styles.familyMarkerAvatar, { backgroundColor: markerColor }]}
         >
           <Text style={styles.familyMarkerInitials}>{initials}</Text>
         </View>
+        {isRecent && !isOffline && (
+          <View
+            style={[styles.familyMarkerPulse, { backgroundColor: markerColor }]}
+          />
+        )}
       </View>
     </Marker>
   );
@@ -714,32 +727,36 @@ const styles = StyleSheet.create({
 
   // Custom Marker Styles
   markerWrapper: {
-    width: 56,
-    height: 56,
+    width: 48,
+    height: 48,
     alignItems: "center",
     justifyContent: "center",
+  },
+  androidMarkerPadding: {
+    padding: 20,
   },
   familyMarkerAvatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 4,
+    borderWidth: 3,
     borderColor: "#fff",
+    overflow: "hidden",
   },
   familyMarkerInitials: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "700",
     color: "#fff",
   },
   familyMarkerPulse: {
     position: "absolute",
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: "#0EA5E9",
-    opacity: 0.15,
+    width: 58,
+    height: 58,
+    borderRadius: 29,
+    opacity: 0.2,
+    zIndex: -1,
   },
 
   placeMarker: {
