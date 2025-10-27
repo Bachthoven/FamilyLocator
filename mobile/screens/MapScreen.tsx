@@ -728,15 +728,15 @@ const styles = StyleSheet.create({
 
   // Custom Marker Styles
   markerContainer: {
-    width: 200,
-    height: 200,
+    width: 80,
+    height: 80,
     alignItems: "center",
     justifyContent: "center",
   },
   avatarCircle: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 3,
@@ -744,7 +744,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#0EA5E9",
   },
   avatarInitials: {
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: "700",
     color: "#ffffff",
     textAlign: "center",
