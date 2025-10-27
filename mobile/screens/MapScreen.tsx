@@ -86,7 +86,7 @@ const UserMarker = ({
       onPress={onPress}
       tracksViewChanges={tracksViewChanges}
     >
-      <View style={styles.markerContainer}>
+      <View style={styles.markerContainer} collapsable={false}>
         <View style={[styles.avatarCircle, { backgroundColor: "#0EA5E9" }]}>
           <Text style={styles.avatarInitials}>{initials}</Text>
         </View>
@@ -146,7 +146,7 @@ const FamilyMarker = ({
       onPress={onPress}
       tracksViewChanges={tracksViewChanges}
     >
-      <View style={styles.markerContainer}>
+      <View style={styles.markerContainer} collapsable={false}>
         <View style={[styles.avatarCircle, { backgroundColor: markerColor }]}>
           <Text style={styles.avatarInitials}>{initials}</Text>
         </View>
@@ -728,23 +728,25 @@ const styles = StyleSheet.create({
 
   // Custom Marker Styles
   markerContainer: {
-    width: 80,
-    height: 80,
+    width: 60,
+    height: 60,
     alignItems: "center",
     justifyContent: "center",
+    overflow: "visible",
   },
   avatarCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 3,
     borderColor: "#ffffff",
     backgroundColor: "#0EA5E9",
+    overflow: "hidden",
   },
   avatarInitials: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: "700",
     color: "#ffffff",
     textAlign: "center",
