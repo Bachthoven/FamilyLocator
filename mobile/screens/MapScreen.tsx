@@ -44,6 +44,34 @@ interface Place {
   color?: string;
 }
 
+// Cache for marker images
+const markerImageCache = new Map<string, any>();
+
+// Function to create SVG marker as data URI
+const createMarkerImage = (initials: string, backgroundColor: string) => {
+  const cacheKey = `${initials}-${backgroundColor}`;
+
+  if (markerImageCache.has(cacheKey)) {
+    return markerImageCache.get(cacheKey);
+  }
+
+  const svg = `
+    <svg width="56" height="56" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="28" cy="28" r="25" fill="${backgroundColor}" stroke="white" stroke-width="3"/>
+      <text x="28" y="28" text-anchor="middle" dominant-baseline="central" 
+            fill="white" font-size="17" font-weight="700" font-family="system-ui">
+        ${initials}
+      </text>
+    </svg>
+  `;
+
+  const imageUri = `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+  const imageSource = { uri: imageUri };
+
+  markerImageCache.set(cacheKey, imageSource);
+  return imageSource;
+};
+
 // Custom marker components for different types
 const UserMarker = ({
   latitude,
@@ -60,13 +88,6 @@ const UserMarker = ({
   lastName?: string;
   onPress?: () => void;
 }) => {
-  const [tracksViewChanges, setTracksViewChanges] = useState(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setTracksViewChanges(false), 1500);
-    return () => clearTimeout(timer);
-  }, []);
-
   // Get initials for current user
   const getInitials = () => {
     if (firstName && lastName) {
@@ -79,19 +100,16 @@ const UserMarker = ({
   };
 
   const initials = getInitials();
+  const markerImage = createMarkerImage(initials, "#0EA5E9");
 
   return (
     <Marker
       coordinate={{ latitude, longitude }}
       onPress={onPress}
-      tracksViewChanges={tracksViewChanges}
-    >
-      <View style={styles.markerContainer}>
-        <View style={[styles.avatarCircle, { backgroundColor: "#0EA5E9" }]}>
-          <Text style={styles.avatarInitials}>{initials}</Text>
-        </View>
-      </View>
-    </Marker>
+      image={markerImage}
+      anchor={{ x: 0.5, y: 0.5 }}
+      tracksViewChanges={false}
+    />
   );
 };
 
@@ -118,13 +136,6 @@ const FamilyMarker = ({
   status: string;
   onPress?: () => void;
 }) => {
-  const [tracksViewChanges, setTracksViewChanges] = useState(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setTracksViewChanges(false), 1500);
-    return () => clearTimeout(timer);
-  }, []);
-
   // Get initials
   const getInitials = () => {
     if (firstName && lastName) {
@@ -138,20 +149,16 @@ const FamilyMarker = ({
 
   const initials = getInitials();
   const markerColor = isOffline ? "#9CA3AF" : "#0EA5E9";
-  const showPulse = isRecent && !isOffline;
+  const markerImage = createMarkerImage(initials, markerColor);
 
   return (
     <Marker
       coordinate={{ latitude, longitude }}
       onPress={onPress}
-      tracksViewChanges={tracksViewChanges}
-    >
-      <View style={styles.markerContainer}>
-        <View style={[styles.avatarCircle, { backgroundColor: markerColor }]}>
-          <Text style={styles.avatarInitials}>{initials}</Text>
-        </View>
-      </View>
-    </Marker>
+      image={markerImage}
+      anchor={{ x: 0.5, y: 0.5 }}
+      tracksViewChanges={false}
+    />
   );
 };
 
@@ -726,29 +733,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
-  // Custom Marker Styles
-  markerContainer: {
-    width: 100,
-    height: 100,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  avatarCircle: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 3,
-    borderColor: "#ffffff",
-    backgroundColor: "#0EA5E9",
-  },
-  avatarInitials: {
-    fontSize: 17,
-    fontWeight: "700",
-    color: "#ffffff",
-    textAlign: "center",
-  },
 
   placeMarker: {
     width: 24,
