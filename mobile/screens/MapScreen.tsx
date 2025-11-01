@@ -81,20 +81,19 @@ const UserMarker = ({
     >
       <View
         style={{
-          width: 50,
-          height: 50,
-          borderRadius: 25,
+          width: 46,
+          height: 46,
+          borderRadius: 10,
           backgroundColor: "#0EA5E9",
           borderWidth: 3,
           borderColor: "#ffffff",
           alignItems: "center",
           justifyContent: "center",
-          overflow: "visible",
         }}
       >
         <Text
           style={{
-            fontSize: 17,
+            fontSize: 16,
             fontWeight: "700",
             color: "#ffffff",
           }}
@@ -151,20 +150,19 @@ const FamilyMarker = ({
     >
       <View
         style={{
-          width: 50,
-          height: 50,
-          borderRadius: 25,
+          width: 46,
+          height: 46,
+          borderRadius: 10,
           backgroundColor: markerColor,
           borderWidth: 3,
           borderColor: "#ffffff",
           alignItems: "center",
           justifyContent: "center",
-          overflow: "visible",
         }}
       >
         <Text
           style={{
-            fontSize: 17,
+            fontSize: 16,
             fontWeight: "700",
             color: "#ffffff",
           }}
