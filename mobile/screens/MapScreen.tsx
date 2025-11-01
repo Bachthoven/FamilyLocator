@@ -77,10 +77,29 @@ const UserMarker = ({
     <Marker
       coordinate={{ latitude, longitude }}
       onPress={onPress}
-      tracksViewChanges={false}
+      tracksViewChanges={true}
     >
-      <View style={styles.markerSquare}>
-        <Text style={styles.markerText}>{initials}</Text>
+      <View
+        style={{
+          width: 48,
+          height: 48,
+          borderRadius: 24,
+          backgroundColor: "#0EA5E9",
+          borderWidth: 3,
+          borderColor: "#ffffff",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Text
+          style={{
+            fontSize: 16,
+            fontWeight: "700",
+            color: "#ffffff",
+          }}
+        >
+          {initials}
+        </Text>
       </View>
     </Marker>
   );
@@ -127,10 +146,29 @@ const FamilyMarker = ({
     <Marker
       coordinate={{ latitude, longitude }}
       onPress={onPress}
-      tracksViewChanges={false}
+      tracksViewChanges={true}
     >
-      <View style={[styles.markerSquare, { backgroundColor: markerColor }]}>
-        <Text style={styles.markerText}>{initials}</Text>
+      <View
+        style={{
+          width: 48,
+          height: 48,
+          borderRadius: 24,
+          backgroundColor: markerColor,
+          borderWidth: 3,
+          borderColor: "#ffffff",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Text
+          style={{
+            fontSize: 16,
+            fontWeight: "700",
+            color: "#ffffff",
+          }}
+        >
+          {initials}
+        </Text>
       </View>
     </Marker>
   );
