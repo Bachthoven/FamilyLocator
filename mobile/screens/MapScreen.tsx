@@ -79,14 +79,21 @@ const UserMarker = ({
       onPress={onPress}
       tracksViewChanges={true}
     >
-      <View style={{ padding: 6 }}>
+      <View
+        style={{
+          width: 60,
+          height: 60,
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
         <View
           style={{
-            width: 48,
-            height: 48,
-            borderRadius: 24,
+            width: 40,
+            height: 40,
+            borderRadius: 20,
             backgroundColor: "#0EA5E9",
-            borderWidth: 3,
+            borderWidth: 2,
             borderColor: "#ffffff",
             alignItems: "center",
             justifyContent: "center",
@@ -94,7 +101,7 @@ const UserMarker = ({
         >
           <Text
             style={{
-              fontSize: 16,
+              fontSize: 14,
               fontWeight: "700",
               color: "#ffffff",
             }}
@@ -150,14 +157,21 @@ const FamilyMarker = ({
       onPress={onPress}
       tracksViewChanges={true}
     >
-      <View style={{ padding: 6 }}>
+      <View
+        style={{
+          width: 60,
+          height: 60,
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
         <View
           style={{
-            width: 48,
-            height: 48,
-            borderRadius: 24,
+            width: 40,
+            height: 40,
+            borderRadius: 20,
             backgroundColor: markerColor,
-            borderWidth: 3,
+            borderWidth: 2,
             borderColor: "#ffffff",
             alignItems: "center",
             justifyContent: "center",
@@ -165,7 +179,7 @@ const FamilyMarker = ({
         >
           <Text
             style={{
-              fontSize: 16,
+              fontSize: 14,
               fontWeight: "700",
               color: "#ffffff",
             }}
