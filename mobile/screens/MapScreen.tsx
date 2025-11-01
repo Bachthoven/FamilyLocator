@@ -783,11 +783,12 @@ const styles = StyleSheet.create({
   },
   customCalloutContent: {
     padding: 12,
+    minWidth: 200,
+    maxWidth: 280,
   },
   calloutHeader: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
     marginBottom: 8,
   },
   calloutIconContainer: {
@@ -797,6 +798,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#F0F9FF",
     alignItems: "center",
     justifyContent: "center",
+    marginRight: 8,
   },
   customCalloutTitle: {
     fontSize: 15,
@@ -812,13 +814,13 @@ const styles = StyleSheet.create({
   calloutStatusRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
     marginBottom: 4,
   },
   calloutStatusDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
+    marginRight: 6,
   },
   calloutStatusText: {
     fontSize: 13,
