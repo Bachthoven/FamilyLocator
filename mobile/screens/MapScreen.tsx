@@ -25,12 +25,8 @@ interface FamilyLocation {
   latitude: number;
   longitude: number;
   name: string;
-  firstName: string;
-  lastName: string;
   address?: string;
   isRecent: boolean;
-  isOffline: boolean;
-  status: string;
 }
 
 interface Place {
@@ -77,60 +73,41 @@ const FamilyMarker = ({
   latitude,
   longitude,
   name,
-  firstName,
-  lastName,
   address,
   isRecent,
-  isOffline,
-  status,
   onPress,
 }: {
   latitude: number;
   longitude: number;
   name: string;
-  firstName: string;
-  lastName: string;
   address?: string;
   isRecent: boolean;
-  isOffline: boolean;
-  status: string;
   onPress?: () => void;
-}) => {
-  // Get initials
-  const getInitials = () => {
-    if (firstName && lastName) {
-      return `${firstName[0]}${lastName[0]}`.toUpperCase();
-    } else if (firstName) {
-      return firstName[0].toUpperCase();
-    } else {
-      return name[0]?.toUpperCase() || "?";
-    }
-  };
-
-  const initials = getInitials();
-  const markerColor = isOffline ? "#9CA3AF" : "#0EA5E9";
-
-  return (
-    <Marker
-      coordinate={{ latitude, longitude }}
-      onPress={onPress}
-      anchor={{ x: 0.5, y: 0.5 }}
-    >
-      <View style={styles.familyMarkerContainer}>
-        <View
-          style={[styles.familyMarkerAvatar, { backgroundColor: markerColor }]}
-        >
-          <Text style={styles.familyMarkerInitials}>{initials}</Text>
-        </View>
-        {isRecent && !isOffline && (
-          <View
-            style={[styles.familyMarkerPulse, { backgroundColor: markerColor }]}
-          />
-        )}
+}) => (
+  <Marker
+    coordinate={{ latitude, longitude }}
+    onPress={onPress}
+    pinColor="#34C759"
+  >
+    <View style={styles.familyMarkerContainer}>
+      <View
+        style={[styles.familyMarker, !isRecent && styles.familyMarkerOld]}
+      />
+      {isRecent && <View style={styles.familyMarkerPulse} />}
+    </View>
+    <Callout>
+      <View style={styles.callout}>
+        <Text style={styles.calloutTitle}>{name}</Text>
+        <Text style={styles.calloutDescription}>
+          {address || "Unknown location"}
+        </Text>
+        <Text style={styles.calloutTime}>
+          {isRecent ? "Active now" : "Last seen recently"}
+        </Text>
       </View>
-    </Marker>
-  );
-};
+    </Callout>
+  </Marker>
+);
 
 const PlaceMarker = ({
   latitude,
@@ -229,11 +206,6 @@ export default function MapScreen({
   const [mapHeading, setMapHeading] = useState(0); // Track map rotation
   const { user } = useAuth();
 
-  // Conversation bubble state
-  const [selectedMember, setSelectedMember] = useState<FamilyLocation | null>(
-    null
-  );
-
   // Alert dialog state
   const [alertConfig, setAlertConfig] = useState<{
     visible: boolean;
@@ -279,11 +251,19 @@ export default function MapScreen({
   };
 
   // Convert API data to FamilyLocation format for markers
-  // Now showing ALL family members with location data, including offline ones
   const familyLocations: FamilyLocation[] = familyLocationsData
     .filter((loc) => {
-      // Show markers for users with location sharing enabled who have location data
-      return loc.user.locationSharingEnabled && loc.timestamp;
+      // Only show markers for users with location sharing enabled AND recent locations (< 24 hours)
+      if (!loc.user.locationSharingEnabled || !loc.timestamp) return false;
+
+      const now = new Date();
+      const timestamp = loc.timestamp ? new Date(loc.timestamp) : new Date(0);
+      const hoursAgo = Math.floor(
+        (now.getTime() - timestamp.getTime()) / (1000 * 60 * 60)
+      );
+
+      // Don't show markers for locations older than 24 hours
+      return hoursAgo < 24;
     })
     .map((loc) => {
       const now = new Date();
@@ -291,38 +271,15 @@ export default function MapScreen({
       const minutesAgo = Math.floor(
         (now.getTime() - timestamp.getTime()) / (1000 * 60)
       );
-
-      // Determine status based on time elapsed
-      const isRecent = minutesAgo < 15; // Active within 15 minutes
-      const isOffline = minutesAgo >= 60; // Offline after 1 hour
-
-      // Generate status text
-      let status = "";
-      if (minutesAgo < 5) {
-        status = "Currently active";
-      } else if (minutesAgo < 15) {
-        status = `${minutesAgo} min ago`;
-      } else if (minutesAgo < 60) {
-        status = `Inactive for ${minutesAgo} min`;
-      } else if (minutesAgo < 1440) {
-        const hours = Math.floor(minutesAgo / 60);
-        status = `Offline for ${hours}h`;
-      } else {
-        const days = Math.floor(minutesAgo / 1440);
-        status = `Offline for ${days}d`;
-      }
+      const isRecent = minutesAgo < 15; // Green pulse for active within 15 minutes
 
       return {
         id: loc.user.id,
         latitude: loc.latitude,
         longitude: loc.longitude,
         name: loc.user.firstName || loc.user.email,
-        firstName: loc.user.firstName || "",
-        lastName: loc.user.lastName || "",
         address: `Last seen ${minutesAgo < 1 ? "just now" : `${minutesAgo} min ago`}`,
         isRecent,
-        isOffline,
-        status,
       };
     });
 
@@ -519,13 +476,8 @@ export default function MapScreen({
             latitude={location.latitude}
             longitude={location.longitude}
             name={location.name}
-            firstName={location.firstName}
-            lastName={location.lastName}
             address={location.address}
             isRecent={location.isRecent}
-            isOffline={location.isOffline}
-            status={location.status}
-            onPress={() => setSelectedMember(location)}
           />
         ))}
 
@@ -541,37 +493,6 @@ export default function MapScreen({
           />
         ))}
       </MapView>
-
-      {/* Conversation Bubble for selected member */}
-      {selectedMember && (
-        <View style={[styles.conversationBubble, { top: insets.top + 80 }]}>
-          <View style={styles.bubbleArrow} />
-          <View style={styles.bubbleContent}>
-            <View style={styles.bubbleHeader}>
-              <Text style={styles.bubbleName}>{selectedMember.name}</Text>
-              <TouchableOpacity
-                onPress={() => setSelectedMember(null)}
-                data-testid="button-close-bubble"
-              >
-                <Ionicons name="close-circle" size={20} color="#9CA3AF" />
-              </TouchableOpacity>
-            </View>
-            <View style={styles.bubbleStatusRow}>
-              <View
-                style={[
-                  styles.bubbleStatusDot,
-                  {
-                    backgroundColor: selectedMember.isOffline
-                      ? "#9CA3AF"
-                      : "#10B981",
-                  },
-                ]}
-              />
-              <Text style={styles.bubbleStatus}>{selectedMember.status}</Text>
-            </View>
-          </View>
-        </View>
-      )}
 
       {/* Notification Bell - Top Right */}
       <View style={[styles.notificationBell, { top: insets.top + 16 }]}>
@@ -733,16 +654,15 @@ const styles = StyleSheet.create({
   familyMarkerContainer: {
     alignItems: "center",
     justifyContent: "center",
-    width: 60,
-    height: 60,
+    width: 40,
+    height: 40,
   },
-  familyMarkerAvatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 3,
+  familyMarker: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: "#34C759",
+    borderWidth: 2,
     borderColor: "#fff",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -750,17 +670,16 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   },
-  familyMarkerInitials: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#fff",
+  familyMarkerOld: {
+    opacity: 0.6,
   },
   familyMarkerPulse: {
     position: "absolute",
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    opacity: 0.2,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: "#34C759",
+    opacity: 0.3,
   },
 
   placeMarker: {
@@ -803,63 +722,6 @@ const styles = StyleSheet.create({
   calloutTime: {
     fontSize: 10,
     color: "#999",
-  },
-
-  // Conversation Bubble Styles
-  conversationBubble: {
-    position: "absolute",
-    left: 16,
-    right: 16,
-    zIndex: 35,
-  },
-  bubbleArrow: {
-    width: 0,
-    height: 0,
-    backgroundColor: "transparent",
-    borderStyle: "solid",
-    borderLeftWidth: 8,
-    borderRightWidth: 8,
-    borderBottomWidth: 10,
-    borderLeftColor: "transparent",
-    borderRightColor: "transparent",
-    borderBottomColor: "#fff",
-    alignSelf: "center",
-  },
-  bubbleContent: {
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    padding: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  bubbleHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 8,
-  },
-  bubbleName: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#111827",
-  },
-  bubbleStatusRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  bubbleStatusDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  bubbleStatus: {
-    fontSize: 14,
-    color: "#6B7280",
-    fontWeight: "500",
   },
 
   // Notification Bell Styles
