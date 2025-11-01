@@ -5,8 +5,10 @@ import {
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
+  Modal,
+  Pressable,
 } from "react-native";
-import MapView, { Marker, Callout, PROVIDER_GOOGLE } from "react-native-maps";
+import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Location from "expo-location";
@@ -60,12 +62,6 @@ const UserMarker = ({
       <View style={styles.userMarker} />
       <View style={styles.userMarkerPulse} />
     </View>
-    <Callout>
-      <View style={styles.callout}>
-        <Text style={styles.calloutTitle}>{name}</Text>
-        <Text style={styles.calloutDescription}>Current location</Text>
-      </View>
-    </Callout>
   </Marker>
 );
 
@@ -99,15 +95,6 @@ const FamilyMarker = ({
       />
       {isRecent && <View style={styles.familyMarkerPulse} />}
     </View>
-    <Callout>
-      <View style={{ padding: 10, minWidth: 150 }}>
-        <Text style={{ fontSize: 16, color: "black", fontWeight: "bold" }}>
-          TEST
-        </Text>
-        <Text style={{ fontSize: 14, color: "black" }}>{name}</Text>
-        <Text style={{ fontSize: 12, color: "black" }}>{statusMessage}</Text>
-      </View>
-    </Callout>
   </Marker>
 );
 
@@ -142,18 +129,6 @@ const PlaceMarker = ({
       <View style={[styles.placeMarker, { backgroundColor: markerColor }]}>
         <View style={styles.placeMarkerDot} />
       </View>
-      <Callout>
-        <View style={styles.callout}>
-          <Text style={styles.calloutTitle}>{name}</Text>
-          <Text style={styles.calloutDescription}>
-            {category
-              ? `${category.charAt(0).toUpperCase() + category.slice(1)} • `
-              : ""}
-            Saved Place
-          </Text>
-          {address && <Text style={styles.calloutTime}>{address}</Text>}
-        </View>
-      </Callout>
     </Marker>
   );
 };
@@ -216,6 +191,15 @@ export default function MapScreen({
     icon?: keyof typeof Ionicons.glyphMap;
     iconColor?: string;
   }>({ visible: false });
+
+  // Selected marker state for modal
+  const [selectedMarker, setSelectedMarker] = useState<{
+    type: "user" | "family" | "place";
+    name: string;
+    statusMessage?: string;
+    address?: string;
+    category?: string;
+  } | null>(null);
 
   // Fetch family locations for the map
   const { data: familyLocationsData = [] } = useQuery<
@@ -501,6 +485,13 @@ export default function MapScreen({
             latitude={currentLocation.latitude}
             longitude={currentLocation.longitude}
             name="You"
+            onPress={() =>
+              setSelectedMarker({
+                type: "user",
+                name: "You",
+                statusMessage: "Current location",
+              })
+            }
           />
         )}
 
@@ -515,6 +506,14 @@ export default function MapScreen({
             isRecent={location.isRecent}
             statusColor={location.statusColor}
             statusMessage={location.statusMessage}
+            onPress={() =>
+              setSelectedMarker({
+                type: "family",
+                name: location.name,
+                statusMessage: location.statusMessage,
+                address: location.address,
+              })
+            }
           />
         ))}
 
@@ -527,6 +526,17 @@ export default function MapScreen({
             name={place.name}
             category={place.category}
             address={place.address}
+            onPress={() =>
+              setSelectedMarker({
+                type: "place",
+                name: place.name,
+                statusMessage: place.category
+                  ? `${place.category.charAt(0).toUpperCase() + place.category.slice(1)} • Saved Place`
+                  : "Saved Place",
+                address: place.address,
+                category: place.category,
+              })
+            }
           />
         ))}
       </MapView>
@@ -636,6 +646,39 @@ export default function MapScreen({
           <Ionicons name="navigate" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
+
+      {/* Marker Info Modal */}
+      <Modal
+        visible={!!selectedMarker}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setSelectedMarker(null)}
+      >
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => setSelectedMarker(null)}
+        >
+          <Pressable
+            style={styles.modalContent}
+            onPress={(e) => e.stopPropagation()}
+          >
+            <View style={styles.modalHandle} />
+            <View style={styles.modalBody}>
+              <Text style={styles.modalTitle}>{selectedMarker?.name}</Text>
+              {selectedMarker?.statusMessage && (
+                <Text style={styles.modalStatus}>
+                  {selectedMarker.statusMessage}
+                </Text>
+              )}
+              {selectedMarker?.address && (
+                <Text style={styles.modalAddress}>
+                  {selectedMarker.address}
+                </Text>
+              )}
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
 
       {/* Custom Alert Dialog */}
       <AlertDialog
@@ -978,5 +1021,50 @@ const styles = StyleSheet.create({
   },
   centerButtonDisabled: {
     backgroundColor: "#9CA3AF",
+  },
+
+  // Modal Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "flex-end",
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingBottom: 34,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 10,
+  },
+  modalHandle: {
+    width: 40,
+    height: 4,
+    backgroundColor: "#D1D5DB",
+    borderRadius: 2,
+    alignSelf: "center",
+    marginTop: 12,
+    marginBottom: 8,
+  },
+  modalBody: {
+    padding: 20,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#111827",
+    marginBottom: 8,
+  },
+  modalStatus: {
+    fontSize: 14,
+    color: "#6B7280",
+    marginBottom: 4,
+  },
+  modalAddress: {
+    fontSize: 12,
+    color: "#9CA3AF",
   },
 });
