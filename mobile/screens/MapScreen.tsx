@@ -99,28 +99,22 @@ const FamilyMarker = ({
       />
       {isRecent && <View style={styles.familyMarkerPulse} />}
     </View>
-    <Callout tooltip>
-      <View style={styles.customCallout}>
-        <View style={styles.customCalloutContent}>
-          <View style={styles.calloutHeader}>
-            <View style={styles.calloutIconContainer}>
-              <Ionicons name="person" size={16} color="#0EA5E9" />
-            </View>
-            <Text style={styles.customCalloutTitle}>{name}</Text>
+    <Callout>
+      <View style={styles.customCalloutContent}>
+        <View style={styles.calloutHeader}>
+          <View style={styles.calloutIconContainer}>
+            <Ionicons name="person" size={16} color="#0EA5E9" />
           </View>
-          <View style={styles.calloutDivider} />
-          <View style={styles.calloutStatusRow}>
-            <View
-              style={[
-                styles.calloutStatusDot,
-                { backgroundColor: statusColor },
-              ]}
-            />
-            <Text style={styles.calloutStatusText}>{statusMessage}</Text>
-          </View>
-          {address && <Text style={styles.customCalloutTime}>{address}</Text>}
+          <Text style={styles.customCalloutTitle}>{name}</Text>
         </View>
-        <View style={styles.calloutPointer} />
+        <View style={styles.calloutDivider} />
+        <View style={styles.calloutStatusRow}>
+          <View
+            style={[styles.calloutStatusDot, { backgroundColor: statusColor }]}
+          />
+          <Text style={styles.calloutStatusText}>{statusMessage}</Text>
+        </View>
+        {address && <Text style={styles.customCalloutTime}>{address}</Text>}
       </View>
     </Callout>
   </Marker>
