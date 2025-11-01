@@ -99,11 +99,24 @@ const FamilyMarker = ({
       />
       {isRecent && <View style={styles.familyMarkerPulse} />}
     </View>
-    <Callout>
-      <View style={styles.callout}>
-        <Text style={styles.calloutTitle}>{name}</Text>
-        <Text style={styles.calloutDescription}>{statusMessage}</Text>
-        {address && <Text style={styles.calloutTime}>{address}</Text>}
+    <Callout style={{ width: 180 }}>
+      <View style={{ padding: 10, width: 180 }}>
+        <Text
+          style={{
+            fontSize: 14,
+            fontWeight: "600",
+            color: "#000",
+            marginBottom: 4,
+          }}
+        >
+          {name}
+        </Text>
+        <Text style={{ fontSize: 12, color: "#666", marginBottom: 2 }}>
+          {statusMessage}
+        </Text>
+        {address && (
+          <Text style={{ fontSize: 10, color: "#999" }}>{address}</Text>
+        )}
       </View>
     </Callout>
   </Marker>
