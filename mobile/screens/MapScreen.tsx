@@ -100,21 +100,10 @@ const FamilyMarker = ({
       {isRecent && <View style={styles.familyMarkerPulse} />}
     </View>
     <Callout>
-      <View style={styles.customCalloutContent}>
-        <View style={styles.calloutHeader}>
-          <View style={styles.calloutIconContainer}>
-            <Ionicons name="person" size={16} color="#0EA5E9" />
-          </View>
-          <Text style={styles.customCalloutTitle}>{name}</Text>
-        </View>
-        <View style={styles.calloutDivider} />
-        <View style={styles.calloutStatusRow}>
-          <View
-            style={[styles.calloutStatusDot, { backgroundColor: statusColor }]}
-          />
-          <Text style={styles.calloutStatusText}>{statusMessage}</Text>
-        </View>
-        {address && <Text style={styles.customCalloutTime}>{address}</Text>}
+      <View style={styles.callout}>
+        <Text style={styles.calloutTitle}>{name}</Text>
+        <Text style={styles.calloutDescription}>{statusMessage}</Text>
+        {address && <Text style={styles.calloutTime}>{address}</Text>}
       </View>
     </Callout>
   </Marker>
