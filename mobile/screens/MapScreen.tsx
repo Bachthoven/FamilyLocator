@@ -78,22 +78,22 @@ const UserMarker = ({
       coordinate={{ latitude, longitude }}
       onPress={onPress}
       tracksViewChanges={true}
+      anchor={{ x: 0.5, y: 0.5 }}
     >
       <View
         style={{
-          width: 44,
-          height: 44,
-          borderRadius: 4,
+          width: 46,
+          height: 46,
+          borderRadius: 23,
           backgroundColor: "#0EA5E9",
-          borderWidth: 2,
-          borderColor: "#ffffff",
           alignItems: "center",
           justifyContent: "center",
+          elevation: 3,
         }}
       >
         <Text
           style={{
-            fontSize: 15,
+            fontSize: 16,
             fontWeight: "700",
             color: "#ffffff",
           }}
@@ -147,22 +147,22 @@ const FamilyMarker = ({
       coordinate={{ latitude, longitude }}
       onPress={onPress}
       tracksViewChanges={true}
+      anchor={{ x: 0.5, y: 0.5 }}
     >
       <View
         style={{
-          width: 44,
-          height: 44,
-          borderRadius: 4,
+          width: 46,
+          height: 46,
+          borderRadius: 23,
           backgroundColor: markerColor,
-          borderWidth: 2,
-          borderColor: "#ffffff",
           alignItems: "center",
           justifyContent: "center",
+          elevation: 3,
         }}
       >
         <Text
           style={{
-            fontSize: 15,
+            fontSize: 16,
             fontWeight: "700",
             color: "#ffffff",
           }}
