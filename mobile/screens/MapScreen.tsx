@@ -83,7 +83,7 @@ const UserMarker = ({
         style={{
           width: 44,
           height: 44,
-          borderRadius: 8,
+          borderRadius: 4,
           backgroundColor: "#0EA5E9",
           borderWidth: 2,
           borderColor: "#ffffff",
@@ -152,7 +152,7 @@ const FamilyMarker = ({
         style={{
           width: 44,
           height: 44,
-          borderRadius: 8,
+          borderRadius: 4,
           backgroundColor: markerColor,
           borderWidth: 2,
           borderColor: "#ffffff",
