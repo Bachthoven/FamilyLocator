@@ -79,12 +79,8 @@ const UserMarker = ({
       onPress={onPress}
       tracksViewChanges={false}
     >
-      <View style={styles.markerWrapper}>
-        <View style={styles.markerOuter}>
-          <View style={styles.markerInner}>
-            <Text style={styles.markerText}>{initials}</Text>
-          </View>
-        </View>
+      <View style={styles.markerCircle}>
+        <Text style={styles.markerText}>{initials}</Text>
       </View>
     </Marker>
   );
@@ -133,12 +129,8 @@ const FamilyMarker = ({
       onPress={onPress}
       tracksViewChanges={false}
     >
-      <View style={styles.markerWrapper}>
-        <View style={styles.markerOuter}>
-          <View style={[styles.markerInner, { backgroundColor: markerColor }]}>
-            <Text style={styles.markerText}>{initials}</Text>
-          </View>
-        </View>
+      <View style={[styles.markerCircle, { backgroundColor: markerColor }]}>
+        <Text style={styles.markerText}>{initials}</Text>
       </View>
     </Marker>
   );
@@ -715,34 +707,25 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
-  // Marker styles - using triple-nested structure to prevent Android clipping
-  markerWrapper: {
-    width: 70,
-    height: 70,
+  // Marker styles
+  markerContainer: {
     alignItems: "center",
     justifyContent: "center",
   },
-  markerOuter: {
-    width: 56,
-    height: 56,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "white",
-    borderRadius: 28,
-  },
-  markerInner: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+  markerCircle: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     backgroundColor: "#0EA5E9",
+    borderWidth: 3,
+    borderColor: "#ffffff",
     alignItems: "center",
     justifyContent: "center",
   },
   markerText: {
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: "700",
     color: "#ffffff",
-    textAlign: "center",
   },
 
   placeMarker: {
