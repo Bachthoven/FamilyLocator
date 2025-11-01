@@ -78,41 +78,26 @@ const UserMarker = ({
       coordinate={{ latitude, longitude }}
       onPress={onPress}
       tracksViewChanges={true}
-      anchor={{ x: 0.5, y: 0.5 }}
     >
       <View
-        collapsable={false}
         style={{
-          width: 56,
-          height: 56,
-          backgroundColor: "transparent",
+          width: 40,
+          height: 40,
+          borderRadius: 0,
+          backgroundColor: "#0EA5E9",
           alignItems: "center",
           justifyContent: "center",
         }}
       >
-        <View
+        <Text
           style={{
-            position: "absolute",
-            width: 46,
-            height: 46,
-            borderRadius: 23,
-            backgroundColor: "#0EA5E9",
-            borderWidth: 3,
-            borderColor: "#ffffff",
-            alignItems: "center",
-            justifyContent: "center",
+            fontSize: 14,
+            fontWeight: "700",
+            color: "#ffffff",
           }}
         >
-          <Text
-            style={{
-              fontSize: 16,
-              fontWeight: "700",
-              color: "#ffffff",
-            }}
-          >
-            {initials}
-          </Text>
-        </View>
+          {initials}
+        </Text>
       </View>
     </Marker>
   );
@@ -160,41 +145,26 @@ const FamilyMarker = ({
       coordinate={{ latitude, longitude }}
       onPress={onPress}
       tracksViewChanges={true}
-      anchor={{ x: 0.5, y: 0.5 }}
     >
       <View
-        collapsable={false}
         style={{
-          width: 56,
-          height: 56,
-          backgroundColor: "transparent",
+          width: 40,
+          height: 40,
+          borderRadius: 0,
+          backgroundColor: markerColor,
           alignItems: "center",
           justifyContent: "center",
         }}
       >
-        <View
+        <Text
           style={{
-            position: "absolute",
-            width: 46,
-            height: 46,
-            borderRadius: 23,
-            backgroundColor: markerColor,
-            borderWidth: 3,
-            borderColor: "#ffffff",
-            alignItems: "center",
-            justifyContent: "center",
+            fontSize: 14,
+            fontWeight: "700",
+            color: "#ffffff",
           }}
         >
-          <Text
-            style={{
-              fontSize: 16,
-              fontWeight: "700",
-              color: "#ffffff",
-            }}
-          >
-            {initials}
-          </Text>
-        </View>
+          {initials}
+        </Text>
       </View>
     </Marker>
   );
