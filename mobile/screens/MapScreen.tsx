@@ -79,27 +79,35 @@ const UserMarker = ({
       onPress={onPress}
       tracksViewChanges={true}
       anchor={{ x: 0.5, y: 0.5 }}
-      centerOffset={{ x: 0, y: 0 }}
     >
       <View
         style={{
-          width: 40,
-          height: 40,
-          borderRadius: 0,
-          backgroundColor: "#0EA5E9",
-          alignItems: "center",
-          justifyContent: "center",
+          width: 48,
+          height: 48,
+          padding: 4,
+          backgroundColor: "transparent",
         }}
       >
-        <Text
+        <View
           style={{
-            fontSize: 14,
-            fontWeight: "700",
-            color: "#ffffff",
+            width: 40,
+            height: 40,
+            borderRadius: 0,
+            backgroundColor: "#0EA5E9",
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
-          {initials}
-        </Text>
+          <Text
+            style={{
+              fontSize: 14,
+              fontWeight: "700",
+              color: "#ffffff",
+            }}
+          >
+            {initials}
+          </Text>
+        </View>
       </View>
     </Marker>
   );
@@ -148,27 +156,35 @@ const FamilyMarker = ({
       onPress={onPress}
       tracksViewChanges={true}
       anchor={{ x: 0.5, y: 0.5 }}
-      centerOffset={{ x: 0, y: 0 }}
     >
       <View
         style={{
-          width: 40,
-          height: 40,
-          borderRadius: 0,
-          backgroundColor: markerColor,
-          alignItems: "center",
-          justifyContent: "center",
+          width: 48,
+          height: 48,
+          padding: 4,
+          backgroundColor: "transparent",
         }}
       >
-        <Text
+        <View
           style={{
-            fontSize: 14,
-            fontWeight: "700",
-            color: "#ffffff",
+            width: 40,
+            height: 40,
+            borderRadius: 0,
+            backgroundColor: markerColor,
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
-          {initials}
-        </Text>
+          <Text
+            style={{
+              fontSize: 14,
+              fontWeight: "700",
+              color: "#ffffff",
+            }}
+          >
+            {initials}
+          </Text>
+        </View>
       </View>
     </Marker>
   );
