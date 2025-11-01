@@ -19,7 +19,6 @@ import { User } from "../../shared/schema";
 import NotificationBell from "../components/NotificationBell";
 import Compass from "../components/Compass";
 import AlertDialog from "../components/AlertDialog";
-import Svg, { Circle, Text as SvgText } from "react-native-svg";
 
 // Type definitions
 interface FamilyLocation {
@@ -78,30 +77,10 @@ const UserMarker = ({
     <Marker
       coordinate={{ latitude, longitude }}
       onPress={onPress}
-      tracksViewChanges={true}
+      tracksViewChanges={false}
     >
-      <View style={{ alignItems: "center", justifyContent: "center" }}>
-        <Svg width={54} height={54} collapsable={false}>
-          <Circle
-            cx="27"
-            cy="27"
-            r="24"
-            fill="#0EA5E9"
-            stroke="#ffffff"
-            strokeWidth="3"
-          />
-          <SvgText
-            x="27"
-            y="27"
-            fill="white"
-            fontSize="16"
-            fontWeight="700"
-            textAnchor="middle"
-            alignmentBaseline="middle"
-          >
-            {initials}
-          </SvgText>
-        </Svg>
+      <View style={styles.markerSquare}>
+        <Text style={styles.markerText}>{initials}</Text>
       </View>
     </Marker>
   );
@@ -148,30 +127,10 @@ const FamilyMarker = ({
     <Marker
       coordinate={{ latitude, longitude }}
       onPress={onPress}
-      tracksViewChanges={true}
+      tracksViewChanges={false}
     >
-      <View style={{ alignItems: "center", justifyContent: "center" }}>
-        <Svg width={54} height={54} collapsable={false}>
-          <Circle
-            cx="27"
-            cy="27"
-            r="24"
-            fill={markerColor}
-            stroke="#ffffff"
-            strokeWidth="3"
-          />
-          <SvgText
-            x="27"
-            y="27"
-            fill="white"
-            fontSize="16"
-            fontWeight="700"
-            textAnchor="middle"
-            alignmentBaseline="middle"
-          >
-            {initials}
-          </SvgText>
-        </Svg>
+      <View style={[styles.markerSquare, { backgroundColor: markerColor }]}>
+        <Text style={styles.markerText}>{initials}</Text>
       </View>
     </Marker>
   );
@@ -748,17 +707,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
-  // Marker styles
-  markerContainer: {
-    width: 60,
-    height: 60,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  markerCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+  // Marker styles - using rounded square that Android can handle
+  markerSquare: {
+    width: 44,
+    height: 44,
+    borderRadius: 12, // Smaller radius that Android can render properly
     backgroundColor: "#0EA5E9",
     borderWidth: 3,
     borderColor: "#ffffff",
