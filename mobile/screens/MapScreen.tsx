@@ -77,10 +77,12 @@ const UserMarker = ({
     <Marker
       coordinate={{ latitude, longitude }}
       onPress={onPress}
-      tracksViewChanges={false}
+      tracksViewChanges={true}
     >
-      <View style={styles.markerCircle}>
-        <Text style={styles.markerText}>{initials}</Text>
+      <View style={styles.markerContainer}>
+        <View style={styles.markerCircle}>
+          <Text style={styles.markerText}>{initials}</Text>
+        </View>
       </View>
     </Marker>
   );
@@ -127,10 +129,12 @@ const FamilyMarker = ({
     <Marker
       coordinate={{ latitude, longitude }}
       onPress={onPress}
-      tracksViewChanges={false}
+      tracksViewChanges={true}
     >
-      <View style={[styles.markerCircle, { backgroundColor: markerColor }]}>
-        <Text style={styles.markerText}>{initials}</Text>
+      <View style={styles.markerContainer}>
+        <View style={[styles.markerCircle, { backgroundColor: markerColor }]}>
+          <Text style={styles.markerText}>{initials}</Text>
+        </View>
       </View>
     </Marker>
   );
@@ -709,6 +713,8 @@ const styles = StyleSheet.create({
 
   // Marker styles
   markerContainer: {
+    width: 60,
+    height: 60,
     alignItems: "center",
     justifyContent: "center",
   },
