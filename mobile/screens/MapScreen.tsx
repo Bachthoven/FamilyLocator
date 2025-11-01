@@ -77,27 +77,36 @@ const UserMarker = ({
     <Marker
       coordinate={{ latitude, longitude }}
       onPress={onPress}
-      tracksViewChanges={false}
+      tracksViewChanges={true}
     >
       <View
-        collapsable={false}
         style={{
-          width: 44,
-          height: 44,
-          backgroundColor: "#0EA5E9",
+          width: 50,
+          height: 50,
           alignItems: "center",
           justifyContent: "center",
+          backgroundColor: "transparent",
         }}
       >
-        <Text
+        <View
           style={{
-            fontSize: 14,
-            fontWeight: "700",
-            color: "#ffffff",
+            width: 40,
+            height: 40,
+            backgroundColor: "#0EA5E9",
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
-          {initials}
-        </Text>
+          <Text
+            style={{
+              fontSize: 14,
+              fontWeight: "700",
+              color: "#ffffff",
+            }}
+          >
+            {initials}
+          </Text>
+        </View>
       </View>
     </Marker>
   );
@@ -144,27 +153,36 @@ const FamilyMarker = ({
     <Marker
       coordinate={{ latitude, longitude }}
       onPress={onPress}
-      tracksViewChanges={false}
+      tracksViewChanges={true}
     >
       <View
-        collapsable={false}
         style={{
-          width: 44,
-          height: 44,
-          backgroundColor: markerColor,
+          width: 50,
+          height: 50,
           alignItems: "center",
           justifyContent: "center",
+          backgroundColor: "transparent",
         }}
       >
-        <Text
+        <View
           style={{
-            fontSize: 14,
-            fontWeight: "700",
-            color: "#ffffff",
+            width: 40,
+            height: 40,
+            backgroundColor: markerColor,
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
-          {initials}
-        </Text>
+          <Text
+            style={{
+              fontSize: 14,
+              fontWeight: "700",
+              color: "#ffffff",
+            }}
+          >
+            {initials}
+          </Text>
+        </View>
       </View>
     </Marker>
   );
