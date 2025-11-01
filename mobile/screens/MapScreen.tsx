@@ -192,13 +192,14 @@ export default function MapScreen({
     iconColor?: string;
   }>({ visible: false });
 
-  // Selected marker state for modal
+  // Selected marker state for speech bubble
   const [selectedMarker, setSelectedMarker] = useState<{
     type: "user" | "family" | "place";
     name: string;
     statusMessage?: string;
     address?: string;
     category?: string;
+    coordinate: { latitude: number; longitude: number };
   } | null>(null);
 
   // Fetch family locations for the map
@@ -490,6 +491,10 @@ export default function MapScreen({
                 type: "user",
                 name: "You",
                 statusMessage: "Current location",
+                coordinate: {
+                  latitude: currentLocation.latitude,
+                  longitude: currentLocation.longitude,
+                },
               })
             }
           />
@@ -512,6 +517,10 @@ export default function MapScreen({
                 name: location.name,
                 statusMessage: location.statusMessage,
                 address: location.address,
+                coordinate: {
+                  latitude: location.latitude,
+                  longitude: location.longitude,
+                },
               })
             }
           />
@@ -535,6 +544,10 @@ export default function MapScreen({
                   : "Saved Place",
                 address: place.address,
                 category: place.category,
+                coordinate: {
+                  latitude: place.latitude,
+                  longitude: place.longitude,
+                },
               })
             }
           />
@@ -647,38 +660,41 @@ export default function MapScreen({
         </TouchableOpacity>
       </View>
 
-      {/* Marker Info Modal */}
-      <Modal
-        visible={!!selectedMarker}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setSelectedMarker(null)}
-      >
+      {/* Speech Bubble Callout */}
+      {selectedMarker && (
         <Pressable
-          style={styles.modalOverlay}
+          style={styles.speechBubbleOverlay}
           onPress={() => setSelectedMarker(null)}
         >
-          <Pressable
-            style={styles.modalContent}
-            onPress={(e) => e.stopPropagation()}
-          >
-            <View style={styles.modalHandle} />
-            <View style={styles.modalBody}>
-              <Text style={styles.modalTitle}>{selectedMarker?.name}</Text>
-              {selectedMarker?.statusMessage && (
-                <Text style={styles.modalStatus}>
+          <View style={styles.speechBubbleContainer}>
+            <View style={styles.speechBubble}>
+              <View style={styles.speechBubbleHeader}>
+                <Text style={styles.speechBubbleName}>
+                  {selectedMarker.name}
+                </Text>
+                <TouchableOpacity
+                  onPress={() => setSelectedMarker(null)}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
+                  <Ionicons name="close-circle" size={20} color="#9CA3AF" />
+                </TouchableOpacity>
+              </View>
+              {selectedMarker.statusMessage && (
+                <Text style={styles.speechBubbleStatus}>
                   {selectedMarker.statusMessage}
                 </Text>
               )}
-              {selectedMarker?.address && (
-                <Text style={styles.modalAddress}>
+              {selectedMarker.address && (
+                <Text style={styles.speechBubbleAddress}>
                   {selectedMarker.address}
                 </Text>
               )}
             </View>
-          </Pressable>
+            {/* Triangular pointer */}
+            <View style={styles.speechBubblePointer} />
+          </View>
         </Pressable>
-      </Modal>
+      )}
 
       {/* Custom Alert Dialog */}
       <AlertDialog
@@ -1023,48 +1039,66 @@ const styles = StyleSheet.create({
     backgroundColor: "#9CA3AF",
   },
 
-  // Modal Styles
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    justifyContent: "flex-end",
+  // Speech Bubble Styles
+  speechBubbleOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
   },
-  modalContent: {
+  speechBubbleContainer: {
+    alignItems: "center",
+  },
+  speechBubble: {
     backgroundColor: "#fff",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    paddingBottom: 34,
+    borderRadius: 16,
+    padding: 16,
+    minWidth: 240,
+    maxWidth: 320,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 10,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    elevation: 8,
+    borderWidth: 2,
+    borderColor: "#0EA5E9",
   },
-  modalHandle: {
-    width: 40,
-    height: 4,
-    backgroundColor: "#D1D5DB",
-    borderRadius: 2,
-    alignSelf: "center",
-    marginTop: 12,
+  speechBubbleHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     marginBottom: 8,
   },
-  modalBody: {
-    padding: 20,
-  },
-  modalTitle: {
-    fontSize: 20,
+  speechBubbleName: {
+    fontSize: 18,
     fontWeight: "700",
     color: "#111827",
-    marginBottom: 8,
+    flex: 1,
   },
-  modalStatus: {
+  speechBubbleStatus: {
     fontSize: 14,
     color: "#6B7280",
     marginBottom: 4,
   },
-  modalAddress: {
+  speechBubbleAddress: {
     fontSize: 12,
     color: "#9CA3AF",
+  },
+  speechBubblePointer: {
+    width: 0,
+    height: 0,
+    backgroundColor: "transparent",
+    borderStyle: "solid",
+    borderLeftWidth: 12,
+    borderRightWidth: 12,
+    borderTopWidth: 16,
+    borderLeftColor: "transparent",
+    borderRightColor: "transparent",
+    borderTopColor: "#0EA5E9",
+    marginTop: -2,
   },
 });
