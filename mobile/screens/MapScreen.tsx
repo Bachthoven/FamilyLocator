@@ -75,6 +75,8 @@ const FamilyMarker = ({
   name,
   address,
   isRecent,
+  statusColor,
+  statusMessage,
   onPress,
 }: {
   latitude: number;
@@ -82,12 +84,14 @@ const FamilyMarker = ({
   name: string;
   address?: string;
   isRecent: boolean;
+  statusColor: string;
+  statusMessage: string;
   onPress?: () => void;
 }) => (
   <Marker
     coordinate={{ latitude, longitude }}
     onPress={onPress}
-    pinColor="#34C759"
+    pinColor="#10B981"
   >
     <View style={styles.familyMarkerContainer}>
       <View
@@ -95,15 +99,28 @@ const FamilyMarker = ({
       />
       {isRecent && <View style={styles.familyMarkerPulse} />}
     </View>
-    <Callout>
-      <View style={styles.callout}>
-        <Text style={styles.calloutTitle}>{name}</Text>
-        <Text style={styles.calloutDescription}>
-          {address || "Unknown location"}
-        </Text>
-        <Text style={styles.calloutTime}>
-          {isRecent ? "Active now" : "Last seen recently"}
-        </Text>
+    <Callout tooltip>
+      <View style={styles.customCallout}>
+        <View style={styles.customCalloutContent}>
+          <View style={styles.calloutHeader}>
+            <View style={styles.calloutIconContainer}>
+              <Ionicons name="person" size={16} color="#0EA5E9" />
+            </View>
+            <Text style={styles.customCalloutTitle}>{name}</Text>
+          </View>
+          <View style={styles.calloutDivider} />
+          <View style={styles.calloutStatusRow}>
+            <View
+              style={[
+                styles.calloutStatusDot,
+                { backgroundColor: statusColor },
+              ]}
+            />
+            <Text style={styles.calloutStatusText}>{statusMessage}</Text>
+          </View>
+          {address && <Text style={styles.customCalloutTime}>{address}</Text>}
+        </View>
+        <View style={styles.calloutPointer} />
       </View>
     </Callout>
   </Marker>
@@ -250,8 +267,43 @@ export default function MapScreen({
     longitudeDelta: 0.0421,
   };
 
+  // Helper function to get status info
+  const getStatusInfo = (minutesAgo: number) => {
+    if (minutesAgo < 5) {
+      return {
+        color: "#10B981",
+        message: "Currently active",
+      };
+    } else if (minutesAgo < 15) {
+      return {
+        color: "#F59E0B",
+        message: `${minutesAgo} min ago`,
+      };
+    } else if (minutesAgo < 60) {
+      return {
+        color: "#F97316",
+        message: `Inactive for ${minutesAgo} min`,
+      };
+    } else if (minutesAgo < 1440) {
+      const hours = Math.floor(minutesAgo / 60);
+      return {
+        color: "#EF4444",
+        message: `Offline for ${hours}h`,
+      };
+    } else {
+      const days = Math.floor(minutesAgo / 1440);
+      return {
+        color: "#6B7280",
+        message: `Offline for ${days}d`,
+      };
+    }
+  };
+
   // Convert API data to FamilyLocation format for markers
-  const familyLocations: FamilyLocation[] = familyLocationsData
+  const familyLocations: (FamilyLocation & {
+    statusColor: string;
+    statusMessage: string;
+  })[] = familyLocationsData
     .filter((loc) => {
       // Only show markers for users with location sharing enabled AND recent locations (< 24 hours)
       if (!loc.user.locationSharingEnabled || !loc.timestamp) return false;
@@ -272,14 +324,21 @@ export default function MapScreen({
         (now.getTime() - timestamp.getTime()) / (1000 * 60)
       );
       const isRecent = minutesAgo < 15; // Green pulse for active within 15 minutes
+      const statusInfo = getStatusInfo(minutesAgo);
+      const fullName =
+        loc.user.firstName && loc.user.lastName
+          ? `${loc.user.firstName} ${loc.user.lastName}`
+          : loc.user.firstName || loc.user.email;
 
       return {
         id: loc.user.id,
         latitude: loc.latitude,
         longitude: loc.longitude,
-        name: loc.user.firstName || loc.user.email,
+        name: fullName,
         address: `Last seen ${minutesAgo < 1 ? "just now" : `${minutesAgo} min ago`}`,
         isRecent,
+        statusColor: statusInfo.color,
+        statusMessage: statusInfo.message,
       };
     });
 
@@ -478,6 +537,8 @@ export default function MapScreen({
             name={location.name}
             address={location.address}
             isRecent={location.isRecent}
+            statusColor={location.statusColor}
+            statusMessage={location.statusMessage}
           />
         ))}
 
@@ -661,7 +722,7 @@ const styles = StyleSheet.create({
     width: 16,
     height: 16,
     borderRadius: 8,
-    backgroundColor: "#34C759",
+    backgroundColor: "#10B981",
     borderWidth: 2,
     borderColor: "#fff",
     shadowColor: "#000",
@@ -678,7 +739,7 @@ const styles = StyleSheet.create({
     width: 16,
     height: 16,
     borderRadius: 8,
-    backgroundColor: "#34C759",
+    backgroundColor: "#10B981",
     opacity: 0.3,
   },
 
@@ -722,6 +783,81 @@ const styles = StyleSheet.create({
   calloutTime: {
     fontSize: 10,
     color: "#999",
+  },
+
+  // Custom Callout Styles (Speech Bubble)
+  customCallout: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 5,
+    minWidth: 200,
+  },
+  customCalloutContent: {
+    padding: 12,
+  },
+  calloutHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 8,
+  },
+  calloutIconContainer: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: "#F0F9FF",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  customCalloutTitle: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#111827",
+    flex: 1,
+  },
+  calloutDivider: {
+    height: 1,
+    backgroundColor: "#E5E7EB",
+    marginBottom: 8,
+  },
+  calloutStatusRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    marginBottom: 4,
+  },
+  calloutStatusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  calloutStatusText: {
+    fontSize: 13,
+    color: "#374151",
+    fontWeight: "500",
+  },
+  customCalloutTime: {
+    fontSize: 12,
+    color: "#6B7280",
+    marginTop: 4,
+  },
+  calloutPointer: {
+    width: 0,
+    height: 0,
+    backgroundColor: "transparent",
+    borderStyle: "solid",
+    borderLeftWidth: 8,
+    borderRightWidth: 8,
+    borderTopWidth: 8,
+    borderLeftColor: "transparent",
+    borderRightColor: "transparent",
+    borderTopColor: "#fff",
+    alignSelf: "center",
+    marginTop: -1,
   },
 
   // Notification Bell Styles

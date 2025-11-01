@@ -460,6 +460,19 @@ This is a personal/family project. If you have suggestions or find bugs, please 
   - Blue badge with white text indicating current user
   - Improved visual hierarchy and consistency across family member cards
   - Simplified status messages: "Currently active", "2 min ago", "Offline for 3h", etc. (removed redundant status prefix)
+  - Updated "View" button text color to match theme color (#0EA5E9)
+
+- **Map Screen Family Markers (Mobile)**:
+  - Family members now visible on map as green circular markers
+  - Green markers match style of user location marker (circle with white border)
+  - Active members (< 15 min) have pulsing animation on green marker
+  - Custom styled callout (speech bubble) appears when tapping family member marker
+  - Callout shows: member's full name, online/offline status with color-coded dot, time since last seen
+  - Status colors: Green (active), Yellow (recent), Orange (inactive), Red/Gray (offline)
+  - Speech bubble design matches app theme with rounded corners, shadows, and pointer
+  - Callout includes person icon in blue theme color background
+  - Shows full first and last name of family members
+  - Displays detailed status: "Currently active", "5 min ago", "Offline for 2h", "Offline for 3d"
 
 ### 2025-10-22
 
