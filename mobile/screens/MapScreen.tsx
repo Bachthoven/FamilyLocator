@@ -5,7 +5,6 @@ import {
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
-  Platform,
 } from "react-native";
 import MapView, { Marker, Callout, PROVIDER_GOOGLE } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
@@ -49,40 +48,30 @@ const UserMarker = ({
   latitude,
   longitude,
   name,
-  firstName,
-  lastName,
   onPress,
 }: {
   latitude: number;
   longitude: number;
   name: string;
-  firstName?: string;
-  lastName?: string;
   onPress?: () => void;
-}) => {
-  // Get initials for current user
-  const getInitials = () => {
-    if (firstName && lastName) {
-      return `${firstName[0]}${lastName[0]}`.toUpperCase();
-    } else if (firstName) {
-      return firstName[0].toUpperCase();
-    } else {
-      return "ME";
-    }
-  };
-
-  const initials = getInitials();
-
-  return (
-    <Marker
-      coordinate={{ latitude, longitude }}
-      onPress={onPress}
-      pinColor="#0EA5E9"
-      title={`You (${initials})`}
-      description={name || "Your current location"}
-    />
-  );
-};
+}) => (
+  <Marker
+    coordinate={{ latitude, longitude }}
+    onPress={onPress}
+    pinColor="#0EA5E9"
+  >
+    <View style={styles.userMarkerContainer}>
+      <View style={styles.userMarker} />
+      <View style={styles.userMarkerPulse} />
+    </View>
+    <Callout>
+      <View style={styles.callout}>
+        <Text style={styles.calloutTitle}>{name}</Text>
+        <Text style={styles.calloutDescription}>Current location</Text>
+      </View>
+    </Callout>
+  </Marker>
+);
 
 const FamilyMarker = ({
   latitude,
@@ -120,16 +109,26 @@ const FamilyMarker = ({
 
   const initials = getInitials();
   const markerColor = isOffline ? "#9CA3AF" : "#0EA5E9";
-  const statusText = isOffline ? " (Offline)" : "";
 
   return (
     <Marker
       coordinate={{ latitude, longitude }}
       onPress={onPress}
-      pinColor={markerColor}
-      title={`${name} (${initials})${statusText}`}
-      description={address || status || "Tap to see location"}
-    />
+      anchor={{ x: 0.5, y: 0.5 }}
+    >
+      <View style={styles.familyMarkerContainer}>
+        <View
+          style={[styles.familyMarkerAvatar, { backgroundColor: markerColor }]}
+        >
+          <Text style={styles.familyMarkerInitials}>{initials}</Text>
+        </View>
+        {isRecent && !isOffline && (
+          <View
+            style={[styles.familyMarkerPulse, { backgroundColor: markerColor }]}
+          />
+        )}
+      </View>
+    </Marker>
   );
 };
 
@@ -510,8 +509,6 @@ export default function MapScreen({
             latitude={currentLocation.latitude}
             longitude={currentLocation.longitude}
             name="You"
-            firstName={user?.firstName ?? undefined}
-            lastName={user?.lastName ?? undefined}
           />
         )}
 
@@ -704,21 +701,66 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
-  // Marker styles - using rounded square that Android can handle
-  markerSquare: {
-    width: 44,
-    height: 44,
-    borderRadius: 12, // Smaller radius that Android can render properly
-    backgroundColor: "#0EA5E9",
-    borderWidth: 3,
-    borderColor: "#ffffff",
+  // Custom Marker Styles
+  userMarkerContainer: {
     alignItems: "center",
     justifyContent: "center",
+    width: 40,
+    height: 40,
   },
-  markerText: {
+  userMarker: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: "#0EA5E9",
+    borderWidth: 2,
+    borderColor: "#fff",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  userMarkerPulse: {
+    position: "absolute",
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: "#0EA5E9",
+    opacity: 0.3,
+  },
+
+  familyMarkerContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    width: 60,
+    height: 60,
+  },
+  familyMarkerAvatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 3,
+    borderColor: "#fff",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  familyMarkerInitials: {
     fontSize: 16,
     fontWeight: "700",
-    color: "#ffffff",
+    color: "#fff",
+  },
+  familyMarkerPulse: {
+    position: "absolute",
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    opacity: 0.2,
   },
 
   placeMarker: {
