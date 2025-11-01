@@ -452,7 +452,7 @@ This is a personal/family project. If you have suggestions or find bugs, please 
 
 - **Family Tab UI Enhancements (Mobile)**:
   - Removed family member count indicator from section header
-  - Updated profile avatars to use darker gray color (#6B7280) with white initials
+  - Updated profile avatars to use lighter gray color (#9CA3AF) with white initials
   - Profile avatars now show both first and last initials (e.g., "JD" for John Doe)
   - Added logged-in user to family members list with "You" badge
   - Logged-in user shows as "Currently active" with green status
