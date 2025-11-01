@@ -452,12 +452,12 @@ This is a personal/family project. If you have suggestions or find bugs, please 
 
 - **Family Tab UI Enhancements (Mobile)**:
   - Removed family member count indicator from section header
-  - Updated profile avatars to use blue theme color (#0EA5E9) instead of gray
+  - Updated profile avatars to use darker gray color (#6B7280) with white initials
   - Profile avatars now show both first and last initials (e.g., "JD" for John Doe)
   - Added logged-in user to family members list with "You" badge
   - Logged-in user shows as "Currently active" with green status
   - Statistics now accurately count logged-in user in Total Members and Online Now
-  - Blue badge with white text indicating current user
+  - Blue badge (#0EA5E9) with white text indicating current user
   - Improved visual hierarchy and consistency across family member cards
   - Simplified status messages: "Currently active", "2 min ago", "Offline for 3h", etc. (removed redundant status prefix)
   - Updated "View" button text color to match theme color (#0EA5E9)
