@@ -77,37 +77,27 @@ const UserMarker = ({
     <Marker
       coordinate={{ latitude, longitude }}
       onPress={onPress}
-      tracksViewChanges={true}
-      anchor={{ x: 0.5, y: 0.5 }}
+      tracksViewChanges={false}
     >
       <View
+        collapsable={false}
         style={{
-          width: 48,
-          height: 48,
-          padding: 4,
-          backgroundColor: "transparent",
+          width: 44,
+          height: 44,
+          backgroundColor: "#0EA5E9",
+          alignItems: "center",
+          justifyContent: "center",
         }}
       >
-        <View
+        <Text
           style={{
-            width: 40,
-            height: 40,
-            borderRadius: 0,
-            backgroundColor: "#0EA5E9",
-            alignItems: "center",
-            justifyContent: "center",
+            fontSize: 14,
+            fontWeight: "700",
+            color: "#ffffff",
           }}
         >
-          <Text
-            style={{
-              fontSize: 14,
-              fontWeight: "700",
-              color: "#ffffff",
-            }}
-          >
-            {initials}
-          </Text>
-        </View>
+          {initials}
+        </Text>
       </View>
     </Marker>
   );
@@ -154,37 +144,27 @@ const FamilyMarker = ({
     <Marker
       coordinate={{ latitude, longitude }}
       onPress={onPress}
-      tracksViewChanges={true}
-      anchor={{ x: 0.5, y: 0.5 }}
+      tracksViewChanges={false}
     >
       <View
+        collapsable={false}
         style={{
-          width: 48,
-          height: 48,
-          padding: 4,
-          backgroundColor: "transparent",
+          width: 44,
+          height: 44,
+          backgroundColor: markerColor,
+          alignItems: "center",
+          justifyContent: "center",
         }}
       >
-        <View
+        <Text
           style={{
-            width: 40,
-            height: 40,
-            borderRadius: 0,
-            backgroundColor: markerColor,
-            alignItems: "center",
-            justifyContent: "center",
+            fontSize: 14,
+            fontWeight: "700",
+            color: "#ffffff",
           }}
         >
-          <Text
-            style={{
-              fontSize: 14,
-              fontWeight: "700",
-              color: "#ffffff",
-            }}
-          >
-            {initials}
-          </Text>
-        </View>
+          {initials}
+        </Text>
       </View>
     </Marker>
   );
