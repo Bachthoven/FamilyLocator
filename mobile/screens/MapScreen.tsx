@@ -78,6 +78,8 @@ const UserMarker = ({
       coordinate={{ latitude, longitude }}
       onPress={onPress}
       tracksViewChanges={true}
+      anchor={{ x: 0.5, y: 0.5 }}
+      centerOffset={{ x: 0, y: 0 }}
     >
       <View
         style={{
@@ -145,6 +147,8 @@ const FamilyMarker = ({
       coordinate={{ latitude, longitude }}
       onPress={onPress}
       tracksViewChanges={true}
+      anchor={{ x: 0.5, y: 0.5 }}
+      centerOffset={{ x: 0, y: 0 }}
     >
       <View
         style={{
