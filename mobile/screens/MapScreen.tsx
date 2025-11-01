@@ -19,6 +19,7 @@ import { User } from "../../shared/schema";
 import NotificationBell from "../components/NotificationBell";
 import Compass from "../components/Compass";
 import AlertDialog from "../components/AlertDialog";
+import Svg, { Circle, Text as SvgText } from "react-native-svg";
 
 // Type definitions
 interface FamilyLocation {
@@ -79,10 +80,28 @@ const UserMarker = ({
       onPress={onPress}
       tracksViewChanges={true}
     >
-      <View style={styles.markerContainer}>
-        <View style={styles.markerCircle}>
-          <Text style={styles.markerText}>{initials}</Text>
-        </View>
+      <View style={{ alignItems: "center", justifyContent: "center" }}>
+        <Svg width={54} height={54} collapsable={false}>
+          <Circle
+            cx="27"
+            cy="27"
+            r="24"
+            fill="#0EA5E9"
+            stroke="#ffffff"
+            strokeWidth="3"
+          />
+          <SvgText
+            x="27"
+            y="27"
+            fill="white"
+            fontSize="16"
+            fontWeight="700"
+            textAnchor="middle"
+            alignmentBaseline="middle"
+          >
+            {initials}
+          </SvgText>
+        </Svg>
       </View>
     </Marker>
   );
@@ -131,10 +150,28 @@ const FamilyMarker = ({
       onPress={onPress}
       tracksViewChanges={true}
     >
-      <View style={styles.markerContainer}>
-        <View style={[styles.markerCircle, { backgroundColor: markerColor }]}>
-          <Text style={styles.markerText}>{initials}</Text>
-        </View>
+      <View style={{ alignItems: "center", justifyContent: "center" }}>
+        <Svg width={54} height={54} collapsable={false}>
+          <Circle
+            cx="27"
+            cy="27"
+            r="24"
+            fill={markerColor}
+            stroke="#ffffff"
+            strokeWidth="3"
+          />
+          <SvgText
+            x="27"
+            y="27"
+            fill="white"
+            fontSize="16"
+            fontWeight="700"
+            textAnchor="middle"
+            alignmentBaseline="middle"
+          >
+            {initials}
+          </SvgText>
+        </Svg>
       </View>
     </Marker>
   );
