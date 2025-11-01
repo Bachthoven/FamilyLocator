@@ -77,38 +77,10 @@ const UserMarker = ({
     <Marker
       coordinate={{ latitude, longitude }}
       onPress={onPress}
-      tracksViewChanges={true}
-    >
-      <View
-        style={{
-          width: 50,
-          height: 50,
-          alignItems: "center",
-          justifyContent: "center",
-          backgroundColor: "transparent",
-        }}
-      >
-        <View
-          style={{
-            width: 40,
-            height: 40,
-            backgroundColor: "#0EA5E9",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 14,
-              fontWeight: "700",
-              color: "#ffffff",
-            }}
-          >
-            {initials}
-          </Text>
-        </View>
-      </View>
-    </Marker>
+      pinColor="#0EA5E9"
+      title={`You (${initials})`}
+      description={name || "Your current location"}
+    />
   );
 };
 
@@ -148,43 +120,16 @@ const FamilyMarker = ({
 
   const initials = getInitials();
   const markerColor = isOffline ? "#9CA3AF" : "#0EA5E9";
+  const statusText = isOffline ? " (Offline)" : "";
 
   return (
     <Marker
       coordinate={{ latitude, longitude }}
       onPress={onPress}
-      tracksViewChanges={true}
-    >
-      <View
-        style={{
-          width: 50,
-          height: 50,
-          alignItems: "center",
-          justifyContent: "center",
-          backgroundColor: "transparent",
-        }}
-      >
-        <View
-          style={{
-            width: 40,
-            height: 40,
-            backgroundColor: markerColor,
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 14,
-              fontWeight: "700",
-              color: "#ffffff",
-            }}
-          >
-            {initials}
-          </Text>
-        </View>
-      </View>
-    </Marker>
+      pinColor={markerColor}
+      title={`${name} (${initials})${statusText}`}
+      description={address || status || "Tap to see location"}
+    />
   );
 };
 
