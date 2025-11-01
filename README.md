@@ -464,8 +464,10 @@ This is a personal/family project. If you have suggestions or find bugs, please 
 
 - **Map Screen Family Markers (Mobile)**:
   - Family members now visible on map as green circular markers
+  - Shows all family members with location sharing enabled (no time limit)
   - Green markers match style of user location marker (circle with white border)
   - Active members (< 15 min) have pulsing animation on green marker
+  - Older markers (> 15 min) are slightly faded but still visible
   - Custom styled callout (speech bubble) appears when tapping family member marker
   - Callout shows: member's full name, online/offline status with color-coded dot, time since last seen
   - Status colors: Green (active), Yellow (recent), Orange (inactive), Red/Gray (offline)
