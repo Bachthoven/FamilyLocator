@@ -81,34 +81,26 @@ const UserMarker = ({
     >
       <View
         style={{
-          width: 60,
-          height: 60,
+          width: 50,
+          height: 50,
+          borderRadius: 25,
+          backgroundColor: "#0EA5E9",
+          borderWidth: 3,
+          borderColor: "#ffffff",
           alignItems: "center",
           justifyContent: "center",
+          overflow: "visible",
         }}
       >
-        <View
+        <Text
           style={{
-            width: 40,
-            height: 40,
-            borderRadius: 20,
-            backgroundColor: "#0EA5E9",
-            borderWidth: 2,
-            borderColor: "#ffffff",
-            alignItems: "center",
-            justifyContent: "center",
+            fontSize: 17,
+            fontWeight: "700",
+            color: "#ffffff",
           }}
         >
-          <Text
-            style={{
-              fontSize: 14,
-              fontWeight: "700",
-              color: "#ffffff",
-            }}
-          >
-            {initials}
-          </Text>
-        </View>
+          {initials}
+        </Text>
       </View>
     </Marker>
   );
@@ -159,34 +151,26 @@ const FamilyMarker = ({
     >
       <View
         style={{
-          width: 60,
-          height: 60,
+          width: 50,
+          height: 50,
+          borderRadius: 25,
+          backgroundColor: markerColor,
+          borderWidth: 3,
+          borderColor: "#ffffff",
           alignItems: "center",
           justifyContent: "center",
+          overflow: "visible",
         }}
       >
-        <View
+        <Text
           style={{
-            width: 40,
-            height: 40,
-            borderRadius: 20,
-            backgroundColor: markerColor,
-            borderWidth: 2,
-            borderColor: "#ffffff",
-            alignItems: "center",
-            justifyContent: "center",
+            fontSize: 17,
+            fontWeight: "700",
+            color: "#ffffff",
           }}
         >
-          <Text
-            style={{
-              fontSize: 14,
-              fontWeight: "700",
-              color: "#ffffff",
-            }}
-          >
-            {initials}
-          </Text>
-        </View>
+          {initials}
+        </Text>
       </View>
     </Marker>
   );
