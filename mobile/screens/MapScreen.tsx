@@ -521,10 +521,13 @@ export default function MapScreen({
             onPress={() => {
               // Mark as programmatic move
               isProgrammaticMove.current = true;
+              // Offset latitude to position marker at speech bubble location (31% from top)
+              // Screen center is at 50%, so we need to shift up by 19%
+              const latitudeOffset = currentRegion.latitudeDelta * 0.19;
               // Center map on marker while maintaining current zoom
               mapRef.current?.animateToRegion(
                 {
-                  latitude: currentLocation.latitude,
+                  latitude: currentLocation.latitude + latitudeOffset,
                   longitude: currentLocation.longitude,
                   latitudeDelta: currentRegion.latitudeDelta,
                   longitudeDelta: currentRegion.longitudeDelta,
@@ -559,10 +562,13 @@ export default function MapScreen({
             onPress={() => {
               // Mark as programmatic move
               isProgrammaticMove.current = true;
+              // Offset latitude to position marker at speech bubble location (31% from top)
+              // Screen center is at 50%, so we need to shift up by 19%
+              const latitudeOffset = currentRegion.latitudeDelta * 0.19;
               // Center map on marker while maintaining current zoom
               mapRef.current?.animateToRegion(
                 {
-                  latitude: location.latitude,
+                  latitude: location.latitude + latitudeOffset,
                   longitude: location.longitude,
                   latitudeDelta: currentRegion.latitudeDelta,
                   longitudeDelta: currentRegion.longitudeDelta,
@@ -596,10 +602,13 @@ export default function MapScreen({
             onPress={() => {
               // Mark as programmatic move
               isProgrammaticMove.current = true;
+              // Offset latitude to position marker at speech bubble location (31% from top)
+              // Screen center is at 50%, so we need to shift up by 19%
+              const latitudeOffset = currentRegion.latitudeDelta * 0.19;
               // Center map on marker while maintaining current zoom
               mapRef.current?.animateToRegion(
                 {
-                  latitude: place.latitude,
+                  latitude: place.latitude + latitudeOffset,
                   longitude: place.longitude,
                   latitudeDelta: currentRegion.latitudeDelta,
                   longitudeDelta: currentRegion.longitudeDelta,
@@ -1126,7 +1135,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "#0EA5E9",
     alignSelf: "center",
-    marginLeft: 30,
+    marginLeft: 40,
   },
   speechBubbleHeader: {
     flexDirection: "row",
