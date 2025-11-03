@@ -211,15 +211,6 @@ export default function MapScreen({
     coordinate: { latitude: number; longitude: number };
   } | null>(null);
 
-  // Bubble positioning state
-  const [bubblePosition, setBubblePosition] = useState<{
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  } | null>(null);
-  const bubbleRef = useRef<View>(null);
-
   // Fetch family locations for the map
   const { data: familyLocationsData = [] } = useQuery<
     Array<{
@@ -354,41 +345,6 @@ export default function MapScreen({
     // { id: 1, latitude: 40.7589, longitude: -73.9851, name: 'Home', category: 'home', address: '123 Main St' },
   ];
 
-  // Function to update bubble position based on marker coordinates
-  const updateBubblePosition = async (coordinate: {
-    latitude: number;
-    longitude: number;
-  }) => {
-    if (!mapRef.current) return;
-
-    try {
-      // Convert lat/lng to screen coordinates
-      const point = await mapRef.current.pointForCoordinate(coordinate);
-
-      // Measure bubble if we have it
-      if (bubbleRef.current) {
-        bubbleRef.current.measure((x, y, width, height) => {
-          setBubblePosition({
-            x: point.x,
-            y: point.y,
-            width,
-            height,
-          });
-        });
-      } else {
-        // Use default dimensions if bubble not yet measured
-        setBubblePosition({
-          x: point.x,
-          y: point.y,
-          width: 280, // Default estimated width
-          height: 120, // Default estimated height
-        });
-      }
-    } catch (error) {
-      console.error("Error updating bubble position:", error);
-    }
-  };
-
   // Get location only if we don't have a saved region and no current location
   useEffect(() => {
     if (!hasInitializedLocation.current && !currentLocation && !savedRegion) {
@@ -412,19 +368,6 @@ export default function MapScreen({
       onLocationFocused?.();
     }
   }, [focusLocation]);
-
-  // Update bubble position when marker is selected or after animation
-  useEffect(() => {
-    if (selectedMarker) {
-      // Delay to allow map animation to complete
-      const timeout = setTimeout(() => {
-        updateBubblePosition(selectedMarker.coordinate);
-      }, 350); // Slightly longer than animation duration
-      return () => clearTimeout(timeout);
-    } else {
-      setBubblePosition(null);
-    }
-  }, [selectedMarker]);
 
   const getCurrentLocation = async () => {
     try {
@@ -559,10 +502,6 @@ export default function MapScreen({
           // Only save region when Map tab is active to prevent saving incorrect positions
           if (isActive) {
             onRegionChange?.(region);
-          }
-          // Update bubble position after region change
-          if (selectedMarker) {
-            updateBubblePosition(selectedMarker.coordinate);
           }
         }}
         showsUserLocation={false}
@@ -793,18 +732,8 @@ export default function MapScreen({
       </View>
 
       {/* Speech Bubble Callout */}
-      {selectedMarker && bubblePosition && (
-        <View
-          ref={bubbleRef}
-          style={[
-            styles.speechBubbleContainer,
-            {
-              left: bubblePosition.x - bubblePosition.width / 2,
-              top: bubblePosition.y - bubblePosition.height - 50, // 50px above marker
-            },
-          ]}
-          pointerEvents="box-none"
-        >
+      {selectedMarker && (
+        <View style={styles.speechBubbleContainer} pointerEvents="box-none">
           <View style={styles.speechBubble}>
             <View style={styles.speechBubbleHeader}>
               <Text style={styles.speechBubbleName}>{selectedMarker.name}</Text>
@@ -1177,6 +1106,9 @@ const styles = StyleSheet.create({
   // Speech Bubble Styles
   speechBubbleContainer: {
     position: "absolute",
+    top: "31%",
+    left: 0,
+    right: 0,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -1184,7 +1116,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderRadius: 16,
     padding: 16,
-    width: 280,
+    minWidth: 240,
+    maxWidth: 320,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
@@ -1192,6 +1125,8 @@ const styles = StyleSheet.create({
     elevation: 8,
     borderWidth: 2,
     borderColor: "#0EA5E9",
+    alignSelf: "center",
+    marginLeft: 50,
   },
   speechBubbleHeader: {
     flexDirection: "row",
