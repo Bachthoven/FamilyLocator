@@ -240,7 +240,7 @@ export default function AuthScreen() {
                         onPress={() => setShowLoginPassword(!showLoginPassword)}
                       >
                         <Ionicons
-                          name={showLoginPassword ? "eye-off" : "eye"}
+                          name={showLoginPassword ? "eye" : "eye-off"}
                           size={20}
                           color="#64748b"
                         />
@@ -389,7 +389,7 @@ export default function AuthScreen() {
                         }
                       >
                         <Ionicons
-                          name={showRegisterPassword ? "eye-off" : "eye"}
+                          name={showRegisterPassword ? "eye" : "eye-off"}
                           size={20}
                           color="#64748b"
                         />
@@ -425,7 +425,7 @@ export default function AuthScreen() {
                         }
                       >
                         <Ionicons
-                          name={showConfirmPassword ? "eye-off" : "eye"}
+                          name={showConfirmPassword ? "eye" : "eye-off"}
                           size={20}
                           color="#64748b"
                         />
@@ -593,7 +593,8 @@ const styles = StyleSheet.create({
   eyeIcon: {
     position: "absolute",
     right: 12,
-    top: 12,
+    top: "50%",
+    transform: [{ translateY: -12 }],
     padding: 4,
   },
   errorText: {
