@@ -662,11 +662,14 @@ export default function MapScreen({
 
       {/* Speech Bubble Callout */}
       {selectedMarker && (
-        <Pressable
-          style={styles.speechBubbleOverlay}
-          onPress={() => setSelectedMarker(null)}
-        >
-          <View style={styles.speechBubbleContainer}>
+        <>
+          {/* Invisible overlay to catch taps */}
+          <Pressable
+            style={styles.invisibleOverlay}
+            onPress={() => setSelectedMarker(null)}
+          />
+          {/* Speech bubble positioned in upper-center area */}
+          <View style={styles.speechBubbleContainer} pointerEvents="box-none">
             <View style={styles.speechBubble}>
               <View style={styles.speechBubbleHeader}>
                 <Text style={styles.speechBubbleName}>
@@ -693,7 +696,7 @@ export default function MapScreen({
             {/* Triangular pointer */}
             <View style={styles.speechBubblePointer} />
           </View>
-        </Pressable>
+        </>
       )}
 
       {/* Custom Alert Dialog */}
@@ -1040,18 +1043,20 @@ const styles = StyleSheet.create({
   },
 
   // Speech Bubble Styles
-  speechBubbleOverlay: {
+  invisibleOverlay: {
     position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.3)",
   },
   speechBubbleContainer: {
+    position: "absolute",
+    top: "30%",
+    left: 0,
+    right: 0,
     alignItems: "center",
+    paddingHorizontal: 20,
   },
   speechBubble: {
     backgroundColor: "#fff",
