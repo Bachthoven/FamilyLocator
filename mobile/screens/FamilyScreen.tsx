@@ -185,7 +185,7 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
       icon: "person-remove",
       iconColor: "#FF3B30",
       buttons: [
-        { text: "Cancel", style: "cancel" },
+        { text: "Close", style: "cancel" },
         {
           text: "Remove",
           style: "destructive",
@@ -611,6 +611,11 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                   onPress={() => setCodeDialogOpen(false)}
                   data-testid="button-close-code-dialog"
                 >
+                  <Ionicons
+                    name="close-circle-outline"
+                    size={18}
+                    color="#0EA5E9"
+                  />
                   <Text style={styles.secondaryButtonText}>Close</Text>
                 </TouchableOpacity>
               </View>
@@ -677,9 +682,14 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                     setJoinDialogOpen(false);
                     setJoinCode("");
                   }}
-                  data-testid="button-cancel-join"
+                  data-testid="button-close-join"
                 >
-                  <Text style={styles.secondaryButtonText}>Cancel</Text>
+                  <Ionicons
+                    name="close-circle-outline"
+                    size={18}
+                    color="#0EA5E9"
+                  />
+                  <Text style={styles.secondaryButtonText}>Close</Text>
                 </TouchableOpacity>
               </View>
             </View>

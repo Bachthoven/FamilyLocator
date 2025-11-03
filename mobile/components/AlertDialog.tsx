@@ -85,6 +85,13 @@ export default function AlertDialog({
                 activeOpacity={0.7}
                 data-testid={`button-alert-${button.text.toLowerCase().replace(/\s+/g, "-")}`}
               >
+                {button.style === "cancel" && (
+                  <Ionicons
+                    name="close-circle-outline"
+                    size={18}
+                    color="#0EA5E9"
+                  />
+                )}
                 <Text
                   style={[
                     styles.buttonText,
@@ -158,8 +165,10 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 20,
     borderRadius: 12,
+    flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
+    gap: 6,
   },
   buttonSingle: {
     flex: 0,
