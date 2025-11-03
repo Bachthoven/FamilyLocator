@@ -150,6 +150,7 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: "row",
     gap: 12,
+    justifyContent: "center",
   },
   button: {
     flex: 1,
