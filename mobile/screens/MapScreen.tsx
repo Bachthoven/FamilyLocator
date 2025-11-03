@@ -181,6 +181,14 @@ export default function MapScreen({
   );
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const [mapHeading, setMapHeading] = useState(0); // Track map rotation
+  const [currentRegion, setCurrentRegion] = useState(
+    savedRegion || {
+      latitude: 40.7128,
+      longitude: -74.006,
+      latitudeDelta: 0.0922,
+      longitudeDelta: 0.0421,
+    }
+  );
   const { user } = useAuth();
 
   // Alert dialog state
@@ -480,8 +488,14 @@ export default function MapScreen({
           mapRef.current?.getCamera().then((camera) => {
             setMapHeading(camera.heading || 0);
           });
+          // Close speech bubble when user starts panning/zooming
+          if (selectedMarker) {
+            setSelectedMarker(null);
+          }
         }}
         onRegionChangeComplete={(region) => {
+          // Track current region for zoom level
+          setCurrentRegion(region);
           // Only save region when Map tab is active to prevent saving incorrect positions
           if (isActive) {
             onRegionChange?.(region);
@@ -502,13 +516,13 @@ export default function MapScreen({
             longitude={currentLocation.longitude}
             name="You"
             onPress={() => {
-              // Center map on marker
+              // Center map on marker while maintaining current zoom
               mapRef.current?.animateToRegion(
                 {
                   latitude: currentLocation.latitude,
                   longitude: currentLocation.longitude,
-                  latitudeDelta: 0.01,
-                  longitudeDelta: 0.01,
+                  latitudeDelta: currentRegion.latitudeDelta,
+                  longitudeDelta: currentRegion.longitudeDelta,
                 },
                 300
               );
@@ -538,13 +552,13 @@ export default function MapScreen({
             statusColor={location.statusColor}
             statusMessage={location.statusMessage}
             onPress={() => {
-              // Center map on marker
+              // Center map on marker while maintaining current zoom
               mapRef.current?.animateToRegion(
                 {
                   latitude: location.latitude,
                   longitude: location.longitude,
-                  latitudeDelta: 0.01,
-                  longitudeDelta: 0.01,
+                  latitudeDelta: currentRegion.latitudeDelta,
+                  longitudeDelta: currentRegion.longitudeDelta,
                 },
                 300
               );
@@ -573,13 +587,13 @@ export default function MapScreen({
             category={place.category}
             address={place.address}
             onPress={() => {
-              // Center map on marker
+              // Center map on marker while maintaining current zoom
               mapRef.current?.animateToRegion(
                 {
                   latitude: place.latitude,
                   longitude: place.longitude,
-                  latitudeDelta: 0.01,
-                  longitudeDelta: 0.01,
+                  latitudeDelta: currentRegion.latitudeDelta,
+                  longitudeDelta: currentRegion.longitudeDelta,
                 },
                 300
               );
