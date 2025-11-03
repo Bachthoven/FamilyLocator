@@ -594,7 +594,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: 12,
     top: "50%",
-    transform: [{ translateY: -12 }],
+    transform: [{ translateY: -14 }],
     padding: 4,
   },
   errorText: {
