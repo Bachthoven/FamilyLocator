@@ -27,6 +27,7 @@ export default function AuthScreen() {
     email?: string;
     password?: string;
   }>({});
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
 
   // Register form state
   const [registerFirstName, setRegisterFirstName] = useState("");
@@ -43,6 +44,8 @@ export default function AuthScreen() {
     password?: string;
     confirmPassword?: string;
   }>({});
+  const [showRegisterPassword, setShowRegisterPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -219,18 +222,30 @@ export default function AuthScreen() {
                   {/* Password Input */}
                   <View style={styles.inputGroup}>
                     <Text style={styles.label}>Password</Text>
-                    <TextInput
-                      style={[
-                        styles.input,
-                        loginErrors.password && styles.inputError,
-                      ]}
-                      placeholder="Enter password"
-                      value={loginPassword}
-                      onChangeText={setLoginPassword}
-                      secureTextEntry
-                      autoCapitalize="none"
-                      autoCorrect={false}
-                    />
+                    <View style={styles.passwordContainer}>
+                      <TextInput
+                        style={[
+                          styles.passwordInput,
+                          loginErrors.password && styles.inputError,
+                        ]}
+                        placeholder="Enter password"
+                        value={loginPassword}
+                        onChangeText={setLoginPassword}
+                        secureTextEntry={!showLoginPassword}
+                        autoCapitalize="none"
+                        autoCorrect={false}
+                      />
+                      <TouchableOpacity
+                        style={styles.eyeIcon}
+                        onPress={() => setShowLoginPassword(!showLoginPassword)}
+                      >
+                        <Ionicons
+                          name={showLoginPassword ? "eye-off" : "eye"}
+                          size={20}
+                          color="#64748b"
+                        />
+                      </TouchableOpacity>
+                    </View>
                     {loginErrors.password && (
                       <Text style={styles.errorText}>
                         {loginErrors.password}
@@ -354,18 +369,32 @@ export default function AuthScreen() {
                   {/* Password Input */}
                   <View style={styles.inputGroup}>
                     <Text style={styles.label}>Password</Text>
-                    <TextInput
-                      style={[
-                        styles.input,
-                        registerErrors.password && styles.inputError,
-                      ]}
-                      placeholder="Enter password"
-                      value={registerPassword}
-                      onChangeText={setRegisterPassword}
-                      secureTextEntry
-                      autoCapitalize="none"
-                      autoCorrect={false}
-                    />
+                    <View style={styles.passwordContainer}>
+                      <TextInput
+                        style={[
+                          styles.passwordInput,
+                          registerErrors.password && styles.inputError,
+                        ]}
+                        placeholder="Enter password"
+                        value={registerPassword}
+                        onChangeText={setRegisterPassword}
+                        secureTextEntry={!showRegisterPassword}
+                        autoCapitalize="none"
+                        autoCorrect={false}
+                      />
+                      <TouchableOpacity
+                        style={styles.eyeIcon}
+                        onPress={() =>
+                          setShowRegisterPassword(!showRegisterPassword)
+                        }
+                      >
+                        <Ionicons
+                          name={showRegisterPassword ? "eye-off" : "eye"}
+                          size={20}
+                          color="#64748b"
+                        />
+                      </TouchableOpacity>
+                    </View>
                     {registerErrors.password && (
                       <Text style={styles.errorText}>
                         {registerErrors.password}
@@ -376,18 +405,32 @@ export default function AuthScreen() {
                   {/* Confirm Password Input */}
                   <View style={styles.inputGroup}>
                     <Text style={styles.label}>Confirm Password</Text>
-                    <TextInput
-                      style={[
-                        styles.input,
-                        registerErrors.confirmPassword && styles.inputError,
-                      ]}
-                      placeholder="Confirm password"
-                      value={registerConfirmPassword}
-                      onChangeText={setRegisterConfirmPassword}
-                      secureTextEntry
-                      autoCapitalize="none"
-                      autoCorrect={false}
-                    />
+                    <View style={styles.passwordContainer}>
+                      <TextInput
+                        style={[
+                          styles.passwordInput,
+                          registerErrors.confirmPassword && styles.inputError,
+                        ]}
+                        placeholder="Confirm password"
+                        value={registerConfirmPassword}
+                        onChangeText={setRegisterConfirmPassword}
+                        secureTextEntry={!showConfirmPassword}
+                        autoCapitalize="none"
+                        autoCorrect={false}
+                      />
+                      <TouchableOpacity
+                        style={styles.eyeIcon}
+                        onPress={() =>
+                          setShowConfirmPassword(!showConfirmPassword)
+                        }
+                      >
+                        <Ionicons
+                          name={showConfirmPassword ? "eye-off" : "eye"}
+                          size={20}
+                          color="#64748b"
+                        />
+                      </TouchableOpacity>
+                    </View>
                     {registerErrors.confirmPassword && (
                       <Text style={styles.errorText}>
                         {registerErrors.confirmPassword}
@@ -533,6 +576,25 @@ const styles = StyleSheet.create({
   },
   inputError: {
     borderColor: "#ef4444",
+  },
+  passwordContainer: {
+    position: "relative",
+  },
+  passwordInput: {
+    borderWidth: 1,
+    borderColor: "#cbd5e1",
+    borderRadius: 8,
+    padding: 12,
+    paddingRight: 48,
+    fontSize: 16,
+    backgroundColor: "#fff",
+    color: "#1a202c",
+  },
+  eyeIcon: {
+    position: "absolute",
+    right: 12,
+    top: 12,
+    padding: 4,
   },
   errorText: {
     fontSize: 12,
