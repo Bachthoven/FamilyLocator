@@ -176,6 +176,7 @@ export default function MapScreen({
   const insets = useSafeAreaInsets();
   const mapRef = useRef<MapView>(null);
   const hasInitializedLocation = useRef(false);
+  const isProgrammaticMove = useRef(false); // Track if we're centering programmatically
   const [localMapType, setLocalMapType] = useState<"standard" | "hybrid">(
     "standard"
   );
@@ -488,14 +489,16 @@ export default function MapScreen({
           mapRef.current?.getCamera().then((camera) => {
             setMapHeading(camera.heading || 0);
           });
-          // Close speech bubble when user starts panning/zooming
-          if (selectedMarker) {
+          // Close speech bubble when user manually pans/zooms (not programmatic)
+          if (selectedMarker && !isProgrammaticMove.current) {
             setSelectedMarker(null);
           }
         }}
         onRegionChangeComplete={(region) => {
           // Track current region for zoom level
           setCurrentRegion(region);
+          // Reset programmatic move flag
+          isProgrammaticMove.current = false;
           // Only save region when Map tab is active to prevent saving incorrect positions
           if (isActive) {
             onRegionChange?.(region);
@@ -516,6 +519,8 @@ export default function MapScreen({
             longitude={currentLocation.longitude}
             name="You"
             onPress={() => {
+              // Mark as programmatic move
+              isProgrammaticMove.current = true;
               // Center map on marker while maintaining current zoom
               mapRef.current?.animateToRegion(
                 {
@@ -552,6 +557,8 @@ export default function MapScreen({
             statusColor={location.statusColor}
             statusMessage={location.statusMessage}
             onPress={() => {
+              // Mark as programmatic move
+              isProgrammaticMove.current = true;
               // Center map on marker while maintaining current zoom
               mapRef.current?.animateToRegion(
                 {
@@ -587,6 +594,8 @@ export default function MapScreen({
             category={place.category}
             address={place.address}
             onPress={() => {
+              // Mark as programmatic move
+              isProgrammaticMove.current = true;
               // Center map on marker while maintaining current zoom
               mapRef.current?.animateToRegion(
                 {
@@ -1097,7 +1106,7 @@ const styles = StyleSheet.create({
   // Speech Bubble Styles
   speechBubbleContainer: {
     position: "absolute",
-    top: "35%",
+    top: "20%",
     left: 0,
     right: 0,
     alignItems: "center",
