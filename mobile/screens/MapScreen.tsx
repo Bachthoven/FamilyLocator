@@ -1107,8 +1107,8 @@ const styles = StyleSheet.create({
   speechBubbleContainer: {
     position: "absolute",
     top: "31%",
-    left: 0,
-    right: 0,
+    left: 50,
+    right: -50,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -1125,8 +1125,6 @@ const styles = StyleSheet.create({
     elevation: 8,
     borderWidth: 2,
     borderColor: "#0EA5E9",
-    alignSelf: "center",
-    marginLeft: 50,
   },
   speechBubbleHeader: {
     flexDirection: "row",
