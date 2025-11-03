@@ -489,12 +489,22 @@ export default function MapScreen({
           mapRef.current?.getCamera().then((camera) => {
             setMapHeading(camera.heading || 0);
           });
-          // Close speech bubble when user manually pans/zooms (not programmatic)
-          if (selectedMarker && !isProgrammaticMove.current) {
-            setSelectedMarker(null);
-          }
         }}
         onRegionChangeComplete={(region) => {
+          // Close speech bubble only if user actually panned/zoomed significantly
+          if (selectedMarker && !isProgrammaticMove.current) {
+            const latDiff = Math.abs(region.latitude - currentRegion.latitude);
+            const lonDiff = Math.abs(
+              region.longitude - currentRegion.longitude
+            );
+            const deltaDiff = Math.abs(
+              region.latitudeDelta - currentRegion.latitudeDelta
+            );
+            // Dismiss only if there was significant movement (not just a tap)
+            if (latDiff > 0.0001 || lonDiff > 0.0001 || deltaDiff > 0.001) {
+              setSelectedMarker(null);
+            }
+          }
           // Track current region for zoom level
           setCurrentRegion(region);
           // Reset programmatic move flag
@@ -1106,7 +1116,7 @@ const styles = StyleSheet.create({
   // Speech Bubble Styles
   speechBubbleContainer: {
     position: "absolute",
-    top: "20%",
+    top: "30%",
     left: 0,
     right: 0,
     alignItems: "center",
