@@ -1126,7 +1126,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "#0EA5E9",
     alignSelf: "center",
-    marginLeft: 40,
+    marginLeft: 50,
   },
   speechBubbleHeader: {
     flexDirection: "row",
