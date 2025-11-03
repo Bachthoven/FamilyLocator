@@ -237,6 +237,21 @@ export default function MapScreen({
     longitudeDelta: 0.0421,
   };
 
+  // Helper function to format time ago
+  const formatTimeAgo = (minutesAgo: number) => {
+    if (minutesAgo < 1) {
+      return "just now";
+    } else if (minutesAgo < 60) {
+      return `${minutesAgo} min ago`;
+    } else if (minutesAgo < 1440) {
+      const hours = Math.floor(minutesAgo / 60);
+      return `${hours}h ago`;
+    } else {
+      const days = Math.floor(minutesAgo / 1440);
+      return `${days}d ago`;
+    }
+  };
+
   // Helper function to get status info
   const getStatusInfo = (minutesAgo: number) => {
     if (minutesAgo < 5) {
@@ -296,7 +311,7 @@ export default function MapScreen({
         latitude: loc.latitude,
         longitude: loc.longitude,
         name: fullName,
-        address: `Last seen ${minutesAgo < 1 ? "just now" : `${minutesAgo} min ago`}`,
+        address: `Last seen ${formatTimeAgo(minutesAgo)}`,
         isRecent,
         statusColor: statusInfo.color,
         statusMessage: statusInfo.message,
@@ -486,7 +501,18 @@ export default function MapScreen({
             latitude={currentLocation.latitude}
             longitude={currentLocation.longitude}
             name="You"
-            onPress={() =>
+            onPress={() => {
+              // Center map on marker
+              mapRef.current?.animateToRegion(
+                {
+                  latitude: currentLocation.latitude,
+                  longitude: currentLocation.longitude,
+                  latitudeDelta: 0.01,
+                  longitudeDelta: 0.01,
+                },
+                300
+              );
+              // Show speech bubble
               setSelectedMarker({
                 type: "user",
                 name: "You",
@@ -495,8 +521,8 @@ export default function MapScreen({
                   latitude: currentLocation.latitude,
                   longitude: currentLocation.longitude,
                 },
-              })
-            }
+              });
+            }}
           />
         )}
 
@@ -511,7 +537,18 @@ export default function MapScreen({
             isRecent={location.isRecent}
             statusColor={location.statusColor}
             statusMessage={location.statusMessage}
-            onPress={() =>
+            onPress={() => {
+              // Center map on marker
+              mapRef.current?.animateToRegion(
+                {
+                  latitude: location.latitude,
+                  longitude: location.longitude,
+                  latitudeDelta: 0.01,
+                  longitudeDelta: 0.01,
+                },
+                300
+              );
+              // Show speech bubble
               setSelectedMarker({
                 type: "family",
                 name: location.name,
@@ -521,8 +558,8 @@ export default function MapScreen({
                   latitude: location.latitude,
                   longitude: location.longitude,
                 },
-              })
-            }
+              });
+            }}
           />
         ))}
 
@@ -535,7 +572,18 @@ export default function MapScreen({
             name={place.name}
             category={place.category}
             address={place.address}
-            onPress={() =>
+            onPress={() => {
+              // Center map on marker
+              mapRef.current?.animateToRegion(
+                {
+                  latitude: place.latitude,
+                  longitude: place.longitude,
+                  latitudeDelta: 0.01,
+                  longitudeDelta: 0.01,
+                },
+                300
+              );
+              // Show speech bubble
               setSelectedMarker({
                 type: "place",
                 name: place.name,
@@ -548,8 +596,8 @@ export default function MapScreen({
                   latitude: place.latitude,
                   longitude: place.longitude,
                 },
-              })
-            }
+              });
+            }}
           />
         ))}
       </MapView>
@@ -662,41 +710,31 @@ export default function MapScreen({
 
       {/* Speech Bubble Callout */}
       {selectedMarker && (
-        <>
-          {/* Invisible overlay to catch taps */}
-          <Pressable
-            style={styles.invisibleOverlay}
-            onPress={() => setSelectedMarker(null)}
-          />
-          {/* Speech bubble positioned in upper-center area */}
-          <View style={styles.speechBubbleContainer} pointerEvents="box-none">
-            <View style={styles.speechBubble}>
-              <View style={styles.speechBubbleHeader}>
-                <Text style={styles.speechBubbleName}>
-                  {selectedMarker.name}
-                </Text>
-                <TouchableOpacity
-                  onPress={() => setSelectedMarker(null)}
-                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                >
-                  <Ionicons name="close-circle" size={20} color="#9CA3AF" />
-                </TouchableOpacity>
-              </View>
-              {selectedMarker.statusMessage && (
-                <Text style={styles.speechBubbleStatus}>
-                  {selectedMarker.statusMessage}
-                </Text>
-              )}
-              {selectedMarker.address && (
-                <Text style={styles.speechBubbleAddress}>
-                  {selectedMarker.address}
-                </Text>
-              )}
+        <View style={styles.speechBubbleContainer} pointerEvents="box-none">
+          <View style={styles.speechBubble}>
+            <View style={styles.speechBubbleHeader}>
+              <Text style={styles.speechBubbleName}>{selectedMarker.name}</Text>
+              <TouchableOpacity
+                onPress={() => setSelectedMarker(null)}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <Ionicons name="close-circle" size={20} color="#9CA3AF" />
+              </TouchableOpacity>
             </View>
-            {/* Triangular pointer */}
-            <View style={styles.speechBubblePointer} />
+            {selectedMarker.statusMessage && (
+              <Text style={styles.speechBubbleStatus}>
+                {selectedMarker.statusMessage}
+              </Text>
+            )}
+            {selectedMarker.address && (
+              <Text style={styles.speechBubbleAddress}>
+                {selectedMarker.address}
+              </Text>
+            )}
           </View>
-        </>
+          {/* Triangular pointer */}
+          <View style={styles.speechBubblePointer} />
+        </View>
       )}
 
       {/* Custom Alert Dialog */}
@@ -770,7 +808,7 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   familyMarkerOld: {
-    opacity: 0.6,
+    opacity: 0.3,
   },
   familyMarkerPulse: {
     position: "absolute",
@@ -1043,16 +1081,9 @@ const styles = StyleSheet.create({
   },
 
   // Speech Bubble Styles
-  invisibleOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-  },
   speechBubbleContainer: {
     position: "absolute",
-    top: "30%",
+    top: "35%",
     left: 0,
     right: 0,
     alignItems: "center",
