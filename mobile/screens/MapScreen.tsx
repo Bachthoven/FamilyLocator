@@ -1111,7 +1111,6 @@ const styles = StyleSheet.create({
     right: 0,
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 20,
   },
   speechBubble: {
     backgroundColor: "#fff",
