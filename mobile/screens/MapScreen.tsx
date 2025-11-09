@@ -1116,7 +1116,7 @@ const styles = StyleSheet.create({
   // Speech Bubble Styles
   speechBubbleContainer: {
     position: "absolute",
-    top: "28%",
+    top: "33%",
     left: 0,
     right: 0,
     alignItems: "center",
