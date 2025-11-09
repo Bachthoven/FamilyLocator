@@ -56,9 +56,7 @@ const UserMarker = ({
   <Marker
     coordinate={{ latitude, longitude }}
     onPress={onPress}
-    pinColor="#0EA5E9"
     anchor={{ x: 0.5, y: 0.5 }}
-    centerOffset={{ x: 0, y: 0 }}
   >
     <View style={styles.userMarkerContainer}>
       <View style={styles.userMarker} />
@@ -89,9 +87,7 @@ const FamilyMarker = ({
   <Marker
     coordinate={{ latitude, longitude }}
     onPress={onPress}
-    pinColor="#10B981"
     anchor={{ x: 0.5, y: 0.5 }}
-    centerOffset={{ x: 0, y: 0 }}
   >
     <View style={styles.familyMarkerContainer}>
       <View
