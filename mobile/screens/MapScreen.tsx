@@ -738,7 +738,7 @@ export default function MapScreen({
             styles.speechBubbleContainer,
             {
               paddingLeft: 4,
-              top: "35%", // Position speech bubble above marker
+              top: "30%", // Position speech bubble higher above marker
             },
           ]}
           pointerEvents="box-none"
