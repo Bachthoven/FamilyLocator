@@ -738,7 +738,7 @@ export default function MapScreen({
             styles.speechBubbleContainer,
             {
               paddingLeft: 4,
-              top: "45%", // Override the default position to be much closer to marker
+              top: "40%", // Position speech bubble closer to marker
             },
           ]}
           pointerEvents="box-none"
