@@ -1107,8 +1107,8 @@ const styles = StyleSheet.create({
   speechBubbleContainer: {
     position: "absolute",
     top: "31%",
-    left: 0,
-    right: 0,
+    left: "50%",
+    transform: [{ translateX: -150 }], // Adjusted for better centering
     alignItems: "center",
     justifyContent: "center",
   },
