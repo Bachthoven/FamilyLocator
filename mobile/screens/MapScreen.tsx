@@ -734,7 +734,7 @@ export default function MapScreen({
       {/* Speech Bubble Callout */}
       {selectedMarker && (
         <View style={styles.speechBubbleContainer} pointerEvents="box-none">
-          <View style={[styles.speechBubble, { marginLeft: 20 }]}>
+          <View style={[styles.speechBubble, { marginLeft: 35 }]}>
             <View style={styles.speechBubbleHeader}>
               <Text style={styles.speechBubbleName}>{selectedMarker.name}</Text>
               <TouchableOpacity
