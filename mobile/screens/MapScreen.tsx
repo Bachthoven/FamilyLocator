@@ -53,7 +53,11 @@ const UserMarker = ({
   name: string;
   onPress?: () => void;
 }) => (
-  <Marker coordinate={{ latitude, longitude }} onPress={onPress}>
+  <Marker
+    coordinate={{ latitude, longitude }}
+    onPress={onPress}
+    anchor={{ x: 0.5, y: 1 }}
+  >
     <View style={styles.userMarkerContainer}>
       <View style={styles.userMarker} />
       <View style={styles.userMarkerPulse} />
@@ -80,7 +84,11 @@ const FamilyMarker = ({
   statusMessage: string;
   onPress?: () => void;
 }) => (
-  <Marker coordinate={{ latitude, longitude }} onPress={onPress}>
+  <Marker
+    coordinate={{ latitude, longitude }}
+    onPress={onPress}
+    anchor={{ x: 0.5, y: 1 }}
+  >
     <View style={styles.familyMarkerContainer}>
       <View
         style={[styles.familyMarker, !isRecent && styles.familyMarkerOld]}
@@ -201,12 +209,6 @@ export default function MapScreen({
     address?: string;
     category?: string;
     coordinate: { latitude: number; longitude: number };
-  } | null>(null);
-
-  // Store marker screen position for accurate speech bubble placement
-  const [markerScreenPosition, setMarkerScreenPosition] = useState<{
-    x: number;
-    y: number;
   } | null>(null);
 
   // Fetch family locations for the map
@@ -490,10 +492,9 @@ export default function MapScreen({
           // Close speech bubble when user manually pans/zooms (not programmatic)
           if (selectedMarker && !isProgrammaticMove.current) {
             setSelectedMarker(null);
-            setMarkerScreenPosition(null);
           }
         }}
-        onRegionChangeComplete={async (region) => {
+        onRegionChangeComplete={(region) => {
           // Track current region for zoom level
           setCurrentRegion(region);
           // Reset programmatic move flag
@@ -501,19 +502,6 @@ export default function MapScreen({
           // Only save region when Map tab is active to prevent saving incorrect positions
           if (isActive) {
             onRegionChange?.(region);
-          }
-
-          // Calculate screen position of selected marker for accurate speech bubble placement
-          if (selectedMarker && mapRef.current) {
-            try {
-              const screenPoint = await mapRef.current.pointForCoordinate(
-                selectedMarker.coordinate
-              );
-              setMarkerScreenPosition(screenPoint);
-            } catch (error) {
-              // Fallback to center if calculation fails
-              setMarkerScreenPosition(null);
-            }
           }
         }}
         showsUserLocation={false}
@@ -748,19 +736,9 @@ export default function MapScreen({
         <View
           style={[
             styles.speechBubbleContainer,
-            markerScreenPosition
-              ? {
-                  // Use calculated screen position for perfect alignment
-                  position: "absolute",
-                  left: markerScreenPosition.x - 130, // Center bubble (approx half width)
-                  top: markerScreenPosition.y - 140, // Position above marker
-                  paddingLeft: 4,
-                }
-              : {
-                  // Fallback to percentage-based positioning
-                  paddingLeft: 4,
-                  top: "31%",
-                },
+            {
+              paddingLeft: 4,
+            },
           ]}
           pointerEvents="box-none"
         >
@@ -770,7 +748,6 @@ export default function MapScreen({
               <TouchableOpacity
                 onPress={() => {
                   setSelectedMarker(null);
-                  setMarkerScreenPosition(null);
                 }}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
@@ -1139,7 +1116,7 @@ const styles = StyleSheet.create({
   // Speech Bubble Styles
   speechBubbleContainer: {
     position: "absolute",
-    top: "31%",
+    top: "28%",
     left: 0,
     right: 0,
     alignItems: "center",
