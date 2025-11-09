@@ -1108,7 +1108,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: "31%",
     left: "50%",
-    transform: [{ translateX: -150 }], // Adjusted for better centering
+    transform: [{ translateX: -100 }], // Adjusted for better centering
     alignItems: "center",
     justifyContent: "center",
   },
