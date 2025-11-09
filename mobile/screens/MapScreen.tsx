@@ -211,6 +211,10 @@ export default function MapScreen({
     coordinate: { latitude: number; longitude: number };
   } | null>(null);
 
+  // Store marker screen position and bubble height for accurate positioning
+  const [markerScreenY, setMarkerScreenY] = useState<number | null>(null);
+  const [bubbleHeight, setBubbleHeight] = useState<number>(0);
+
   // Fetch family locations for the map
   const { data: familyLocationsData = [] } = useQuery<
     Array<{
@@ -492,6 +496,8 @@ export default function MapScreen({
           // Close speech bubble when user manually pans/zooms (not programmatic)
           if (selectedMarker && !isProgrammaticMove.current) {
             setSelectedMarker(null);
+            setMarkerScreenY(null);
+            setBubbleHeight(0);
           }
         }}
         onRegionChangeComplete={(region) => {
@@ -531,16 +537,37 @@ export default function MapScreen({
                 },
                 300
               );
-              // Show speech bubble
-              setSelectedMarker({
-                type: "user",
-                name: "You",
-                statusMessage: "Current location",
-                coordinate: {
+              // Calculate marker screen position and show speech bubble
+              mapRef.current
+                ?.pointForCoordinate({
                   latitude: currentLocation.latitude,
                   longitude: currentLocation.longitude,
-                },
-              });
+                })
+                .then((point) => {
+                  setMarkerScreenY(point.y);
+                  setSelectedMarker({
+                    type: "user",
+                    name: "You",
+                    statusMessage: "Current location",
+                    coordinate: {
+                      latitude: currentLocation.latitude,
+                      longitude: currentLocation.longitude,
+                    },
+                  });
+                })
+                .catch(() => {
+                  // Fallback if calculation fails
+                  setMarkerScreenY(null);
+                  setSelectedMarker({
+                    type: "user",
+                    name: "You",
+                    statusMessage: "Current location",
+                    coordinate: {
+                      latitude: currentLocation.latitude,
+                      longitude: currentLocation.longitude,
+                    },
+                  });
+                });
             }}
           />
         )}
@@ -569,17 +596,39 @@ export default function MapScreen({
                 },
                 300
               );
-              // Show speech bubble
-              setSelectedMarker({
-                type: "family",
-                name: location.name,
-                statusMessage: location.statusMessage,
-                address: location.address,
-                coordinate: {
+              // Calculate marker screen position and show speech bubble
+              mapRef.current
+                ?.pointForCoordinate({
                   latitude: location.latitude,
                   longitude: location.longitude,
-                },
-              });
+                })
+                .then((point) => {
+                  setMarkerScreenY(point.y);
+                  setSelectedMarker({
+                    type: "family",
+                    name: location.name,
+                    statusMessage: location.statusMessage,
+                    address: location.address,
+                    coordinate: {
+                      latitude: location.latitude,
+                      longitude: location.longitude,
+                    },
+                  });
+                })
+                .catch(() => {
+                  // Fallback if calculation fails
+                  setMarkerScreenY(null);
+                  setSelectedMarker({
+                    type: "family",
+                    name: location.name,
+                    statusMessage: location.statusMessage,
+                    address: location.address,
+                    coordinate: {
+                      latitude: location.latitude,
+                      longitude: location.longitude,
+                    },
+                  });
+                });
             }}
           />
         ))}
@@ -736,19 +785,37 @@ export default function MapScreen({
         <View
           style={[
             styles.speechBubbleContainer,
-            {
-              paddingLeft: 4,
-              top: "30%", // Position speech bubble higher above marker
-            },
+            markerScreenY !== null && bubbleHeight > 0
+              ? {
+                  // Dynamic positioning based on actual marker and bubble positions
+                  position: "absolute",
+                  top: markerScreenY - bubbleHeight - 60, // 60px gap above marker
+                  left: 0,
+                  right: 0,
+                  paddingLeft: 4,
+                }
+              : {
+                  // Fallback to percentage positioning
+                  paddingLeft: 4,
+                  top: "30%",
+                },
           ]}
           pointerEvents="box-none"
         >
-          <View style={styles.speechBubble}>
+          <View
+            style={styles.speechBubble}
+            onLayout={(event) => {
+              // Measure bubble height for dynamic positioning
+              setBubbleHeight(event.nativeEvent.layout.height + 10); // +10 for pointer
+            }}
+          >
             <View style={styles.speechBubbleHeader}>
               <Text style={styles.speechBubbleName}>{selectedMarker.name}</Text>
               <TouchableOpacity
                 onPress={() => {
                   setSelectedMarker(null);
+                  setMarkerScreenY(null);
+                  setBubbleHeight(0);
                 }}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
