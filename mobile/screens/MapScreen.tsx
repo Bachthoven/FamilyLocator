@@ -53,11 +53,7 @@ const UserMarker = ({
   name: string;
   onPress?: () => void;
 }) => (
-  <Marker
-    coordinate={{ latitude, longitude }}
-    onPress={onPress}
-    anchor={{ x: 0.5, y: 0.5 }}
-  >
+  <Marker coordinate={{ latitude, longitude }} onPress={onPress}>
     <View style={styles.userMarkerContainer}>
       <View style={styles.userMarker} />
       <View style={styles.userMarkerPulse} />
@@ -84,11 +80,7 @@ const FamilyMarker = ({
   statusMessage: string;
   onPress?: () => void;
 }) => (
-  <Marker
-    coordinate={{ latitude, longitude }}
-    onPress={onPress}
-    anchor={{ x: 0.5, y: 0.5 }}
-  >
+  <Marker coordinate={{ latitude, longitude }} onPress={onPress}>
     <View style={styles.familyMarkerContainer}>
       <View
         style={[styles.familyMarker, !isRecent && styles.familyMarkerOld]}
@@ -560,9 +552,11 @@ export default function MapScreen({
               // Mark as programmatic move
               isProgrammaticMove.current = true;
               // Center map on marker while maintaining current zoom
+              // Add small offset for family markers to match visual height of user marker
+              const latOffset = currentRegion.latitudeDelta * 0.02;
               mapRef.current?.animateToRegion(
                 {
-                  latitude: location.latitude,
+                  latitude: location.latitude - latOffset,
                   longitude: location.longitude,
                   latitudeDelta: currentRegion.latitudeDelta,
                   longitudeDelta: currentRegion.longitudeDelta,
