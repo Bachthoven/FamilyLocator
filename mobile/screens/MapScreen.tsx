@@ -552,11 +552,9 @@ export default function MapScreen({
               // Mark as programmatic move
               isProgrammaticMove.current = true;
               // Center map on marker while maintaining current zoom
-              // Add small offset for family markers to match visual height of user marker
-              const latOffset = currentRegion.latitudeDelta * 0.02;
               mapRef.current?.animateToRegion(
                 {
-                  latitude: location.latitude - latOffset,
+                  latitude: location.latitude,
                   longitude: location.longitude,
                   latitudeDelta: currentRegion.latitudeDelta,
                   longitudeDelta: currentRegion.longitudeDelta,
@@ -728,7 +726,14 @@ export default function MapScreen({
       {/* Speech Bubble Callout */}
       {selectedMarker && (
         <View
-          style={[styles.speechBubbleContainer, { paddingLeft: 4 }]}
+          style={[
+            styles.speechBubbleContainer,
+            {
+              paddingLeft: 4,
+              // Adjust top position based on marker type to compensate for visual differences
+              top: selectedMarker.type === "family" ? "32%" : "31%",
+            },
+          ]}
           pointerEvents="box-none"
         >
           <View style={styles.speechBubble}>
