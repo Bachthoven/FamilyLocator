@@ -789,7 +789,7 @@ export default function MapScreen({
               ? {
                   // Dynamic positioning based on actual marker and bubble positions
                   position: "absolute",
-                  top: markerScreenY - bubbleHeight - 60, // 60px gap above marker
+                  top: markerScreenY - bubbleHeight - 72, // 72px gap above marker
                   left: 0,
                   right: 0,
                   paddingLeft: 4,
@@ -806,7 +806,7 @@ export default function MapScreen({
             style={styles.speechBubble}
             onLayout={(event) => {
               // Measure bubble height for dynamic positioning
-              setBubbleHeight(event.nativeEvent.layout.height + 10); // +10 for pointer
+              setBubbleHeight(event.nativeEvent.layout.height + 15); // +15 for pointer
             }}
           >
             <View style={styles.speechBubbleHeader}>
