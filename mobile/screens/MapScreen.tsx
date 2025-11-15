@@ -41,62 +41,83 @@ interface Place {
   color?: string;
 }
 
+// Helper function to get initials from name
+const getInitials = (firstName?: string, lastName?: string, email?: string): string => {
+  if (firstName && lastName) {
+    return `${firstName[0]}${lastName[0]}`.toUpperCase();
+  } else if (firstName) {
+    return firstName.substring(0, 2).toUpperCase();
+  } else if (email) {
+    return email.substring(0, 2).toUpperCase();
+  }
+  return "??";
+};
+
 // Custom marker components for different types
 const UserMarker = ({
   latitude,
   longitude,
-  name,
-  onPress,
+  firstName,
+  lastName,
+  email,
 }: {
   latitude: number;
   longitude: number;
-  name: string;
-  onPress?: () => void;
-}) => (
-  <Marker
-    coordinate={{ latitude, longitude }}
-    onPress={onPress}
-    anchor={{ x: 0.5, y: 1 }}
-  >
-    <View style={styles.userMarkerContainer}>
-      <View style={styles.userMarker} />
-      <View style={styles.userMarkerPulse} />
-    </View>
-  </Marker>
-);
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+}) => {
+  const initials = getInitials(firstName, lastName, email);
+  
+  return (
+    <Marker
+      coordinate={{ latitude, longitude }}
+      anchor={{ x: 0.5, y: 0.5 }}
+    >
+      <View style={styles.userMarkerContainer}>
+        <View style={styles.userMarker}>
+          <Text style={styles.markerInitials}>{initials}</Text>
+        </View>
+      </View>
+    </Marker>
+  );
+};
 
 const FamilyMarker = ({
   latitude,
   longitude,
-  name,
-  address,
-  isRecent,
-  statusColor,
-  statusMessage,
-  onPress,
+  firstName,
+  lastName,
+  email,
+  isActive,
 }: {
   latitude: number;
   longitude: number;
-  name: string;
-  address?: string;
-  isRecent: boolean;
-  statusColor: string;
-  statusMessage: string;
-  onPress?: () => void;
-}) => (
-  <Marker
-    coordinate={{ latitude, longitude }}
-    onPress={onPress}
-    anchor={{ x: 0.5, y: 1 }}
-  >
-    <View style={styles.familyMarkerContainer}>
-      <View
-        style={[styles.familyMarker, !isRecent && styles.familyMarkerOld]}
-      />
-      {isRecent && <View style={styles.familyMarkerPulse} />}
-    </View>
-  </Marker>
-);
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  isActive: boolean;
+}) => {
+  const initials = getInitials(firstName, lastName, email);
+  
+  return (
+    <Marker
+      coordinate={{ latitude, longitude }}
+      anchor={{ x: 0.5, y: 0.5 }}
+    >
+      <View style={styles.familyMarkerContainer}>
+        <View
+          style={[
+            styles.familyMarker,
+            !isActive && styles.familyMarkerInactive
+          ]}
+        >
+          <Text style={styles.markerInitials}>{initials}</Text>
+        </View>
+      </View>
+    </Marker>
+  );
+};
 
 const PlaceMarker = ({
   latitude,
@@ -201,20 +222,6 @@ export default function MapScreen({
     iconColor?: string;
   }>({ visible: false });
 
-  // Selected marker state for speech bubble
-  const [selectedMarker, setSelectedMarker] = useState<{
-    type: "user" | "family" | "place";
-    name: string;
-    statusMessage?: string;
-    address?: string;
-    category?: string;
-    coordinate: { latitude: number; longitude: number };
-  } | null>(null);
-
-  // Store marker screen position and bubble height for accurate positioning
-  const [markerScreenY, setMarkerScreenY] = useState<number | null>(null);
-  const [bubbleHeight, setBubbleHeight] = useState<number>(0);
-  const [bubbleHeightMarkerKey, setBubbleHeightMarkerKey] = useState<string>("");
 
   // Fetch family locations for the map
   const { data: familyLocationsData = [] } = useQuery<
@@ -302,6 +309,9 @@ export default function MapScreen({
   const familyLocations: (FamilyLocation & {
     statusColor: string;
     statusMessage: string;
+    firstName?: string;
+    lastName?: string;
+    email: string;
   })[] = familyLocationsData
     .filter((loc) => {
       // Only show markers for users with location sharing enabled
@@ -329,6 +339,9 @@ export default function MapScreen({
         isRecent,
         statusColor: statusInfo.color,
         statusMessage: statusInfo.message,
+        firstName: loc.user.firstName || undefined,
+        lastName: loc.user.lastName || undefined,
+        email: loc.user.email,
       };
     });
 
@@ -494,12 +507,6 @@ export default function MapScreen({
           mapRef.current?.getCamera().then((camera) => {
             setMapHeading(camera.heading || 0);
           });
-          // Close speech bubble when user manually pans/zooms (not programmatic)
-          if (selectedMarker && !isProgrammaticMove.current) {
-            setSelectedMarker(null);
-            setMarkerScreenY(null);
-            setBubbleHeight(0);
-          }
         }}
         onRegionChangeComplete={(region) => {
           // Track current region for zoom level
@@ -524,52 +531,9 @@ export default function MapScreen({
           <UserMarker
             latitude={currentLocation.latitude}
             longitude={currentLocation.longitude}
-            name="You"
-            onPress={() => {
-              // Mark as programmatic move
-              isProgrammaticMove.current = true;
-              // Center map on marker while maintaining current zoom
-              mapRef.current?.animateToRegion(
-                {
-                  latitude: currentLocation.latitude,
-                  longitude: currentLocation.longitude,
-                  latitudeDelta: currentRegion.latitudeDelta,
-                  longitudeDelta: currentRegion.longitudeDelta,
-                },
-                300
-              );
-              // Calculate marker screen position and show speech bubble
-              mapRef.current
-                ?.pointForCoordinate({
-                  latitude: currentLocation.latitude,
-                  longitude: currentLocation.longitude,
-                })
-                .then((point) => {
-                  setMarkerScreenY(point.y);
-                  setSelectedMarker({
-                    type: "user",
-                    name: "You",
-                    statusMessage: "Current location",
-                    coordinate: {
-                      latitude: currentLocation.latitude,
-                      longitude: currentLocation.longitude,
-                    },
-                  });
-                })
-                .catch(() => {
-                  // Fallback if calculation fails
-                  setMarkerScreenY(null);
-                  setSelectedMarker({
-                    type: "user",
-                    name: "You",
-                    statusMessage: "Current location",
-                    coordinate: {
-                      latitude: currentLocation.latitude,
-                      longitude: currentLocation.longitude,
-                    },
-                  });
-                });
-            }}
+            firstName={user?.firstName || undefined}
+            lastName={user?.lastName || undefined}
+            email={user?.email}
           />
         )}
 
@@ -579,58 +543,10 @@ export default function MapScreen({
             key={location.id}
             latitude={location.latitude}
             longitude={location.longitude}
-            name={location.name}
-            address={location.address}
-            isRecent={location.isRecent}
-            statusColor={location.statusColor}
-            statusMessage={location.statusMessage}
-            onPress={() => {
-              // Mark as programmatic move
-              isProgrammaticMove.current = true;
-              // Center map on marker while maintaining current zoom
-              mapRef.current?.animateToRegion(
-                {
-                  latitude: location.latitude,
-                  longitude: location.longitude,
-                  latitudeDelta: currentRegion.latitudeDelta,
-                  longitudeDelta: currentRegion.longitudeDelta,
-                },
-                300
-              );
-              // Calculate marker screen position and show speech bubble
-              mapRef.current
-                ?.pointForCoordinate({
-                  latitude: location.latitude,
-                  longitude: location.longitude,
-                })
-                .then((point) => {
-                  setMarkerScreenY(point.y);
-                  setSelectedMarker({
-                    type: "family",
-                    name: location.name,
-                    statusMessage: location.statusMessage,
-                    address: location.address,
-                    coordinate: {
-                      latitude: location.latitude,
-                      longitude: location.longitude,
-                    },
-                  });
-                })
-                .catch(() => {
-                  // Fallback if calculation fails
-                  setMarkerScreenY(null);
-                  setSelectedMarker({
-                    type: "family",
-                    name: location.name,
-                    statusMessage: location.statusMessage,
-                    address: location.address,
-                    coordinate: {
-                      latitude: location.latitude,
-                      longitude: location.longitude,
-                    },
-                  });
-                });
-            }}
+            firstName={location.firstName}
+            lastName={location.lastName}
+            email={location.email}
+            isActive={location.isRecent}
           />
         ))}
 
@@ -656,20 +572,6 @@ export default function MapScreen({
                 },
                 300
               );
-              // Show speech bubble
-              setSelectedMarker({
-                type: "place",
-                name: place.name,
-                statusMessage: place.category
-                  ? `${place.category.charAt(0).toUpperCase() + place.category.slice(1)} • Saved Place`
-                  : "Saved Place",
-                address: place.address,
-                category: place.category,
-                coordinate: {
-                  latitude: place.latitude,
-                  longitude: place.longitude,
-                },
-              });
             }}
           />
         ))}
@@ -781,68 +683,6 @@ export default function MapScreen({
         </TouchableOpacity>
       </View>
 
-      {/* Speech Bubble Callout */}
-      {selectedMarker && (
-        <View
-          key={`${selectedMarker.type}-${selectedMarker.name}`}
-          style={[
-            styles.speechBubbleContainer,
-            markerScreenY !== null && 
-            bubbleHeight > 0 && 
-            bubbleHeightMarkerKey === `${selectedMarker.type}-${selectedMarker.name}`
-              ? {
-                  // Dynamic positioning based on actual marker and bubble positions
-                  position: "absolute",
-                  top: markerScreenY - bubbleHeight - 72, // 72px gap above marker
-                  left: 0,
-                  right: 0,
-                  paddingLeft: 4,
-                }
-              : {
-                  // Fallback to percentage positioning
-                  paddingLeft: 4,
-                  top: "30%",
-                },
-          ]}
-          pointerEvents="box-none"
-        >
-          <View
-            style={styles.speechBubble}
-            onLayout={(event) => {
-              // Measure bubble height for dynamic positioning
-              const markerKey = `${selectedMarker.type}-${selectedMarker.name}`;
-              setBubbleHeight(event.nativeEvent.layout.height + 15); // +15 for pointer
-              setBubbleHeightMarkerKey(markerKey);
-            }}
-          >
-            <View style={styles.speechBubbleHeader}>
-              <Text style={styles.speechBubbleName}>{selectedMarker.name}</Text>
-              <TouchableOpacity
-                onPress={() => {
-                  setSelectedMarker(null);
-                  setMarkerScreenY(null);
-                  setBubbleHeight(0);
-                }}
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-              >
-                <Ionicons name="close-circle" size={20} color="#9CA3AF" />
-              </TouchableOpacity>
-            </View>
-            {selectedMarker.statusMessage && (
-              <Text style={styles.speechBubbleStatus}>
-                {selectedMarker.statusMessage}
-              </Text>
-            )}
-            {selectedMarker.address && (
-              <Text style={styles.speechBubbleAddress}>
-                {selectedMarker.address}
-              </Text>
-            )}
-          </View>
-          {/* Triangular pointer */}
-          <View style={styles.speechBubblePointer} />
-        </View>
-      )}
 
       {/* Custom Alert Dialog */}
       <AlertDialog
@@ -874,25 +714,19 @@ const styles = StyleSheet.create({
     height: 40,
   },
   userMarker: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     backgroundColor: "#0EA5E9",
     borderWidth: 2,
     borderColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 5,
-  },
-  userMarkerPulse: {
-    position: "absolute",
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: "#0EA5E9",
-    opacity: 0.3,
   },
 
   familyMarkerContainer: {
@@ -902,28 +736,28 @@ const styles = StyleSheet.create({
     height: 40,
   },
   familyMarker: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: "#10B981",
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "#0EA5E9",
     borderWidth: 2,
     borderColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 5,
   },
-  familyMarkerOld: {
-    opacity: 0.3,
+  familyMarkerInactive: {
+    backgroundColor: "#9CA3AF",
+    opacity: 0.6,
   },
-  familyMarkerPulse: {
-    position: "absolute",
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: "#10B981",
-    opacity: 0.3,
+  markerInitials: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "600",
   },
 
   placeMarker: {
@@ -1185,65 +1019,5 @@ const styles = StyleSheet.create({
   },
   centerButtonDisabled: {
     backgroundColor: "#9CA3AF",
-  },
-
-  // Speech Bubble Styles
-  speechBubbleContainer: {
-    position: "absolute",
-    top: "38%",
-    left: 0,
-    right: 0,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  speechBubble: {
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    padding: 16,
-    minWidth: 240,
-    maxWidth: 320,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
-    elevation: 8,
-    borderWidth: 2,
-    borderColor: "#0EA5E9",
-    alignSelf: "center",
-  },
-  speechBubbleHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 8,
-  },
-  speechBubbleName: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#111827",
-    flex: 1,
-  },
-  speechBubbleStatus: {
-    fontSize: 14,
-    color: "#6B7280",
-    marginBottom: 4,
-  },
-  speechBubbleAddress: {
-    fontSize: 12,
-    color: "#9CA3AF",
-  },
-  speechBubblePointer: {
-    width: 0,
-    height: 0,
-    backgroundColor: "transparent",
-    borderStyle: "solid",
-    borderLeftWidth: 12,
-    borderRightWidth: 12,
-    borderTopWidth: 16,
-    borderLeftColor: "transparent",
-    borderRightColor: "transparent",
-    borderTopColor: "#0EA5E9",
-    marginTop: -1,
-    alignSelf: "center",
   },
 });
