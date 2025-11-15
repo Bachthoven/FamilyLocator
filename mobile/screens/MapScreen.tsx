@@ -538,8 +538,6 @@ export default function MapScreen({
                 300
               );
               // Calculate marker screen position and show speech bubble
-              // Reset bubble height to force remeasurement
-              setBubbleHeight(0);
               mapRef.current
                 ?.pointForCoordinate({
                   latitude: currentLocation.latitude,
@@ -599,8 +597,6 @@ export default function MapScreen({
                 300
               );
               // Calculate marker screen position and show speech bubble
-              // Reset bubble height to force remeasurement
-              setBubbleHeight(0);
               mapRef.current
                 ?.pointForCoordinate({
                   latitude: location.latitude,
@@ -787,6 +783,7 @@ export default function MapScreen({
       {/* Speech Bubble Callout */}
       {selectedMarker && (
         <View
+          key={`${selectedMarker.type}-${selectedMarker.name}`}
           style={[
             styles.speechBubbleContainer,
             markerScreenY !== null && bubbleHeight > 0
