@@ -710,8 +710,8 @@ const styles = StyleSheet.create({
   userMarkerContainer: {
     alignItems: "center",
     justifyContent: "center",
-    width: 36,
-    height: 36,
+    width: 42,
+    height: 42,
   },
   userMarker: {
     width: 36,
@@ -727,8 +727,8 @@ const styles = StyleSheet.create({
   familyMarkerContainer: {
     alignItems: "center",
     justifyContent: "center",
-    width: 36,
-    height: 36,
+    width: 42,
+    height: 42,
   },
   familyMarker: {
     width: 36,
