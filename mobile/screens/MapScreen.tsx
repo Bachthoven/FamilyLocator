@@ -214,6 +214,7 @@ export default function MapScreen({
   // Store marker screen position and bubble height for accurate positioning
   const [markerScreenY, setMarkerScreenY] = useState<number | null>(null);
   const [bubbleHeight, setBubbleHeight] = useState<number>(0);
+  const [bubbleHeightMarkerKey, setBubbleHeightMarkerKey] = useState<string>("");
 
   // Fetch family locations for the map
   const { data: familyLocationsData = [] } = useQuery<
@@ -786,7 +787,9 @@ export default function MapScreen({
           key={`${selectedMarker.type}-${selectedMarker.name}`}
           style={[
             styles.speechBubbleContainer,
-            markerScreenY !== null && bubbleHeight > 0
+            markerScreenY !== null && 
+            bubbleHeight > 0 && 
+            bubbleHeightMarkerKey === `${selectedMarker.type}-${selectedMarker.name}`
               ? {
                   // Dynamic positioning based on actual marker and bubble positions
                   position: "absolute",
@@ -807,7 +810,9 @@ export default function MapScreen({
             style={styles.speechBubble}
             onLayout={(event) => {
               // Measure bubble height for dynamic positioning
+              const markerKey = `${selectedMarker.type}-${selectedMarker.name}`;
               setBubbleHeight(event.nativeEvent.layout.height + 15); // +15 for pointer
+              setBubbleHeightMarkerKey(markerKey);
             }}
           >
             <View style={styles.speechBubbleHeader}>
