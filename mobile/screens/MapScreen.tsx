@@ -15,7 +15,6 @@ import * as Location from "expo-location";
 import { BlurView } from "expo-blur";
 import { StatusBar } from "expo-status-bar";
 import { useQuery } from "@tanstack/react-query";
-import Svg, { Circle, Text as SvgText } from "react-native-svg";
 import { useAuth } from "../src/contexts/AuthContext";
 import { User } from "../../shared/schema";
 import NotificationBell from "../components/NotificationBell";
@@ -75,28 +74,10 @@ const UserMarker = ({
       coordinate={{ latitude, longitude }}
       anchor={{ x: 0.5, y: 0.5 }}
     >
-      <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-        <Svg width={40} height={40}>
-          <Circle
-            cx={20}
-            cy={20}
-            r={16}
-            fill="#0EA5E9"
-            stroke="#ffffff"
-            strokeWidth={3}
-          />
-          <SvgText
-            x={20}
-            y={20}
-            fill="white"
-            fontSize={12}
-            fontWeight="bold"
-            textAnchor="middle"
-            alignmentBaseline="middle"
-          >
-            {initials}
-          </SvgText>
-        </Svg>
+      <View style={styles.userMarkerContainer}>
+        <View style={styles.userMarker}>
+          <Text style={styles.markerInitials}>{initials}</Text>
+        </View>
       </View>
     </Marker>
   );
@@ -118,37 +99,21 @@ const FamilyMarker = ({
   isActive: boolean;
 }) => {
   const initials = getInitials(firstName, lastName, email);
-  const markerColor = isActive ? "#0EA5E9" : "#9CA3AF";
-  const markerOpacity = isActive ? 1 : 0.6;
   
   return (
     <Marker
       coordinate={{ latitude, longitude }}
       anchor={{ x: 0.5, y: 0.5 }}
     >
-      <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-        <Svg width={40} height={40}>
-          <Circle
-            cx={20}
-            cy={20}
-            r={16}
-            fill={markerColor}
-            fillOpacity={markerOpacity}
-            stroke="#ffffff"
-            strokeWidth={3}
-          />
-          <SvgText
-            x={20}
-            y={20}
-            fill="white"
-            fontSize={12}
-            fontWeight="bold"
-            textAnchor="middle"
-            alignmentBaseline="middle"
-          >
-            {initials}
-          </SvgText>
-        </Svg>
+      <View style={styles.familyMarkerContainer}>
+        <View
+          style={[
+            styles.familyMarker,
+            !isActive && styles.familyMarkerInactive
+          ]}
+        >
+          <Text style={styles.markerInitials}>{initials}</Text>
+        </View>
       </View>
     </Marker>
   );
@@ -741,6 +706,63 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
+
+  // Custom Marker Styles with padding to prevent clipping
+  userMarkerContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    width: 44,
+    height: 44,
+    padding: 4,
+  },
+  userMarker: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#0EA5E9",
+    borderWidth: 3,
+    borderColor: "#ffffff",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3,
+    elevation: 5,
+  },
+
+  familyMarkerContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    width: 44,
+    height: 44,
+    padding: 4,
+  },
+  familyMarker: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#0EA5E9",
+    borderWidth: 3,
+    borderColor: "#ffffff",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3,
+    elevation: 5,
+  },
+  familyMarkerInactive: {
+    backgroundColor: "#9CA3AF",
+    opacity: 0.6,
+  },
+  markerInitials: {
+    color: "#ffffff",
+    fontSize: 13,
+    fontWeight: "700",
+    textAlign: "center",
+  },
 
   placeMarker: {
     width: 24,
