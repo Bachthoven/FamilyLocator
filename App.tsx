@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -19,14 +19,41 @@ import HistoryScreen from "./mobile/screens/HistoryScreen";
 import SettingsScreen from "./mobile/screens/SettingsScreen";
 import AuthScreen from "./mobile/screens/AuthScreen";
 import { useThemeColors } from "./mobile/theme/colors";
+import registerNNPushToken from "native-notify";
+import Constants from "expo-constants";
 
 type TabName = "Map" | "Family" | "Places" | "History" | "Settings";
+
+// Get Native Notify credentials from environment variables
+const NATIVE_NOTIFY_APP_ID = Constants.expoConfig?.extra?.nativeNotifyAppId;
+const NATIVE_NOTIFY_APP_TOKEN =
+  Constants.expoConfig?.extra?.nativeNotifyAppToken;
 
 function AppContent() {
   const { user, isLoading } = useAuth();
   const colors = useThemeColors();
   const colorScheme = useColorScheme();
   const [activeTab, setActiveTab] = useState<TabName>("Map");
+
+  // Register Native Notify push token
+  // This must be called at the top level of a functional component
+  useEffect(() => {
+    if (NATIVE_NOTIFY_APP_ID && NATIVE_NOTIFY_APP_TOKEN) {
+      try {
+        registerNNPushToken(
+          Number(NATIVE_NOTIFY_APP_ID),
+          NATIVE_NOTIFY_APP_TOKEN
+        );
+        console.log("Native Notify registered successfully");
+      } catch (error) {
+        console.log("Native Notify registration error:", error);
+      }
+    } else {
+      console.log(
+        "Native Notify credentials not configured. Push notifications disabled."
+      );
+    }
+  }, []);
   const [focusLocation, setFocusLocation] = useState<{
     latitude: number;
     longitude: number;
