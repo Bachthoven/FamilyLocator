@@ -14,6 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Location from "expo-location";
 import * as Notifications from "expo-notifications";
+import Constants from "expo-constants";
 import { BlurView } from "expo-blur";
 import { StatusBar } from "expo-status-bar";
 import { useQuery } from "@tanstack/react-query";
@@ -24,16 +25,21 @@ import Compass from "../components/Compass";
 import AlertDialog from "../components/AlertDialog";
 import { useThemeColors } from "../theme/colors";
 
-// Configure notification handler
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
+// Check if running in Expo Go (where push notifications are not supported in SDK 53+)
+const isExpoGo = Constants.appOwnership === "expo";
+
+// Configure notification handler (only for development builds, not Expo Go)
+if (!isExpoGo) {
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+      shouldShowBanner: true,
+      shouldShowList: true,
+    }),
+  });
+}
 
 // Type definitions
 interface FamilyLocation {
@@ -410,25 +416,86 @@ export default function MapScreen({
     []
   );
 
-  // Request notification permissions
+  // State for proximity alert (in-app notification for Expo Go)
+  const [proximityAlert, setProximityAlert] = useState<{
+    visible: boolean;
+    memberName: string;
+    placeName: string;
+  }>({ visible: false, memberName: "", placeName: "" });
+
+  // Request notification permissions (only for development builds)
   useEffect(() => {
+    if (isExpoGo) {
+      console.log(
+        "Running in Expo Go - using in-app alerts for proximity notifications"
+      );
+      return;
+    }
+
     const requestNotificationPermissions = async () => {
-      const { status: existingStatus } =
-        await Notifications.getPermissionsAsync();
-      let finalStatus = existingStatus;
+      try {
+        const { status: existingStatus } =
+          await Notifications.getPermissionsAsync();
+        let finalStatus = existingStatus;
 
-      if (existingStatus !== "granted") {
-        const { status } = await Notifications.requestPermissionsAsync();
-        finalStatus = status;
-      }
+        if (existingStatus !== "granted") {
+          const { status } = await Notifications.requestPermissionsAsync();
+          finalStatus = status;
+        }
 
-      if (finalStatus !== "granted") {
-        console.log("Notification permissions not granted");
+        if (finalStatus !== "granted") {
+          console.log("Notification permissions not granted");
+        }
+      } catch (error) {
+        console.log("Notification setup error:", error);
       }
     };
 
     requestNotificationPermissions();
   }, []);
+
+  // Helper function to send proximity notification
+  const sendProximityNotification = useCallback(
+    async (memberName: string, placeName: string) => {
+      if (isExpoGo) {
+        // In Expo Go, show in-app alert
+        setProximityAlert({
+          visible: true,
+          memberName,
+          placeName,
+        });
+        // Auto-hide after 4 seconds
+        setTimeout(() => {
+          setProximityAlert((prev) => ({ ...prev, visible: false }));
+        }, 4000);
+      } else {
+        // In development build, use system notifications
+        try {
+          await Notifications.scheduleNotificationAsync({
+            content: {
+              title: `📍 ${memberName} arrived`,
+              body: `${memberName} is now at ${placeName}`,
+              sound: true,
+              priority: Notifications.AndroidNotificationPriority.HIGH,
+            },
+            trigger: null,
+          });
+        } catch (error) {
+          console.log("Notification error:", error);
+          // Fallback to in-app alert
+          setProximityAlert({
+            visible: true,
+            memberName,
+            placeName,
+          });
+          setTimeout(() => {
+            setProximityAlert((prev) => ({ ...prev, visible: false }));
+          }, 4000);
+        }
+      }
+    },
+    []
+  );
 
   // Check proximity and send notifications
   useEffect(() => {
@@ -461,16 +528,7 @@ export default function MapScreen({
           if (!wasNearby) {
             // Send notification only if we haven't already
             sentProximityAlerts.current.add(alertKey);
-
-            Notifications.scheduleNotificationAsync({
-              content: {
-                title: `📍 ${memberName} arrived`,
-                body: `${memberName} is now at ${place.name}`,
-                sound: true,
-                priority: Notifications.AndroidNotificationPriority.HIGH,
-              },
-              trigger: null, // Send immediately
-            });
+            sendProximityNotification(memberName, place.name);
           }
         } else if (distance > PROXIMITY_RADIUS + 10) {
           // Member has moved away (with 10m buffer to prevent flapping)
@@ -480,7 +538,12 @@ export default function MapScreen({
         }
       });
     });
-  }, [familyLocationsData, places, calculateDistance]);
+  }, [
+    familyLocationsData,
+    places,
+    calculateDistance,
+    sendProximityNotification,
+  ]);
 
   // Get location only if we don't have a saved region and no current location
   useEffect(() => {
@@ -980,6 +1043,35 @@ export default function MapScreen({
         )}
       </Animated.View>
 
+      {/* Proximity Alert Banner (for Expo Go) */}
+      {proximityAlert.visible && (
+        <View style={[styles.proximityAlertBanner, { top: insets.top + 60 }]}>
+          <BlurView intensity={100} style={styles.proximityAlertBlur}>
+            <View style={styles.proximityAlertContent}>
+              <View style={styles.proximityAlertIcon}>
+                <Ionicons name="location" size={20} color="#FFFFFF" />
+              </View>
+              <View style={styles.proximityAlertText}>
+                <Text style={styles.proximityAlertTitle}>
+                  📍 {proximityAlert.memberName} arrived
+                </Text>
+                <Text style={styles.proximityAlertBody}>
+                  Now at {proximityAlert.placeName}
+                </Text>
+              </View>
+              <TouchableOpacity
+                onPress={() =>
+                  setProximityAlert((prev) => ({ ...prev, visible: false }))
+                }
+                style={styles.proximityAlertClose}
+              >
+                <Ionicons name="close" size={18} color="#6B7280" />
+              </TouchableOpacity>
+            </View>
+          </BlurView>
+        </View>
+      )}
+
       {/* Custom Alert Dialog */}
       <AlertDialog
         visible={alertConfig.visible}
@@ -1382,5 +1474,48 @@ const styles = StyleSheet.create({
     fontSize: 13,
     marginLeft: 6,
     flex: 1,
+  },
+
+  // Proximity Alert Banner Styles
+  proximityAlertBanner: {
+    position: "absolute",
+    left: 16,
+    right: 16,
+    zIndex: 200,
+  },
+  proximityAlertBlur: {
+    borderRadius: 12,
+    overflow: "hidden",
+  },
+  proximityAlertContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 12,
+    backgroundColor: "rgba(255, 255, 255, 0.95)",
+  },
+  proximityAlertIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#0EA5E9",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+  },
+  proximityAlertText: {
+    flex: 1,
+  },
+  proximityAlertTitle: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#1F2937",
+    marginBottom: 2,
+  },
+  proximityAlertBody: {
+    fontSize: 13,
+    color: "#6B7280",
+  },
+  proximityAlertClose: {
+    padding: 4,
   },
 });
