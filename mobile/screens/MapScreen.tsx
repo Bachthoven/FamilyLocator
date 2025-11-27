@@ -54,11 +54,10 @@ const getInitials = (firstName?: string, lastName?: string, email?: string): str
   return "??";
 };
 
-// Marker dimensions for View-based approach (more reliable on Android)
-const MARKER_CONTAINER_SIZE = 100; // Extra large container to prevent any clipping
+// Marker dimensions for View-based approach
 const CIRCLE_SIZE = 40; // Diameter of the circle
 
-// Custom marker components using View with borderRadius (more reliable than SVG on Android)
+// Custom marker components using View with borderRadius
 const UserMarker = ({
   latitude,
   longitude,
@@ -78,37 +77,25 @@ const UserMarker = ({
     <Marker
       coordinate={{ latitude, longitude }}
       anchor={{ x: 0.5, y: 0.5 }}
-      tracksViewChanges={false}
-      flat={true}
     >
       <View style={{
-        width: MARKER_CONTAINER_SIZE,
-        height: MARKER_CONTAINER_SIZE,
+        width: CIRCLE_SIZE,
+        height: CIRCLE_SIZE,
+        borderRadius: CIRCLE_SIZE / 2,
+        backgroundColor: '#0EA5E9',
+        borderWidth: 3,
+        borderColor: '#ffffff',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: 'transparent',
       }}>
-        <View style={{
-          width: CIRCLE_SIZE,
-          height: CIRCLE_SIZE,
-          borderRadius: CIRCLE_SIZE / 2,
-          backgroundColor: '#0EA5E9',
-          borderWidth: 3,
-          borderColor: '#ffffff',
-          alignItems: 'center',
-          justifyContent: 'center',
-          elevation: 0,
-          shadowOpacity: 0,
+        <Text style={{
+          color: '#ffffff',
+          fontSize: 13,
+          fontWeight: 'bold',
+          textAlign: 'center',
         }}>
-          <Text style={{
-            color: '#ffffff',
-            fontSize: 13,
-            fontWeight: 'bold',
-            textAlign: 'center',
-          }}>
-            {initials}
-          </Text>
-        </View>
+          {initials}
+        </Text>
       </View>
     </Marker>
   );
@@ -137,38 +124,26 @@ const FamilyMarker = ({
     <Marker
       coordinate={{ latitude, longitude }}
       anchor={{ x: 0.5, y: 0.5 }}
-      tracksViewChanges={false}
-      flat={true}
     >
       <View style={{
-        width: MARKER_CONTAINER_SIZE,
-        height: MARKER_CONTAINER_SIZE,
+        width: CIRCLE_SIZE,
+        height: CIRCLE_SIZE,
+        borderRadius: CIRCLE_SIZE / 2,
+        backgroundColor: markerColor,
+        borderWidth: 3,
+        borderColor: '#ffffff',
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: 'transparent',
+        opacity: markerOpacity,
       }}>
-        <View style={{
-          width: CIRCLE_SIZE,
-          height: CIRCLE_SIZE,
-          borderRadius: CIRCLE_SIZE / 2,
-          backgroundColor: markerColor,
-          borderWidth: 3,
-          borderColor: '#ffffff',
-          alignItems: 'center',
-          justifyContent: 'center',
-          opacity: markerOpacity,
-          elevation: 0,
-          shadowOpacity: 0,
+        <Text style={{
+          color: '#ffffff',
+          fontSize: 13,
+          fontWeight: 'bold',
+          textAlign: 'center',
         }}>
-          <Text style={{
-            color: '#ffffff',
-            fontSize: 13,
-            fontWeight: 'bold',
-            textAlign: 'center',
-          }}>
-            {initials}
-          </Text>
-        </View>
+          {initials}
+        </Text>
       </View>
     </Marker>
   );
