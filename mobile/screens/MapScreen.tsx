@@ -54,11 +54,36 @@ const getInitials = (firstName?: string, lastName?: string, email?: string): str
   return "??";
 };
 
-// Android renders markers as 100x100 bitmaps by default - must fit within this
-const ANDROID_MARKER_SIZE = 100;
-const CIRCLE_SIZE = 44; // Circle diameter (with border)
+// Generate SVG data URI for marker icons - bypasses Android's problematic view-to-bitmap conversion
+// This is the recommended workaround for react-native-maps marker clipping on Android
+// See: https://github.com/react-native-maps/react-native-maps/issues/5165
+const markerIconCache: Record<string, { uri: string }> = {};
 
-// Custom marker components - sized to fit Android's 100x100 bitmap limit
+const getMarkerIcon = (initials: string, color: string, opacity: number = 1): { uri: string } => {
+  const cacheKey = `${initials}-${color}-${opacity}`;
+  if (markerIconCache[cacheKey]) {
+    return markerIconCache[cacheKey];
+  }
+  
+  const size = 96;
+  const center = size / 2;
+  const radius = 20;
+  const strokeWidth = 3;
+  const fillOpacity = opacity;
+  
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+    <circle cx="${center}" cy="${center}" r="${radius}" fill="${color}" fill-opacity="${fillOpacity}" stroke="#ffffff" stroke-width="${strokeWidth}"/>
+    <text x="${center}" y="${center}" fill="#ffffff" font-size="14" font-weight="bold" text-anchor="middle" dominant-baseline="central" font-family="sans-serif">${initials}</text>
+  </svg>`;
+  
+  const encoded = encodeURIComponent(svg);
+  const dataUri = `data:image/svg+xml,${encoded}`;
+  
+  markerIconCache[cacheKey] = { uri: dataUri };
+  return markerIconCache[cacheKey];
+};
+
+// Custom marker components using SVG data URI icons (no View children)
 const UserMarker = ({
   latitude,
   longitude,
@@ -73,39 +98,14 @@ const UserMarker = ({
   email?: string;
 }) => {
   const initials = getInitials(firstName, lastName, email);
+  const icon = getMarkerIcon(initials, '#0EA5E9', 1);
   
   return (
     <Marker
       coordinate={{ latitude, longitude }}
       anchor={{ x: 0.5, y: 0.5 }}
-    >
-      <View style={{
-        width: ANDROID_MARKER_SIZE,
-        height: ANDROID_MARKER_SIZE,
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}>
-        <View style={{
-          width: CIRCLE_SIZE,
-          height: CIRCLE_SIZE,
-          borderRadius: CIRCLE_SIZE / 2,
-          backgroundColor: '#0EA5E9',
-          borderWidth: 3,
-          borderColor: '#ffffff',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}>
-          <Text style={{
-            color: '#ffffff',
-            fontSize: 14,
-            fontWeight: 'bold',
-            textAlign: 'center',
-          }}>
-            {initials}
-          </Text>
-        </View>
-      </View>
-    </Marker>
+      icon={icon}
+    />
   );
 };
 
@@ -127,40 +127,14 @@ const FamilyMarker = ({
   const initials = getInitials(firstName, lastName, email);
   const markerColor = isActive ? "#0EA5E9" : "#9CA3AF";
   const markerOpacity = isActive ? 1 : 0.6;
+  const icon = getMarkerIcon(initials, markerColor, markerOpacity);
   
   return (
     <Marker
       coordinate={{ latitude, longitude }}
       anchor={{ x: 0.5, y: 0.5 }}
-    >
-      <View style={{
-        width: ANDROID_MARKER_SIZE,
-        height: ANDROID_MARKER_SIZE,
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}>
-        <View style={{
-          width: CIRCLE_SIZE,
-          height: CIRCLE_SIZE,
-          borderRadius: CIRCLE_SIZE / 2,
-          backgroundColor: markerColor,
-          borderWidth: 3,
-          borderColor: '#ffffff',
-          alignItems: 'center',
-          justifyContent: 'center',
-          opacity: markerOpacity,
-        }}>
-          <Text style={{
-            color: '#ffffff',
-            fontSize: 14,
-            fontWeight: 'bold',
-            textAlign: 'center',
-          }}>
-            {initials}
-          </Text>
-        </View>
-      </View>
-    </Marker>
+      icon={icon}
+    />
   );
 };
 
