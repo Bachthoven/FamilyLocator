@@ -10,6 +10,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./mobile/src/lib/queryClient";
 import { AuthProvider, useAuth } from "./mobile/src/contexts/AuthContext";
+import { ThemeProvider } from "./mobile/theme/ThemeContext";
 import CustomTabBar from "./mobile/components/CustomTabBar";
 import MapScreen from "./mobile/screens/MapScreen";
 import FamilyScreen from "./mobile/screens/FamilyScreen";
@@ -120,11 +121,13 @@ function AppContent() {
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <SafeAreaProvider>
-          <AppContent />
-        </SafeAreaProvider>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <SafeAreaProvider>
+            <AppContent />
+          </SafeAreaProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

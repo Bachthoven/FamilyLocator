@@ -1,4 +1,5 @@
 import { useColorScheme } from "react-native";
+import { useEffectiveTheme } from "./ThemeContext";
 
 export type StatusBarStyleType = "light" | "dark";
 
@@ -111,11 +112,21 @@ export const darkColors: ThemeColors = {
 };
 
 export function useThemeColors(): ThemeColors {
-  const colorScheme = useColorScheme();
-  return colorScheme === "dark" ? darkColors : lightColors;
+  try {
+    const effectiveTheme = useEffectiveTheme();
+    return effectiveTheme === "dark" ? darkColors : lightColors;
+  } catch {
+    const colorScheme = useColorScheme();
+    return colorScheme === "dark" ? darkColors : lightColors;
+  }
 }
 
 export function useIsDarkMode(): boolean {
-  const colorScheme = useColorScheme();
-  return colorScheme === "dark";
+  try {
+    const effectiveTheme = useEffectiveTheme();
+    return effectiveTheme === "dark";
+  } catch {
+    const colorScheme = useColorScheme();
+    return colorScheme === "dark";
+  }
 }
