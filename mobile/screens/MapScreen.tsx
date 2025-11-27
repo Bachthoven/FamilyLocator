@@ -54,12 +54,11 @@ const getInitials = (firstName?: string, lastName?: string, email?: string): str
   return "??";
 };
 
-// Marker dimensions - using larger canvas with padding to prevent Android clipping
-const MARKER_SIZE = 80; // Large canvas to prevent clipping
-const CIRCLE_RADIUS = 18;
-const CIRCLE_CENTER = MARKER_SIZE / 2; // Center the circle in the canvas
+// Marker dimensions for View-based approach (more reliable on Android)
+const MARKER_CONTAINER_SIZE = 100; // Extra large container to prevent any clipping
+const CIRCLE_SIZE = 40; // Diameter of the circle
 
-// Custom marker components for different types using SVG for perfect circles
+// Custom marker components using View with borderRadius (more reliable than SVG on Android)
 const UserMarker = ({
   latitude,
   longitude,
@@ -80,34 +79,36 @@ const UserMarker = ({
       coordinate={{ latitude, longitude }}
       anchor={{ x: 0.5, y: 0.5 }}
       tracksViewChanges={false}
+      flat={true}
     >
-      <View style={{ 
-        width: MARKER_SIZE, 
-        height: MARKER_SIZE, 
-        alignItems: 'center', 
+      <View style={{
+        width: MARKER_CONTAINER_SIZE,
+        height: MARKER_CONTAINER_SIZE,
+        alignItems: 'center',
         justifyContent: 'center',
+        backgroundColor: 'transparent',
       }}>
-        <Svg width={MARKER_SIZE} height={MARKER_SIZE} viewBox={`0 0 ${MARKER_SIZE} ${MARKER_SIZE}`}>
-          <Circle
-            cx={CIRCLE_CENTER}
-            cy={CIRCLE_CENTER}
-            r={CIRCLE_RADIUS}
-            fill="#0EA5E9"
-            stroke="#ffffff"
-            strokeWidth={3}
-          />
-          <SvgText
-            x={CIRCLE_CENTER}
-            y={CIRCLE_CENTER}
-            fill="white"
-            fontSize={13}
-            fontWeight="bold"
-            textAnchor="middle"
-            alignmentBaseline="central"
-          >
+        <View style={{
+          width: CIRCLE_SIZE,
+          height: CIRCLE_SIZE,
+          borderRadius: CIRCLE_SIZE / 2,
+          backgroundColor: '#0EA5E9',
+          borderWidth: 3,
+          borderColor: '#ffffff',
+          alignItems: 'center',
+          justifyContent: 'center',
+          elevation: 0,
+          shadowOpacity: 0,
+        }}>
+          <Text style={{
+            color: '#ffffff',
+            fontSize: 13,
+            fontWeight: 'bold',
+            textAlign: 'center',
+          }}>
             {initials}
-          </SvgText>
-        </Svg>
+          </Text>
+        </View>
       </View>
     </Marker>
   );
@@ -137,35 +138,37 @@ const FamilyMarker = ({
       coordinate={{ latitude, longitude }}
       anchor={{ x: 0.5, y: 0.5 }}
       tracksViewChanges={false}
+      flat={true}
     >
-      <View style={{ 
-        width: MARKER_SIZE, 
-        height: MARKER_SIZE, 
-        alignItems: 'center', 
+      <View style={{
+        width: MARKER_CONTAINER_SIZE,
+        height: MARKER_CONTAINER_SIZE,
+        alignItems: 'center',
         justifyContent: 'center',
+        backgroundColor: 'transparent',
       }}>
-        <Svg width={MARKER_SIZE} height={MARKER_SIZE} viewBox={`0 0 ${MARKER_SIZE} ${MARKER_SIZE}`}>
-          <Circle
-            cx={CIRCLE_CENTER}
-            cy={CIRCLE_CENTER}
-            r={CIRCLE_RADIUS}
-            fill={markerColor}
-            fillOpacity={markerOpacity}
-            stroke="#ffffff"
-            strokeWidth={3}
-          />
-          <SvgText
-            x={CIRCLE_CENTER}
-            y={CIRCLE_CENTER}
-            fill="white"
-            fontSize={13}
-            fontWeight="bold"
-            textAnchor="middle"
-            alignmentBaseline="central"
-          >
+        <View style={{
+          width: CIRCLE_SIZE,
+          height: CIRCLE_SIZE,
+          borderRadius: CIRCLE_SIZE / 2,
+          backgroundColor: markerColor,
+          borderWidth: 3,
+          borderColor: '#ffffff',
+          alignItems: 'center',
+          justifyContent: 'center',
+          opacity: markerOpacity,
+          elevation: 0,
+          shadowOpacity: 0,
+        }}>
+          <Text style={{
+            color: '#ffffff',
+            fontSize: 13,
+            fontWeight: 'bold',
+            textAlign: 'center',
+          }}>
             {initials}
-          </SvgText>
-        </Svg>
+          </Text>
+        </View>
       </View>
     </Marker>
   );
