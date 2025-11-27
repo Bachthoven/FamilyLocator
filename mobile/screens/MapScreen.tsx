@@ -56,6 +56,17 @@ const getInitials = (firstName?: string, lastName?: string, email?: string): str
 
 // Marker dimensions for View-based approach
 const CIRCLE_SIZE = 40; // Diameter of the circle
+const WRAPPER_SIZE = 60; // Larger wrapper to prevent clipping
+const WRAPPER_PADDING = (WRAPPER_SIZE - CIRCLE_SIZE) / 2;
+
+// Marker wrapper style to prevent Android clipping
+const markerWrapperStyle = {
+  width: WRAPPER_SIZE,
+  height: WRAPPER_SIZE,
+  alignItems: 'center' as const,
+  justifyContent: 'center' as const,
+  overflow: 'visible' as const,
+};
 
 // Custom marker components using View with borderRadius
 const UserMarker = ({
@@ -77,25 +88,29 @@ const UserMarker = ({
     <Marker
       coordinate={{ latitude, longitude }}
       anchor={{ x: 0.5, y: 0.5 }}
+      style={{ overflow: 'visible' }}
     >
-      <View style={{
-        width: CIRCLE_SIZE,
-        height: CIRCLE_SIZE,
-        borderRadius: CIRCLE_SIZE / 2,
-        backgroundColor: '#0EA5E9',
-        borderWidth: 3,
-        borderColor: '#ffffff',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}>
-        <Text style={{
-          color: '#ffffff',
-          fontSize: 13,
-          fontWeight: 'bold',
-          textAlign: 'center',
+      <View style={markerWrapperStyle}>
+        <View style={{
+          width: CIRCLE_SIZE,
+          height: CIRCLE_SIZE,
+          borderRadius: CIRCLE_SIZE / 2,
+          backgroundColor: '#0EA5E9',
+          borderWidth: 3,
+          borderColor: '#ffffff',
+          alignItems: 'center',
+          justifyContent: 'center',
+          overflow: 'visible',
         }}>
-          {initials}
-        </Text>
+          <Text style={{
+            color: '#ffffff',
+            fontSize: 13,
+            fontWeight: 'bold',
+            textAlign: 'center',
+          }}>
+            {initials}
+          </Text>
+        </View>
       </View>
     </Marker>
   );
@@ -124,26 +139,30 @@ const FamilyMarker = ({
     <Marker
       coordinate={{ latitude, longitude }}
       anchor={{ x: 0.5, y: 0.5 }}
+      style={{ overflow: 'visible' }}
     >
-      <View style={{
-        width: CIRCLE_SIZE,
-        height: CIRCLE_SIZE,
-        borderRadius: CIRCLE_SIZE / 2,
-        backgroundColor: markerColor,
-        borderWidth: 3,
-        borderColor: '#ffffff',
-        alignItems: 'center',
-        justifyContent: 'center',
-        opacity: markerOpacity,
-      }}>
-        <Text style={{
-          color: '#ffffff',
-          fontSize: 13,
-          fontWeight: 'bold',
-          textAlign: 'center',
+      <View style={markerWrapperStyle}>
+        <View style={{
+          width: CIRCLE_SIZE,
+          height: CIRCLE_SIZE,
+          borderRadius: CIRCLE_SIZE / 2,
+          backgroundColor: markerColor,
+          borderWidth: 3,
+          borderColor: '#ffffff',
+          alignItems: 'center',
+          justifyContent: 'center',
+          opacity: markerOpacity,
+          overflow: 'visible',
         }}>
-          {initials}
-        </Text>
+          <Text style={{
+            color: '#ffffff',
+            fontSize: 13,
+            fontWeight: 'bold',
+            textAlign: 'center',
+          }}>
+            {initials}
+          </Text>
+        </View>
       </View>
     </Marker>
   );
