@@ -497,8 +497,8 @@ export default function MapScreen({
 
   return (
     <View style={styles.container}>
-      {/* Status Bar - white icons in satellite/hybrid mode */}
-      <StatusBar style={mapType === "standard" ? "dark" : "light"} />
+      {/* Status Bar - always white icons for dark mode */}
+      <StatusBar style="light" />
       <MapView
         ref={mapRef}
         style={styles.map}
@@ -716,7 +716,7 @@ export default function MapScreen({
           <Ionicons
             name={mapType === "standard" ? "earth-outline" : "map-outline"}
             size={24}
-            color="#333"
+            color="#F9FAFB"
           />
         </TouchableOpacity>
 
@@ -726,7 +726,7 @@ export default function MapScreen({
           style={styles.controlButton}
           activeOpacity={0.7}
         >
-          <Ionicons name="add" size={24} color="#333" />
+          <Ionicons name="add" size={24} color="#F9FAFB" />
         </TouchableOpacity>
 
         {/* Zoom Out */}
@@ -735,7 +735,7 @@ export default function MapScreen({
           style={styles.controlButton}
           activeOpacity={0.7}
         >
-          <Ionicons name="remove" size={24} color="#333" />
+          <Ionicons name="remove" size={24} color="#F9FAFB" />
         </TouchableOpacity>
 
         {/* Center on User */}
@@ -776,7 +776,7 @@ export default function MapScreen({
                         : "location"
                   }
                   size={20}
-                  color="#0EA5E9"
+                  color="#fff"
                 />
               </View>
               <Text style={styles.slideDownName}>{selectedMarker.name}</Text>
@@ -806,7 +806,7 @@ export default function MapScreen({
             )}
             {selectedMarker.address && (
               <View style={styles.slideDownAddressRow}>
-                <Ionicons name="location-outline" size={14} color="#6B7280" />
+                <Ionicons name="location-outline" size={14} color="#9CA3AF" />
                 <Text style={styles.slideDownAddress}>
                   {selectedMarker.address}
                 </Text>
@@ -1139,15 +1139,15 @@ const styles = StyleSheet.create({
   controlButton: {
     width: 56,
     height: 56,
-    backgroundColor: "#fff",
+    backgroundColor: "#1F2937",
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#e0e0e0",
+    borderColor: "#374151",
     alignItems: "center",
     justifyContent: "center",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 5,
   },
@@ -1159,7 +1159,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#9CA3AF",
   },
 
-  // Slide-Down Dialog Styles
+  // Slide-Down Dialog Styles (Dark Mode)
   slideDownContainer: {
     position: "absolute",
     left: 16,
@@ -1167,16 +1167,16 @@ const styles = StyleSheet.create({
     zIndex: 100,
   },
   slideDownDialog: {
-    backgroundColor: "#fff",
+    backgroundColor: "#1F2937",
     borderRadius: 16,
     padding: 16,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.3,
     shadowRadius: 12,
     elevation: 8,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: "#374151",
   },
   slideDownHeader: {
     flexDirection: "row",
@@ -1186,7 +1186,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: "#F0F9FF",
+    backgroundColor: "#0EA5E9",
     alignItems: "center",
     justifyContent: "center",
     marginRight: 12,
@@ -1194,7 +1194,7 @@ const styles = StyleSheet.create({
   slideDownName: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#111827",
+    color: "#F9FAFB",
     flex: 1,
   },
   slideDownCloseButton: {
@@ -1213,7 +1213,7 @@ const styles = StyleSheet.create({
   },
   slideDownStatus: {
     fontSize: 14,
-    color: "#374151",
+    color: "#D1D5DB",
   },
   slideDownAddressRow: {
     flexDirection: "row",
@@ -1222,7 +1222,7 @@ const styles = StyleSheet.create({
   },
   slideDownAddress: {
     fontSize: 13,
-    color: "#6B7280",
+    color: "#9CA3AF",
     marginLeft: 6,
     flex: 1,
   },

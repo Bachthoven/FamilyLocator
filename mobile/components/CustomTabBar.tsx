@@ -42,7 +42,7 @@ export default function CustomTabBar({
             <Ionicons
               name={tab.icon}
               size={24}
-              color={isActive ? "#0EA5E9" : "#8E8E93"}
+              color={isActive ? "#0EA5E9" : "#9CA3AF"}
             />
             <Text style={[styles.label, isActive && styles.activeLabel]}>
               {tab.label}
@@ -57,9 +57,9 @@ export default function CustomTabBar({
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
-    backgroundColor: "#fff",
+    backgroundColor: "#1F2937",
     borderTopWidth: 1,
-    borderTopColor: "#E5E5EA",
+    borderTopColor: "#374151",
     paddingTop: 8,
     paddingHorizontal: 4,
   },
@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 12,
     marginTop: 4,
-    color: "#8E8E93",
+    color: "#9CA3AF",
     fontWeight: "500",
   },
   activeLabel: {
