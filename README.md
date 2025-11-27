@@ -349,6 +349,35 @@ The application is deployed on Replit and uses Replit's built-in deployment feat
 
 ## 🔄 Recent Updates
 
+### Mobile History & Settings Screens (November 27, 2025)
+
+- **HistoryScreen**: Complete location history implementation
+  - Timeline view showing past 24 hours of location updates
+  - Map visualization with colored markers for each family member
+  - Family member filtering tabs with selection state
+  - Statistics display (members count, locations count)
+  - Pull-to-refresh functionality
+  - Accuracy badges (High/Medium/Low) and location type badges (Auto/Manual)
+  - Empty states for no history or no selected members
+  - Matches web app's History page exactly
+
+- **SettingsScreen**: Full settings management
+  - User profile card with avatar and user info
+  - Profile editor modal (name, email, phone, password change)
+  - Location settings modal (auto-logging toggle, interval selection: 1/5/15/30 min)
+  - Notification settings modal (permission status, enable button)
+  - Appearance/theme modal (Light/Dark/System options with persistence)
+  - Help & Support section
+  - Logout button with confirmation
+  - App version info display
+
+- **ThemeContext**: Manual theme switching system
+  - Supports Light/Dark/System modes
+  - AsyncStorage persistence for theme preference
+  - Integrates with useThemeColors hook across all screens
+  - System mode follows device color scheme automatically
+  - Immediate theme updates without app restart
+
 ### React 19 & Expo SDK 54 Upgrade (October 19, 2025)
 
 - **React Version**: Upgraded from 18.2 to 19.1 to support Expo SDK 54
