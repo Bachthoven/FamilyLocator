@@ -919,8 +919,6 @@ const styles = StyleSheet.create({
   },
   secondaryButton: {
     backgroundColor: "transparent",
-    borderWidth: 1,
-    borderColor: "#D1D5DB",
   },
   buttonDisabled: {
     opacity: 0.5,

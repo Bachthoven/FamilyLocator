@@ -261,7 +261,7 @@ export default function PlacesScreen() {
     return (
       <View
         key={place.id}
-        style={[styles.placeCard, { backgroundColor: colors.surface }]}
+        style={[styles.placeCard, { backgroundColor: colors.cardBackground }]}
         data-testid={`card-place-${place.id}`}
       >
         <View style={styles.placeCardContent}>
@@ -753,7 +753,10 @@ export default function PlacesScreen() {
           {[1, 2].map((j) => (
             <View
               key={j}
-              style={[styles.skeletonCard, { backgroundColor: colors.surface }]}
+              style={[
+                styles.skeletonCard,
+                { backgroundColor: colors.cardBackground },
+              ]}
             >
               <View
                 style={[
@@ -785,7 +788,7 @@ export default function PlacesScreen() {
   const renderStatistics = () => (
     <View style={styles.statsContainer}>
       <View
-        style={[styles.statCard, { backgroundColor: colors.surface }]}
+        style={[styles.statCard, { backgroundColor: colors.cardBackground }]}
         data-testid="stat-total-places"
       >
         <Text style={[styles.statNumber, { color: colors.primary }]}>
@@ -796,7 +799,7 @@ export default function PlacesScreen() {
         </Text>
       </View>
       <View
-        style={[styles.statCard, { backgroundColor: colors.surface }]}
+        style={[styles.statCard, { backgroundColor: colors.cardBackground }]}
         data-testid="stat-categories"
       >
         <Text style={[styles.statNumber, { color: "#10B981" }]}>
