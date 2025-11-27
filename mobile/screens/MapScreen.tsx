@@ -5,8 +5,8 @@ import {
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
-  Modal,
-  Pressable,
+  Animated,
+  Dimensions,
 } from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
@@ -201,7 +201,7 @@ export default function MapScreen({
     iconColor?: string;
   }>({ visible: false });
 
-  // Selected marker state for speech bubble
+  // Selected marker state for slide-down dialog
   const [selectedMarker, setSelectedMarker] = useState<{
     type: "user" | "family" | "place";
     name: string;
@@ -211,9 +211,26 @@ export default function MapScreen({
     coordinate: { latitude: number; longitude: number };
   } | null>(null);
 
-  // Store marker screen position and bubble height for accurate positioning
-  const [markerScreenY, setMarkerScreenY] = useState<number | null>(null);
-  const [bubbleHeight, setBubbleHeight] = useState<number>(0);
+  // Animation for slide-down dialog
+  const slideAnim = useRef(new Animated.Value(-200)).current;
+
+  // Animate dialog when marker is selected/deselected
+  useEffect(() => {
+    if (selectedMarker) {
+      Animated.spring(slideAnim, {
+        toValue: 0,
+        useNativeDriver: true,
+        tension: 80,
+        friction: 12,
+      }).start();
+    } else {
+      Animated.timing(slideAnim, {
+        toValue: -200,
+        duration: 200,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [selectedMarker]);
 
   // Fetch family locations for the map
   const { data: familyLocationsData = [] } = useQuery<
@@ -493,11 +510,9 @@ export default function MapScreen({
           mapRef.current?.getCamera().then((camera) => {
             setMapHeading(camera.heading || 0);
           });
-          // Close speech bubble when user manually pans/zooms (not programmatic)
+          // Close slide-down dialog when user manually pans/zooms (not programmatic)
           if (selectedMarker && !isProgrammaticMove.current) {
             setSelectedMarker(null);
-            setMarkerScreenY(null);
-            setBubbleHeight(0);
           }
         }}
         onRegionChangeComplete={(region) => {
@@ -537,37 +552,16 @@ export default function MapScreen({
                 },
                 300
               );
-              // Calculate marker screen position and show speech bubble
-              mapRef.current
-                ?.pointForCoordinate({
+              // Show slide-down dialog
+              setSelectedMarker({
+                type: "user",
+                name: "You",
+                statusMessage: "Current location",
+                coordinate: {
                   latitude: currentLocation.latitude,
                   longitude: currentLocation.longitude,
-                })
-                .then((point) => {
-                  setMarkerScreenY(point.y);
-                  setSelectedMarker({
-                    type: "user",
-                    name: "You",
-                    statusMessage: "Current location",
-                    coordinate: {
-                      latitude: currentLocation.latitude,
-                      longitude: currentLocation.longitude,
-                    },
-                  });
-                })
-                .catch(() => {
-                  // Fallback if calculation fails
-                  setMarkerScreenY(null);
-                  setSelectedMarker({
-                    type: "user",
-                    name: "You",
-                    statusMessage: "Current location",
-                    coordinate: {
-                      latitude: currentLocation.latitude,
-                      longitude: currentLocation.longitude,
-                    },
-                  });
-                });
+                },
+              });
             }}
           />
         )}
@@ -596,39 +590,17 @@ export default function MapScreen({
                 },
                 300
               );
-              // Calculate marker screen position and show speech bubble
-              mapRef.current
-                ?.pointForCoordinate({
+              // Show slide-down dialog
+              setSelectedMarker({
+                type: "family",
+                name: location.name,
+                statusMessage: location.statusMessage,
+                address: location.address,
+                coordinate: {
                   latitude: location.latitude,
                   longitude: location.longitude,
-                })
-                .then((point) => {
-                  setMarkerScreenY(point.y);
-                  setSelectedMarker({
-                    type: "family",
-                    name: location.name,
-                    statusMessage: location.statusMessage,
-                    address: location.address,
-                    coordinate: {
-                      latitude: location.latitude,
-                      longitude: location.longitude,
-                    },
-                  });
-                })
-                .catch(() => {
-                  // Fallback if calculation fails
-                  setMarkerScreenY(null);
-                  setSelectedMarker({
-                    type: "family",
-                    name: location.name,
-                    statusMessage: location.statusMessage,
-                    address: location.address,
-                    coordinate: {
-                      latitude: location.latitude,
-                      longitude: location.longitude,
-                    },
-                  });
-                });
+                },
+              });
             }}
           />
         ))}
@@ -780,63 +752,69 @@ export default function MapScreen({
         </TouchableOpacity>
       </View>
 
-      {/* Speech Bubble Callout */}
-      {selectedMarker && (
-        <View
-          style={[
-            styles.speechBubbleContainer,
-            markerScreenY !== null && bubbleHeight > 0
-              ? {
-                  // Dynamic positioning based on actual marker and bubble positions
-                  position: "absolute",
-                  top: markerScreenY - bubbleHeight - 60, // 60px gap above marker
-                  left: 0,
-                  right: 0,
-                  paddingLeft: 4,
-                }
-              : {
-                  // Fallback to percentage positioning
-                  paddingLeft: 4,
-                  top: "30%",
-                },
-          ]}
-          pointerEvents="box-none"
-        >
-          <View
-            style={styles.speechBubble}
-            onLayout={(event) => {
-              // Measure bubble height for dynamic positioning
-              setBubbleHeight(event.nativeEvent.layout.height + 10); // +10 for pointer
-            }}
-          >
-            <View style={styles.speechBubbleHeader}>
-              <Text style={styles.speechBubbleName}>{selectedMarker.name}</Text>
+      {/* Slide-Down Dialog from Top */}
+      <Animated.View
+        style={[
+          styles.slideDownContainer,
+          {
+            transform: [{ translateY: slideAnim }],
+            top: insets.top,
+          },
+        ]}
+        pointerEvents={selectedMarker ? "auto" : "none"}
+      >
+        {selectedMarker && (
+          <View style={styles.slideDownDialog}>
+            <View style={styles.slideDownHeader}>
+              <View style={styles.slideDownIconContainer}>
+                <Ionicons
+                  name={
+                    selectedMarker.type === "user"
+                      ? "person"
+                      : selectedMarker.type === "family"
+                        ? "people"
+                        : "location"
+                  }
+                  size={20}
+                  color="#0EA5E9"
+                />
+              </View>
+              <Text style={styles.slideDownName}>{selectedMarker.name}</Text>
               <TouchableOpacity
-                onPress={() => {
-                  setSelectedMarker(null);
-                  setMarkerScreenY(null);
-                  setBubbleHeight(0);
-                }}
+                onPress={() => setSelectedMarker(null)}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                style={styles.slideDownCloseButton}
               >
-                <Ionicons name="close-circle" size={20} color="#9CA3AF" />
+                <Ionicons name="close-circle" size={24} color="#9CA3AF" />
               </TouchableOpacity>
             </View>
             {selectedMarker.statusMessage && (
-              <Text style={styles.speechBubbleStatus}>
-                {selectedMarker.statusMessage}
-              </Text>
+              <View style={styles.slideDownStatusRow}>
+                <View
+                  style={[
+                    styles.slideDownStatusDot,
+                    {
+                      backgroundColor:
+                        selectedMarker.type === "user" ? "#10B981" : "#10B981",
+                    },
+                  ]}
+                />
+                <Text style={styles.slideDownStatus}>
+                  {selectedMarker.statusMessage}
+                </Text>
+              </View>
             )}
             {selectedMarker.address && (
-              <Text style={styles.speechBubbleAddress}>
-                {selectedMarker.address}
-              </Text>
+              <View style={styles.slideDownAddressRow}>
+                <Ionicons name="location-outline" size={14} color="#6B7280" />
+                <Text style={styles.slideDownAddress}>
+                  {selectedMarker.address}
+                </Text>
+              </View>
             )}
           </View>
-          {/* Triangular pointer */}
-          <View style={styles.speechBubblePointer} />
-        </View>
-      )}
+        )}
+      </Animated.View>
 
       {/* Custom Alert Dialog */}
       <AlertDialog
@@ -1181,63 +1159,71 @@ const styles = StyleSheet.create({
     backgroundColor: "#9CA3AF",
   },
 
-  // Speech Bubble Styles
-  speechBubbleContainer: {
+  // Slide-Down Dialog Styles
+  slideDownContainer: {
     position: "absolute",
-    top: "38%",
-    left: 0,
-    right: 0,
-    alignItems: "center",
-    justifyContent: "center",
+    left: 16,
+    right: 16,
+    zIndex: 100,
   },
-  speechBubble: {
+  slideDownDialog: {
     backgroundColor: "#fff",
     borderRadius: 16,
     padding: 16,
-    minWidth: 240,
-    maxWidth: 320,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.15,
     shadowRadius: 12,
     elevation: 8,
-    borderWidth: 2,
-    borderColor: "#0EA5E9",
-    alignSelf: "center",
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
   },
-  speechBubbleHeader: {
+  slideDownHeader: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 8,
   },
-  speechBubbleName: {
+  slideDownIconContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#F0F9FF",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+  },
+  slideDownName: {
     fontSize: 18,
-    fontWeight: "700",
+    fontWeight: "600",
     color: "#111827",
     flex: 1,
   },
-  speechBubbleStatus: {
+  slideDownCloseButton: {
+    padding: 4,
+  },
+  slideDownStatusRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 12,
+  },
+  slideDownStatusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: 8,
+  },
+  slideDownStatus: {
     fontSize: 14,
+    color: "#374151",
+  },
+  slideDownAddressRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 8,
+  },
+  slideDownAddress: {
+    fontSize: 13,
     color: "#6B7280",
-    marginBottom: 4,
-  },
-  speechBubbleAddress: {
-    fontSize: 12,
-    color: "#9CA3AF",
-  },
-  speechBubblePointer: {
-    width: 0,
-    height: 0,
-    backgroundColor: "transparent",
-    borderStyle: "solid",
-    borderLeftWidth: 12,
-    borderRightWidth: 12,
-    borderTopWidth: 16,
-    borderLeftColor: "transparent",
-    borderRightColor: "transparent",
-    borderTopColor: "#0EA5E9",
-    marginTop: -1,
-    alignSelf: "center",
+    marginLeft: 6,
+    flex: 1,
   },
 });
