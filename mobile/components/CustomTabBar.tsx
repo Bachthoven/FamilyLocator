@@ -2,6 +2,7 @@ import React from "react";
 import { View, TouchableOpacity, Text, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useThemeColors } from "../theme/colors";
 
 type TabName = "Map" | "Family" | "Places" | "History" | "Settings";
 
@@ -27,9 +28,19 @@ export default function CustomTabBar({
   onTabPress,
 }: CustomTabBarProps) {
   const insets = useSafeAreaInsets();
+  const colors = useThemeColors();
 
   return (
-    <View style={[styles.container, { paddingBottom: insets.bottom }]}>
+    <View
+      style={[
+        styles.container,
+        {
+          paddingBottom: insets.bottom,
+          backgroundColor: colors.tabBarBackground,
+          borderTopColor: colors.tabBarBorder,
+        },
+      ]}
+    >
       {tabs.map((tab) => {
         const isActive = activeTab === tab.name;
         return (
@@ -42,9 +53,14 @@ export default function CustomTabBar({
             <Ionicons
               name={tab.icon}
               size={24}
-              color={isActive ? "#0EA5E9" : "#9CA3AF"}
+              color={isActive ? colors.primary : colors.tabBarInactive}
             />
-            <Text style={[styles.label, isActive && styles.activeLabel]}>
+            <Text
+              style={[
+                styles.label,
+                { color: isActive ? colors.primary : colors.tabBarInactive },
+              ]}
+            >
               {tab.label}
             </Text>
           </TouchableOpacity>
@@ -57,9 +73,7 @@ export default function CustomTabBar({
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
-    backgroundColor: "#1F2937",
     borderTopWidth: 1,
-    borderTopColor: "#374151",
     paddingTop: 8,
     paddingHorizontal: 4,
   },
@@ -71,10 +85,6 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 12,
     marginTop: 4,
-    color: "#9CA3AF",
     fontWeight: "500",
-  },
-  activeLabel: {
-    color: "#0EA5E9",
   },
 });

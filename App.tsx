@@ -1,5 +1,10 @@
 import React, { useState } from "react";
-import { View, StyleSheet, ActivityIndicator } from "react-native";
+import {
+  View,
+  StyleSheet,
+  ActivityIndicator,
+  useColorScheme,
+} from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -12,11 +17,14 @@ import PlacesScreen from "./mobile/screens/PlacesScreen";
 import HistoryScreen from "./mobile/screens/HistoryScreen";
 import SettingsScreen from "./mobile/screens/SettingsScreen";
 import AuthScreen from "./mobile/screens/AuthScreen";
+import { useThemeColors } from "./mobile/theme/colors";
 
 type TabName = "Map" | "Family" | "Places" | "History" | "Settings";
 
 function AppContent() {
   const { user, isLoading } = useAuth();
+  const colors = useThemeColors();
+  const colorScheme = useColorScheme();
   const [activeTab, setActiveTab] = useState<TabName>("Map");
   const [focusLocation, setFocusLocation] = useState<{
     latitude: number;
@@ -38,8 +46,14 @@ function AppContent() {
   // Show loading screen while checking authentication
   if (isLoading) {
     return (
-      <View style={styles.loadingContainer}>
+      <View
+        style={[
+          styles.loadingContainer,
+          { backgroundColor: colors.background },
+        ]}
+      >
         <ActivityIndicator size="large" color="#0EA5E9" />
+        <StatusBar style={colors.statusBarStyle} />
       </View>
     );
   }
@@ -61,7 +75,7 @@ function AppContent() {
 
   // Show main app if logged in
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Keep all screens mounted but hide inactive ones to preserve state */}
       <View style={activeTab === "Map" ? styles.screen : styles.hiddenScreen}>
         <MapScreen
@@ -97,8 +111,8 @@ function AppContent() {
         <SettingsScreen />
       </View>
       <CustomTabBar activeTab={activeTab} onTabPress={setActiveTab} />
-      {/* dark = black icons for standard map, light = white icons for hybrid/satellite map */}
-      <StatusBar style={mapType === "hybrid" ? "light" : "dark"} />
+      {/* StatusBar adapts to system theme - light icons for dark mode, dark icons for light mode */}
+      <StatusBar style={colors.statusBarStyle} />
     </View>
   );
 }

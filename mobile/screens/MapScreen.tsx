@@ -20,6 +20,7 @@ import { User } from "../../shared/schema";
 import NotificationBell from "../components/NotificationBell";
 import Compass from "../components/Compass";
 import AlertDialog from "../components/AlertDialog";
+import { useThemeColors } from "../theme/colors";
 
 // Type definitions
 interface FamilyLocation {
@@ -174,6 +175,7 @@ export default function MapScreen({
   onMapTypeChange,
 }: MapScreenProps) {
   const insets = useSafeAreaInsets();
+  const colors = useThemeColors();
   const mapRef = useRef<MapView>(null);
   const hasInitializedLocation = useRef(false);
   const isProgrammaticMove = useRef(false); // Track if we're centering programmatically
@@ -497,8 +499,8 @@ export default function MapScreen({
 
   return (
     <View style={styles.container}>
-      {/* Status Bar - always white icons for dark mode */}
-      <StatusBar style="light" />
+      {/* Status Bar - dynamic based on theme */}
+      <StatusBar style={colors.statusBarStyle} />
       <MapView
         ref={mapRef}
         style={styles.map}
@@ -710,32 +712,50 @@ export default function MapScreen({
         {/* Map Type Toggle */}
         <TouchableOpacity
           onPress={toggleMapType}
-          style={styles.controlButton}
+          style={[
+            styles.controlButton,
+            {
+              backgroundColor: colors.controlButtonBackground,
+              borderColor: colors.controlButtonBorder,
+            },
+          ]}
           activeOpacity={0.7}
         >
           <Ionicons
             name={mapType === "standard" ? "earth-outline" : "map-outline"}
             size={24}
-            color="#F9FAFB"
+            color={colors.controlButtonIcon}
           />
         </TouchableOpacity>
 
         {/* Zoom In */}
         <TouchableOpacity
           onPress={zoomIn}
-          style={styles.controlButton}
+          style={[
+            styles.controlButton,
+            {
+              backgroundColor: colors.controlButtonBackground,
+              borderColor: colors.controlButtonBorder,
+            },
+          ]}
           activeOpacity={0.7}
         >
-          <Ionicons name="add" size={24} color="#F9FAFB" />
+          <Ionicons name="add" size={24} color={colors.controlButtonIcon} />
         </TouchableOpacity>
 
         {/* Zoom Out */}
         <TouchableOpacity
           onPress={zoomOut}
-          style={styles.controlButton}
+          style={[
+            styles.controlButton,
+            {
+              backgroundColor: colors.controlButtonBackground,
+              borderColor: colors.controlButtonBorder,
+            },
+          ]}
           activeOpacity={0.7}
         >
-          <Ionicons name="remove" size={24} color="#F9FAFB" />
+          <Ionicons name="remove" size={24} color={colors.controlButtonIcon} />
         </TouchableOpacity>
 
         {/* Center on User */}
@@ -764,7 +784,15 @@ export default function MapScreen({
         pointerEvents={selectedMarker ? "auto" : "none"}
       >
         {selectedMarker && (
-          <View style={styles.slideDownDialog}>
+          <View
+            style={[
+              styles.slideDownDialog,
+              {
+                backgroundColor: colors.dialogBackground,
+                borderColor: colors.dialogBorder,
+              },
+            ]}
+          >
             <View style={styles.slideDownHeader}>
               <View style={styles.slideDownIconContainer}>
                 <Ionicons
@@ -779,13 +807,21 @@ export default function MapScreen({
                   color="#fff"
                 />
               </View>
-              <Text style={styles.slideDownName}>{selectedMarker.name}</Text>
+              <Text
+                style={[styles.slideDownName, { color: colors.dialogText }]}
+              >
+                {selectedMarker.name}
+              </Text>
               <TouchableOpacity
                 onPress={() => setSelectedMarker(null)}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 style={styles.slideDownCloseButton}
               >
-                <Ionicons name="close-circle" size={24} color="#9CA3AF" />
+                <Ionicons
+                  name="close-circle"
+                  size={24}
+                  color={colors.dialogTextMuted}
+                />
               </TouchableOpacity>
             </View>
             {selectedMarker.statusMessage && (
@@ -799,15 +835,29 @@ export default function MapScreen({
                     },
                   ]}
                 />
-                <Text style={styles.slideDownStatus}>
+                <Text
+                  style={[
+                    styles.slideDownStatus,
+                    { color: colors.dialogTextSecondary },
+                  ]}
+                >
                   {selectedMarker.statusMessage}
                 </Text>
               </View>
             )}
             {selectedMarker.address && (
               <View style={styles.slideDownAddressRow}>
-                <Ionicons name="location-outline" size={14} color="#9CA3AF" />
-                <Text style={styles.slideDownAddress}>
+                <Ionicons
+                  name="location-outline"
+                  size={14}
+                  color={colors.dialogTextMuted}
+                />
+                <Text
+                  style={[
+                    styles.slideDownAddress,
+                    { color: colors.dialogTextMuted },
+                  ]}
+                >
                   {selectedMarker.address}
                 </Text>
               </View>
@@ -1139,10 +1189,8 @@ const styles = StyleSheet.create({
   controlButton: {
     width: 56,
     height: 56,
-    backgroundColor: "#1F2937",
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#374151",
     alignItems: "center",
     justifyContent: "center",
     shadowColor: "#000",
@@ -1159,7 +1207,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#9CA3AF",
   },
 
-  // Slide-Down Dialog Styles (Dark Mode)
+  // Slide-Down Dialog Styles
   slideDownContainer: {
     position: "absolute",
     left: 16,
@@ -1167,7 +1215,6 @@ const styles = StyleSheet.create({
     zIndex: 100,
   },
   slideDownDialog: {
-    backgroundColor: "#1F2937",
     borderRadius: 16,
     padding: 16,
     shadowColor: "#000",
@@ -1176,7 +1223,6 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 8,
     borderWidth: 1,
-    borderColor: "#374151",
   },
   slideDownHeader: {
     flexDirection: "row",
@@ -1194,7 +1240,6 @@ const styles = StyleSheet.create({
   slideDownName: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#F9FAFB",
     flex: 1,
   },
   slideDownCloseButton: {
@@ -1213,7 +1258,6 @@ const styles = StyleSheet.create({
   },
   slideDownStatus: {
     fontSize: 14,
-    color: "#D1D5DB",
   },
   slideDownAddressRow: {
     flexDirection: "row",
@@ -1222,7 +1266,6 @@ const styles = StyleSheet.create({
   },
   slideDownAddress: {
     fontSize: 13,
-    color: "#9CA3AF",
     marginLeft: 6,
     flex: 1,
   },

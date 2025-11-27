@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -11,13 +11,16 @@ import {
   StyleSheet,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../src/contexts/AuthContext";
+import { useThemeColors } from "../theme/colors";
 
 type TabType = "login" | "register";
 
 export default function AuthScreen() {
   const { loginMutation, registerMutation } = useAuth();
+  const colors = useThemeColors();
   const [activeTab, setActiveTab] = useState<TabType>("login");
 
   // Login form state
@@ -142,7 +145,10 @@ export default function AuthScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colors.background }]}
+    >
+      <StatusBar style={colors.statusBarStyle} />
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.keyboardView}
