@@ -159,33 +159,53 @@ export default function AuthScreen() {
         >
           {/* Header */}
           <View style={styles.header}>
-            <Text style={styles.title}>FamilyLocator</Text>
-            <Text style={styles.subtitle}>Stay connected with your family</Text>
+            <Text style={[styles.title, { color: colors.text }]}>
+              FamilyLocator
+            </Text>
+            <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+              Stay connected with your family
+            </Text>
           </View>
 
           {/* Tabs */}
-          <View style={styles.tabs}>
+          <View
+            style={[styles.tabs, { backgroundColor: colors.surfaceSecondary }]}
+          >
             <TouchableOpacity
-              style={[styles.tab, activeTab === "login" && styles.activeTab]}
+              style={[
+                styles.tab,
+                activeTab === "login" && [
+                  styles.activeTab,
+                  { backgroundColor: colors.surface },
+                ],
+              ]}
               onPress={() => setActiveTab("login")}
             >
               <Text
                 style={[
                   styles.tabText,
-                  activeTab === "login" && styles.activeTabText,
+                  { color: colors.textSecondary },
+                  activeTab === "login" && { color: colors.text },
                 ]}
               >
                 Sign In
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.tab, activeTab === "register" && styles.activeTab]}
+              style={[
+                styles.tab,
+                activeTab === "register" && [
+                  styles.activeTab,
+                  { backgroundColor: colors.surface },
+                ],
+              ]}
               onPress={() => setActiveTab("register")}
             >
               <Text
                 style={[
                   styles.tabText,
-                  activeTab === "register" && styles.activeTabText,
+                  { color: colors.textSecondary },
+                  activeTab === "register" && { color: colors.text },
                 ]}
               >
                 Create Account
@@ -194,12 +214,19 @@ export default function AuthScreen() {
           </View>
 
           {/* Content Card */}
-          <View style={styles.card}>
+          <View style={[styles.card, { backgroundColor: colors.surface }]}>
             {activeTab === "login" ? (
               <View style={styles.formContainer}>
                 <View style={styles.cardHeader}>
-                  <Text style={styles.cardTitle}>Welcome back</Text>
-                  <Text style={styles.cardDescription}>
+                  <Text style={[styles.cardTitle, { color: colors.text }]}>
+                    Welcome back
+                  </Text>
+                  <Text
+                    style={[
+                      styles.cardDescription,
+                      { color: colors.textSecondary },
+                    ]}
+                  >
                     Sign in to your account to continue
                   </Text>
                 </View>
@@ -207,13 +234,21 @@ export default function AuthScreen() {
                 <View style={styles.form}>
                   {/* Email Input */}
                   <View style={styles.inputGroup}>
-                    <Text style={styles.label}>Email</Text>
+                    <Text style={[styles.label, { color: colors.text }]}>
+                      Email
+                    </Text>
                     <TextInput
                       style={[
                         styles.input,
+                        {
+                          backgroundColor: colors.inputBackground,
+                          borderColor: colors.inputBorder,
+                          color: colors.text,
+                        },
                         loginErrors.email && styles.inputError,
                       ]}
                       placeholder="your@email.com"
+                      placeholderTextColor={colors.textMuted}
                       value={loginEmail}
                       onChangeText={setLoginEmail}
                       keyboardType="email-address"
@@ -227,14 +262,22 @@ export default function AuthScreen() {
 
                   {/* Password Input */}
                   <View style={styles.inputGroup}>
-                    <Text style={styles.label}>Password</Text>
+                    <Text style={[styles.label, { color: colors.text }]}>
+                      Password
+                    </Text>
                     <View style={styles.passwordContainer}>
                       <TextInput
                         style={[
                           styles.passwordInput,
+                          {
+                            backgroundColor: colors.inputBackground,
+                            borderColor: colors.inputBorder,
+                            color: colors.text,
+                          },
                           loginErrors.password && styles.inputError,
                         ]}
                         placeholder="Enter password"
+                        placeholderTextColor={colors.textMuted}
                         value={loginPassword}
                         onChangeText={setLoginPassword}
                         secureTextEntry={!showLoginPassword}
@@ -248,7 +291,7 @@ export default function AuthScreen() {
                         <Ionicons
                           name={showLoginPassword ? "eye" : "eye-off"}
                           size={20}
-                          color="#64748b"
+                          color={colors.textMuted}
                         />
                       </TouchableOpacity>
                     </View>
@@ -282,8 +325,15 @@ export default function AuthScreen() {
             ) : (
               <View style={styles.formContainer}>
                 <View style={styles.cardHeader}>
-                  <Text style={styles.cardTitle}>Create Account</Text>
-                  <Text style={styles.cardDescription}>
+                  <Text style={[styles.cardTitle, { color: colors.text }]}>
+                    Create Account
+                  </Text>
+                  <Text
+                    style={[
+                      styles.cardDescription,
+                      { color: colors.textSecondary },
+                    ]}
+                  >
                     Join FamilyLocator to stay connected with your family
                   </Text>
                 </View>
@@ -292,13 +342,21 @@ export default function AuthScreen() {
                   {/* Name Inputs */}
                   <View style={styles.row}>
                     <View style={styles.halfInputGroup}>
-                      <Text style={styles.label}>First Name</Text>
+                      <Text style={[styles.label, { color: colors.text }]}>
+                        First Name
+                      </Text>
                       <TextInput
                         style={[
                           styles.input,
+                          {
+                            backgroundColor: colors.inputBackground,
+                            borderColor: colors.inputBorder,
+                            color: colors.text,
+                          },
                           registerErrors.firstName && styles.inputError,
                         ]}
                         placeholder="John"
+                        placeholderTextColor={colors.textMuted}
                         value={registerFirstName}
                         onChangeText={setRegisterFirstName}
                         autoCapitalize="words"
@@ -311,13 +369,21 @@ export default function AuthScreen() {
                     </View>
 
                     <View style={styles.halfInputGroup}>
-                      <Text style={styles.label}>Last Name</Text>
+                      <Text style={[styles.label, { color: colors.text }]}>
+                        Last Name
+                      </Text>
                       <TextInput
                         style={[
                           styles.input,
+                          {
+                            backgroundColor: colors.inputBackground,
+                            borderColor: colors.inputBorder,
+                            color: colors.text,
+                          },
                           registerErrors.lastName && styles.inputError,
                         ]}
                         placeholder="Doe"
+                        placeholderTextColor={colors.textMuted}
                         value={registerLastName}
                         onChangeText={setRegisterLastName}
                         autoCapitalize="words"
@@ -332,13 +398,21 @@ export default function AuthScreen() {
 
                   {/* Email Input */}
                   <View style={styles.inputGroup}>
-                    <Text style={styles.label}>Email</Text>
+                    <Text style={[styles.label, { color: colors.text }]}>
+                      Email
+                    </Text>
                     <TextInput
                       style={[
                         styles.input,
+                        {
+                          backgroundColor: colors.inputBackground,
+                          borderColor: colors.inputBorder,
+                          color: colors.text,
+                        },
                         registerErrors.email && styles.inputError,
                       ]}
                       placeholder="your@email.com"
+                      placeholderTextColor={colors.textMuted}
                       value={registerEmail}
                       onChangeText={setRegisterEmail}
                       keyboardType="email-address"
@@ -354,13 +428,21 @@ export default function AuthScreen() {
 
                   {/* Phone Input */}
                   <View style={styles.inputGroup}>
-                    <Text style={styles.label}>Phone Number</Text>
+                    <Text style={[styles.label, { color: colors.text }]}>
+                      Phone Number
+                    </Text>
                     <TextInput
                       style={[
                         styles.input,
+                        {
+                          backgroundColor: colors.inputBackground,
+                          borderColor: colors.inputBorder,
+                          color: colors.text,
+                        },
                         registerErrors.phoneNumber && styles.inputError,
                       ]}
                       placeholder="+1 (555) 123-4567"
+                      placeholderTextColor={colors.textMuted}
                       value={registerPhone}
                       onChangeText={setRegisterPhone}
                       keyboardType="phone-pad"
@@ -374,14 +456,22 @@ export default function AuthScreen() {
 
                   {/* Password Input */}
                   <View style={styles.inputGroup}>
-                    <Text style={styles.label}>Password</Text>
+                    <Text style={[styles.label, { color: colors.text }]}>
+                      Password
+                    </Text>
                     <View style={styles.passwordContainer}>
                       <TextInput
                         style={[
                           styles.passwordInput,
+                          {
+                            backgroundColor: colors.inputBackground,
+                            borderColor: colors.inputBorder,
+                            color: colors.text,
+                          },
                           registerErrors.password && styles.inputError,
                         ]}
                         placeholder="Enter password"
+                        placeholderTextColor={colors.textMuted}
                         value={registerPassword}
                         onChangeText={setRegisterPassword}
                         secureTextEntry={!showRegisterPassword}
@@ -397,7 +487,7 @@ export default function AuthScreen() {
                         <Ionicons
                           name={showRegisterPassword ? "eye" : "eye-off"}
                           size={20}
-                          color="#64748b"
+                          color={colors.textMuted}
                         />
                       </TouchableOpacity>
                     </View>
@@ -410,14 +500,22 @@ export default function AuthScreen() {
 
                   {/* Confirm Password Input */}
                   <View style={styles.inputGroup}>
-                    <Text style={styles.label}>Confirm Password</Text>
+                    <Text style={[styles.label, { color: colors.text }]}>
+                      Confirm Password
+                    </Text>
                     <View style={styles.passwordContainer}>
                       <TextInput
                         style={[
                           styles.passwordInput,
+                          {
+                            backgroundColor: colors.inputBackground,
+                            borderColor: colors.inputBorder,
+                            color: colors.text,
+                          },
                           registerErrors.confirmPassword && styles.inputError,
                         ]}
                         placeholder="Confirm password"
+                        placeholderTextColor={colors.textMuted}
                         value={registerConfirmPassword}
                         onChangeText={setRegisterConfirmPassword}
                         secureTextEntry={!showConfirmPassword}
@@ -433,7 +531,7 @@ export default function AuthScreen() {
                         <Ionicons
                           name={showConfirmPassword ? "eye" : "eye-off"}
                           size={20}
-                          color="#64748b"
+                          color={colors.textMuted}
                         />
                       </TouchableOpacity>
                     </View>
