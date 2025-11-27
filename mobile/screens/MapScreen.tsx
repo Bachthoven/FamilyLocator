@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -7,11 +7,13 @@ import {
   ActivityIndicator,
   Animated,
   Dimensions,
+  Platform,
 } from "react-native";
 import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Location from "expo-location";
+import * as Notifications from "expo-notifications";
 import { BlurView } from "expo-blur";
 import { StatusBar } from "expo-status-bar";
 import { useQuery } from "@tanstack/react-query";
@@ -21,6 +23,17 @@ import NotificationBell from "../components/NotificationBell";
 import Compass from "../components/Compass";
 import AlertDialog from "../components/AlertDialog";
 import { useThemeColors } from "../theme/colors";
+
+// Configure notification handler
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+    shouldShowBanner: true,
+    shouldShowList: true,
+  }),
+});
 
 // Type definitions
 interface FamilyLocation {
@@ -364,9 +377,110 @@ export default function MapScreen({
   // Always include the logged-in user as online (viewing the app = online)
   const onlineMembersCount = familyMembersOnline + 1;
 
-  const places: Place[] = [
-    // { id: 1, latitude: 40.7589, longitude: -73.9851, name: 'Home', category: 'home', address: '123 Main St' },
-  ];
+  // Fetch saved places from API
+  const { data: placesData = [] } = useQuery<Place[]>({
+    queryKey: ["/api/places"],
+    enabled: !!user && isActive,
+  });
+
+  const places: Place[] = placesData;
+
+  // Track which proximity alerts have been sent to avoid duplicates
+  const sentProximityAlerts = useRef<Set<string>>(new Set());
+
+  // Calculate distance between two coordinates in meters using Haversine formula
+  const calculateDistance = useCallback(
+    (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+      const R = 6371e3; // Earth's radius in meters
+      const phi1 = (lat1 * Math.PI) / 180;
+      const phi2 = (lat2 * Math.PI) / 180;
+      const deltaPhi = ((lat2 - lat1) * Math.PI) / 180;
+      const deltaLambda = ((lon2 - lon1) * Math.PI) / 180;
+
+      const a =
+        Math.sin(deltaPhi / 2) * Math.sin(deltaPhi / 2) +
+        Math.cos(phi1) *
+          Math.cos(phi2) *
+          Math.sin(deltaLambda / 2) *
+          Math.sin(deltaLambda / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+      return R * c;
+    },
+    []
+  );
+
+  // Request notification permissions
+  useEffect(() => {
+    const requestNotificationPermissions = async () => {
+      const { status: existingStatus } =
+        await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
+
+      if (existingStatus !== "granted") {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+      }
+
+      if (finalStatus !== "granted") {
+        console.log("Notification permissions not granted");
+      }
+    };
+
+    requestNotificationPermissions();
+  }, []);
+
+  // Check proximity and send notifications
+  useEffect(() => {
+    if (!familyLocationsData.length || !places.length) return;
+
+    const PROXIMITY_RADIUS = 20; // 20 meters
+
+    familyLocationsData.forEach((familyLoc) => {
+      if (!familyLoc.user.locationSharingEnabled || !familyLoc.timestamp)
+        return;
+
+      const memberName =
+        familyLoc.user.firstName && familyLoc.user.lastName
+          ? `${familyLoc.user.firstName} ${familyLoc.user.lastName}`
+          : familyLoc.user.firstName || familyLoc.user.email;
+
+      places.forEach((place) => {
+        const distance = calculateDistance(
+          familyLoc.latitude,
+          familyLoc.longitude,
+          place.latitude,
+          place.longitude
+        );
+
+        const alertKey = `${familyLoc.user.id}-${place.id}`;
+        const wasNearby = sentProximityAlerts.current.has(alertKey);
+
+        if (distance <= PROXIMITY_RADIUS) {
+          // Member is within 20m of place
+          if (!wasNearby) {
+            // Send notification only if we haven't already
+            sentProximityAlerts.current.add(alertKey);
+
+            Notifications.scheduleNotificationAsync({
+              content: {
+                title: `📍 ${memberName} arrived`,
+                body: `${memberName} is now at ${place.name}`,
+                sound: true,
+                priority: Notifications.AndroidNotificationPriority.HIGH,
+              },
+              trigger: null, // Send immediately
+            });
+          }
+        } else if (distance > PROXIMITY_RADIUS + 10) {
+          // Member has moved away (with 10m buffer to prevent flapping)
+          if (wasNearby) {
+            sentProximityAlerts.current.delete(alertKey);
+          }
+        }
+      });
+    });
+  }, [familyLocationsData, places, calculateDistance]);
 
   // Get location only if we don't have a saved region and no current location
   useEffect(() => {
