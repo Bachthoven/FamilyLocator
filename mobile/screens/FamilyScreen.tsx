@@ -653,7 +653,7 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                   { backgroundColor: colors.cardBackground },
                 ]}
               >
-                <Text style={[styles.statNumber, { color: colors.text }]}>
+                <Text style={[styles.statNumber, { color: colors.primary }]}>
                   {familyMembers.length + 1}
                 </Text>
                 <Text
