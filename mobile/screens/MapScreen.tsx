@@ -15,6 +15,7 @@ import * as Location from "expo-location";
 import { BlurView } from "expo-blur";
 import { StatusBar } from "expo-status-bar";
 import { useQuery } from "@tanstack/react-query";
+import Svg, { Circle, Text as SvgText } from "react-native-svg";
 import { useAuth } from "../src/contexts/AuthContext";
 import { User } from "../../shared/schema";
 import NotificationBell from "../components/NotificationBell";
@@ -53,7 +54,7 @@ const getInitials = (firstName?: string, lastName?: string, email?: string): str
   return "??";
 };
 
-// Custom marker components for different types
+// Custom marker components for different types using SVG for perfect circles
 const UserMarker = ({
   latitude,
   longitude,
@@ -74,10 +75,28 @@ const UserMarker = ({
       coordinate={{ latitude, longitude }}
       anchor={{ x: 0.5, y: 0.5 }}
     >
-      <View style={styles.userMarkerContainer}>
-        <View style={styles.userMarker}>
-          <Text style={styles.markerInitials}>{initials}</Text>
-        </View>
+      <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+        <Svg width={44} height={44}>
+          <Circle
+            cx={22}
+            cy={22}
+            r={18}
+            fill="#0EA5E9"
+            stroke="#ffffff"
+            strokeWidth={3}
+          />
+          <SvgText
+            x={22}
+            y={22}
+            fill="white"
+            fontSize={13}
+            fontWeight="bold"
+            textAnchor="middle"
+            alignmentBaseline="central"
+          >
+            {initials}
+          </SvgText>
+        </Svg>
       </View>
     </Marker>
   );
@@ -99,21 +118,37 @@ const FamilyMarker = ({
   isActive: boolean;
 }) => {
   const initials = getInitials(firstName, lastName, email);
+  const markerColor = isActive ? "#0EA5E9" : "#9CA3AF";
+  const markerOpacity = isActive ? 1 : 0.6;
   
   return (
     <Marker
       coordinate={{ latitude, longitude }}
       anchor={{ x: 0.5, y: 0.5 }}
     >
-      <View style={styles.familyMarkerContainer}>
-        <View
-          style={[
-            styles.familyMarker,
-            !isActive && styles.familyMarkerInactive
-          ]}
-        >
-          <Text style={styles.markerInitials}>{initials}</Text>
-        </View>
+      <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+        <Svg width={44} height={44}>
+          <Circle
+            cx={22}
+            cy={22}
+            r={18}
+            fill={markerColor}
+            fillOpacity={markerOpacity}
+            stroke="#ffffff"
+            strokeWidth={3}
+          />
+          <SvgText
+            x={22}
+            y={22}
+            fill="white"
+            fontSize={13}
+            fontWeight="bold"
+            textAnchor="middle"
+            alignmentBaseline="central"
+          >
+            {initials}
+          </SvgText>
+        </Svg>
       </View>
     </Marker>
   );
