@@ -18,6 +18,7 @@ import { useAuth } from "../src/contexts/AuthContext";
 import { apiRequest } from "../src/lib/queryClient";
 import { User, InvitationCode } from "../../shared/schema";
 import AlertDialog from "../components/AlertDialog";
+import { useThemeColors } from "../theme/colors";
 
 interface FamilyScreenProps {
   onNavigateToMap?: (location: {
@@ -29,6 +30,7 @@ interface FamilyScreenProps {
 
 export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
   const insets = useSafeAreaInsets();
+  const colors = useThemeColors();
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
@@ -282,15 +284,30 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
   };
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
+    <View
+      style={[
+        styles.container,
+        { paddingTop: insets.top, backgroundColor: colors.background },
+      ]}
+    >
       {/* Header */}
-      <View style={styles.header}>
+      <View
+        style={[
+          styles.header,
+          {
+            backgroundColor: colors.headerBackground,
+            borderBottomColor: colors.headerBorder,
+          },
+        ]}
+      >
         <View style={styles.headerContent}>
           <View style={styles.titleRow}>
-            <Ionicons name="people" size={24} color="#333" />
-            <Text style={styles.headerText}>Family Members</Text>
+            <Ionicons name="people" size={24} color={colors.text} />
+            <Text style={[styles.headerText, { color: colors.text }]}>
+              Family Members
+            </Text>
           </View>
-          <Text style={styles.subtitle}>
+          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
             Manage your family connections and location sharing
           </Text>
         </View>
@@ -325,14 +342,33 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
           // Loading skeletons
           <View style={styles.skeletonsContainer}>
             {[1, 2, 3].map((i) => (
-              <View key={i} style={styles.skeletonCard}>
-                <View style={styles.skeletonAvatar} />
+              <View
+                key={i}
+                style={[
+                  styles.skeletonCard,
+                  { backgroundColor: colors.cardBackground },
+                ]}
+              >
+                <View
+                  style={[
+                    styles.skeletonAvatar,
+                    { backgroundColor: colors.skeletonBackground },
+                  ]}
+                />
                 <View style={styles.skeletonContent}>
                   <View
-                    style={[styles.skeletonLine, styles.skeletonLineWide]}
+                    style={[
+                      styles.skeletonLine,
+                      styles.skeletonLineWide,
+                      { backgroundColor: colors.skeletonBackground },
+                    ]}
                   />
                   <View
-                    style={[styles.skeletonLine, styles.skeletonLineNarrow]}
+                    style={[
+                      styles.skeletonLine,
+                      styles.skeletonLineNarrow,
+                      { backgroundColor: colors.skeletonBackground },
+                    ]}
                   />
                 </View>
               </View>
@@ -341,9 +377,17 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
         ) : familyMembers.length === 0 ? (
           // Empty state
           <View style={styles.emptyState}>
-            <Ionicons name="people-outline" size={64} color="#9CA3AF" />
-            <Text style={styles.emptyTitle}>No family members yet</Text>
-            <Text style={styles.emptyDescription}>
+            <Ionicons
+              name="people-outline"
+              size={64}
+              color={colors.textMuted}
+            />
+            <Text style={[styles.emptyTitle, { color: colors.text }]}>
+              No family members yet
+            </Text>
+            <Text
+              style={[styles.emptyDescription, { color: colors.textSecondary }]}
+            >
               Generate an invitation code to invite family members, or join
               using someone else's code.
             </Text>
@@ -372,21 +416,42 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
             {invitationCodes.length > 0 && (
               <View style={styles.section}>
                 <View style={styles.sectionHeader}>
-                  <Ionicons name="ticket-outline" size={20} color="#6B7280" />
-                  <Text style={styles.sectionTitle}>
+                  <Ionicons
+                    name="ticket-outline"
+                    size={20}
+                    color={colors.textSecondary}
+                  />
+                  <Text
+                    style={[
+                      styles.sectionTitle,
+                      { color: colors.textSecondary },
+                    ]}
+                  >
                     Active Invitation Codes
                   </Text>
                 </View>
                 {invitationCodes.map((code) => (
                   <View
                     key={code.id}
-                    style={styles.codeCard}
+                    style={[
+                      styles.codeCard,
+                      { backgroundColor: colors.cardBackground },
+                    ]}
                     data-testid={`card-code-${code.code}`}
                   >
                     <View style={styles.codeCardContent}>
                       <View style={styles.codeInfo}>
-                        <Text style={styles.codeValue}>{code.code}</Text>
-                        <Text style={styles.codeExpiry}>
+                        <Text
+                          style={[styles.codeValue, { color: colors.text }]}
+                        >
+                          {code.code}
+                        </Text>
+                        <Text
+                          style={[
+                            styles.codeExpiry,
+                            { color: colors.textSecondary },
+                          ]}
+                        >
                           {formatExpiration(code.expiresAt)}
                         </Text>
                       </View>
@@ -398,7 +463,7 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                         <Ionicons
                           name="copy-outline"
                           size={20}
-                          color="#0EA5E9"
+                          color={colors.primary}
                         />
                       </TouchableOpacity>
                     </View>
@@ -410,17 +475,33 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
             {/* Family members list */}
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
-                <Ionicons name="people-outline" size={20} color="#6B7280" />
-                <Text style={styles.sectionTitle}>Family Members</Text>
+                <Ionicons
+                  name="people-outline"
+                  size={20}
+                  color={colors.textSecondary}
+                />
+                <Text
+                  style={[styles.sectionTitle, { color: colors.textSecondary }]}
+                >
+                  Family Members
+                </Text>
               </View>
               {/* Logged-in user */}
               {user && (
                 <View
-                  style={styles.memberCard}
+                  style={[
+                    styles.memberCard,
+                    { backgroundColor: colors.cardBackground },
+                  ]}
                   data-testid={`card-member-${user.id}`}
                 >
                   <View style={styles.memberInfo}>
-                    <View style={styles.avatar}>
+                    <View
+                      style={[
+                        styles.avatar,
+                        { backgroundColor: colors.avatarBackground },
+                      ]}
+                    >
                       <Text style={styles.avatarText}>
                         {user.firstName && user.lastName
                           ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
@@ -431,7 +512,9 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                     </View>
                     <View style={styles.memberDetails}>
                       <View style={styles.memberNameRow}>
-                        <Text style={styles.memberName}>
+                        <Text
+                          style={[styles.memberName, { color: colors.text }]}
+                        >
                           {user.firstName && user.lastName
                             ? `${user.firstName} ${user.lastName}`
                             : user.firstName || user.email}
@@ -447,7 +530,14 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                             { backgroundColor: "#10B981" },
                           ]}
                         />
-                        <Text style={styles.statusText}>Currently active</Text>
+                        <Text
+                          style={[
+                            styles.statusText,
+                            { color: colors.textSecondary },
+                          ]}
+                        >
+                          Currently active
+                        </Text>
                       </View>
                     </View>
                   </View>
@@ -473,11 +563,19 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                 return (
                   <View
                     key={member.id}
-                    style={styles.memberCard}
+                    style={[
+                      styles.memberCard,
+                      { backgroundColor: colors.cardBackground },
+                    ]}
                     data-testid={`card-member-${member.id}`}
                   >
                     <View style={styles.memberInfo}>
-                      <View style={styles.avatar}>
+                      <View
+                        style={[
+                          styles.avatar,
+                          { backgroundColor: colors.avatarBackground },
+                        ]}
+                      >
                         <Text style={styles.avatarText}>
                           {member.firstName && member.lastName
                             ? `${member.firstName[0]}${member.lastName[0]}`.toUpperCase()
@@ -487,7 +585,11 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                         </Text>
                       </View>
                       <View style={styles.memberDetails}>
-                        <Text style={styles.memberName}>{memberName}</Text>
+                        <Text
+                          style={[styles.memberName, { color: colors.text }]}
+                        >
+                          {memberName}
+                        </Text>
                         <View style={styles.statusRow}>
                           <View
                             style={[
@@ -495,7 +597,12 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                               { backgroundColor: statusInfo.color },
                             ]}
                           />
-                          <Text style={styles.statusText}>
+                          <Text
+                            style={[
+                              styles.statusText,
+                              { color: colors.textSecondary },
+                            ]}
+                          >
                             {statusInfo.message}
                           </Text>
                         </View>
@@ -540,13 +647,27 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
 
             {/* Statistics */}
             <View style={styles.statistics}>
-              <View style={styles.statCard}>
-                <Text style={styles.statNumber}>
+              <View
+                style={[
+                  styles.statCard,
+                  { backgroundColor: colors.cardBackground },
+                ]}
+              >
+                <Text style={[styles.statNumber, { color: colors.text }]}>
                   {familyMembers.length + 1}
                 </Text>
-                <Text style={styles.statLabel}>Total Members</Text>
+                <Text
+                  style={[styles.statLabel, { color: colors.textSecondary }]}
+                >
+                  Total Members
+                </Text>
               </View>
-              <View style={styles.statCard}>
+              <View
+                style={[
+                  styles.statCard,
+                  { backgroundColor: colors.cardBackground },
+                ]}
+              >
                 <Text style={styles.statNumberOnline}>
                   {1 +
                     familyLocations.filter((loc) => {
@@ -560,7 +681,11 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                       return minutesAgo < 5;
                     }).length}
                 </Text>
-                <Text style={styles.statLabel}>Online Now</Text>
+                <Text
+                  style={[styles.statLabel, { color: colors.textSecondary }]}
+                >
+                  Online Now
+                </Text>
               </View>
             </View>
           </>
@@ -576,16 +701,32 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
       >
         <View style={styles.modalOverlay}>
           <BlurView intensity={100} style={styles.modalBlur}>
-            <View style={styles.modalContent}>
+            <View
+              style={[styles.modalContent, { backgroundColor: colors.surface }]}
+            >
               <View style={styles.modalHeader}>
-                <Ionicons name="qr-code" size={20} color="#333" />
-                <Text style={styles.modalTitle}>Invitation Code Generated</Text>
+                <Ionicons name="qr-code" size={20} color={colors.text} />
+                <Text style={[styles.modalTitle, { color: colors.text }]}>
+                  Invitation Code Generated
+                </Text>
               </View>
               <View style={styles.codeContainer}>
-                <View style={styles.codeBox}>
-                  <Text style={styles.codeText}>{generatedCode}</Text>
+                <View
+                  style={[
+                    styles.codeBox,
+                    { backgroundColor: colors.cardBackground },
+                  ]}
+                >
+                  <Text style={[styles.codeText, { color: colors.text }]}>
+                    {generatedCode}
+                  </Text>
                 </View>
-                <Text style={styles.codeDescription}>
+                <Text
+                  style={[
+                    styles.codeDescription,
+                    { color: colors.textSecondary },
+                  ]}
+                >
                   Share this code with family members. It expires in 24 hours.
                 </Text>
               </View>
@@ -633,16 +774,30 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
       >
         <View style={styles.modalOverlay}>
           <BlurView intensity={100} style={styles.modalBlur}>
-            <View style={styles.modalContent}>
+            <View
+              style={[styles.modalContent, { backgroundColor: colors.surface }]}
+            >
               <View style={styles.modalHeader}>
-                <Ionicons name="key" size={20} color="#333" />
-                <Text style={styles.modalTitle}>Join Family</Text>
+                <Ionicons name="key" size={20} color={colors.text} />
+                <Text style={[styles.modalTitle, { color: colors.text }]}>
+                  Join Family
+                </Text>
               </View>
               <View style={styles.inputContainer}>
-                <Text style={styles.inputLabel}>Invitation Code</Text>
+                <Text style={[styles.inputLabel, { color: colors.text }]}>
+                  Invitation Code
+                </Text>
                 <TextInput
-                  style={styles.input}
+                  style={[
+                    styles.input,
+                    {
+                      backgroundColor: colors.inputBackground,
+                      borderColor: colors.inputBorder,
+                      color: colors.inputText,
+                    },
+                  ]}
                   placeholder="Enter 6-character code"
+                  placeholderTextColor={colors.inputPlaceholder}
                   value={joinCode}
                   onChangeText={(text) => setJoinCode(text.toUpperCase())}
                   maxLength={6}

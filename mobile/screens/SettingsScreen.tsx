@@ -1,20 +1,39 @@
 import React from "react";
 import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useThemeColors } from "../theme/colors";
 
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
+  const colors = useThemeColors();
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
-      <View style={styles.header}>
-        <Text style={styles.headerText}>Settings</Text>
+    <View
+      style={[
+        styles.container,
+        { paddingTop: insets.top, backgroundColor: colors.background },
+      ]}
+    >
+      <View
+        style={[
+          styles.header,
+          {
+            backgroundColor: colors.headerBackground,
+            borderBottomColor: colors.headerBorder,
+          },
+        ]}
+      >
+        <Text style={[styles.headerText, { color: colors.text }]}>
+          Settings
+        </Text>
       </View>
       <ScrollView style={styles.content}>
         <View style={styles.placeholder}>
           <Text style={styles.placeholderText}>⚙️</Text>
-          <Text style={styles.title}>App Settings</Text>
-          <Text style={styles.description}>
+          <Text style={[styles.title, { color: colors.text }]}>
+            App Settings
+          </Text>
+          <Text style={[styles.description, { color: colors.textSecondary }]}>
             Manage your profile, privacy settings, and location preferences
           </Text>
         </View>
@@ -26,19 +45,15 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
   },
   header: {
-    backgroundColor: "#fff",
     paddingVertical: 16,
     paddingHorizontal: 20,
     borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
   },
   headerText: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#333",
   },
   content: {
     flex: 1,
@@ -56,12 +71,10 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: "600",
-    color: "#333",
     marginBottom: 8,
   },
   description: {
     fontSize: 14,
-    color: "#666",
     textAlign: "center",
     lineHeight: 20,
   },

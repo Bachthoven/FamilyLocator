@@ -25,10 +25,21 @@ export interface ThemeColors {
   dialogTextSecondary: string;
   dialogTextMuted: string;
   avatarBackground: string;
+  cardBackground: string;
+  headerBackground: string;
+  headerBorder: string;
+  inputBackground: string;
+  inputBorder: string;
+  inputText: string;
+  inputPlaceholder: string;
+  skeletonBackground: string;
+  compassBackground: string;
+  compassNorth: string;
+  compassSouth: string;
 }
 
 export const lightColors: ThemeColors = {
-  background: "#FFFFFF",
+  background: "#F9FAFB",
   surface: "#FFFFFF",
   surfaceSecondary: "#F3F4F6",
   text: "#1F2937",
@@ -49,7 +60,18 @@ export const lightColors: ThemeColors = {
   dialogText: "#1F2937",
   dialogTextSecondary: "#6B7280",
   dialogTextMuted: "#9CA3AF",
-  avatarBackground: "#9CA3AF",
+  avatarBackground: "#7DD3FC",
+  cardBackground: "#F3F4F6",
+  headerBackground: "#FFFFFF",
+  headerBorder: "#E5E7EB",
+  inputBackground: "#FFFFFF",
+  inputBorder: "#D1D5DB",
+  inputText: "#1F2937",
+  inputPlaceholder: "#9CA3AF",
+  skeletonBackground: "#E5E7EB",
+  compassBackground: "#FFFFFF",
+  compassNorth: "#0EA5E9",
+  compassSouth: "#9CA3AF",
 };
 
 export const darkColors: ThemeColors = {
@@ -74,7 +96,18 @@ export const darkColors: ThemeColors = {
   dialogText: "#F9FAFB",
   dialogTextSecondary: "#D1D5DB",
   dialogTextMuted: "#9CA3AF",
-  avatarBackground: "#9CA3AF",
+  avatarBackground: "#0EA5E9",
+  cardBackground: "#374151",
+  headerBackground: "#1F2937",
+  headerBorder: "#374151",
+  inputBackground: "#374151",
+  inputBorder: "#4B5563",
+  inputText: "#F9FAFB",
+  inputPlaceholder: "#9CA3AF",
+  skeletonBackground: "#374151",
+  compassBackground: "#1F2937",
+  compassNorth: "#0EA5E9",
+  compassSouth: "#6B7280",
 };
 
 export function useThemeColors(): ThemeColors {

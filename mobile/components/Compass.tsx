@@ -1,21 +1,20 @@
 import React, { useEffect, useRef } from "react";
 import { View, StyleSheet, TouchableOpacity, Animated } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { useThemeColors } from "../theme/colors";
 
 interface CompassProps {
-  heading: number; // Current map heading in degrees
+  heading: number;
   onPress: () => void;
 }
 
 export default function Compass({ heading, onPress }: CompassProps) {
+  const colors = useThemeColors();
   const rotateAnim = useRef(new Animated.Value(heading)).current;
 
   useEffect(() => {
-    // No animation for instant real-time updates
     rotateAnim.setValue(heading);
   }, [heading]);
 
-  // Rotate in opposite direction to keep north pointing up
   const rotation = rotateAnim.interpolate({
     inputRange: [0, 360],
     outputRange: ["0deg", "-360deg"],
@@ -24,7 +23,13 @@ export default function Compass({ heading, onPress }: CompassProps) {
   return (
     <TouchableOpacity
       onPress={onPress}
-      style={styles.container}
+      style={[
+        styles.container,
+        {
+          backgroundColor: colors.compassBackground,
+          borderColor: colors.border,
+        },
+      ]}
       activeOpacity={0.7}
       data-testid="button-compass"
     >
@@ -36,10 +41,15 @@ export default function Compass({ heading, onPress }: CompassProps) {
           },
         ]}
       >
-        {/* North needle (red) - pointing up */}
-        <View style={styles.needleNorth} />
-        {/* South needle (gray) - pointing down */}
-        <View style={styles.needleSouth} />
+        <View
+          style={[
+            styles.needleNorth,
+            { borderBottomColor: colors.compassNorth },
+          ]}
+        />
+        <View
+          style={[styles.needleSouth, { borderTopColor: colors.compassSouth }]}
+        />
       </Animated.View>
     </TouchableOpacity>
   );
@@ -50,7 +60,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 12,
-    backgroundColor: "#fff",
+    borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
     shadowColor: "#000",
@@ -65,7 +75,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  // Red north needle (pointing up)
   needleNorth: {
     position: "absolute",
     width: 0,
@@ -77,10 +86,8 @@ const styles = StyleSheet.create({
     borderBottomWidth: 15,
     borderLeftColor: "transparent",
     borderRightColor: "transparent",
-    borderBottomColor: "#FF3B30",
     top: 0,
   },
-  // Gray south needle (pointing down, with gap at base)
   needleSouth: {
     position: "absolute",
     width: 0,
@@ -92,7 +99,6 @@ const styles = StyleSheet.create({
     borderTopWidth: 15,
     borderLeftColor: "transparent",
     borderRightColor: "transparent",
-    borderTopColor: "#666",
     bottom: 0,
   },
 });
