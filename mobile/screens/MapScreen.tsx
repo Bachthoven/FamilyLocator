@@ -54,6 +54,11 @@ const getInitials = (firstName?: string, lastName?: string, email?: string): str
   return "??";
 };
 
+// Marker dimensions - using larger canvas with padding to prevent Android clipping
+const MARKER_SIZE = 80; // Large canvas to prevent clipping
+const CIRCLE_RADIUS = 18;
+const CIRCLE_CENTER = MARKER_SIZE / 2; // Center the circle in the canvas
+
 // Custom marker components for different types using SVG for perfect circles
 const UserMarker = ({
   latitude,
@@ -74,20 +79,26 @@ const UserMarker = ({
     <Marker
       coordinate={{ latitude, longitude }}
       anchor={{ x: 0.5, y: 0.5 }}
+      tracksViewChanges={false}
     >
-      <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-        <Svg width={44} height={44}>
+      <View style={{ 
+        width: MARKER_SIZE, 
+        height: MARKER_SIZE, 
+        alignItems: 'center', 
+        justifyContent: 'center',
+      }}>
+        <Svg width={MARKER_SIZE} height={MARKER_SIZE} viewBox={`0 0 ${MARKER_SIZE} ${MARKER_SIZE}`}>
           <Circle
-            cx={22}
-            cy={22}
-            r={18}
+            cx={CIRCLE_CENTER}
+            cy={CIRCLE_CENTER}
+            r={CIRCLE_RADIUS}
             fill="#0EA5E9"
             stroke="#ffffff"
             strokeWidth={3}
           />
           <SvgText
-            x={22}
-            y={22}
+            x={CIRCLE_CENTER}
+            y={CIRCLE_CENTER}
             fill="white"
             fontSize={13}
             fontWeight="bold"
@@ -125,21 +136,27 @@ const FamilyMarker = ({
     <Marker
       coordinate={{ latitude, longitude }}
       anchor={{ x: 0.5, y: 0.5 }}
+      tracksViewChanges={false}
     >
-      <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-        <Svg width={44} height={44}>
+      <View style={{ 
+        width: MARKER_SIZE, 
+        height: MARKER_SIZE, 
+        alignItems: 'center', 
+        justifyContent: 'center',
+      }}>
+        <Svg width={MARKER_SIZE} height={MARKER_SIZE} viewBox={`0 0 ${MARKER_SIZE} ${MARKER_SIZE}`}>
           <Circle
-            cx={22}
-            cy={22}
-            r={18}
+            cx={CIRCLE_CENTER}
+            cy={CIRCLE_CENTER}
+            r={CIRCLE_RADIUS}
             fill={markerColor}
             fillOpacity={markerOpacity}
             stroke="#ffffff"
             strokeWidth={3}
           />
           <SvgText
-            x={22}
-            y={22}
+            x={CIRCLE_CENTER}
+            y={CIRCLE_CENTER}
             fill="white"
             fontSize={13}
             fontWeight="bold"
