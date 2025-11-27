@@ -24,11 +24,6 @@ import Constants from "expo-constants";
 
 type TabName = "Map" | "Family" | "Places" | "History" | "Settings";
 
-// Get Native Notify credentials from environment variables
-const NATIVE_NOTIFY_APP_ID = Constants.expoConfig?.extra?.nativeNotifyAppId;
-const NATIVE_NOTIFY_APP_TOKEN =
-  Constants.expoConfig?.extra?.nativeNotifyAppToken;
-
 function AppContent() {
   const { user, isLoading } = useAuth();
   const colors = useThemeColors();
@@ -36,14 +31,14 @@ function AppContent() {
   const [activeTab, setActiveTab] = useState<TabName>("Map");
 
   // Register Native Notify push token
-  // This must be called at the top level of a functional component
+  // Credentials are read inside useEffect to ensure Expo config is loaded
   useEffect(() => {
-    if (NATIVE_NOTIFY_APP_ID && NATIVE_NOTIFY_APP_TOKEN) {
+    const appId = Constants.expoConfig?.extra?.nativeNotifyAppId;
+    const appToken = Constants.expoConfig?.extra?.nativeNotifyAppToken;
+
+    if (appId && appToken) {
       try {
-        registerNNPushToken(
-          Number(NATIVE_NOTIFY_APP_ID),
-          NATIVE_NOTIFY_APP_TOKEN
-        );
+        registerNNPushToken(Number(appId), appToken);
         console.log("Native Notify registered successfully");
       } catch (error) {
         console.log("Native Notify registration error:", error);

@@ -349,6 +349,31 @@ The application is deployed on Replit and uses Replit's built-in deployment feat
 
 ## 🔄 Recent Updates
 
+### Native Notify Push Notifications Integration (November 27, 2025)
+
+- **Native Notify Setup**: Integrated Native Notify for push notifications
+  - Installed `native-notify` package for Expo-compatible push notifications
+  - Created `app.config.js` for environment variable configuration
+  - Updated `App.tsx` to register push tokens on app launch
+  - Environment variables are passed through Expo's extra config
+
+- **Notification Service**: Created `mobile/services/notifications.ts`
+  - `sendMassNotification()` - Broadcast to all registered users
+  - `sendIndieNotification()` - Send to specific user by subID
+  - `registerIndieUser()` / `unregisterIndieUser()` - Manage user registrations
+  - `createProximityNotificationPayload()` - Helper for proximity alerts
+
+- **Setup Instructions**:
+  1. Create account at https://app.nativenotify.com
+  2. Get your App ID (number) and App Token (string)
+  3. Add to Replit Secrets (these are passed through app.config.js):
+     - `NATIVE_NOTIFY_APP_ID` - Your Native Notify App ID (number)
+     - `NATIVE_NOTIFY_APP_TOKEN` - Your Native Notify App Token (string)
+  4. Run `eas login` and `eas init` to create an EAS project (required for push notifications)
+  5. Test on physical device (push notifications don't work on emulators)
+
+- **Removed**: expo-notifications local notification code (caused errors in Expo Go)
+
 ### Mobile History & Settings Screens (November 27, 2025)
 
 - **HistoryScreen**: Complete location history implementation
