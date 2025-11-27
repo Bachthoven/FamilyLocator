@@ -17,7 +17,6 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import * as Notifications from "expo-notifications";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useThemeColors, useIsDarkMode } from "../theme/colors";
 import { useAuth } from "../src/contexts/AuthContext";
@@ -79,7 +78,6 @@ export default function SettingsScreen() {
 
   useEffect(() => {
     loadLocationSettings();
-    checkNotificationPermission();
   }, []);
 
   const loadLocationSettings = async () => {
@@ -92,15 +90,6 @@ export default function SettingsScreen() {
       });
     } catch (error) {
       console.log("Error loading location settings:", error);
-    }
-  };
-
-  const checkNotificationPermission = async () => {
-    try {
-      const { status } = await Notifications.getPermissionsAsync();
-      setNotificationPermission(status);
-    } catch (error) {
-      console.log("Error checking notification permission:", error);
     }
   };
 
@@ -168,20 +157,13 @@ export default function SettingsScreen() {
   };
 
   const requestNotificationPermission = async () => {
-    try {
-      const { status } = await Notifications.requestPermissionsAsync();
-      setNotificationPermission(status);
-      if (status === "granted") {
-        Alert.alert("Success", "Notifications enabled!");
-      } else {
-        Alert.alert(
-          "Permission Denied",
-          "Please enable notifications in your device settings"
-        );
-      }
-    } catch (error) {
-      Alert.alert("Error", "Failed to request notification permission");
-    }
+    // Native Notify handles push notification permissions automatically
+    // This is a placeholder for future Native Notify integration
+    Alert.alert(
+      "Notifications",
+      "Push notifications will be enabled once Native Notify is configured."
+    );
+    setNotificationPermission("pending");
   };
 
   const handleLogout = () => {
@@ -318,9 +300,11 @@ export default function SettingsScreen() {
                   />
                 ) : (
                   <Text style={[styles.avatarText, { color: colors.text }]}>
-                    {profileForm.firstName
+                    {profileForm.firstName && profileForm.firstName.length > 0
                       ? profileForm.firstName[0].toUpperCase()
-                      : profileForm.email[0].toUpperCase()}
+                      : profileForm.email && profileForm.email.length > 0
+                        ? profileForm.email[0].toUpperCase()
+                        : "?"}
                   </Text>
                 )}
               </View>
@@ -1011,9 +995,11 @@ export default function SettingsScreen() {
               />
             ) : (
               <Text style={[styles.avatarText, { color: colors.text }]}>
-                {user.firstName
+                {user.firstName && user.firstName.length > 0
                   ? user.firstName[0].toUpperCase()
-                  : user.email?.[0].toUpperCase()}
+                  : user.email && user.email.length > 0
+                    ? user.email[0].toUpperCase()
+                    : "?"}
               </Text>
             )}
           </View>

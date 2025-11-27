@@ -13,7 +13,6 @@ import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Location from "expo-location";
-import * as Notifications from "expo-notifications";
 import { BlurView } from "expo-blur";
 import { StatusBar } from "expo-status-bar";
 import { useQuery } from "@tanstack/react-query";
@@ -23,17 +22,6 @@ import NotificationBell from "../components/NotificationBell";
 import Compass from "../components/Compass";
 import AlertDialog from "../components/AlertDialog";
 import { useThemeColors } from "../theme/colors";
-
-// Configure notification handler for local notifications (works in Expo Go)
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
 
 // Type definitions
 interface FamilyLocation {
@@ -410,68 +398,24 @@ export default function MapScreen({
     []
   );
 
-  // State for proximity alert (in-app notification for Expo Go)
+  // State for proximity alert (in-app notification)
   const [proximityAlert, setProximityAlert] = useState<{
     visible: boolean;
     memberName: string;
     placeName: string;
   }>({ visible: false, memberName: "", placeName: "" });
 
-  // Request notification permissions (local notifications work in Expo Go)
-  useEffect(() => {
-    const requestNotificationPermissions = async () => {
-      try {
-        const { status: existingStatus } =
-          await Notifications.getPermissionsAsync();
-        let finalStatus = existingStatus;
-
-        if (existingStatus !== "granted") {
-          const { status } = await Notifications.requestPermissionsAsync();
-          finalStatus = status;
-        }
-
-        if (finalStatus !== "granted") {
-          console.log("Notification permissions not granted");
-        } else {
-          console.log("Notification permissions granted");
-        }
-      } catch (error) {
-        console.log("Notification setup error:", error);
-      }
-    };
-
-    requestNotificationPermissions();
-  }, []);
-
-  // Helper function to send proximity notification
-  const sendProximityNotification = useCallback(
-    async (memberName: string, placeName: string) => {
-      try {
-        // Use local notification with a 1-second delay (works in Expo Go)
-        await Notifications.scheduleNotificationAsync({
-          content: {
-            title: `📍 ${memberName} arrived`,
-            body: `${memberName} is now at ${placeName}`,
-            sound: true,
-            priority: Notifications.AndroidNotificationPriority.HIGH,
-          },
-          trigger: {
-            type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
-            seconds: 1,
-          },
-        });
-      } catch (error) {
-        console.log("Local notification error:", error);
-        // Fallback to in-app alert if notifications fail
-        setProximityAlert({
-          visible: true,
-          memberName,
-          placeName,
-        });
-        setTimeout(() => {
-          setProximityAlert((prev) => ({ ...prev, visible: false }));
-        }, 4000);
-      }
+  // Helper function to show proximity alert (in-app only, Native Notify will handle push)
+  const showProximityAlert = useCallback(
+    (memberName: string, placeName: string) => {
+      setProximityAlert({
+        visible: true,
+        memberName,
+        placeName,
+      });
+      setTimeout(() => {
+        setProximityAlert((prev) => ({ ...prev, visible: false }));
+      }, 4000);
     },
     []
   );
@@ -505,9 +449,9 @@ export default function MapScreen({
         if (distance <= PROXIMITY_RADIUS) {
           // Member is within 20m of place
           if (!wasNearby) {
-            // Send notification only if we haven't already
+            // Show in-app alert only if we haven't already
             sentProximityAlerts.current.add(alertKey);
-            sendProximityNotification(memberName, place.name);
+            showProximityAlert(memberName, place.name);
           }
         } else if (distance > PROXIMITY_RADIUS + 10) {
           // Member has moved away (with 10m buffer to prevent flapping)
@@ -517,12 +461,7 @@ export default function MapScreen({
         }
       });
     });
-  }, [
-    familyLocationsData,
-    places,
-    calculateDistance,
-    sendProximityNotification,
-  ]);
+  }, [familyLocationsData, places, calculateDistance, showProximityAlert]);
 
   // Get location only if we don't have a saved region and no current location
   useEffect(() => {

@@ -507,7 +507,9 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                           ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
                           : user.firstName
                             ? user.firstName[0].toUpperCase()
-                            : user.email?.[0].toUpperCase()}
+                            : user.email && user.email.length > 0
+                              ? user.email[0].toUpperCase()
+                              : "?"}
                       </Text>
                     </View>
                     <View style={styles.memberDetails}>
@@ -581,7 +583,9 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                             ? `${member.firstName[0]}${member.lastName[0]}`.toUpperCase()
                             : member.firstName
                               ? member.firstName[0].toUpperCase()
-                              : member.email?.[0].toUpperCase()}
+                              : member.email && member.email.length > 0
+                                ? member.email[0].toUpperCase()
+                                : "?"}
                         </Text>
                       </View>
                       <View style={styles.memberDetails}>
