@@ -296,7 +296,7 @@ export default function PlacesScreen() {
               onPress={() => handleEditPlace(place)}
               data-testid={`button-edit-place-${place.id}`}
             >
-              <Ionicons name="pencil" size={18} color="#3B82F6" />
+              <Ionicons name="create" size={20} color="#0EA5E9" />
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.actionButton}
