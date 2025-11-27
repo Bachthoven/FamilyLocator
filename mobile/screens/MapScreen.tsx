@@ -14,7 +14,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Location from "expo-location";
 import * as Notifications from "expo-notifications";
-import Constants from "expo-constants";
 import { BlurView } from "expo-blur";
 import { StatusBar } from "expo-status-bar";
 import { useQuery } from "@tanstack/react-query";
@@ -25,21 +24,16 @@ import Compass from "../components/Compass";
 import AlertDialog from "../components/AlertDialog";
 import { useThemeColors } from "../theme/colors";
 
-// Check if running in Expo Go (where push notifications are not supported in SDK 53+)
-const isExpoGo = Constants.appOwnership === "expo";
-
-// Configure notification handler (only for development builds, not Expo Go)
-if (!isExpoGo) {
-  Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-      shouldShowAlert: true,
-      shouldPlaySound: true,
-      shouldSetBadge: false,
-      shouldShowBanner: true,
-      shouldShowList: true,
-    }),
-  });
-}
+// Configure notification handler for local notifications (works in Expo Go)
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+    shouldShowBanner: true,
+    shouldShowList: true,
+  }),
+});
 
 // Type definitions
 interface FamilyLocation {
@@ -423,15 +417,8 @@ export default function MapScreen({
     placeName: string;
   }>({ visible: false, memberName: "", placeName: "" });
 
-  // Request notification permissions (only for development builds)
+  // Request notification permissions (local notifications work in Expo Go)
   useEffect(() => {
-    if (isExpoGo) {
-      console.log(
-        "Running in Expo Go - using in-app alerts for proximity notifications"
-      );
-      return;
-    }
-
     const requestNotificationPermissions = async () => {
       try {
         const { status: existingStatus } =
@@ -445,6 +432,8 @@ export default function MapScreen({
 
         if (finalStatus !== "granted") {
           console.log("Notification permissions not granted");
+        } else {
+          console.log("Notification permissions granted");
         }
       } catch (error) {
         console.log("Notification setup error:", error);
@@ -457,41 +446,31 @@ export default function MapScreen({
   // Helper function to send proximity notification
   const sendProximityNotification = useCallback(
     async (memberName: string, placeName: string) => {
-      if (isExpoGo) {
-        // In Expo Go, show in-app alert
+      try {
+        // Use local notification with a 1-second delay (works in Expo Go)
+        await Notifications.scheduleNotificationAsync({
+          content: {
+            title: `📍 ${memberName} arrived`,
+            body: `${memberName} is now at ${placeName}`,
+            sound: true,
+            priority: Notifications.AndroidNotificationPriority.HIGH,
+          },
+          trigger: {
+            type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+            seconds: 1,
+          },
+        });
+      } catch (error) {
+        console.log("Local notification error:", error);
+        // Fallback to in-app alert if notifications fail
         setProximityAlert({
           visible: true,
           memberName,
           placeName,
         });
-        // Auto-hide after 4 seconds
         setTimeout(() => {
           setProximityAlert((prev) => ({ ...prev, visible: false }));
         }, 4000);
-      } else {
-        // In development build, use system notifications
-        try {
-          await Notifications.scheduleNotificationAsync({
-            content: {
-              title: `📍 ${memberName} arrived`,
-              body: `${memberName} is now at ${placeName}`,
-              sound: true,
-              priority: Notifications.AndroidNotificationPriority.HIGH,
-            },
-            trigger: null,
-          });
-        } catch (error) {
-          console.log("Notification error:", error);
-          // Fallback to in-app alert
-          setProximityAlert({
-            visible: true,
-            memberName,
-            placeName,
-          });
-          setTimeout(() => {
-            setProximityAlert((prev) => ({ ...prev, visible: false }));
-          }, 4000);
-        }
       }
     },
     []
