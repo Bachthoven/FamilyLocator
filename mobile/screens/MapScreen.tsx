@@ -54,21 +54,11 @@ const getInitials = (firstName?: string, lastName?: string, email?: string): str
   return "??";
 };
 
-// Marker dimensions for View-based approach
-const CIRCLE_SIZE = 40; // Diameter of the circle
-const WRAPPER_SIZE = 60; // Larger wrapper to prevent clipping
-const WRAPPER_PADDING = (WRAPPER_SIZE - CIRCLE_SIZE) / 2;
+// Android renders markers as 100x100 bitmaps by default - must fit within this
+const ANDROID_MARKER_SIZE = 100;
+const CIRCLE_SIZE = 44; // Circle diameter (with border)
 
-// Marker wrapper style to prevent Android clipping
-const markerWrapperStyle = {
-  width: WRAPPER_SIZE,
-  height: WRAPPER_SIZE,
-  alignItems: 'center' as const,
-  justifyContent: 'center' as const,
-  overflow: 'visible' as const,
-};
-
-// Custom marker components using View with borderRadius
+// Custom marker components - sized to fit Android's 100x100 bitmap limit
 const UserMarker = ({
   latitude,
   longitude,
@@ -88,9 +78,13 @@ const UserMarker = ({
     <Marker
       coordinate={{ latitude, longitude }}
       anchor={{ x: 0.5, y: 0.5 }}
-      style={{ overflow: 'visible' }}
     >
-      <View style={markerWrapperStyle}>
+      <View style={{
+        width: ANDROID_MARKER_SIZE,
+        height: ANDROID_MARKER_SIZE,
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}>
         <View style={{
           width: CIRCLE_SIZE,
           height: CIRCLE_SIZE,
@@ -100,11 +94,10 @@ const UserMarker = ({
           borderColor: '#ffffff',
           alignItems: 'center',
           justifyContent: 'center',
-          overflow: 'visible',
         }}>
           <Text style={{
             color: '#ffffff',
-            fontSize: 13,
+            fontSize: 14,
             fontWeight: 'bold',
             textAlign: 'center',
           }}>
@@ -139,9 +132,13 @@ const FamilyMarker = ({
     <Marker
       coordinate={{ latitude, longitude }}
       anchor={{ x: 0.5, y: 0.5 }}
-      style={{ overflow: 'visible' }}
     >
-      <View style={markerWrapperStyle}>
+      <View style={{
+        width: ANDROID_MARKER_SIZE,
+        height: ANDROID_MARKER_SIZE,
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}>
         <View style={{
           width: CIRCLE_SIZE,
           height: CIRCLE_SIZE,
@@ -152,11 +149,10 @@ const FamilyMarker = ({
           alignItems: 'center',
           justifyContent: 'center',
           opacity: markerOpacity,
-          overflow: 'visible',
         }}>
           <Text style={{
             color: '#ffffff',
-            fontSize: 13,
+            fontSize: 14,
             fontWeight: 'bold',
             textAlign: 'center',
           }}>
