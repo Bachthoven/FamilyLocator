@@ -15,7 +15,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Location from "expo-location";
 import { BlurView } from "expo-blur";
 import { StatusBar } from "expo-status-bar";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../src/contexts/AuthContext";
 import { User } from "../../shared/schema";
 import NotificationBell from "../components/NotificationBell";
@@ -41,6 +41,12 @@ interface Place {
   category?: string;
   address?: string;
   color?: string;
+}
+
+interface DragState {
+  placeId: number;
+  originalCoordinate: { latitude: number; longitude: number };
+  currentCoordinate: { latitude: number; longitude: number };
 }
 
 // Custom marker components for different types
@@ -108,6 +114,9 @@ const PlaceMarker = ({
   address,
   color,
   onPress,
+  draggable,
+  onDragEnd,
+  isDragging,
 }: {
   latitude: number;
   longitude: number;
@@ -116,6 +125,9 @@ const PlaceMarker = ({
   address?: string;
   color?: string;
   onPress?: () => void;
+  draggable?: boolean;
+  onDragEnd?: (coordinate: { latitude: number; longitude: number }) => void;
+  isDragging?: boolean;
 }) => {
   const categoryColors: Record<string, string> = {
     home: "#9333EA",
@@ -127,9 +139,25 @@ const PlaceMarker = ({
   const markerColor = color || categoryColors[category || "other"] || "#6B7280";
 
   return (
-    <Marker coordinate={{ latitude, longitude }} onPress={onPress}>
-      <View style={[styles.placeMarker, { backgroundColor: markerColor }]}>
+    <Marker
+      coordinate={{ latitude, longitude }}
+      onPress={onPress}
+      draggable={draggable}
+      onDragEnd={(e) => onDragEnd?.(e.nativeEvent.coordinate)}
+    >
+      <View
+        style={[
+          styles.placeMarker,
+          { backgroundColor: markerColor },
+          isDragging && styles.placeMarkerDragging,
+        ]}
+      >
         <View style={styles.placeMarkerDot} />
+        {isDragging && (
+          <View style={styles.dragIndicator}>
+            <Ionicons name="move" size={10} color="#fff" />
+          </View>
+        )}
       </View>
     </Marker>
   );
@@ -207,12 +235,17 @@ export default function MapScreen({
   // Selected marker state for slide-down dialog
   const [selectedMarker, setSelectedMarker] = useState<{
     type: "user" | "family" | "place";
+    id?: number;
     name: string;
     statusMessage?: string;
     address?: string;
     category?: string;
     coordinate: { latitude: number; longitude: number };
   } | null>(null);
+
+  // Drag mode state for place markers
+  const [dragState, setDragState] = useState<DragState | null>(null);
+  const queryClient = useQueryClient();
 
   // Animation for slide-down dialog
   const slideAnim = useRef(new Animated.Value(-200)).current;
@@ -372,6 +405,48 @@ export default function MapScreen({
   });
 
   const places: Place[] = placesData;
+
+  // Mutation for updating place location
+  const updatePlaceMutation = useMutation({
+    mutationFn: async ({
+      id,
+      latitude,
+      longitude,
+    }: {
+      id: number;
+      latitude: number;
+      longitude: number;
+    }) => {
+      const response = await fetch(`/api/places/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ latitude, longitude }),
+      });
+      if (!response.ok) throw new Error("Failed to update place location");
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/places"] });
+      setDragState(null);
+      setSelectedMarker(null);
+      setAlertConfig({
+        visible: true,
+        title: "Location Updated",
+        message: "The place location has been saved.",
+        icon: "checkmark-circle",
+        iconColor: "#10B981",
+      });
+    },
+    onError: () => {
+      setAlertConfig({
+        visible: true,
+        title: "Update Failed",
+        message: "Could not save the new location. Please try again.",
+        icon: "alert-circle",
+        iconColor: "#EF4444",
+      });
+    },
+  });
 
   // Track which proximity alerts have been sent to avoid duplicates
   const sentProximityAlerts = useRef<Set<string>>(new Set());
@@ -703,44 +778,62 @@ export default function MapScreen({
         ))}
 
         {/* Saved Places Markers */}
-        {places.map((place) => (
-          <PlaceMarker
-            key={place.id}
-            latitude={place.latitude}
-            longitude={place.longitude}
-            name={place.name}
-            category={place.category}
-            address={place.address}
-            onPress={() => {
-              // Mark as programmatic move
-              isProgrammaticMove.current = true;
-              // Center map on marker while maintaining current zoom
-              mapRef.current?.animateToRegion(
-                {
-                  latitude: place.latitude,
-                  longitude: place.longitude,
-                  latitudeDelta: currentRegion.latitudeDelta,
-                  longitudeDelta: currentRegion.longitudeDelta,
-                },
-                300
-              );
-              // Show speech bubble
-              setSelectedMarker({
-                type: "place",
-                name: place.name,
-                statusMessage: place.category
-                  ? `${place.category.charAt(0).toUpperCase() + place.category.slice(1)} • Saved Place`
-                  : "Saved Place",
-                address: place.address,
-                category: place.category,
-                coordinate: {
-                  latitude: place.latitude,
-                  longitude: place.longitude,
-                },
-              });
-            }}
-          />
-        ))}
+        {places.map((place) => {
+          const isDraggingThisPlace = dragState?.placeId === place.id;
+          const displayLat = isDraggingThisPlace
+            ? dragState.currentCoordinate.latitude
+            : place.latitude;
+          const displayLng = isDraggingThisPlace
+            ? dragState.currentCoordinate.longitude
+            : place.longitude;
+
+          return (
+            <PlaceMarker
+              key={place.id}
+              latitude={displayLat}
+              longitude={displayLng}
+              name={place.name}
+              category={place.category}
+              address={place.address}
+              draggable={isDraggingThisPlace}
+              isDragging={isDraggingThisPlace}
+              onDragEnd={(coordinate) => {
+                if (isDraggingThisPlace) {
+                  setDragState((prev) =>
+                    prev ? { ...prev, currentCoordinate: coordinate } : null
+                  );
+                }
+              }}
+              onPress={() => {
+                if (dragState) return;
+                isProgrammaticMove.current = true;
+                mapRef.current?.animateToRegion(
+                  {
+                    latitude: place.latitude,
+                    longitude: place.longitude,
+                    latitudeDelta: currentRegion.latitudeDelta,
+                    longitudeDelta: currentRegion.longitudeDelta,
+                  },
+                  300
+                );
+                setSelectedMarker({
+                  type: "place",
+                  id: place.id,
+                  name: place.name,
+                  statusMessage: place.category
+                    ? `${place.category.charAt(0).toUpperCase() + place.category.slice(1)} • Saved Place`
+                    : "Saved Place",
+                  address: place.address,
+                  category: place.category,
+                  coordinate: {
+                    latitude: place.latitude,
+                    longitude: place.longitude,
+                  },
+                });
+              }}
+            />
+          );
+        })}
       </MapView>
 
       {/* Notification Bell - Top Right */}
@@ -957,9 +1050,82 @@ export default function MapScreen({
                 </Text>
               </View>
             )}
+            {selectedMarker.type === "place" && selectedMarker.id && (
+              <TouchableOpacity
+                style={styles.enableDragButton}
+                onPress={() => {
+                  setDragState({
+                    placeId: selectedMarker.id!,
+                    originalCoordinate: selectedMarker.coordinate,
+                    currentCoordinate: selectedMarker.coordinate,
+                  });
+                  setSelectedMarker(null);
+                }}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="move" size={18} color="#fff" />
+                <Text style={styles.enableDragButtonText}>
+                  Enable Dragging Mode
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
         )}
       </Animated.View>
+
+      {/* Drag Mode Control Panel */}
+      {dragState && (
+        <View style={[styles.dragModePanel, { bottom: 88 }]}>
+          <BlurView intensity={100} style={styles.dragModePanelBlur}>
+            <View style={styles.dragModePanelContent}>
+              <View style={styles.dragModeInfo}>
+                <View style={styles.dragModeIconContainer}>
+                  <Ionicons name="move" size={20} color="#fff" />
+                </View>
+                <View style={styles.dragModeTextContainer}>
+                  <Text style={styles.dragModeTitle}>Drag Mode Active</Text>
+                  <Text style={styles.dragModeSubtitle}>
+                    Drag the marker to adjust location
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.dragModeButtons}>
+                <TouchableOpacity
+                  style={styles.dragModeCancelButton}
+                  onPress={() => setDragState(null)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.dragModeCancelText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.dragModeSaveButton,
+                    updatePlaceMutation.isPending &&
+                      styles.dragModeSaveButtonDisabled,
+                  ]}
+                  onPress={() => {
+                    if (dragState) {
+                      updatePlaceMutation.mutate({
+                        id: dragState.placeId,
+                        latitude: dragState.currentCoordinate.latitude,
+                        longitude: dragState.currentCoordinate.longitude,
+                      });
+                    }
+                  }}
+                  disabled={updatePlaceMutation.isPending}
+                  activeOpacity={0.7}
+                >
+                  {updatePlaceMutation.isPending ? (
+                    <ActivityIndicator size="small" color="#fff" />
+                  ) : (
+                    <Text style={styles.dragModeSaveText}>Save Location</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            </View>
+          </BlurView>
+        </View>
+      )}
 
       {/* Proximity Alert Banner (for Expo Go) */}
       {proximityAlert.visible && (
@@ -1086,11 +1252,35 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   },
+  placeMarkerDragging: {
+    width: 32,
+    height: 32,
+    borderRadius: 6,
+    borderWidth: 3,
+    borderColor: "#0EA5E9",
+    shadowColor: "#0EA5E9",
+    shadowOpacity: 0.5,
+    shadowRadius: 8,
+    elevation: 10,
+  },
   placeMarkerDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
     backgroundColor: "#fff",
+  },
+  dragIndicator: {
+    position: "absolute",
+    top: -8,
+    right: -8,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: "#0EA5E9",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2,
+    borderColor: "#fff",
   },
 
   // Callout Styles
@@ -1392,6 +1582,100 @@ const styles = StyleSheet.create({
     fontSize: 13,
     marginLeft: 6,
     flex: 1,
+  },
+
+  // Enable Drag Button
+  enableDragButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#0EA5E9",
+    borderRadius: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    marginTop: 16,
+    gap: 8,
+  },
+  enableDragButtonText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+
+  // Drag Mode Panel Styles
+  dragModePanel: {
+    position: "absolute",
+    left: 16,
+    right: 16,
+    zIndex: 150,
+  },
+  dragModePanelBlur: {
+    borderRadius: 16,
+    overflow: "hidden",
+  },
+  dragModePanelContent: {
+    padding: 16,
+    backgroundColor: "rgba(255, 255, 255, 0.95)",
+  },
+  dragModeInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  dragModeIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#0EA5E9",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+  },
+  dragModeTextContainer: {
+    flex: 1,
+  },
+  dragModeTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#1F2937",
+    marginBottom: 2,
+  },
+  dragModeSubtitle: {
+    fontSize: 13,
+    color: "#6B7280",
+  },
+  dragModeButtons: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  dragModeCancelButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 10,
+    backgroundColor: "#F3F4F6",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  dragModeCancelText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#6B7280",
+  },
+  dragModeSaveButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 10,
+    backgroundColor: "#10B981",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  dragModeSaveButtonDisabled: {
+    backgroundColor: "#9CA3AF",
+  },
+  dragModeSaveText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#fff",
   },
 
   // Proximity Alert Banner Styles

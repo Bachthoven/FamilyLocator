@@ -372,7 +372,14 @@ The application is deployed on Replit and uses Replit's built-in deployment feat
   4. Run `eas login` and `eas init` to create an EAS project (required for push notifications)
   5. Test on physical device (push notifications don't work on emulators)
 
-- **Removed**: expo-notifications local notification code (caused errors in Expo Go)
+- **Removed**: expo-notifications package entirely (caused errors in Expo Go)
+
+### Place Marker Dragging Feature (November 28, 2025)
+
+- **Dragging Mode**: Tap on any saved place marker on the map to see a popup with "Enable Dragging Mode" button
+- **Drag to Adjust**: Once enabled, you can drag the place marker to a new location while still being able to zoom/pan the map
+- **Save/Cancel**: A control panel appears at the bottom with "Cancel" to discard changes or "Save Location" to update the place coordinates
+- **Visual Feedback**: Dragging markers have a highlighted border and a move icon indicator
 
 ### Mobile History & Settings Screens (November 27, 2025)
 
