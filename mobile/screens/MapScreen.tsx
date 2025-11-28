@@ -151,7 +151,7 @@ const PlaceMarker = ({
       onDrag={(e) => onDrag?.(e.nativeEvent.coordinate)}
       onDragEnd={(e) => onDragEnd?.(e.nativeEvent.coordinate)}
       anchor={{ x: 0.5, y: 0.5 }}
-      tracksViewChanges={isDragging}
+      tracksViewChanges={true}
     >
       <View style={styles.placeMarkerWrapper}>
         <View
