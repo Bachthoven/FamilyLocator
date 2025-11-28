@@ -372,7 +372,7 @@ The application is deployed on Replit and uses Replit's built-in deployment feat
   4. Run `eas login` and `eas init` to create an EAS project (required for push notifications)
   5. Test on physical device (push notifications don't work on emulators)
 
-- **Removed**: expo-notifications package entirely (caused errors in Expo Go)
+- **Note**: expo-notifications is required by native-notify package. The warning about "expo-notifications not working in Expo Go" is expected - push notifications only work in development builds on real devices, not in Expo Go
 
 ### Place Marker Dragging Feature (November 28, 2025)
 
