@@ -666,7 +666,8 @@ export default function MapScreen({
             setMapHeading(camera.heading || 0);
           });
           // Close slide-down dialog when user manually pans/zooms (not programmatic)
-          if (selectedMarker && !isProgrammaticMove.current) {
+          // But not while in reposition mode
+          if (selectedMarker && !isProgrammaticMove.current && !dragState) {
             setSelectedMarker(null);
           }
         }}
@@ -817,12 +818,12 @@ export default function MapScreen({
           ))}
       </MapView>
 
-      {/* Crosshair for repositioning mode */}
+      {/* Center marker for repositioning mode */}
       {dragState && (
-        <View style={styles.crosshairContainer} pointerEvents="none">
-          <View style={styles.crosshairVertical} />
-          <View style={styles.crosshairHorizontal} />
-          <View style={styles.crosshairCenter} />
+        <View style={styles.repositionMarkerContainer} pointerEvents="box-none">
+          <View style={styles.repositionMarker}>
+            <View style={styles.repositionMarkerDot} />
+          </View>
         </View>
       )}
 
@@ -1259,8 +1260,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
 
-  // Crosshair for repositioning mode
-  crosshairContainer: {
+  // Reposition marker for repositioning mode (center of screen)
+  repositionMarkerContainer: {
     position: "absolute",
     top: 0,
     left: 0,
@@ -1269,27 +1270,26 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  crosshairVertical: {
-    position: "absolute",
-    width: 2,
-    height: 40,
-    backgroundColor: "#0EA5E9",
-    borderRadius: 1,
-  },
-  crosshairHorizontal: {
-    position: "absolute",
-    width: 40,
-    height: 2,
-    backgroundColor: "#0EA5E9",
-    borderRadius: 1,
-  },
-  crosshairCenter: {
-    width: 12,
-    height: 12,
+  repositionMarker: {
+    width: 28,
+    height: 28,
     borderRadius: 6,
-    borderWidth: 2,
+    borderWidth: 3,
     borderColor: "#0EA5E9",
-    backgroundColor: "transparent",
+    backgroundColor: "#6B7280",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#0EA5E9",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.5,
+    shadowRadius: 8,
+    elevation: 10,
+  },
+  repositionMarkerDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: "#fff",
   },
 
   // Callout Styles
