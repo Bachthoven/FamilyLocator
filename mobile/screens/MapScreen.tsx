@@ -114,10 +114,6 @@ const PlaceMarker = ({
   address,
   color,
   onPress,
-  draggable,
-  onDrag,
-  onDragEnd,
-  isDragging,
 }: {
   latitude: number;
   longitude: number;
@@ -126,10 +122,6 @@ const PlaceMarker = ({
   address?: string;
   color?: string;
   onPress?: () => void;
-  draggable?: boolean;
-  onDrag?: (coordinate: { latitude: number; longitude: number }) => void;
-  onDragEnd?: (coordinate: { latitude: number; longitude: number }) => void;
-  isDragging?: boolean;
 }) => {
   const categoryColors: Record<string, string> = {
     home: "#9333EA",
@@ -144,19 +136,10 @@ const PlaceMarker = ({
     <Marker
       coordinate={{ latitude, longitude }}
       onPress={onPress}
-      draggable={draggable}
-      onDrag={(e) => onDrag?.(e.nativeEvent.coordinate)}
-      onDragEnd={(e) => onDragEnd?.(e.nativeEvent.coordinate)}
       anchor={{ x: 0.5, y: 0.5 }}
       tracksViewChanges={true}
     >
-      <View
-        style={[
-          styles.placeMarker,
-          { backgroundColor: markerColor },
-          isDragging && styles.placeMarkerDragging,
-        ]}
-      >
+      <View style={[styles.placeMarker, { backgroundColor: markerColor }]}>
         <View style={styles.placeMarkerDot} />
       </View>
     </Marker>
@@ -696,6 +679,20 @@ export default function MapScreen({
           if (isActive) {
             onRegionChange?.(region);
           }
+          // Update drag state with map center position
+          if (dragState) {
+            setDragState((prev) =>
+              prev
+                ? {
+                    ...prev,
+                    currentCoordinate: {
+                      latitude: region.latitude,
+                      longitude: region.longitude,
+                    },
+                  }
+                : null
+            );
+          }
         }}
         showsUserLocation={false}
         showsMyLocationButton={false}
@@ -704,9 +701,6 @@ export default function MapScreen({
         showsPointsOfInterest={true}
         showsBuildings={true}
         toolbarEnabled={false}
-        scrollEnabled={!dragState}
-        rotateEnabled={!dragState}
-        pitchEnabled={!dragState}
         moveOnMarkerPress={false}
       >
         {/* Current User Marker */}
@@ -781,40 +775,17 @@ export default function MapScreen({
           />
         ))}
 
-        {/* Saved Places Markers */}
-        {places.map((place) => {
-          const isDraggingThisPlace = dragState?.placeId === place.id;
-          const displayLat = isDraggingThisPlace
-            ? dragState.currentCoordinate.latitude
-            : place.latitude;
-          const displayLng = isDraggingThisPlace
-            ? dragState.currentCoordinate.longitude
-            : place.longitude;
-
-          return (
+        {/* Saved Places Markers - hide the one being repositioned */}
+        {places
+          .filter((place) => dragState?.placeId !== place.id)
+          .map((place) => (
             <PlaceMarker
               key={place.id}
-              latitude={displayLat}
-              longitude={displayLng}
+              latitude={place.latitude}
+              longitude={place.longitude}
               name={place.name}
               category={place.category}
               address={place.address}
-              draggable={isDraggingThisPlace}
-              isDragging={isDraggingThisPlace}
-              onDrag={(coordinate) => {
-                if (isDraggingThisPlace) {
-                  setDragState((prev) =>
-                    prev ? { ...prev, currentCoordinate: coordinate } : null
-                  );
-                }
-              }}
-              onDragEnd={(coordinate) => {
-                if (isDraggingThisPlace) {
-                  setDragState((prev) =>
-                    prev ? { ...prev, currentCoordinate: coordinate } : null
-                  );
-                }
-              }}
               onPress={() => {
                 if (dragState) return;
                 isProgrammaticMove.current = true;
@@ -843,9 +814,17 @@ export default function MapScreen({
                 });
               }}
             />
-          );
-        })}
+          ))}
       </MapView>
+
+      {/* Crosshair for repositioning mode */}
+      {dragState && (
+        <View style={styles.crosshairContainer} pointerEvents="none">
+          <View style={styles.crosshairVertical} />
+          <View style={styles.crosshairHorizontal} />
+          <View style={styles.crosshairCenter} />
+        </View>
+      )}
 
       {/* Notification Bell - Top Right */}
       <View style={[styles.notificationBell, { top: insets.top + 16 }]}>
@@ -1065,6 +1044,16 @@ export default function MapScreen({
               <TouchableOpacity
                 style={styles.enableDragButton}
                 onPress={() => {
+                  isProgrammaticMove.current = true;
+                  mapRef.current?.animateToRegion(
+                    {
+                      latitude: selectedMarker.coordinate.latitude,
+                      longitude: selectedMarker.coordinate.longitude,
+                      latitudeDelta: currentRegion.latitudeDelta,
+                      longitudeDelta: currentRegion.longitudeDelta,
+                    },
+                    300
+                  );
                   setDragState({
                     placeId: selectedMarker.id!,
                     originalCoordinate: selectedMarker.coordinate,
@@ -1074,9 +1063,9 @@ export default function MapScreen({
                 }}
                 activeOpacity={0.7}
               >
-                <Ionicons name="move" size={18} color="#fff" />
+                <Ionicons name="locate" size={18} color="#fff" />
                 <Text style={styles.enableDragButtonText}>
-                  Enable Dragging Mode
+                  Reposition Place
                 </Text>
               </TouchableOpacity>
             )}
@@ -1091,12 +1080,12 @@ export default function MapScreen({
             <View style={styles.dragModePanelContent}>
               <View style={styles.dragModeInfo}>
                 <View style={styles.dragModeIconContainer}>
-                  <Ionicons name="move" size={20} color="#fff" />
+                  <Ionicons name="locate" size={20} color="#fff" />
                 </View>
                 <View style={styles.dragModeTextContainer}>
-                  <Text style={styles.dragModeTitle}>Drag Mode Active</Text>
+                  <Text style={styles.dragModeTitle}>Reposition Mode</Text>
                   <Text style={styles.dragModeSubtitle}>
-                    Drag the marker to adjust location
+                    Pan the map to move the crosshair
                   </Text>
                 </View>
               </View>
@@ -1263,20 +1252,46 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   },
-  placeMarkerDragging: {
-    borderWidth: 3,
-    borderColor: "#0EA5E9",
-    shadowColor: "#0EA5E9",
-    shadowOpacity: 0.6,
-    shadowRadius: 6,
-    elevation: 10,
-  },
   placeMarkerDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
     backgroundColor: "#fff",
   },
+
+  // Crosshair for repositioning mode
+  crosshairContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  crosshairVertical: {
+    position: "absolute",
+    width: 2,
+    height: 40,
+    backgroundColor: "#0EA5E9",
+    borderRadius: 1,
+  },
+  crosshairHorizontal: {
+    position: "absolute",
+    width: 40,
+    height: 2,
+    backgroundColor: "#0EA5E9",
+    borderRadius: 1,
+  },
+  crosshairCenter: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: "#0EA5E9",
+    backgroundColor: "transparent",
+  },
+
   // Callout Styles
   callout: {
     padding: 8,
