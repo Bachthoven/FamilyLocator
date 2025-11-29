@@ -115,7 +115,6 @@ const PlaceMarker = ({
   color,
   onPress,
   draggable,
-  onDragStart,
   onDrag,
   onDragEnd,
   isDragging,
@@ -128,7 +127,6 @@ const PlaceMarker = ({
   color?: string;
   onPress?: () => void;
   draggable?: boolean;
-  onDragStart?: () => void;
   onDrag?: (coordinate: { latitude: number; longitude: number }) => void;
   onDragEnd?: (coordinate: { latitude: number; longitude: number }) => void;
   isDragging?: boolean;
@@ -147,27 +145,19 @@ const PlaceMarker = ({
       coordinate={{ latitude, longitude }}
       onPress={onPress}
       draggable={draggable}
-      onDragStart={onDragStart}
       onDrag={(e) => onDrag?.(e.nativeEvent.coordinate)}
       onDragEnd={(e) => onDragEnd?.(e.nativeEvent.coordinate)}
       anchor={{ x: 0.5, y: 0.5 }}
       tracksViewChanges={true}
     >
-      <View style={styles.placeMarkerWrapper}>
-        <View
-          style={[
-            styles.placeMarker,
-            { backgroundColor: markerColor },
-            isDragging && styles.placeMarkerDragging,
-          ]}
-        >
-          <View style={styles.placeMarkerDot} />
-        </View>
-        {isDragging && (
-          <View style={styles.dragIndicator}>
-            <Ionicons name="move" size={10} color="#fff" />
-          </View>
-        )}
+      <View
+        style={[
+          styles.placeMarker,
+          { backgroundColor: markerColor },
+          isDragging && styles.placeMarkerDragging,
+        ]}
+      >
+        <View style={styles.placeMarkerDot} />
       </View>
     </Marker>
   );
@@ -255,7 +245,6 @@ export default function MapScreen({
 
   // Drag mode state for place markers
   const [dragState, setDragState] = useState<DragState | null>(null);
-  const [isMarkerDragging, setIsMarkerDragging] = useState(false);
   const queryClient = useQueryClient();
 
   // Animation for slide-down dialog
@@ -715,9 +704,9 @@ export default function MapScreen({
         showsPointsOfInterest={true}
         showsBuildings={true}
         toolbarEnabled={false}
-        scrollEnabled={!isMarkerDragging}
-        rotateEnabled={!isMarkerDragging}
-        pitchEnabled={!isMarkerDragging}
+        scrollEnabled={!dragState}
+        rotateEnabled={!dragState}
+        pitchEnabled={!dragState}
         moveOnMarkerPress={false}
       >
         {/* Current User Marker */}
@@ -812,9 +801,6 @@ export default function MapScreen({
               address={place.address}
               draggable={isDraggingThisPlace}
               isDragging={isDraggingThisPlace}
-              onDragStart={() => {
-                setIsMarkerDragging(true);
-              }}
               onDrag={(coordinate) => {
                 if (isDraggingThisPlace) {
                   setDragState((prev) =>
@@ -823,7 +809,6 @@ export default function MapScreen({
                 }
               }}
               onDragEnd={(coordinate) => {
-                setIsMarkerDragging(false);
                 if (isDraggingThisPlace) {
                   setDragState((prev) =>
                     prev ? { ...prev, currentCoordinate: coordinate } : null
@@ -1264,13 +1249,6 @@ const styles = StyleSheet.create({
     opacity: 0.3,
   },
 
-  placeMarkerWrapper: {
-    width: 44,
-    height: 44,
-    alignItems: "center",
-    justifyContent: "center",
-    overflow: "visible",
-  },
   placeMarker: {
     width: 24,
     height: 24,
@@ -1286,14 +1264,11 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   placeMarkerDragging: {
-    width: 32,
-    height: 32,
-    borderRadius: 6,
     borderWidth: 3,
     borderColor: "#0EA5E9",
     shadowColor: "#0EA5E9",
-    shadowOpacity: 0.5,
-    shadowRadius: 8,
+    shadowOpacity: 0.6,
+    shadowRadius: 6,
     elevation: 10,
   },
   placeMarkerDot: {
@@ -1302,25 +1277,6 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: "#fff",
   },
-  dragIndicator: {
-    position: "absolute",
-    top: 0,
-    right: 0,
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    backgroundColor: "#0EA5E9",
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 2,
-    borderColor: "#fff",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.3,
-    shadowRadius: 2,
-    elevation: 5,
-  },
-
   // Callout Styles
   callout: {
     padding: 8,
