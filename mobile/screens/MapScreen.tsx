@@ -411,6 +411,7 @@ export default function MapScreen({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/places"] });
       setDragState(null);
+      isProgrammaticMove.current = false;
       setSelectedMarker(null);
       setAlertConfig({
         visible: true,
@@ -702,7 +703,7 @@ export default function MapScreen({
         showsPointsOfInterest={true}
         showsBuildings={true}
         toolbarEnabled={false}
-        moveOnMarkerPress={false}
+        moveOnMarkerPress={!dragState}
       >
         {/* Current User Marker */}
         {currentLocation && (
@@ -1093,7 +1094,10 @@ export default function MapScreen({
               <View style={styles.dragModeButtons}>
                 <TouchableOpacity
                   style={styles.dragModeCancelButton}
-                  onPress={() => setDragState(null)}
+                  onPress={() => {
+                    setDragState(null);
+                    isProgrammaticMove.current = false;
+                  }}
                   activeOpacity={0.7}
                 >
                   <Text style={styles.dragModeCancelText}>Cancel</Text>
