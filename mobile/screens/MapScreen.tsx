@@ -65,6 +65,7 @@ const UserMarker = ({
     coordinate={{ latitude, longitude }}
     onPress={onPress}
     anchor={{ x: 0.5, y: 1 }}
+    tracksViewChanges={false}
   >
     <View style={styles.userMarkerContainer}>
       <View style={styles.userMarker} />
@@ -96,6 +97,7 @@ const FamilyMarker = ({
     coordinate={{ latitude, longitude }}
     onPress={onPress}
     anchor={{ x: 0.5, y: 1 }}
+    tracksViewChanges={false}
   >
     <View style={styles.familyMarkerContainer}>
       <View
@@ -137,7 +139,7 @@ const PlaceMarker = ({
       coordinate={{ latitude, longitude }}
       onPress={onPress}
       anchor={{ x: 0.5, y: 0.5 }}
-      tracksViewChanges={true}
+      tracksViewChanges={false}
     >
       <View style={[styles.placeMarker, { backgroundColor: markerColor }]}>
         <View style={styles.placeMarkerDot} />
@@ -607,7 +609,9 @@ export default function MapScreen({
   };
 
   const centerOnUser = () => {
+    if (dragState) return;
     if (currentLocation) {
+      isProgrammaticMove.current = true;
       mapRef.current?.animateToRegion(
         {
           ...currentLocation,
@@ -616,12 +620,16 @@ export default function MapScreen({
         },
         1000
       );
+      setTimeout(() => {
+        isProgrammaticMove.current = false;
+      }, 1100);
     } else {
       getCurrentLocation();
     }
   };
 
   const zoomIn = () => {
+    if (dragState) return;
     mapRef.current?.getCamera().then((camera) => {
       if (camera.zoom !== undefined) {
         mapRef.current?.animateCamera(
@@ -633,6 +641,7 @@ export default function MapScreen({
   };
 
   const zoomOut = () => {
+    if (dragState) return;
     mapRef.current?.getCamera().then((camera) => {
       if (camera.zoom !== undefined) {
         mapRef.current?.animateCamera(
@@ -644,6 +653,7 @@ export default function MapScreen({
   };
 
   const resetNorth = () => {
+    if (dragState) return;
     mapRef.current?.animateCamera({ heading: 0 }, { duration: 300 });
   };
 
@@ -712,6 +722,7 @@ export default function MapScreen({
             longitude={currentLocation.longitude}
             name="You"
             onPress={() => {
+              if (dragState) return;
               // Mark as programmatic move
               isProgrammaticMove.current = true;
               // Center map on marker while maintaining current zoom
@@ -750,6 +761,7 @@ export default function MapScreen({
             statusColor={location.statusColor}
             statusMessage={location.statusMessage}
             onPress={() => {
+              if (dragState) return;
               // Mark as programmatic move
               isProgrammaticMove.current = true;
               // Center map on marker while maintaining current zoom
@@ -821,7 +833,7 @@ export default function MapScreen({
 
       {/* Center marker for repositioning mode */}
       {dragState && (
-        <View style={styles.repositionMarkerContainer} pointerEvents="box-none">
+        <View style={styles.repositionMarkerContainer} pointerEvents="none">
           <View style={styles.repositionMarker}>
             <View style={styles.repositionMarkerDot} />
           </View>
