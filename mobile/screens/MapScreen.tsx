@@ -139,7 +139,6 @@ const PlaceMarker = ({
       coordinate={{ latitude, longitude }}
       onPress={onPress}
       anchor={{ x: 0.5, y: 0.5 }}
-      tracksViewChanges={false}
     >
       <View style={[styles.placeMarker, { backgroundColor: markerColor }]}>
         <View style={styles.placeMarkerDot} />
