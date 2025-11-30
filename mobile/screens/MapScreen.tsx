@@ -46,6 +46,7 @@ interface Place {
 
 interface DragState {
   placeId: number;
+  placeName: string;
   originalCoordinate: { latitude: number; longitude: number };
   currentCoordinate: { latitude: number; longitude: number };
 }
@@ -98,7 +99,6 @@ const FamilyMarker = ({
     coordinate={{ latitude, longitude }}
     onPress={onPress}
     anchor={{ x: 0.5, y: 1 }}
-    tracksViewChanges={false}
   >
     <View style={styles.familyMarkerContainer}>
       <View
@@ -395,10 +395,12 @@ export default function MapScreen({
   const updatePlaceMutation = useMutation({
     mutationFn: async ({
       id,
+      name,
       latitude,
       longitude,
     }: {
       id: number;
+      name: string;
       latitude: number;
       longitude: number;
     }) => {
@@ -406,7 +408,7 @@ export default function MapScreen({
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ latitude, longitude }),
+        body: JSON.stringify({ name, latitude, longitude }),
       });
       if (!response.ok) throw new Error("Failed to update place location");
       return response.json();
@@ -1071,6 +1073,7 @@ export default function MapScreen({
                   );
                   setDragState({
                     placeId: selectedMarker.id!,
+                    placeName: selectedMarker.name,
                     originalCoordinate: selectedMarker.coordinate,
                     currentCoordinate: selectedMarker.coordinate,
                   });
@@ -1125,6 +1128,7 @@ export default function MapScreen({
                     if (dragState) {
                       updatePlaceMutation.mutate({
                         id: dragState.placeId,
+                        name: dragState.placeName,
                         latitude: dragState.currentCoordinate.latitude,
                         longitude: dragState.currentCoordinate.longitude,
                       });
