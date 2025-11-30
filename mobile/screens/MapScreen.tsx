@@ -22,7 +22,7 @@ import NotificationBell from "../components/NotificationBell";
 import Compass from "../components/Compass";
 import AlertDialog from "../components/AlertDialog";
 import { useThemeColors } from "../theme/colors";
-import { API_URL } from "../src/api/config";
+import { apiRequest } from "../src/lib/queryClient";
 
 // Type definitions
 interface FamilyLocation {
@@ -67,7 +67,6 @@ const UserMarker = ({
     coordinate={{ latitude, longitude }}
     onPress={onPress}
     anchor={{ x: 0.5, y: 1 }}
-    tracksViewChanges={false}
   >
     <View style={styles.userMarkerContainer}>
       <View style={styles.userMarker} />
@@ -404,13 +403,11 @@ export default function MapScreen({
       latitude: number;
       longitude: number;
     }) => {
-      const response = await fetch(`${API_URL}/api/places/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ name, latitude, longitude }),
+      const response = await apiRequest("PATCH", `/api/places/${id}`, {
+        name,
+        latitude,
+        longitude,
       });
-      if (!response.ok) throw new Error("Failed to update place location");
       return response.json();
     },
     onSuccess: () => {
