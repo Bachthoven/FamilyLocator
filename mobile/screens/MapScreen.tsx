@@ -22,6 +22,7 @@ import NotificationBell from "../components/NotificationBell";
 import Compass from "../components/Compass";
 import AlertDialog from "../components/AlertDialog";
 import { useThemeColors } from "../theme/colors";
+import { API_URL } from "../src/api/config";
 
 // Type definitions
 interface FamilyLocation {
@@ -401,9 +402,10 @@ export default function MapScreen({
       latitude: number;
       longitude: number;
     }) => {
-      const response = await fetch(`/api/places/${id}`, {
+      const response = await fetch(`${API_URL}/api/places/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ latitude, longitude }),
       });
       if (!response.ok) throw new Error("Failed to update place location");
@@ -1286,10 +1288,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   repositionMarker: {
-    width: 28,
-    height: 28,
-    borderRadius: 6,
-    borderWidth: 3,
+    width: 24,
+    height: 24,
+    borderRadius: 4,
+    borderWidth: 2,
     borderColor: "#0EA5E9",
     backgroundColor: "#6B7280",
     alignItems: "center",
@@ -1301,9 +1303,9 @@ const styles = StyleSheet.create({
     elevation: 10,
   },
   repositionMarkerDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
     backgroundColor: "#fff",
   },
 
