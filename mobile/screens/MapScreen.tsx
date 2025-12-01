@@ -394,17 +394,14 @@ export default function MapScreen({
   const updatePlaceMutation = useMutation({
     mutationFn: async ({
       id,
-      name,
       latitude,
       longitude,
     }: {
       id: number;
-      name: string;
       latitude: number;
       longitude: number;
     }) => {
-      const response = await apiRequest("PATCH", `/api/places/${id}`, {
-        name,
+      const response = await apiRequest("PATCH", `/api/places/${id}/location`, {
         latitude,
         longitude,
       });
@@ -1125,7 +1122,6 @@ export default function MapScreen({
                     if (dragState) {
                       updatePlaceMutation.mutate({
                         id: dragState.placeId,
-                        name: dragState.placeName,
                         latitude: dragState.currentCoordinate.latitude,
                         longitude: dragState.currentCoordinate.longitude,
                       });
