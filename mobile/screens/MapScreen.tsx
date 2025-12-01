@@ -21,7 +21,7 @@ import { User } from "../../shared/schema";
 import NotificationBell from "../components/NotificationBell";
 import Compass from "../components/Compass";
 import AlertDialog from "../components/AlertDialog";
-import { useThemeColors } from "../theme/colors";
+import { useThemeColors, useIsDarkMode } from "../theme/colors";
 import { apiRequest } from "../src/lib/queryClient";
 
 // Type definitions
@@ -189,6 +189,7 @@ export default function MapScreen({
 }: MapScreenProps) {
   const insets = useSafeAreaInsets();
   const colors = useThemeColors();
+  const isDarkMode = useIsDarkMode();
   const mapRef = useRef<MapView>(null);
   const hasInitializedLocation = useRef(false);
   const isProgrammaticMove = useRef(false); // Track if we're centering programmatically
@@ -851,13 +852,13 @@ export default function MapScreen({
       <View style={[styles.membersIndicator, { top: insets.top + 16 }]}>
         <BlurView 
           intensity={80} 
-          tint="light"
+          tint={isDarkMode ? "dark" : "light"}
           style={styles.membersIndicatorBlur} 
           experimentalBlurMethod="dimezisBlurView"
         >
           <View style={styles.membersIndicatorContent}>
             <View style={styles.statusDot} />
-            <Text style={styles.membersText}>
+            <Text style={[styles.membersText, isDarkMode && { color: "#FFFFFF" }]}>
               {onlineMembersCount} member
               {onlineMembersCount !== 1 ? "s" : ""} online
             </Text>
