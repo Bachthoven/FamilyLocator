@@ -1439,7 +1439,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 18,
-    paddingVertical: 11,
+    paddingVertical: 12,
+    height: 44,
     gap: 8,
   },
   statusDot: {
