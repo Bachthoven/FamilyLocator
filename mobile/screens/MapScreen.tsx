@@ -125,14 +125,16 @@ const PlaceMarker = ({
   color?: string;
   onPress?: () => void;
 }) => {
+  // Match colors with PlacesScreen categoryColors
   const categoryColors: Record<string, string> = {
-    home: "#9333EA",
-    work: "#F97316",
-    school: "#EAB308",
-    other: "#6B7280",
+    home: "#3B82F6",
+    work: "#10B981",
+    school: "#8B5CF6",
+    other: "#F97316",
   };
 
-  const markerColor = color || categoryColors[category || "other"] || "#6B7280";
+  // Use custom color if set, otherwise use category color
+  const markerColor = color || categoryColors[category || "other"] || "#F97316";
 
   return (
     <Marker
@@ -1090,89 +1092,122 @@ export default function MapScreen({
         )}
       </Animated.View>
 
-      {/* Drag Mode Control Panel */}
+      {/* Drag Mode Control Panel - positioned at top to match slide-down dialog */}
       {dragState && (
-        <View style={[styles.dragModePanel, { bottom: 88 }]}>
-          <BlurView intensity={100} style={styles.dragModePanelBlur}>
-            <View style={styles.dragModePanelContent}>
-              <View style={styles.dragModeInfo}>
-                <View style={styles.dragModeIconContainer}>
-                  <Ionicons name="locate" size={20} color="#fff" />
-                </View>
-                <View style={styles.dragModeTextContainer}>
-                  <Text style={styles.dragModeTitle}>Reposition Mode</Text>
-                  <Text style={styles.dragModeSubtitle}>
-                    Pan the map to move the crosshair
-                  </Text>
-                </View>
+        <View style={[styles.dragModePanel, { top: insets.top + 60 }]}>
+          <View
+            style={[
+              styles.dragModePanelContent,
+              {
+                backgroundColor: colors.dialogBackground,
+                borderColor: colors.dialogBorder,
+                borderWidth: 1,
+                borderRadius: 16,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.3,
+                shadowRadius: 12,
+                elevation: 8,
+              },
+            ]}
+          >
+            <View style={styles.dragModeInfo}>
+              <View style={styles.dragModeIconContainer}>
+                <Ionicons name="locate" size={20} color="#fff" />
               </View>
-              <View style={styles.dragModeButtons}>
-                <TouchableOpacity
-                  style={styles.dragModeCancelButton}
-                  onPress={() => {
-                    setDragState(null);
-                    isProgrammaticMove.current = false;
-                  }}
-                  activeOpacity={0.7}
-                >
-                  <Text style={styles.dragModeCancelText}>Cancel</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[
-                    styles.dragModeSaveButton,
-                    updatePlaceMutation.isPending &&
-                      styles.dragModeSaveButtonDisabled,
-                  ]}
-                  onPress={() => {
-                    if (dragState) {
-                      updatePlaceMutation.mutate({
-                        id: dragState.placeId,
-                        latitude: dragState.currentCoordinate.latitude,
-                        longitude: dragState.currentCoordinate.longitude,
-                      });
-                    }
-                  }}
-                  disabled={updatePlaceMutation.isPending}
-                  activeOpacity={0.7}
-                >
-                  {updatePlaceMutation.isPending ? (
-                    <ActivityIndicator size="small" color="#fff" />
-                  ) : (
-                    <Text style={styles.dragModeSaveText}>Save Location</Text>
-                  )}
-                </TouchableOpacity>
+              <View style={styles.dragModeTextContainer}>
+                <Text style={[styles.dragModeTitle, { color: colors.dialogText }]}>
+                  Reposition Mode
+                </Text>
+                <Text style={[styles.dragModeSubtitle, { color: colors.dialogTextSecondary }]}>
+                  Pan the map to move the crosshair
+                </Text>
               </View>
             </View>
-          </BlurView>
+            <View style={styles.dragModeButtons}>
+              <TouchableOpacity
+                style={[
+                  styles.dragModeCancelButton,
+                  { backgroundColor: colors.surfaceSecondary },
+                ]}
+                onPress={() => {
+                  setDragState(null);
+                  isProgrammaticMove.current = false;
+                }}
+                activeOpacity={0.7}
+              >
+                <Text style={[styles.dragModeCancelText, { color: colors.textSecondary }]}>
+                  Cancel
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.dragModeSaveButton,
+                  updatePlaceMutation.isPending &&
+                    styles.dragModeSaveButtonDisabled,
+                ]}
+                onPress={() => {
+                  if (dragState) {
+                    updatePlaceMutation.mutate({
+                      id: dragState.placeId,
+                      latitude: dragState.currentCoordinate.latitude,
+                      longitude: dragState.currentCoordinate.longitude,
+                    });
+                  }
+                }}
+                disabled={updatePlaceMutation.isPending}
+                activeOpacity={0.7}
+              >
+                {updatePlaceMutation.isPending ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <Text style={styles.dragModeSaveText}>Save Location</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
       )}
 
       {/* Proximity Alert Banner (for Expo Go) */}
       {proximityAlert.visible && (
         <View style={[styles.proximityAlertBanner, { top: insets.top + 60 }]}>
-          <BlurView intensity={100} style={styles.proximityAlertBlur}>
-            <View style={styles.proximityAlertContent}>
-              <View style={styles.proximityAlertIcon}>
-                <Ionicons name="location" size={20} color="#FFFFFF" />
-              </View>
-              <View style={styles.proximityAlertText}>
-                <Text style={styles.proximityAlertTitle}>
-                  📍 {proximityAlert.memberName} arrived
-                </Text>
-                <Text style={styles.proximityAlertBody}>
-                  Now at {proximityAlert.placeName}
-                </Text>
-              </View>
-              <TouchableOpacity
-                onPress={() =>
-                  setProximityAlert((prev) => ({ ...prev, visible: false }))
-                }
-                style={styles.proximityAlertClose}
-              >
-                <Ionicons name="close" size={18} color="#6B7280" />
-              </TouchableOpacity>
+          <View
+            style={[
+              styles.proximityAlertContent,
+              {
+                backgroundColor: colors.dialogBackground,
+                borderColor: colors.dialogBorder,
+                borderWidth: 1,
+                borderRadius: 12,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.3,
+                shadowRadius: 12,
+                elevation: 8,
+              },
+            ]}
+          >
+            <View style={styles.proximityAlertIcon}>
+              <Ionicons name="location" size={20} color="#FFFFFF" />
             </View>
-          </BlurView>
+            <View style={styles.proximityAlertText}>
+              <Text style={[styles.proximityAlertTitle, { color: colors.dialogText }]}>
+                📍 {proximityAlert.memberName} arrived
+              </Text>
+              <Text style={[styles.proximityAlertBody, { color: colors.dialogTextSecondary }]}>
+                Now at {proximityAlert.placeName}
+              </Text>
+            </View>
+            <TouchableOpacity
+              onPress={() =>
+                setProximityAlert((prev) => ({ ...prev, visible: false }))
+              }
+              style={styles.proximityAlertClose}
+            >
+              <Ionicons name="close" size={18} color={colors.dialogTextMuted} />
+            </TouchableOpacity>
+          </View>
         </View>
       )}
 

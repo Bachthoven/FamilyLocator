@@ -8,6 +8,7 @@ import {
   Pressable,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useThemeColors } from "../theme/colors";
 
 interface AlertButton {
   text: string;
@@ -34,13 +35,14 @@ export default function AlertDialog({
   buttons = [{ text: "OK", style: "default" }],
   onDismiss,
 }: AlertDialogProps) {
+  const colors = useThemeColors();
+
   const handleButtonPress = (button: AlertButton) => {
     button.onPress?.();
     onDismiss?.();
   };
 
   const handleBackdropPress = () => {
-    // Only dismiss if there's a cancel button
     const hasCancelButton = buttons.some((b) => b.style === "cancel");
     if (hasCancelButton) {
       onDismiss?.();
@@ -56,7 +58,14 @@ export default function AlertDialog({
     >
       <Pressable style={styles.backdrop} onPress={handleBackdropPress}>
         <Pressable
-          style={styles.container}
+          style={[
+            styles.container,
+            {
+              backgroundColor: colors.dialogBackground,
+              borderColor: colors.dialogBorder,
+              borderWidth: 1,
+            },
+          ]}
           onPress={(e) => e.stopPropagation()}
         >
           {icon && (
@@ -69,8 +78,16 @@ export default function AlertDialog({
               <Ionicons name={icon} size={32} color={iconColor} />
             </View>
           )}
-          {title && <Text style={styles.title}>{title}</Text>}
-          {message && <Text style={styles.message}>{message}</Text>}
+          {title && (
+            <Text style={[styles.title, { color: colors.dialogText }]}>
+              {title}
+            </Text>
+          )}
+          {message && (
+            <Text style={[styles.message, { color: colors.dialogTextSecondary }]}>
+              {message}
+            </Text>
+          )}
           <View style={styles.buttonContainer}>
             {buttons.map((button, index) => (
               <TouchableOpacity
@@ -78,7 +95,10 @@ export default function AlertDialog({
                 style={[
                   styles.button,
                   button.style === "destructive" && styles.buttonDestructive,
-                  button.style === "cancel" && styles.buttonCancel,
+                  button.style === "cancel" && [
+                    styles.buttonCancel,
+                    { backgroundColor: colors.surfaceSecondary },
+                  ],
                   buttons.length === 1 && styles.buttonSingle,
                 ]}
                 onPress={() => handleButtonPress(button)}
@@ -89,7 +109,7 @@ export default function AlertDialog({
                   <Ionicons
                     name="close-circle-outline"
                     size={18}
-                    color="#0EA5E9"
+                    color={colors.textSecondary}
                   />
                 )}
                 <Text
@@ -97,7 +117,10 @@ export default function AlertDialog({
                     styles.buttonText,
                     button.style === "destructive" &&
                       styles.buttonTextDestructive,
-                    button.style === "cancel" && styles.buttonTextCancel,
+                    button.style === "cancel" && [
+                      styles.buttonTextCancel,
+                      { color: colors.textSecondary },
+                    ],
                   ]}
                 >
                   {button.text}
@@ -120,7 +143,6 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   container: {
-    backgroundColor: "#fff",
     borderRadius: 16,
     padding: 24,
     width: "100%",
@@ -143,13 +165,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: "700",
-    color: "#000",
     textAlign: "center",
     marginBottom: 8,
   },
   message: {
     fontSize: 16,
-    color: "#666",
     textAlign: "center",
     lineHeight: 22,
     marginBottom: 24,
@@ -175,9 +195,7 @@ const styles = StyleSheet.create({
     minWidth: 120,
     alignSelf: "center",
   },
-  buttonCancel: {
-    backgroundColor: "#F5F5F5",
-  },
+  buttonCancel: {},
   buttonDestructive: {
     backgroundColor: "#FF3B30",
   },
@@ -186,9 +204,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#fff",
   },
-  buttonTextCancel: {
-    color: "#666",
-  },
+  buttonTextCancel: {},
   buttonTextDestructive: {
     color: "#fff",
   },
