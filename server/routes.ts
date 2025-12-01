@@ -962,6 +962,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete a single notification
+  app.delete(
+    "/api/notifications/:id",
+    isAuthenticated,
+    async (req: any, res) => {
+      try {
+        const userId = req.user.id;
+        const notificationId = parseInt(req.params.id);
+        await storage.deleteNotification(userId, notificationId);
+        res.json({ message: "Notification deleted" });
+      } catch (error) {
+        console.error("Error deleting notification:", error);
+        res.status(500).json({ message: "Failed to delete notification" });
+      }
+    }
+  );
+
   const httpServer = createServer(app);
 
   // WebSocket server for real-time location updates

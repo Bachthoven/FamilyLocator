@@ -82,6 +82,18 @@ export default function NotificationBell() {
     }
   };
 
+  const handleDeleteNotification = async (notificationId: number) => {
+    try {
+      await apiRequest("DELETE", `/api/notifications/${notificationId}`);
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/notifications/unread-count"],
+      });
+    } catch (error) {
+      console.error("Failed to delete notification:", error);
+    }
+  };
+
   const formatTime = (timestamp: string | Date) => {
     const date = new Date(timestamp);
     const now = new Date();
@@ -197,11 +209,11 @@ export default function NotificationBell() {
                 {notifications.length > 0 && (
                   <TouchableOpacity
                     onPress={handleClearAll}
-                    style={[styles.clearAllButton, { backgroundColor: colors.border }]}
+                    style={styles.clearAllButton}
                     activeOpacity={0.7}
                   >
-                    <Ionicons name="trash-outline" size={14} color={colors.textSecondary} />
-                    <Text style={[styles.clearAllText, { color: colors.textSecondary }]}>Clear all</Text>
+                    <Ionicons name="trash-outline" size={14} color="#EF4444" />
+                    <Text style={styles.clearAllText}>Clear all</Text>
                   </TouchableOpacity>
                 )}
                 {notifications.length > 0 && unreadCount > 0 && (
@@ -308,19 +320,17 @@ export default function NotificationBell() {
                           </Text>
                         </View>
 
-                        {/* Mark as read button (only for unread) */}
-                        {isUnread && (
-                          <TouchableOpacity
-                            onPress={(e) => {
-                              e.stopPropagation();
-                              handleMarkAsRead(notification.id);
-                            }}
-                            style={styles.markReadButton}
-                            activeOpacity={0.7}
-                          >
-                            <Ionicons name="close" size={16} color={colors.textSecondary} />
-                          </TouchableOpacity>
-                        )}
+                        {/* Delete notification button */}
+                        <TouchableOpacity
+                          onPress={(e) => {
+                            e.stopPropagation();
+                            handleDeleteNotification(notification.id);
+                          }}
+                          style={styles.deleteNotificationButton}
+                          activeOpacity={0.7}
+                        >
+                          <Ionicons name="close" size={18} color={colors.textMuted} />
+                        </TouchableOpacity>
                       </TouchableOpacity>
                     );
                   })}
@@ -371,7 +381,6 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
   },
   closeOverlay: {
     flex: 1,
@@ -430,12 +439,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 10,
     paddingVertical: 6,
-    borderRadius: 8,
     gap: 4,
   },
   clearAllText: {
     fontSize: 12,
     fontWeight: "500",
+    color: "#EF4444",
+  },
+  deleteNotificationButton: {
+    width: 28,
+    height: 28,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 14,
   },
   closeButton: {
     width: 32,

@@ -853,8 +853,7 @@ export default function MapScreen({
         <BlurView 
           intensity={80} 
           tint={isDarkMode ? "dark" : "light"}
-          style={styles.membersIndicatorBlur} 
-          experimentalBlurMethod="dimezisBlurView"
+          style={styles.membersIndicatorBlur}
         >
           <View style={styles.membersIndicatorContent}>
             <View style={styles.statusDot} />
