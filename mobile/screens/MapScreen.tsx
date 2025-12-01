@@ -1438,8 +1438,8 @@ const styles = StyleSheet.create({
   membersIndicatorContent: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 13,
+    paddingHorizontal: 18,
+    paddingVertical: 11,
     gap: 8,
   },
   statusDot: {
