@@ -8,11 +8,11 @@ import {
   ScrollView,
   ActivityIndicator,
 } from "react-native";
-import { BlurView } from "expo-blur";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "../src/lib/queryClient";
+import { useThemeColors, useIsDarkMode } from "../theme/colors";
 
 interface Notification {
   id: number;
@@ -27,6 +27,8 @@ interface Notification {
 
 export default function NotificationBell() {
   const insets = useSafeAreaInsets();
+  const colors = useThemeColors();
+  const isDarkMode = useIsDarkMode();
   const [isOpen, setIsOpen] = useState(false);
 
   // Get unread notification count for the red dot
@@ -65,6 +67,18 @@ export default function NotificationBell() {
       });
     } catch (error) {
       console.error("Failed to mark all notifications as read:", error);
+    }
+  };
+
+  const handleClearAll = async () => {
+    try {
+      await apiRequest("DELETE", "/api/notifications");
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/notifications/unread-count"],
+      });
+    } catch (error) {
+      console.error("Failed to clear all notifications:", error);
     }
   };
 
@@ -154,31 +168,42 @@ export default function NotificationBell() {
         onRequestClose={() => setIsOpen(false)}
       >
         <View style={styles.modalOverlay}>
-          <BlurView intensity={20} style={styles.blurOverlay}>
-            <TouchableOpacity
-              style={styles.closeOverlay}
-              activeOpacity={1}
-              onPress={() => setIsOpen(false)}
-            />
-          </BlurView>
+          <TouchableOpacity
+            style={styles.closeOverlay}
+            activeOpacity={1}
+            onPress={() => setIsOpen(false)}
+          />
 
           <View
             style={[
               styles.modalContainer,
-              { paddingBottom: insets.bottom + 16 },
+              { 
+                paddingBottom: insets.bottom + 16,
+                backgroundColor: colors.surface,
+              },
             ]}
           >
             {/* Header */}
-            <View style={styles.modalHeader}>
+            <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
               <View>
-                <Text style={styles.modalTitle}>Notifications</Text>
+                <Text style={[styles.modalTitle, { color: colors.text }]}>Notifications</Text>
                 {notifications.length > 0 && (
-                  <Text style={styles.modalSubtitle}>
+                  <Text style={[styles.modalSubtitle, { color: colors.textSecondary }]}>
                     {unreadCount > 0 ? `${unreadCount} new` : "All caught up"}
                   </Text>
                 )}
               </View>
               <View style={styles.headerButtons}>
+                {notifications.length > 0 && (
+                  <TouchableOpacity
+                    onPress={handleClearAll}
+                    style={[styles.clearAllButton, { backgroundColor: colors.border }]}
+                    activeOpacity={0.7}
+                  >
+                    <Ionicons name="trash-outline" size={14} color={colors.textSecondary} />
+                    <Text style={[styles.clearAllText, { color: colors.textSecondary }]}>Clear all</Text>
+                  </TouchableOpacity>
+                )}
                 {notifications.length > 0 && unreadCount > 0 && (
                   <TouchableOpacity
                     onPress={handleMarkAllAsRead}
@@ -193,7 +218,7 @@ export default function NotificationBell() {
                   style={styles.closeButton}
                   activeOpacity={0.7}
                 >
-                  <Ionicons name="close" size={24} color="#333" />
+                  <Ionicons name="close" size={24} color={colors.text} />
                 </TouchableOpacity>
               </View>
             </View>
@@ -203,21 +228,21 @@ export default function NotificationBell() {
               {isLoading ? (
                 <View style={styles.loadingContainer}>
                   <ActivityIndicator size="large" color="#0EA5E9" />
-                  <Text style={styles.loadingText}>
+                  <Text style={[styles.loadingText, { color: colors.textSecondary }]}>
                     Loading notifications...
                   </Text>
                 </View>
               ) : notifications.length === 0 ? (
                 <View style={styles.emptyState}>
-                  <View style={styles.emptyIconContainer}>
+                  <View style={[styles.emptyIconContainer, { backgroundColor: colors.surfaceSecondary }]}>
                     <Ionicons
                       name="notifications-outline"
                       size={48}
-                      color="#9CA3AF"
+                      color={colors.textMuted}
                     />
                   </View>
-                  <Text style={styles.emptyTitle}>No notifications yet</Text>
-                  <Text style={styles.emptyDescription}>
+                  <Text style={[styles.emptyTitle, { color: colors.text }]}>No notifications yet</Text>
+                  <Text style={[styles.emptyDescription, { color: colors.textSecondary }]}>
                     You'll see location alerts and updates here
                   </Text>
                 </View>
@@ -238,7 +263,8 @@ export default function NotificationBell() {
                         }
                         style={[
                           styles.notificationItem,
-                          isUnread && styles.notificationItemUnread,
+                          { backgroundColor: colors.surfaceSecondary, borderLeftColor: colors.border },
+                          isUnread && { backgroundColor: isDarkMode ? '#1E3A5F' : '#EBF5FF', borderLeftColor: '#0EA5E9', borderWidth: 1, borderColor: '#0EA5E9' },
                         ]}
                         activeOpacity={0.7}
                         data-testid={`notification-item-${notification.id}`}
@@ -260,7 +286,8 @@ export default function NotificationBell() {
                           <Text
                             style={[
                               styles.notificationTitle,
-                              isUnread && styles.notificationTitleUnread,
+                              { color: colors.textSecondary },
+                              isUnread && { color: colors.text, fontWeight: 'bold' },
                             ]}
                           >
                             {notification.title}
@@ -268,12 +295,13 @@ export default function NotificationBell() {
                           <Text
                             style={[
                               styles.notificationMessage,
-                              isUnread && styles.notificationMessageUnread,
+                              { color: colors.textSecondary },
+                              isUnread && { color: colors.text, fontWeight: '500' },
                             ]}
                           >
                             {notification.message}
                           </Text>
-                          <Text style={styles.notificationTime}>
+                          <Text style={[styles.notificationTime, { color: colors.textMuted }]}>
                             {formatTime(
                               notification.createdAt || new Date().toISOString()
                             )}
@@ -290,7 +318,7 @@ export default function NotificationBell() {
                             style={styles.markReadButton}
                             activeOpacity={0.7}
                           >
-                            <Ionicons name="close" size={16} color="#666" />
+                            <Ionicons name="close" size={16} color={colors.textSecondary} />
                           </TouchableOpacity>
                         )}
                       </TouchableOpacity>
@@ -343,9 +371,7 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-  },
-  blurOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
   },
   closeOverlay: {
     flex: 1,
@@ -398,6 +424,18 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 12,
     fontWeight: "600",
+  },
+  clearAllButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+    gap: 4,
+  },
+  clearAllText: {
+    fontSize: 12,
+    fontWeight: "500",
   },
   closeButton: {
     width: 32,

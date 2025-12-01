@@ -950,6 +950,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
+  // Delete all notifications for a user
+  app.delete("/api/notifications", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.id;
+      await storage.deleteAllNotifications(userId);
+      res.json({ message: "All notifications deleted" });
+    } catch (error) {
+      console.error("Error deleting all notifications:", error);
+      res.status(500).json({ message: "Failed to delete notifications" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   // WebSocket server for real-time location updates
