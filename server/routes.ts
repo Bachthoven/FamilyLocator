@@ -639,6 +639,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.id;
       const places = await storage.getFamilyPlaces(userId);
+      // Prevent HTTP caching to ensure fresh data after updates
+      res.set("Cache-Control", "no-store, no-cache, must-revalidate");
+      res.set("Pragma", "no-cache");
+      res.set("Expires", "0");
       res.json(places);
     } catch (error) {
       console.error("Error fetching places:", error);
