@@ -849,7 +849,12 @@ export default function MapScreen({
 
       {/* Members Indicator - Top Center */}
       <View style={[styles.membersIndicator, { top: insets.top + 16 }]}>
-        <BlurView intensity={100} style={styles.membersIndicatorBlur} >
+        <BlurView 
+          intensity={80} 
+          tint="light"
+          style={styles.membersIndicatorBlur} 
+          experimentalBlurMethod="dimezisBlurView"
+        >
           <View style={styles.membersIndicatorContent}>
             <View style={styles.statusDot} />
             <Text style={styles.membersText}>
