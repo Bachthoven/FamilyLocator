@@ -28,9 +28,6 @@ function AppContent() {
   const colors = useThemeColors();
   const colorScheme = useColorScheme();
   const [activeTab, setActiveTab] = useState<TabName>("Map");
-
-  // Register Native Notify push token (following exact docs: https://app.nativenotify.com/in-app)
-  registerNNPushToken(32894, 'kmj1gPUDYhaAKAZm1ep1vV');
   const [focusLocation, setFocusLocation] = useState<{
     latitude: number;
     longitude: number;
@@ -123,6 +120,9 @@ function AppContent() {
 }
 
 export default function App() {
+  // Register Native Notify push token (following exact docs: https://app.nativenotify.com/in-app)
+  registerNNPushToken(32894, 'kmj1gPUDYhaAKAZm1ep1vV');
+
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
