@@ -47,6 +47,7 @@ interface Place {
 interface DragState {
   placeId: number;
   placeName: string;
+  placeCategory?: string;
   originalCoordinate: { latitude: number; longitude: number };
   currentCoordinate: { latitude: number; longitude: number };
 }
@@ -834,7 +835,14 @@ export default function MapScreen({
       {/* Center marker for repositioning mode */}
       {dragState && (
         <View style={styles.repositionMarkerContainer} pointerEvents="none">
-          <View style={styles.repositionMarker}>
+          <View style={[styles.repositionMarker, { 
+            backgroundColor: {
+              home: "#3B82F6",
+              work: "#10B981",
+              school: "#8B5CF6",
+              other: "#F97316",
+            }[dragState.placeCategory || "other"] || "#F97316"
+          }]}>
             <View style={styles.repositionMarkerDot} />
           </View>
         </View>
@@ -1075,6 +1083,7 @@ export default function MapScreen({
                   setDragState({
                     placeId: selectedMarker.id!,
                     placeName: selectedMarker.name,
+                    placeCategory: selectedMarker.category,
                     originalCoordinate: selectedMarker.coordinate,
                     currentCoordinate: selectedMarker.coordinate,
                   });
