@@ -1,16 +1,20 @@
 const API_URL = "https://app.nativenotify.com/api";
 
+// Native Notify credentials (from docs: https://app.nativenotify.com/in-app)
+const NATIVE_NOTIFY_APP_ID = 32894;
+const NATIVE_NOTIFY_APP_TOKEN = 'kmj1gPUDYhaAKAZm1ep1vV';
+
 interface MassNotificationParams {
-  appId: number;
-  appToken: string;
+  appId?: number;
+  appToken?: string;
   title: string;
   body: string;
   dateSent?: string;
 }
 
 interface IndieNotificationParams {
-  appId: number;
-  appToken: string;
+  appId?: number;
+  appToken?: string;
   subID: string;
   title: string;
   message: string;
@@ -27,8 +31,8 @@ export async function sendMassNotification(
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        appId: params.appId,
-        appToken: params.appToken,
+        appId: params.appId || NATIVE_NOTIFY_APP_ID,
+        appToken: params.appToken || NATIVE_NOTIFY_APP_TOKEN,
         title: params.title,
         body: params.body,
         dateSent: params.dateSent || new Date().toISOString(),
@@ -65,8 +69,8 @@ export async function sendIndieNotification(
       },
       body: JSON.stringify({
         subID: params.subID,
-        appId: params.appId,
-        appToken: params.appToken,
+        appId: params.appId || NATIVE_NOTIFY_APP_ID,
+        appToken: params.appToken || NATIVE_NOTIFY_APP_TOKEN,
         title: params.title,
         message: params.message,
         pushData: params.pushData,
@@ -108,18 +112,21 @@ export function createProximityNotificationPayload(
 
 export async function registerIndieUser(
   subID: string,
-  appId: number,
-  appToken: string
+  appId?: number,
+  appToken?: string
 ): Promise<void> {
   const { registerIndieID } = await import("native-notify");
-  registerIndieID(subID, appId, appToken);
+  registerIndieID(subID, appId || NATIVE_NOTIFY_APP_ID, appToken || NATIVE_NOTIFY_APP_TOKEN);
 }
 
 export async function unregisterIndieUser(
   subID: string,
-  appId: number,
-  appToken: string
+  appId?: number,
+  appToken?: string
 ): Promise<void> {
   const { unregisterIndieDevice } = await import("native-notify");
-  unregisterIndieDevice(subID, appId, appToken);
+  unregisterIndieDevice(subID, appId || NATIVE_NOTIFY_APP_ID, appToken || NATIVE_NOTIFY_APP_TOKEN);
 }
+
+// Export credentials for use elsewhere
+export { NATIVE_NOTIFY_APP_ID, NATIVE_NOTIFY_APP_TOKEN };

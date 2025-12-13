@@ -20,7 +20,6 @@ import SettingsScreen from "./mobile/screens/SettingsScreen";
 import AuthScreen from "./mobile/screens/AuthScreen";
 import { useThemeColors } from "./mobile/theme/colors";
 import registerNNPushToken from "native-notify";
-import Constants from "expo-constants";
 
 type TabName = "Map" | "Family" | "Places" | "History" | "Settings";
 
@@ -30,25 +29,8 @@ function AppContent() {
   const colorScheme = useColorScheme();
   const [activeTab, setActiveTab] = useState<TabName>("Map");
 
-  // Register Native Notify push token
-  // Credentials are read inside useEffect to ensure Expo config is loaded
-  useEffect(() => {
-    const appId = Constants.expoConfig?.extra?.nativeNotifyAppId;
-    const appToken = Constants.expoConfig?.extra?.nativeNotifyAppToken;
-
-    if (appId && appToken) {
-      try {
-        registerNNPushToken(Number(appId), appToken);
-        console.log("Native Notify registered successfully");
-      } catch (error) {
-        console.log("Native Notify registration error:", error);
-      }
-    } else {
-      console.log(
-        "Native Notify credentials not configured. Push notifications disabled."
-      );
-    }
-  }, []);
+  // Register Native Notify push token (following exact docs: https://app.nativenotify.com/in-app)
+  registerNNPushToken(32894, 'kmj1gPUDYhaAKAZm1ep1vV');
   const [focusLocation, setFocusLocation] = useState<{
     latitude: number;
     longitude: number;
