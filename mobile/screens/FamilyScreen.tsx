@@ -307,7 +307,7 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
     <View
       style={[
         styles.container,
-        { paddingTop: insets.top, backgroundColor: colors.background },
+        { paddingTop: insets.top, backgroundColor: colors.headerBackground },
       ]}
     >
       {/* Header */}

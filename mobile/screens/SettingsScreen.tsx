@@ -233,7 +233,7 @@ export default function SettingsScreen() {
       <View
         style={[
           styles.container,
-          { paddingTop: insets.top, backgroundColor: colors.background },
+          { paddingTop: insets.top, backgroundColor: colors.headerBackground },
         ]}
       >
         <StatusBar style={colors.statusBarStyle} />
@@ -949,7 +949,7 @@ export default function SettingsScreen() {
     <View
       style={[
         styles.container,
-        { paddingTop: insets.top, backgroundColor: colors.background },
+        { paddingTop: insets.top, backgroundColor: colors.headerBackground },
       ]}
     >
       <StatusBar style={colors.statusBarStyle} />

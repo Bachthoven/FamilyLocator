@@ -816,7 +816,7 @@ export default function PlacesScreen() {
     <View
       style={[
         styles.container,
-        { paddingTop: insets.top, backgroundColor: colors.background },
+        { paddingTop: insets.top, backgroundColor: colors.headerBackground },
       ]}
     >
       <View
