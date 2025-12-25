@@ -467,7 +467,7 @@ export default function HistoryScreen() {
         </View>
       ) : (
         <ScrollView
-          style={styles.content}
+          style={[styles.content, { backgroundColor: colors.background }]}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}

@@ -357,7 +357,7 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
       </View>
 
       {/* Content */}
-      <ScrollView style={styles.content}>
+      <ScrollView style={[styles.content, { backgroundColor: colors.background }]}>
         {familyLoading ? (
           // Loading skeletons
           <View style={styles.skeletonsContainer}>
