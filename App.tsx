@@ -51,7 +51,7 @@ function AppContent() {
       <View
         style={[
           styles.loadingContainer,
-          { backgroundColor: colors.background },
+          { backgroundColor: colors.headerBackground },
         ]}
       >
         <ActivityIndicator size="large" color="#0EA5E9" />
@@ -77,7 +77,7 @@ function AppContent() {
 
   // Show main app if logged in
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={[styles.container, { backgroundColor: colors.headerBackground }]}>
       {/* Keep all screens mounted but hide inactive ones to preserve state */}
       <View style={activeTab === "Map" ? styles.screen : styles.hiddenScreen}>
         <MapScreen
