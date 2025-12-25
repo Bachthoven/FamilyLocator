@@ -121,7 +121,7 @@ function AppContent() {
 
 export default function App() {
   // Register Native Notify push token (following exact docs: https://app.nativenotify.com/in-app)
-  registerNNPushToken(32894, 'kmj1gPUDYhaAKAZm1ep1vV');
+  registerNNPushToken(32894, "smjj1gPUDYheAK4Zm1epVw");
 
   return (
     <QueryClientProvider client={queryClient}>
