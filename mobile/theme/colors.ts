@@ -50,7 +50,7 @@ export const lightColors: ThemeColors = {
   primary: "#0EA5E9",
   primaryForeground: "#FFFFFF",
   statusBarStyle: "dark",
-  tabBarBackground: "#FFFFFF",
+  tabBarBackground: "#FFFFFF",  // Same as headerBackground
   tabBarBorder: "#F3F4F6",
   tabBarInactive: "#6B7280",
   controlButtonBackground: "#FFFFFF",
@@ -86,7 +86,7 @@ export const darkColors: ThemeColors = {
   primary: "#0EA5E9",
   primaryForeground: "#FFFFFF",
   statusBarStyle: "light",
-  tabBarBackground: "#1F2937",
+  tabBarBackground: "#1F2937",  // Same as headerBackground
   tabBarBorder: "#2D3748",
   tabBarInactive: "#9CA3AF",
   controlButtonBackground: "#1F2937",
