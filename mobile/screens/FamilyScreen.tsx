@@ -495,7 +495,7 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                           <Ionicons
                             name="trash-outline"
                             size={20}
-                            color={colors.textSecondary}
+                            color="#EF4444"
                           />
                         </TouchableOpacity>
                       </View>
@@ -652,7 +652,7 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                           onPress={() => handleViewLocation(member)}
                           data-testid={`button-view-location-${member.id}`}
                         >
-                          <Ionicons name="location" size={16} color="#0EA5E9" />
+                          <Ionicons name="location" size={20} color="#0EA5E9" />
                           <Text style={styles.actionButtonText}>View</Text>
                         </TouchableOpacity>
                       ) : (
@@ -672,7 +672,7 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                       >
                         <Ionicons
                           name="trash-outline"
-                          size={16}
+                          size={20}
                           color="#EF4444"
                         />
                       </TouchableOpacity>

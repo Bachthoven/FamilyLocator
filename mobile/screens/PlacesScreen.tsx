@@ -303,7 +303,7 @@ export default function PlacesScreen() {
               onPress={() => handleDeletePlace(place)}
               data-testid={`button-delete-place-${place.id}`}
             >
-              <Ionicons name="trash-outline" size={18} color="#EF4444" />
+              <Ionicons name="trash-outline" size={20} color="#EF4444" />
             </TouchableOpacity>
           </View>
         </View>
