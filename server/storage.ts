@@ -76,6 +76,7 @@ export interface IStorage {
   getInvitationByCode(code: string): Promise<InvitationCode | undefined>;
   useInvitationCode(code: string, userId: number): Promise<InvitationCode>;
   getUserActiveCodes(userId: number): Promise<InvitationCode[]>;
+  deleteInvitationCode(userId: number, codeId: number): Promise<void>;
 
   // Notification operations
   createNotification(notification: InsertNotification): Promise<Notification>;
@@ -513,6 +514,17 @@ export class DatabaseStorage implements IStorage {
           eq(invitationCodes.userId, userId),
           sql`${invitationCodes.usedAt} IS NULL`,
           sql`${invitationCodes.expiresAt} > NOW()`
+        )
+      );
+  }
+
+  async deleteInvitationCode(userId: number, codeId: number): Promise<void> {
+    await db
+      .delete(invitationCodes)
+      .where(
+        and(
+          eq(invitationCodes.id, codeId),
+          eq(invitationCodes.userId, userId)
         )
       );
   }

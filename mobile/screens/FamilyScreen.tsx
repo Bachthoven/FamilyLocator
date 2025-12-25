@@ -167,6 +167,26 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
     },
   });
 
+  // Delete invitation code mutation
+  const deleteCodeMutation = useMutation({
+    mutationFn: async (codeId: number) => {
+      await apiRequest("DELETE", `/api/family/codes/${codeId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/family/codes"] });
+    },
+    onError: () => {
+      setAlertConfig({
+        visible: true,
+        title: "Error",
+        message: "Failed to delete invitation code",
+        icon: "alert-circle",
+        iconColor: "#FF3B30",
+        buttons: [{ text: "OK" }],
+      });
+    },
+  });
+
   const copyToClipboard = (code: string) => {
     Clipboard.setString(code);
     setAlertConfig({
@@ -455,17 +475,30 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                           {formatExpiration(code.expiresAt)}
                         </Text>
                       </View>
-                      <TouchableOpacity
-                        style={styles.copyButton}
-                        onPress={() => copyToClipboard(code.code)}
-                        data-testid={`button-copy-${code.code}`}
-                      >
-                        <Ionicons
-                          name="copy-outline"
-                          size={20}
-                          color={colors.primary}
-                        />
-                      </TouchableOpacity>
+                      <View style={styles.codeActions}>
+                        <TouchableOpacity
+                          style={styles.copyButton}
+                          onPress={() => copyToClipboard(code.code)}
+                          data-testid={`button-copy-${code.code}`}
+                        >
+                          <Ionicons
+                            name="copy-outline"
+                            size={20}
+                            color={colors.primary}
+                          />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={styles.deleteCodeButton}
+                          onPress={() => deleteCodeMutation.mutate(code.id)}
+                          data-testid={`button-delete-${code.code}`}
+                        >
+                          <Ionicons
+                            name="trash-outline"
+                            size={20}
+                            color={colors.textSecondary}
+                          />
+                        </TouchableOpacity>
+                      </View>
                     </View>
                   </View>
                 ))}
@@ -981,7 +1014,15 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#6B7280",
   },
+  codeActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
   copyButton: {
+    padding: 8,
+  },
+  deleteCodeButton: {
     padding: 8,
   },
   skeletonsContainer: {

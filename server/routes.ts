@@ -597,6 +597,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete an invitation code
+  app.delete(
+    "/api/family/codes/:codeId",
+    isAuthenticated,
+    async (req: any, res) => {
+      try {
+        const userId = req.user.id;
+        const { codeId } = req.params;
+        await storage.deleteInvitationCode(userId, parseInt(codeId));
+        res.json({ success: true });
+      } catch (error) {
+        console.error("Error deleting invitation code:", error);
+        res.status(500).json({ message: "Failed to delete invitation code" });
+      }
+    }
+  );
+
   app.post(
     "/api/family/accept/:memberId",
     isAuthenticated,
