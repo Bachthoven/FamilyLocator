@@ -499,7 +499,7 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                     <View
                       style={[
                         styles.avatar,
-                        { backgroundColor: colors.avatarBackground },
+                        { backgroundColor: colors.textMuted },
                       ]}
                     >
                       <Text style={styles.avatarText}>
@@ -575,7 +575,7 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                       <View
                         style={[
                           styles.avatar,
-                          { backgroundColor: colors.avatarBackground },
+                          { backgroundColor: colors.textMuted },
                         ]}
                       >
                         <Text style={styles.avatarText}>
