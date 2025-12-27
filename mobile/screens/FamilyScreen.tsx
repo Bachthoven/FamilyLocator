@@ -244,14 +244,6 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
         longitude: locationData.longitude,
         userId: member.id,
       });
-      setAlertConfig({
-        visible: true,
-        title: "Navigating to map",
-        message: `Centering on ${member.firstName || member.email}'s location`,
-        icon: "navigate",
-        iconColor: "#0EA5E9",
-        buttons: [{ text: "OK" }],
-      });
     }
   };
 
