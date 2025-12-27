@@ -977,7 +977,7 @@ const styles = StyleSheet.create({
   },
   modalBackdrop: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    backgroundColor: "transparent",
     justifyContent: "flex-end",
   },
   modalContent: {
@@ -990,8 +990,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: "#E5E7EB",
   },
   modalTitle: {
     fontSize: 20,
@@ -1075,8 +1073,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     padding: 20,
     gap: 12,
-    borderTopWidth: 1,
-    borderTopColor: "#E5E7EB",
   },
   cancelButton: {
     flex: 1,
