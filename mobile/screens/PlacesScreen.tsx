@@ -326,7 +326,7 @@ export default function PlacesScreen() {
           style={[styles.modalContent, { backgroundColor: colors.surface }]}
           onPress={(e) => e.stopPropagation()}
         >
-          <View style={styles.modalHeader}>
+          <View style={[styles.modalHeader, { borderBottomWidth: 1, borderBottomColor: colors.border }]}>
             <Text style={[styles.modalTitle, { color: colors.text }]}>
               Add New Place
             </Text>
@@ -554,7 +554,7 @@ export default function PlacesScreen() {
           style={[styles.modalContent, { backgroundColor: colors.surface }]}
           onPress={(e) => e.stopPropagation()}
         >
-          <View style={styles.modalHeader}>
+          <View style={[styles.modalHeader, { borderBottomWidth: 1, borderBottomColor: colors.border }]}>
             <Text style={[styles.modalTitle, { color: colors.text }]}>
               Edit Place
             </Text>
