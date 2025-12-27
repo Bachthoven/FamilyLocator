@@ -167,15 +167,27 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
     },
   });
 
-  // Delete invitation code mutation
+  // Delete invitation code mutation with optimistic update for instant UI response
   const deleteCodeMutation = useMutation({
     mutationFn: async (codeId: number) => {
       await apiRequest("DELETE", `/api/family/codes/${codeId}`);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/family/codes"] });
+    onMutate: async (codeId: number) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ["/api/family/codes"] });
+      // Snapshot current codes
+      const previousCodes = queryClient.getQueryData(["/api/family/codes"]);
+      // Optimistically remove the code from cache immediately
+      queryClient.setQueryData(["/api/family/codes"], (old: any[] | undefined) =>
+        old ? old.filter((code: any) => code.id !== codeId) : []
+      );
+      return { previousCodes };
     },
-    onError: () => {
+    onError: (_err, _codeId, context) => {
+      // Rollback on error
+      if (context?.previousCodes) {
+        queryClient.setQueryData(["/api/family/codes"], context.previousCodes);
+      }
       setAlertConfig({
         visible: true,
         title: "Error",
@@ -184,6 +196,10 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
         iconColor: "#FF3B30",
         buttons: [{ text: "OK" }],
       });
+    },
+    onSettled: () => {
+      // Refetch to ensure server state sync
+      queryClient.invalidateQueries({ queryKey: ["/api/family/codes"] });
     },
   });
 
