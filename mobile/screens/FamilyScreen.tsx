@@ -849,7 +849,7 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                       color: colors.inputText,
                     },
                   ]}
-                  placeholder="Enter 6-character code"
+                  placeholder="Enter code"
                   placeholderTextColor={colors.inputPlaceholder}
                   value={joinCode}
                   onChangeText={(text) => setJoinCode(text.toUpperCase())}
@@ -874,10 +874,14 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                   }
                   data-testid="button-submit-join"
                 >
+                  <Ionicons
+                    name={joinFamilyMutation.isPending ? "hourglass-outline" : "people"}
+                    size={18}
+                    color="#FFFFFF"
+                    style={{ marginRight: 6 }}
+                  />
                   <Text style={styles.primaryButtonText}>
-                    {joinFamilyMutation.isPending
-                      ? "Joining..."
-                      : "Join Family"}
+                    {joinFamilyMutation.isPending ? "Joining..." : "Join"}
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
