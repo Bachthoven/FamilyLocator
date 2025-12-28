@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
   Alert,
   RefreshControl,
+  Keyboard,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -92,6 +93,107 @@ export default function PlacesScreen() {
   });
   const [useCurrentLocation, setUseCurrentLocation] = useState(false);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
+
+  // Autocomplete state
+  const [addressSuggestions, setAddressSuggestions] = useState<Array<{
+    name: string;
+    address: string;
+    latitude: number;
+    longitude: number;
+  }>>([]);
+  const [isSearchingAddress, setIsSearchingAddress] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Photon API for OpenStreetMap-based autocomplete
+  const searchAddress = useCallback(async (query: string) => {
+    if (query.length < 3) {
+      setAddressSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    setIsSearchingAddress(true);
+    try {
+      const url = `https://photon.komoot.io/api?q=${encodeURIComponent(query)}&limit=5`;
+      const response = await fetch(url);
+      const data = await response.json();
+
+      const suggestions = data.features?.map((feature: any) => {
+        const props = feature.properties;
+        const coords = feature.geometry.coordinates;
+        
+        // Build a readable address from properties
+        const parts: string[] = [];
+        if (props.name) parts.push(props.name);
+        if (props.housenumber && props.street) {
+          parts.push(`${props.housenumber} ${props.street}`);
+        } else if (props.street) {
+          parts.push(props.street);
+        }
+        if (props.city) parts.push(props.city);
+        if (props.state) parts.push(props.state);
+        if (props.country) parts.push(props.country);
+
+        return {
+          name: props.name || props.street || "Unknown",
+          address: parts.join(", "),
+          latitude: coords[1], // GeoJSON is [lon, lat]
+          longitude: coords[0],
+        };
+      }) || [];
+
+      setAddressSuggestions(suggestions);
+      setShowSuggestions(suggestions.length > 0);
+    } catch (error) {
+      console.error("Address search error:", error);
+      setAddressSuggestions([]);
+    } finally {
+      setIsSearchingAddress(false);
+    }
+  }, []);
+
+  // Debounced address search
+  const handleAddressChange = useCallback((text: string) => {
+    setNewPlace((prev) => ({ ...prev, address: text }));
+    
+    // Clear previous timeout
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    // Debounce the search
+    searchTimeoutRef.current = setTimeout(() => {
+      searchAddress(text);
+    }, 300);
+  }, [searchAddress]);
+
+  // Select a suggestion
+  const selectSuggestion = useCallback((suggestion: {
+    name: string;
+    address: string;
+    latitude: number;
+    longitude: number;
+  }) => {
+    setNewPlace((prev) => ({
+      ...prev,
+      address: suggestion.address,
+      latitude: suggestion.latitude,
+      longitude: suggestion.longitude,
+    }));
+    setShowSuggestions(false);
+    setAddressSuggestions([]);
+    Keyboard.dismiss();
+  }, []);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const {
     data: places = [],
@@ -400,28 +502,60 @@ export default function PlacesScreen() {
                   )}
                 </TouchableOpacity>
               </View>
-              <TextInput
-                style={[
-                  styles.input,
-                  {
-                    backgroundColor: useCurrentLocation
-                      ? "#DCFCE7"
-                      : colors.inputBackground,
-                    borderColor: useCurrentLocation
-                      ? "#86EFAC"
-                      : colors.inputBorder,
-                    color: colors.text,
-                  },
-                ]}
-                placeholder="Start typing an address..."
-                placeholderTextColor={colors.textMuted}
-                value={newPlace.address}
-                onChangeText={(text) =>
-                  setNewPlace((prev) => ({ ...prev, address: text }))
-                }
-                editable={!useCurrentLocation}
-                data-testid="input-place-address"
-              />
+              <View style={styles.addressInputContainer}>
+                <TextInput
+                  style={[
+                    styles.input,
+                    {
+                      backgroundColor: useCurrentLocation
+                        ? "#DCFCE7"
+                        : colors.inputBackground,
+                      borderColor: useCurrentLocation
+                        ? "#86EFAC"
+                        : colors.inputBorder,
+                      color: colors.text,
+                    },
+                  ]}
+                  placeholder="Start typing an address..."
+                  placeholderTextColor={colors.textMuted}
+                  value={newPlace.address}
+                  onChangeText={handleAddressChange}
+                  editable={!useCurrentLocation}
+                  data-testid="input-place-address"
+                />
+                {isSearchingAddress && (
+                  <View style={styles.searchingIndicator}>
+                    <ActivityIndicator size="small" color={colors.primary} />
+                  </View>
+                )}
+              </View>
+
+              {/* Address Suggestions Dropdown */}
+              {showSuggestions && addressSuggestions.length > 0 && (
+                <View style={[styles.suggestionsContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+                  {addressSuggestions.map((suggestion, index) => (
+                    <TouchableOpacity
+                      key={index}
+                      style={[
+                        styles.suggestionItem,
+                        index < addressSuggestions.length - 1 && { borderBottomWidth: 1, borderBottomColor: colors.border },
+                      ]}
+                      onPress={() => selectSuggestion(suggestion)}
+                      data-testid={`suggestion-${index}`}
+                    >
+                      <Ionicons name="location-outline" size={16} color={colors.primary} style={styles.suggestionIcon} />
+                      <View style={styles.suggestionText}>
+                        <Text style={[styles.suggestionName, { color: colors.text }]} numberOfLines={1}>
+                          {suggestion.name}
+                        </Text>
+                        <Text style={[styles.suggestionAddress, { color: colors.textSecondary }]} numberOfLines={1}>
+                          {suggestion.address}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              )}
             </View>
 
             <View style={styles.formGroup}>
@@ -1224,5 +1358,40 @@ const styles = StyleSheet.create({
   statLabel: {
     fontSize: 13,
     marginTop: 4,
+  },
+  addressInputContainer: {
+    position: "relative",
+  },
+  searchingIndicator: {
+    position: "absolute",
+    right: 12,
+    top: 12,
+  },
+  suggestionsContainer: {
+    borderWidth: 1,
+    borderRadius: 8,
+    marginTop: 4,
+    maxHeight: 200,
+    overflow: "hidden",
+  },
+  suggestionItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+  },
+  suggestionIcon: {
+    marginRight: 10,
+  },
+  suggestionText: {
+    flex: 1,
+  },
+  suggestionName: {
+    fontSize: 14,
+    fontWeight: "600",
+    marginBottom: 2,
+  },
+  suggestionAddress: {
+    fontSize: 12,
   },
 });

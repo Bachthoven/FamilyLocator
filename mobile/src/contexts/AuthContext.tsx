@@ -50,13 +50,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         const token = await secureStorage.getAuthToken();
         if (token) {
-          console.log("[AuthContext] Found stored auth token, length:", token.length);
           setHasToken(true);
-        } else {
-          console.log("[AuthContext] No stored auth token found");
         }
       } catch (error) {
-        console.log("Error loading auth token:", error);
+        // Silently handle error
       }
       // Small delay to ensure token is in memory before queries run
       setTimeout(() => setIsInitialized(true), 50);
@@ -78,16 +75,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     gcTime: 1000 * 60 * 10, // 10 minutes (previously cacheTime)
   });
 
-  // Debug logging
-  useEffect(() => {
-    if (__DEV__) {
-      console.log("[AuthContext] isInitialized:", isInitialized);
-      console.log("[AuthContext] isLoading:", isLoading);
-      console.log("[AuthContext] isFetching:", isFetching);
-      console.log("[AuthContext] user:", user);
-      console.log("[AuthContext] error:", error);
-    }
-  }, [isInitialized, isLoading, isFetching, user, error]);
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginData) => {
@@ -102,9 +89,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (token) {
         try {
           await secureStorage.saveAuthToken(token);
-          console.log("[AuthContext] Saved auth token");
         } catch (error) {
-          console.log("Error saving auth token:", error);
+          // Silently handle error
         }
       }
     },
@@ -132,9 +118,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (token) {
         try {
           await secureStorage.saveAuthToken(token);
-          console.log("[AuthContext] Saved auth token");
         } catch (error) {
-          console.log("Error saving auth token:", error);
+          // Silently handle error
         }
       }
     },
@@ -160,9 +145,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Clear auth token from SecureStore
       try {
         await secureStorage.deleteAuthToken();
-        console.log("[AuthContext] Cleared auth token");
       } catch (error) {
-        console.log("Error clearing auth token:", error);
+        // Silently handle error
       }
     },
     onError: (error: Error) => {
