@@ -525,13 +525,92 @@ export default function MapScreen({
     });
   }, [familyLocationsData, places, calculateDistance, showProximityAlert]);
 
-  // Get location only if we don't have a saved region and no current location
+  // Get location immediately on mount - use fast method first, then refine
   useEffect(() => {
-    if (!hasInitializedLocation.current && !currentLocation && !savedRegion) {
-      getCurrentLocation();
+    if (!hasInitializedLocation.current && !currentLocation) {
       hasInitializedLocation.current = true;
+      getLocationFast();
     }
   }, []);
+
+  // Fast location: get last known position immediately, then refine with accurate position
+  const getLocationFast = async () => {
+    try {
+      // Request permissions first
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        setAlertConfig({
+          visible: true,
+          title: "Permission Required",
+          message: "Please enable location permissions to see yourself on the map.",
+          icon: "location",
+          iconColor: "#FF3B30",
+        });
+        return;
+      }
+
+      // Try to get last known position instantly (cached)
+      const lastKnown = await Location.getLastKnownPositionAsync({
+        maxAge: 60000, // Accept positions up to 1 minute old
+      });
+
+      if (lastKnown) {
+        const { latitude, longitude } = lastKnown.coords;
+        onLocationUpdate?.({ latitude, longitude });
+        
+        const newRegion = {
+          latitude,
+          longitude,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        };
+        
+        // Center map immediately
+        mapRef.current?.animateToRegion(newRegion, 300);
+        onRegionChange?.(newRegion);
+      }
+
+      // Then get fresh accurate position in background
+      const freshLocation = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced, // Faster than High
+      });
+
+      const { latitude, longitude } = freshLocation.coords;
+      onLocationUpdate?.({ latitude, longitude });
+
+      // Only animate if position changed significantly (more than 50m)
+      if (lastKnown) {
+        const distance = Math.sqrt(
+          Math.pow(latitude - lastKnown.coords.latitude, 2) +
+          Math.pow(longitude - lastKnown.coords.longitude, 2)
+        ) * 111000; // rough meters
+        
+        if (distance > 50) {
+          const newRegion = {
+            latitude,
+            longitude,
+            latitudeDelta: 0.01,
+            longitudeDelta: 0.01,
+          };
+          mapRef.current?.animateToRegion(newRegion, 500);
+          onRegionChange?.(newRegion);
+        }
+      } else {
+        const newRegion = {
+          latitude,
+          longitude,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        };
+        mapRef.current?.animateToRegion(newRegion, 500);
+        onRegionChange?.(newRegion);
+      }
+    } catch (error) {
+      console.error("Fast location error:", error);
+      // Fall back to regular method
+      getCurrentLocation();
+    }
+  };
 
   // Only recenter when focusLocation changes (navigation from Family screen)
   useEffect(() => {
