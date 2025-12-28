@@ -10,10 +10,13 @@ import {
   useMutation,
   UseMutationResult,
 } from "@tanstack/react-query";
+import * as SecureStore from "expo-secure-store";
 import { User, InsertUser } from "../../../shared/schema";
 import { getQueryFn, apiRequest, queryClient } from "../lib/queryClient";
 import AlertDialog from "../../components/AlertDialog";
 import { Ionicons } from "@expo/vector-icons";
+
+const USER_STORAGE_KEY = "familylocator_user";
 
 type AuthContextType = {
   user: User | null;
@@ -33,6 +36,7 @@ export const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isInitialized, setIsInitialized] = useState(false);
+  const [cachedUser, setCachedUser] = useState<User | null>(null);
   const [alertConfig, setAlertConfig] = useState<{
     visible: boolean;
     title?: string;
@@ -40,6 +44,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     icon?: keyof typeof Ionicons.glyphMap;
     iconColor?: string;
   }>({ visible: false });
+
+  // Load cached user from SecureStore on app start
+  useEffect(() => {
+    const loadCachedUser = async () => {
+      try {
+        const storedUser = await SecureStore.getItemAsync(USER_STORAGE_KEY);
+        if (storedUser) {
+          const parsedUser = JSON.parse(storedUser);
+          setCachedUser(parsedUser);
+          // Pre-populate the query cache with cached user
+          queryClient.setQueryData(["/api/user"], parsedUser);
+        }
+      } catch (error) {
+        console.log("Error loading cached user:", error);
+      }
+      setIsInitialized(true);
+    };
+    loadCachedUser();
+  }, []);
 
   const {
     data: user,
@@ -54,10 +77,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     staleTime: 1000 * 60 * 5, // 5 minutes
     gcTime: 1000 * 60 * 10, // 10 minutes (previously cacheTime)
   });
-
-  useEffect(() => {
-    setIsInitialized(true);
-  }, []);
 
   // Debug logging
   useEffect(() => {
@@ -75,8 +94,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const res = await apiRequest("POST", "/api/login", credentials);
       return await res.json();
     },
-    onSuccess: (user: User) => {
+    onSuccess: async (user: User) => {
       queryClient.setQueryData(["/api/user"], user);
+      setCachedUser(user);
+      // Save user to SecureStore for persistent login
+      try {
+        await SecureStore.setItemAsync(USER_STORAGE_KEY, JSON.stringify(user));
+      } catch (error) {
+        console.log("Error saving user to storage:", error);
+      }
     },
     onError: (error: Error) => {
       setAlertConfig({
@@ -94,8 +120,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const res = await apiRequest("POST", "/api/register", credentials);
       return await res.json();
     },
-    onSuccess: (user: User) => {
+    onSuccess: async (user: User) => {
       queryClient.setQueryData(["/api/user"], user);
+      setCachedUser(user);
+      // Save user to SecureStore for persistent login
+      try {
+        await SecureStore.setItemAsync(USER_STORAGE_KEY, JSON.stringify(user));
+      } catch (error) {
+        console.log("Error saving user to storage:", error);
+      }
     },
     onError: (error: Error) => {
       setAlertConfig({
@@ -112,9 +145,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     mutationFn: async () => {
       await apiRequest("POST", "/api/logout", {});
     },
-    onSuccess: () => {
+    onSuccess: async () => {
       queryClient.setQueryData(["/api/user"], null);
       queryClient.clear();
+      setCachedUser(null);
+      // Clear user from SecureStore
+      try {
+        await SecureStore.deleteItemAsync(USER_STORAGE_KEY);
+      } catch (error) {
+        console.log("Error clearing user from storage:", error);
+      }
     },
     onError: (error: Error) => {
       setAlertConfig({
@@ -127,11 +167,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
   });
 
+  // Use cached user as fallback when server hasn't responded yet
+  const effectiveUser = user ?? cachedUser;
+
   return (
     <AuthContext.Provider
       value={{
-        user: user ?? null,
-        isLoading: !isInitialized || (isLoading && isFetching),
+        user: effectiveUser,
+        isLoading: !isInitialized || (isLoading && isFetching && !cachedUser),
         error,
         loginMutation,
         logoutMutation,
