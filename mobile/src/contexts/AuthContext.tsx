@@ -34,6 +34,7 @@ export const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isInitialized, setIsInitialized] = useState(false);
+  const [hasToken, setHasToken] = useState(false);
   const [cachedUser, setCachedUser] = useState<User | null>(null);
   const [alertConfig, setAlertConfig] = useState<{
     visible: boolean;
@@ -49,13 +50,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         const token = await secureStorage.getAuthToken();
         if (token) {
-          console.log("[AuthContext] Found stored auth token");
-          // Token is now loaded into memory and will be used for API requests
+          console.log("[AuthContext] Found stored auth token, length:", token.length);
+          setHasToken(true);
+        } else {
+          console.log("[AuthContext] No stored auth token found");
         }
       } catch (error) {
         console.log("Error loading auth token:", error);
       }
-      setIsInitialized(true);
+      // Small delay to ensure token is in memory before queries run
+      setTimeout(() => setIsInitialized(true), 50);
     };
     loadAuthToken();
   }, []);

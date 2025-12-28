@@ -11,6 +11,9 @@ function getAuthHeaders(): Record<string, string> {
   const token = secureStorage.getCurrentToken();
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
+    console.log("[API] Using auth token, length:", token.length);
+  } else {
+    console.log("[API] No auth token available");
   }
   return headers;
 }
