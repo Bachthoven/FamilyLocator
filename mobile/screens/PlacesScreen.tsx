@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useRef } from "react";
 import {
   View,
   Text,
@@ -11,11 +11,13 @@ import {
   ActivityIndicator,
   Alert,
   RefreshControl,
+  Dimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
+import MapView, { PROVIDER_GOOGLE, Region } from "react-native-maps";
 import { useThemeColors } from "../theme/colors";
 import { apiRequest } from "../src/lib/queryClient";
 import { useAuth } from "../src/contexts/AuthContext";
@@ -81,6 +83,15 @@ export default function PlacesScreen() {
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [editingPlace, setEditingPlace] = useState<Place | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [mapPickerVisible, setMapPickerVisible] = useState(false);
+  const [mapPickerMode, setMapPickerMode] = useState<"add" | "edit">("add");
+  const [mapPickerRegion, setMapPickerRegion] = useState<Region>({
+    latitude: 37.7749,
+    longitude: -122.4194,
+    latitudeDelta: 0.01,
+    longitudeDelta: 0.01,
+  });
+  const mapPickerRef = useRef<MapView>(null);
 
   const [newPlace, setNewPlace] = useState({
     name: "",
@@ -193,6 +204,50 @@ export default function PlacesScreen() {
     } finally {
       setIsGettingLocation(false);
     }
+  };
+
+  const openMapPicker = async (mode: "add" | "edit") => {
+    setMapPickerMode(mode);
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status === "granted") {
+        const location = await Location.getCurrentPositionAsync({});
+        setMapPickerRegion({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        });
+      }
+    } catch (error) {
+      // Use default region if location unavailable
+    }
+    setMapPickerVisible(true);
+  };
+
+  const confirmMapSelection = () => {
+    const coordsText = `${mapPickerRegion.latitude.toFixed(6)}, ${mapPickerRegion.longitude.toFixed(6)}`;
+    if (mapPickerMode === "add") {
+      setNewPlace((prev) => ({
+        ...prev,
+        latitude: mapPickerRegion.latitude,
+        longitude: mapPickerRegion.longitude,
+        address: `Selected: ${coordsText}`,
+      }));
+      setUseCurrentLocation(true);
+    } else if (mapPickerMode === "edit" && editingPlace) {
+      setEditingPlace((prev) =>
+        prev
+          ? {
+              ...prev,
+              latitude: mapPickerRegion.latitude,
+              longitude: mapPickerRegion.longitude,
+              address: `Selected: ${coordsText}`,
+            }
+          : null
+      );
+    }
+    setMapPickerVisible(false);
   };
 
   const handleAddPlace = () => {
@@ -368,12 +423,14 @@ export default function PlacesScreen() {
             <View style={styles.formGroup}>
               <View style={styles.labelRow}>
                 <Text style={[styles.label, { color: colors.text }]}>
-                  Address *
+                  Location *
                 </Text>
+              </View>
+              <View style={styles.locationOptionsRow}>
                 <TouchableOpacity
                   style={[
-                    styles.locationButton,
-                    { borderColor: colors.primary },
+                    styles.locationOptionButton,
+                    { borderColor: colors.primary, backgroundColor: colors.surfaceSecondary },
                   ]}
                   onPress={getCurrentLocation}
                   disabled={isGettingLocation}
@@ -383,21 +440,25 @@ export default function PlacesScreen() {
                     <ActivityIndicator size="small" color={colors.primary} />
                   ) : (
                     <>
-                      <Ionicons
-                        name="location"
-                        size={14}
-                        color={colors.primary}
-                      />
-                      <Text
-                        style={[
-                          styles.locationButtonText,
-                          { color: colors.primary },
-                        ]}
-                      >
-                        Use Current Location
+                      <Ionicons name="navigate" size={16} color={colors.primary} />
+                      <Text style={[styles.locationOptionText, { color: colors.primary }]}>
+                        Current
                       </Text>
                     </>
                   )}
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.locationOptionButton,
+                    { borderColor: colors.primary, backgroundColor: colors.surfaceSecondary },
+                  ]}
+                  onPress={() => openMapPicker("add")}
+                  data-testid="button-select-on-map"
+                >
+                  <Ionicons name="map" size={16} color={colors.primary} />
+                  <Text style={[styles.locationOptionText, { color: colors.primary }]}>
+                    Select on Map
+                  </Text>
                 </TouchableOpacity>
               </View>
               <TextInput
@@ -413,7 +474,7 @@ export default function PlacesScreen() {
                     color: colors.text,
                   },
                 ]}
-                placeholder="Start typing an address..."
+                placeholder="Or type coordinates manually..."
                 placeholderTextColor={colors.textMuted}
                 value={newPlace.address}
                 onChangeText={(text) =>
@@ -911,6 +972,61 @@ export default function PlacesScreen() {
 
       {renderAddModal()}
       {renderEditModal()}
+
+      {/* Map Picker Modal */}
+      <Modal
+        visible={mapPickerVisible}
+        animationType="slide"
+        onRequestClose={() => setMapPickerVisible(false)}
+      >
+        <View style={[styles.mapPickerContainer, { backgroundColor: colors.background }]}>
+          <View style={[styles.mapPickerHeader, { backgroundColor: colors.headerBackground }]}>
+            <TouchableOpacity
+              onPress={() => setMapPickerVisible(false)}
+              style={styles.mapPickerCloseButton}
+              data-testid="button-close-map-picker"
+            >
+              <Ionicons name="close" size={24} color={colors.text} />
+            </TouchableOpacity>
+            <Text style={[styles.mapPickerTitle, { color: colors.text }]}>
+              Select Location
+            </Text>
+            <TouchableOpacity
+              onPress={confirmMapSelection}
+              style={[styles.mapPickerConfirmButton, { backgroundColor: colors.primary }]}
+              data-testid="button-confirm-map-selection"
+            >
+              <Ionicons name="checkmark" size={20} color="#FFFFFF" />
+              <Text style={styles.mapPickerConfirmText}>Done</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.mapPickerMapContainer}>
+            <MapView
+              ref={mapPickerRef}
+              provider={PROVIDER_GOOGLE}
+              style={styles.mapPickerMap}
+              initialRegion={mapPickerRegion}
+              onRegionChangeComplete={setMapPickerRegion}
+              showsUserLocation={true}
+              showsMyLocationButton={false}
+            />
+            {/* Center crosshair */}
+            <View style={styles.mapPickerCrosshair} pointerEvents="none">
+              <View style={[styles.crosshairVertical, { backgroundColor: colors.primary }]} />
+              <View style={[styles.crosshairHorizontal, { backgroundColor: colors.primary }]} />
+              <View style={[styles.crosshairDot, { backgroundColor: colors.primary }]} />
+            </View>
+          </View>
+
+          <View style={[styles.mapPickerFooter, { backgroundColor: colors.surface }]}>
+            <Ionicons name="location" size={20} color={colors.primary} />
+            <Text style={[styles.mapPickerCoords, { color: colors.text }]}>
+              {mapPickerRegion.latitude.toFixed(6)}, {mapPickerRegion.longitude.toFixed(6)}
+            </Text>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -1057,6 +1173,103 @@ const styles = StyleSheet.create({
   },
   locationButtonText: {
     fontSize: 12,
+    fontWeight: "500",
+  },
+  locationOptionsRow: {
+    flexDirection: "row",
+    gap: 10,
+    marginBottom: 12,
+  },
+  locationOptionButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    gap: 6,
+  },
+  locationOptionText: {
+    fontSize: 14,
+    fontWeight: "500",
+  },
+  mapPickerContainer: {
+    flex: 1,
+  },
+  mapPickerHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    paddingTop: 50,
+  },
+  mapPickerCloseButton: {
+    padding: 8,
+  },
+  mapPickerTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+  },
+  mapPickerConfirmButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+    gap: 6,
+  },
+  mapPickerConfirmText: {
+    color: "#FFFFFF",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  mapPickerMapContainer: {
+    flex: 1,
+    position: "relative",
+  },
+  mapPickerMap: {
+    flex: 1,
+  },
+  mapPickerCrosshair: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    width: 40,
+    height: 40,
+    marginLeft: -20,
+    marginTop: -20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  crosshairVertical: {
+    position: "absolute",
+    width: 2,
+    height: 40,
+    borderRadius: 1,
+  },
+  crosshairHorizontal: {
+    position: "absolute",
+    width: 40,
+    height: 2,
+    borderRadius: 1,
+  },
+  crosshairDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+  },
+  mapPickerFooter: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 16,
+    gap: 8,
+    paddingBottom: 40,
+  },
+  mapPickerCoords: {
+    fontSize: 14,
     fontWeight: "500",
   },
   input: {
