@@ -474,6 +474,23 @@ export default function PlacesScreen() {
                     </Text>
                   </TouchableOpacity>
                 ))}
+                <TouchableOpacity
+                  style={[
+                    styles.categoryButton,
+                    {
+                      backgroundColor: colors.surfaceSecondary,
+                      borderColor: colors.border,
+                      borderStyle: "dashed",
+                    },
+                  ]}
+                  onPress={() => Alert.alert("Coming Soon", "Custom categories will be available in a future update")}
+                  data-testid="button-add-category"
+                >
+                  <Ionicons name="add" size={18} color={colors.textSecondary} />
+                  <Text style={[styles.categoryButtonText, { color: colors.textSecondary }]}>
+                    Add
+                  </Text>
+                </TouchableOpacity>
               </View>
             </View>
 
@@ -648,6 +665,23 @@ export default function PlacesScreen() {
                       </Text>
                     </TouchableOpacity>
                   ))}
+                  <TouchableOpacity
+                    style={[
+                      styles.categoryButton,
+                      {
+                        backgroundColor: colors.surfaceSecondary,
+                        borderColor: colors.border,
+                        borderStyle: "dashed",
+                      },
+                    ]}
+                    onPress={() => Alert.alert("Coming Soon", "Custom categories will be available in a future update")}
+                    data-testid="button-add-category-edit"
+                  >
+                    <Ionicons name="add" size={18} color={colors.textSecondary} />
+                    <Text style={[styles.categoryButtonText, { color: colors.textSecondary }]}>
+                      Add
+                    </Text>
+                  </TouchableOpacity>
                 </View>
               </View>
 
