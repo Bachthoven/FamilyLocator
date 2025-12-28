@@ -1,12 +1,32 @@
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
-import { Express } from "express";
+import { Express, Request, Response, NextFunction } from "express";
 import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
 import { User, InsertUser } from "@shared/schema";
 import MemoryStore from "memorystore";
+import jwt from "jsonwebtoken";
+
+const JWT_SECRET = process.env.JWT_SECRET || "familylocator-jwt-secret-key-for-development-2024";
+const JWT_EXPIRES_IN = "7d";
+
+function generateToken(user: User): string {
+  return jwt.sign(
+    { userId: user.id, email: user.email },
+    JWT_SECRET,
+    { expiresIn: JWT_EXPIRES_IN }
+  );
+}
+
+function verifyToken(token: string): { userId: number; email: string } | null {
+  try {
+    return jwt.verify(token, JWT_SECRET) as { userId: number; email: string };
+  } catch {
+    return null;
+  }
+}
 
 declare global {
   namespace Express {
@@ -148,6 +168,7 @@ export function setupAuth(app: Express) {
 
       req.login(user, (err) => {
         if (err) return next(err);
+        const token = generateToken(user);
         res.status(201).json({
           id: user.id,
           email: user.email,
@@ -157,6 +178,7 @@ export function setupAuth(app: Express) {
           locationSharingEnabled: user.locationSharingEnabled ?? true,
           locationHistoryEnabled: user.locationHistoryEnabled ?? true,
           notificationsEnabled: user.notificationsEnabled ?? true,
+          token, // JWT token for mobile auth
         });
       });
     } catch (error) {
@@ -184,6 +206,7 @@ export function setupAuth(app: Express) {
           console.error("[Login] Session error:", err);
           return next(err);
         }
+        const token = generateToken(user);
         res.status(200).json({
           id: user.id,
           email: user.email,
@@ -193,6 +216,7 @@ export function setupAuth(app: Express) {
           locationSharingEnabled: user.locationSharingEnabled ?? true,
           locationHistoryEnabled: user.locationHistoryEnabled ?? true,
           notificationsEnabled: user.notificationsEnabled ?? true,
+          token, // JWT token for mobile auth
         });
       });
     })(req, res, next);
@@ -205,20 +229,44 @@ export function setupAuth(app: Express) {
     });
   });
 
-  app.get("/api/user", (req, res) => {
-    if (!req.isAuthenticated() || !req.user) {
-      return res.status(401).json({ message: "Unauthorized" });
+  app.get("/api/user", async (req: any, res) => {
+    // Check session-based auth first
+    if (req.isAuthenticated() && req.user) {
+      return res.json({
+        id: req.user.id,
+        email: req.user.email,
+        firstName: req.user.firstName,
+        lastName: req.user.lastName,
+        profileImageUrl: req.user.profileImageUrl,
+        locationSharingEnabled: req.user.locationSharingEnabled ?? true,
+        locationHistoryEnabled: req.user.locationHistoryEnabled ?? true,
+        notificationsEnabled: req.user.notificationsEnabled ?? true,
+      });
     }
-    res.json({
-      id: req.user.id,
-      email: req.user.email,
-      firstName: req.user.firstName,
-      lastName: req.user.lastName,
-      profileImageUrl: req.user.profileImageUrl,
-      locationSharingEnabled: req.user.locationSharingEnabled ?? true,
-      locationHistoryEnabled: req.user.locationHistoryEnabled ?? true,
-      notificationsEnabled: req.user.notificationsEnabled ?? true,
-    });
+
+    // Check JWT token (for mobile)
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      const token = authHeader.substring(7);
+      const decoded = verifyToken(token);
+      if (decoded) {
+        const user = await storage.getUser(decoded.userId);
+        if (user) {
+          return res.json({
+            id: user.id,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            profileImageUrl: user.profileImageUrl,
+            locationSharingEnabled: user.locationSharingEnabled ?? true,
+            locationHistoryEnabled: user.locationHistoryEnabled ?? true,
+            notificationsEnabled: user.notificationsEnabled ?? true,
+          });
+        }
+      }
+    }
+
+    return res.status(401).json({ message: "Unauthorized" });
   });
 
   // Alias for compatibility with frontend useAuth hook
@@ -239,9 +287,25 @@ export function setupAuth(app: Express) {
   });
 }
 
-export function isAuthenticated(req: any, res: any, next: any) {
+export async function isAuthenticated(req: any, res: any, next: any) {
+  // First check session-based auth (for web)
   if (req.isAuthenticated() && req.user) {
     return next();
   }
+
+  // Then check JWT token (for mobile)
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    const token = authHeader.substring(7);
+    const decoded = verifyToken(token);
+    if (decoded) {
+      const user = await storage.getUser(decoded.userId);
+      if (user) {
+        req.user = user;
+        return next();
+      }
+    }
+  }
+
   res.status(401).json({ message: "Unauthorized" });
 }

@@ -1,7 +1,19 @@
 import { QueryClient } from "@tanstack/react-query";
 import { API_URL } from "../api/config";
+import { secureStorage } from "./secureStorage";
 
 type RequestMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
+
+function getAuthHeaders(): Record<string, string> {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  const token = secureStorage.getCurrentToken();
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+  return headers;
+}
 
 export function getQueryFn(options?: {
   on401?: "throw" | "returnNull";
@@ -13,9 +25,7 @@ export function getQueryFn(options?: {
     try {
       const response = await fetch(fullUrl, {
         credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: getAuthHeaders(),
       });
 
       if (response.status === 401) {
@@ -64,9 +74,7 @@ export async function apiRequest(
 ): Promise<Response> {
   const options: RequestInit = {
     method,
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: getAuthHeaders(),
     credentials: "include",
   };
 

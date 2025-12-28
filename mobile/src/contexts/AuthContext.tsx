@@ -10,13 +10,11 @@ import {
   useMutation,
   UseMutationResult,
 } from "@tanstack/react-query";
-import * as SecureStore from "expo-secure-store";
 import { User, InsertUser } from "../../../shared/schema";
 import { getQueryFn, apiRequest, queryClient } from "../lib/queryClient";
+import { secureStorage } from "../lib/secureStorage";
 import AlertDialog from "../../components/AlertDialog";
 import { Ionicons } from "@expo/vector-icons";
-
-const USER_STORAGE_KEY = "familylocator_user";
 
 type AuthContextType = {
   user: User | null;
@@ -45,23 +43,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     iconColor?: string;
   }>({ visible: false });
 
-  // Load cached user from SecureStore on app start
+  // Load auth token from SecureStore on app start
   useEffect(() => {
-    const loadCachedUser = async () => {
+    const loadAuthToken = async () => {
       try {
-        const storedUser = await SecureStore.getItemAsync(USER_STORAGE_KEY);
-        if (storedUser) {
-          const parsedUser = JSON.parse(storedUser);
-          setCachedUser(parsedUser);
-          // Pre-populate the query cache with cached user
-          queryClient.setQueryData(["/api/user"], parsedUser);
+        const token = await secureStorage.getAuthToken();
+        if (token) {
+          console.log("[AuthContext] Found stored auth token");
+          // Token is now loaded into memory and will be used for API requests
         }
       } catch (error) {
-        console.log("Error loading cached user:", error);
+        console.log("Error loading auth token:", error);
       }
       setIsInitialized(true);
     };
-    loadCachedUser();
+    loadAuthToken();
   }, []);
 
   const {
@@ -94,14 +90,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const res = await apiRequest("POST", "/api/login", credentials);
       return await res.json();
     },
-    onSuccess: async (user: User) => {
+    onSuccess: async (userData: User & { token?: string }) => {
+      const { token, ...user } = userData;
       queryClient.setQueryData(["/api/user"], user);
       setCachedUser(user);
-      // Save user to SecureStore for persistent login
-      try {
-        await SecureStore.setItemAsync(USER_STORAGE_KEY, JSON.stringify(user));
-      } catch (error) {
-        console.log("Error saving user to storage:", error);
+      // Save JWT token for persistent login
+      if (token) {
+        try {
+          await secureStorage.saveAuthToken(token);
+          console.log("[AuthContext] Saved auth token");
+        } catch (error) {
+          console.log("Error saving auth token:", error);
+        }
       }
     },
     onError: (error: Error) => {
@@ -120,14 +120,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const res = await apiRequest("POST", "/api/register", credentials);
       return await res.json();
     },
-    onSuccess: async (user: User) => {
+    onSuccess: async (userData: User & { token?: string }) => {
+      const { token, ...user } = userData;
       queryClient.setQueryData(["/api/user"], user);
       setCachedUser(user);
-      // Save user to SecureStore for persistent login
-      try {
-        await SecureStore.setItemAsync(USER_STORAGE_KEY, JSON.stringify(user));
-      } catch (error) {
-        console.log("Error saving user to storage:", error);
+      // Save JWT token for persistent login
+      if (token) {
+        try {
+          await secureStorage.saveAuthToken(token);
+          console.log("[AuthContext] Saved auth token");
+        } catch (error) {
+          console.log("Error saving auth token:", error);
+        }
       }
     },
     onError: (error: Error) => {
@@ -149,11 +153,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       queryClient.setQueryData(["/api/user"], null);
       queryClient.clear();
       setCachedUser(null);
-      // Clear user from SecureStore
+      // Clear auth token from SecureStore
       try {
-        await SecureStore.deleteItemAsync(USER_STORAGE_KEY);
+        await secureStorage.deleteAuthToken();
+        console.log("[AuthContext] Cleared auth token");
       } catch (error) {
-        console.log("Error clearing user from storage:", error);
+        console.log("Error clearing auth token:", error);
       }
     },
     onError: (error: Error) => {

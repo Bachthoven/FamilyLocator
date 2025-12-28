@@ -1,32 +1,48 @@
 import * as SecureStore from "expo-secure-store";
 
-const SESSION_TOKEN_KEY = "familylocator_session_token";
+const AUTH_TOKEN_KEY = "familylocator_auth_token";
+
+// In-memory token for synchronous access
+let currentToken: string | null = null;
 
 export const secureStorage = {
-  async saveSessionToken(token: string): Promise<void> {
+  async saveAuthToken(token: string): Promise<void> {
     try {
-      await SecureStore.setItemAsync(SESSION_TOKEN_KEY, token);
+      currentToken = token;
+      await SecureStore.setItemAsync(AUTH_TOKEN_KEY, token);
     } catch (error) {
-      console.error("Error saving session token:", error);
+      console.error("Error saving auth token:", error);
       throw error;
     }
   },
 
-  async getSessionToken(): Promise<string | null> {
+  async getAuthToken(): Promise<string | null> {
     try {
-      return await SecureStore.getItemAsync(SESSION_TOKEN_KEY);
+      if (currentToken) return currentToken;
+      currentToken = await SecureStore.getItemAsync(AUTH_TOKEN_KEY);
+      return currentToken;
     } catch (error) {
-      console.error("Error retrieving session token:", error);
+      console.error("Error retrieving auth token:", error);
       return null;
     }
   },
 
-  async deleteSessionToken(): Promise<void> {
+  async deleteAuthToken(): Promise<void> {
     try {
-      await SecureStore.deleteItemAsync(SESSION_TOKEN_KEY);
+      currentToken = null;
+      await SecureStore.deleteItemAsync(AUTH_TOKEN_KEY);
     } catch (error) {
-      console.error("Error deleting session token:", error);
+      console.error("Error deleting auth token:", error);
       throw error;
     }
+  },
+
+  // Synchronous access to current token (for API requests)
+  getCurrentToken(): string | null {
+    return currentToken;
+  },
+
+  setCurrentToken(token: string | null): void {
+    currentToken = token;
   },
 };
