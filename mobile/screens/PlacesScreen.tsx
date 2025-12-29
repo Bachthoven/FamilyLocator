@@ -554,13 +554,10 @@ export default function PlacesScreen() {
                 </TouchableOpacity>
               </View>
               <View style={styles.addressInputContainer}>
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={{ flexGrow: 1 }}
-                  keyboardShouldPersistTaps="handled"
+                <TextInput
                   style={[
-                    styles.addressScrollView,
+                    styles.input,
+                    styles.addressInputWithClear,
                     {
                       backgroundColor: useCurrentLocation
                         ? colors.surfaceSecondary
@@ -568,22 +565,34 @@ export default function PlacesScreen() {
                       borderColor: useCurrentLocation
                         ? colors.primary
                         : colors.inputBorder,
+                      color: colors.text,
                     },
                   ]}
-                >
-                  <TextInput
-                    style={[
-                      styles.addressInput,
-                      { color: colors.text },
-                    ]}
-                    placeholder="Start typing an address..."
-                    placeholderTextColor={colors.textMuted}
-                    value={newPlace.address}
-                    onChangeText={handleAddressChange}
-                    editable={!useCurrentLocation}
-                    data-testid="input-place-address"
-                  />
-                </ScrollView>
+                  placeholder="Start typing an address..."
+                  placeholderTextColor={colors.textMuted}
+                  value={newPlace.address}
+                  onChangeText={(text) => {
+                    setUseCurrentLocation(false);
+                    handleAddressChange(text);
+                  }}
+                  multiline={false}
+                  scrollEnabled={true}
+                  data-testid="input-place-address"
+                />
+                {newPlace.address.length > 0 && (
+                  <TouchableOpacity
+                    style={styles.clearAddressButton}
+                    onPress={() => {
+                      setNewPlace((prev) => ({ ...prev, address: "", latitude: 0, longitude: 0 }));
+                      setUseCurrentLocation(false);
+                      setAddressSuggestions([]);
+                      setShowSuggestions(false);
+                    }}
+                    data-testid="button-clear-address"
+                  >
+                    <Ionicons name="close-circle" size={20} color={colors.textMuted} />
+                  </TouchableOpacity>
+                )}
                 {isSearchingAddress && (
                   <View style={styles.searchingIndicator}>
                     <ActivityIndicator size="small" color={colors.primary} />
@@ -1423,21 +1432,19 @@ const styles = StyleSheet.create({
   addressInputContainer: {
     position: "relative",
   },
-  addressScrollView: {
-    borderWidth: 1,
-    borderRadius: 12,
-    height: 48,
+  addressInputWithClear: {
+    paddingRight: 40,
   },
-  addressInput: {
-    fontSize: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    minWidth: "100%",
+  clearAddressButton: {
+    position: "absolute",
+    right: 12,
+    top: 14,
+    padding: 2,
   },
   searchingIndicator: {
     position: "absolute",
-    right: 12,
-    top: 12,
+    right: 38,
+    top: 14,
   },
   suggestionsContainer: {
     borderWidth: 1,
