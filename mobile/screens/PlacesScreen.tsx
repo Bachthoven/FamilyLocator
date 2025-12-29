@@ -186,6 +186,18 @@ export default function PlacesScreen() {
     setShowSuggestions(false);
     setAddressSuggestions([]);
     Keyboard.dismiss();
+
+    // Reset scroll to start so user sees beginning of address
+    setTimeout(() => {
+      if (addressInputRef.current) {
+        addressInputRef.current.focus();
+        setAddressSelection({ start: 0, end: 0 });
+        setTimeout(() => {
+          addressInputRef.current?.blur();
+          setAddressSelection(undefined);
+        }, 50);
+      }
+    }, 100);
   }, []);
 
   // Cleanup timeout on unmount
