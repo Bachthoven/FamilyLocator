@@ -508,10 +508,10 @@ export default function PlacesScreen() {
                     styles.input,
                     {
                       backgroundColor: useCurrentLocation
-                        ? "#DCFCE7"
+                        ? colors.surfaceSecondary
                         : colors.inputBackground,
                       borderColor: useCurrentLocation
-                        ? "#86EFAC"
+                        ? colors.primary
                         : colors.inputBorder,
                       color: colors.text,
                     },
