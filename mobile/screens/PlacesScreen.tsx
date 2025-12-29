@@ -554,9 +554,13 @@ export default function PlacesScreen() {
                 </TouchableOpacity>
               </View>
               <View style={styles.addressInputContainer}>
-                <TextInput
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{ flexGrow: 1 }}
+                  keyboardShouldPersistTaps="handled"
                   style={[
-                    styles.input,
+                    styles.addressScrollView,
                     {
                       backgroundColor: useCurrentLocation
                         ? colors.surfaceSecondary
@@ -564,16 +568,22 @@ export default function PlacesScreen() {
                       borderColor: useCurrentLocation
                         ? colors.primary
                         : colors.inputBorder,
-                      color: colors.text,
                     },
                   ]}
-                  placeholder="Start typing an address..."
-                  placeholderTextColor={colors.textMuted}
-                  value={newPlace.address}
-                  onChangeText={handleAddressChange}
-                  editable={!useCurrentLocation}
-                  data-testid="input-place-address"
-                />
+                >
+                  <TextInput
+                    style={[
+                      styles.addressInput,
+                      { color: colors.text },
+                    ]}
+                    placeholder="Start typing an address..."
+                    placeholderTextColor={colors.textMuted}
+                    value={newPlace.address}
+                    onChangeText={handleAddressChange}
+                    editable={!useCurrentLocation}
+                    data-testid="input-place-address"
+                  />
+                </ScrollView>
                 {isSearchingAddress && (
                   <View style={styles.searchingIndicator}>
                     <ActivityIndicator size="small" color={colors.primary} />
@@ -1412,6 +1422,17 @@ const styles = StyleSheet.create({
   },
   addressInputContainer: {
     position: "relative",
+  },
+  addressScrollView: {
+    borderWidth: 1,
+    borderRadius: 12,
+    height: 48,
+  },
+  addressInput: {
+    fontSize: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    minWidth: "100%",
   },
   searchingIndicator: {
     position: "absolute",
