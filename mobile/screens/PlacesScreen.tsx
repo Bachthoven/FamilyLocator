@@ -279,19 +279,67 @@ export default function PlacesScreen() {
           "Permission Denied",
           "Location permission is required to use this feature"
         );
+        setIsGettingLocation(false);
         return;
       }
 
-      const location = await Location.getCurrentPositionAsync({});
+      const location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Balanced,
+      });
+      const { latitude, longitude } = location.coords;
+
+      // Set coordinates immediately with temporary address
       setNewPlace((prev) => ({
         ...prev,
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-        address: `GPS: ${location.coords.latitude.toFixed(6)}, ${location.coords.longitude.toFixed(6)}`,
+        latitude,
+        longitude,
+        address: "Getting address...",
       }));
       setUseCurrentLocation(true);
+
+      // Reverse geocode to get a proper address using Photon
+      try {
+        const reverseUrl = `https://photon.komoot.io/reverse?lat=${latitude}&lon=${longitude}`;
+        const response = await fetch(reverseUrl);
+        const data = await response.json();
+
+        if (data.features && data.features.length > 0) {
+          const props = data.features[0].properties;
+          const parts: string[] = [];
+          if (props.housenumber && props.street) {
+            parts.push(`${props.housenumber} ${props.street}`);
+          } else if (props.street) {
+            parts.push(props.street);
+          } else if (props.name) {
+            parts.push(props.name);
+          }
+          if (props.city) parts.push(props.city);
+          if (props.state) parts.push(props.state);
+
+          const address = parts.length > 0 
+            ? parts.join(", ") 
+            : `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+
+          setNewPlace((prev) => ({
+            ...prev,
+            address,
+          }));
+        } else {
+          setNewPlace((prev) => ({
+            ...prev,
+            address: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
+          }));
+        }
+      } catch (reverseError) {
+        // Fallback to coordinates if reverse geocoding fails
+        setNewPlace((prev) => ({
+          ...prev,
+          address: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
+        }));
+      }
     } catch (error) {
       Alert.alert("Error", "Could not get your current location");
+      setUseCurrentLocation(false);
     } finally {
       setIsGettingLocation(false);
     }
