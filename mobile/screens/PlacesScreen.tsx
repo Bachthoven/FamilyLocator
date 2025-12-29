@@ -105,6 +105,7 @@ export default function PlacesScreen() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const addressInputRef = useRef<TextInput>(null);
+  const [addressSelection, setAddressSelection] = useState<{ start: number; end: number } | undefined>(undefined);
 
   // Photon API for OpenStreetMap-based autocomplete
   const searchAddress = useCallback(async (query: string) => {
@@ -314,10 +315,17 @@ export default function PlacesScreen() {
       setUseCurrentLocation(true);
       setIsGettingLocation(false);
 
-      // Reset cursor to start so user sees beginning of address
+      // Reset scroll to start so user sees beginning of address
       setTimeout(() => {
-        addressInputRef.current?.setNativeProps({ selection: { start: 0, end: 0 } });
-      }, 50);
+        if (addressInputRef.current) {
+          addressInputRef.current.focus();
+          setAddressSelection({ start: 0, end: 0 });
+          setTimeout(() => {
+            addressInputRef.current?.blur();
+            setAddressSelection(undefined);
+          }, 50);
+        }
+      }, 100);
 
       // Try reverse geocoding in background (don't block UI)
       fetch(`https://photon.komoot.io/reverse?lat=${latitude}&lon=${longitude}`)
@@ -584,6 +592,12 @@ export default function PlacesScreen() {
                   }}
                   multiline={false}
                   scrollEnabled={true}
+                  selection={addressSelection}
+                  onSelectionChange={() => {
+                    if (addressSelection) {
+                      setAddressSelection(undefined);
+                    }
+                  }}
                   data-testid="input-place-address"
                 />
                 {newPlace.address.length > 0 && (
