@@ -945,10 +945,80 @@ export default function MapScreen({
           style={styles.membersIndicatorBlur}
         >
           <View style={styles.membersIndicatorContent}>
-            <View style={styles.statusDot} />
+            {/* Member avatars */}
+            <View style={styles.memberAvatarsRow}>
+              {/* Current user avatar */}
+              {user && (
+                <View style={[styles.memberAvatar, { backgroundColor: "#0EA5E9", zIndex: 10 }]}>
+                  <Text style={styles.memberAvatarText}>
+                    {user.firstName && user.lastName
+                      ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
+                      : user.firstName
+                        ? user.firstName[0].toUpperCase()
+                        : user.email && user.email.length > 0
+                          ? user.email[0].toUpperCase()
+                          : "?"}
+                  </Text>
+                  <View style={styles.onlineIndicator} />
+                </View>
+              )}
+              {/* Online family members avatars (up to 3) */}
+              {familyLocationsData
+                .filter((loc) => {
+                  if (!loc.user.locationSharingEnabled || !loc.timestamp) return false;
+                  const now = new Date();
+                  const timestamp = new Date(loc.timestamp);
+                  const minutesAgo = Math.floor((now.getTime() - timestamp.getTime()) / (1000 * 60));
+                  return minutesAgo < 5;
+                })
+                .slice(0, 3)
+                .map((loc, index) => (
+                  <View 
+                    key={loc.user.id} 
+                    style={[
+                      styles.memberAvatar, 
+                      { 
+                        backgroundColor: ["#8B5CF6", "#10B981", "#F97316"][index % 3],
+                        marginLeft: -8,
+                        zIndex: 9 - index,
+                      }
+                    ]}
+                  >
+                    <Text style={styles.memberAvatarText}>
+                      {loc.user.firstName && loc.user.lastName
+                        ? `${loc.user.firstName[0]}${loc.user.lastName[0]}`.toUpperCase()
+                        : loc.user.firstName
+                          ? loc.user.firstName[0].toUpperCase()
+                          : loc.user.email && loc.user.email.length > 0
+                            ? loc.user.email[0].toUpperCase()
+                            : "?"}
+                    </Text>
+                    <View style={styles.onlineIndicator} />
+                  </View>
+                ))}
+              {/* Show +N if more than 3 online members */}
+              {familyLocationsData.filter((loc) => {
+                if (!loc.user.locationSharingEnabled || !loc.timestamp) return false;
+                const now = new Date();
+                const timestamp = new Date(loc.timestamp);
+                const minutesAgo = Math.floor((now.getTime() - timestamp.getTime()) / (1000 * 60));
+                return minutesAgo < 5;
+              }).length > 3 && (
+                <View style={[styles.memberAvatar, { backgroundColor: "#6B7280", marginLeft: -8, zIndex: 5 }]}>
+                  <Text style={styles.memberAvatarText}>
+                    +{familyLocationsData.filter((loc) => {
+                      if (!loc.user.locationSharingEnabled || !loc.timestamp) return false;
+                      const now = new Date();
+                      const timestamp = new Date(loc.timestamp);
+                      const minutesAgo = Math.floor((now.getTime() - timestamp.getTime()) / (1000 * 60));
+                      return minutesAgo < 5;
+                    }).length - 3}
+                  </Text>
+                </View>
+              )}
+            </View>
             <Text style={[styles.membersText, isDarkMode && { color: "#FFFFFF" }]}>
-              {onlineMembersCount} member
-              {onlineMembersCount !== 1 ? "s" : ""} online
+              {onlineMembersCount} online
             </Text>
           </View>
         </BlurView>
@@ -1575,6 +1645,35 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "500",
     color: "#1F2937",
+  },
+  memberAvatarsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  memberAvatar: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "#FFFFFF",
+  },
+  memberAvatarText: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: "#FFFFFF",
+  },
+  onlineIndicator: {
+    position: "absolute",
+    bottom: -1,
+    right: -1,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: "#22C55E",
+    borderWidth: 2,
+    borderColor: "#FFFFFF",
   },
 
   // Banner Styles
