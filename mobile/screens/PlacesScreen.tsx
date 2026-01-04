@@ -65,11 +65,11 @@ const pinColors = [
   { name: "Gray", value: "#6b7280" },
 ];
 
-const categories = [
-  { label: "Home", value: "home", icon: "home" as const },
-  { label: "Work", value: "work", icon: "briefcase" as const },
-  { label: "School", value: "school", icon: "school" as const },
-  { label: "Other", value: "other", icon: "location" as const },
+const defaultCategories = [
+  { label: "Home", value: "home", icon: "home" as const, color: "#3B82F6" },
+  { label: "Work", value: "work", icon: "briefcase" as const, color: "#10B981" },
+  { label: "School", value: "school", icon: "school" as const, color: "#8B5CF6" },
+  { label: "Other", value: "other", icon: "location" as const, color: "#F97316" },
 ];
 
 export default function PlacesScreen() {
@@ -106,6 +106,23 @@ export default function PlacesScreen() {
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const addressInputRef = useRef<TextInput>(null);
   const [addressSelection, setAddressSelection] = useState<{ start: number; end: number } | undefined>(undefined);
+
+  // Custom categories state
+  const [customCategories, setCustomCategories] = useState<Array<{
+    label: string;
+    value: string;
+    icon: keyof typeof Ionicons.glyphMap;
+    color: string;
+  }>>([]);
+  const [addCategoryModalVisible, setAddCategoryModalVisible] = useState(false);
+  const [newCategory, setNewCategory] = useState({
+    label: "",
+    icon: "bookmark" as keyof typeof Ionicons.glyphMap,
+    color: "#6B7280",
+  });
+
+  // Combined categories (default + custom)
+  const categories = [...defaultCategories, ...customCategories];
 
   // Photon API for OpenStreetMap-based autocomplete
   const searchAddress = useCallback(async (query: string) => {
@@ -674,11 +691,11 @@ export default function PlacesScreen() {
                       {
                         backgroundColor:
                           newPlace.category === cat.value
-                            ? colors.primary
+                            ? cat.color
                             : colors.surfaceSecondary,
                         borderColor:
                           newPlace.category === cat.value
-                            ? colors.primary
+                            ? cat.color
                             : colors.border,
                       },
                     ]}
@@ -720,7 +737,7 @@ export default function PlacesScreen() {
                       borderStyle: "dashed",
                     },
                   ]}
-                  onPress={() => Alert.alert("Coming Soon", "Custom categories will be available in a future update")}
+                  onPress={() => setAddCategoryModalVisible(true)}
                   data-testid="button-add-category"
                 >
                   <Ionicons name="add" size={18} color={colors.textSecondary} />
@@ -863,11 +880,11 @@ export default function PlacesScreen() {
                         {
                           backgroundColor:
                             (editingPlace.category || "other") === cat.value
-                              ? colors.primary
+                              ? cat.color
                               : colors.surfaceSecondary,
                           borderColor:
                             (editingPlace.category || "other") === cat.value
-                              ? colors.primary
+                              ? cat.color
                               : colors.border,
                         },
                       ]}
@@ -911,7 +928,7 @@ export default function PlacesScreen() {
                         borderStyle: "dashed",
                       },
                     ]}
-                    onPress={() => Alert.alert("Coming Soon", "Custom categories will be available in a future update")}
+                    onPress={() => setAddCategoryModalVisible(true)}
                     data-testid="button-add-category-edit"
                   >
                     <Ionicons name="add" size={18} color={colors.textSecondary} />
@@ -1148,6 +1165,158 @@ export default function PlacesScreen() {
 
       {renderAddModal()}
       {renderEditModal()}
+
+      {/* Add Category Modal */}
+      <Modal
+        visible={addCategoryModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setAddCategoryModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: colors.surface }]}>
+            <View style={styles.modalHeader}>
+              <Ionicons name="add-circle" size={24} color={colors.primary} />
+              <Text style={[styles.modalTitle, { color: colors.text }]}>
+                Add Category
+              </Text>
+            </View>
+
+            <View style={styles.formGroup}>
+              <Text style={[styles.label, { color: colors.text }]}>Name</Text>
+              <TextInput
+                style={[
+                  styles.input,
+                  {
+                    backgroundColor: colors.inputBackground,
+                    borderColor: colors.inputBorder,
+                    color: colors.text,
+                  },
+                ]}
+                placeholder="Category name"
+                placeholderTextColor={colors.textMuted}
+                value={newCategory.label}
+                onChangeText={(text) =>
+                  setNewCategory((prev) => ({ ...prev, label: text }))
+                }
+                data-testid="input-new-category-name"
+              />
+            </View>
+
+            <View style={styles.formGroup}>
+              <Text style={[styles.label, { color: colors.text }]}>Icon</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <View style={styles.iconGrid}>
+                  {["bookmark", "heart", "star", "flag", "cart", "cafe", "restaurant", "fitness", "medical", "airplane", "car", "bus"].map((iconName) => (
+                    <TouchableOpacity
+                      key={iconName}
+                      style={[
+                        styles.iconButton,
+                        {
+                          backgroundColor:
+                            newCategory.icon === iconName
+                              ? newCategory.color
+                              : colors.surfaceSecondary,
+                          borderColor:
+                            newCategory.icon === iconName
+                              ? newCategory.color
+                              : colors.border,
+                        },
+                      ]}
+                      onPress={() =>
+                        setNewCategory((prev) => ({
+                          ...prev,
+                          icon: iconName as keyof typeof Ionicons.glyphMap,
+                        }))
+                      }
+                      data-testid={`icon-${iconName}`}
+                    >
+                      <Ionicons
+                        name={iconName as keyof typeof Ionicons.glyphMap}
+                        size={20}
+                        color={newCategory.icon === iconName ? "#FFFFFF" : colors.textSecondary}
+                      />
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </ScrollView>
+            </View>
+
+            <View style={styles.formGroup}>
+              <Text style={[styles.label, { color: colors.text }]}>Color</Text>
+              <View style={styles.colorGrid}>
+                {pinColors.map((color) => (
+                  <TouchableOpacity
+                    key={color.value}
+                    style={[
+                      styles.colorButton,
+                      { backgroundColor: color.value },
+                      newCategory.color === color.value && styles.colorButtonActive,
+                    ]}
+                    onPress={() =>
+                      setNewCategory((prev) => ({ ...prev, color: color.value }))
+                    }
+                    data-testid={`category-color-${color.name}`}
+                  >
+                    {newCategory.color === color.value && (
+                      <Ionicons name="checkmark" size={16} color="#FFFFFF" />
+                    )}
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[
+                  styles.modalButton,
+                  { backgroundColor: colors.surfaceSecondary },
+                ]}
+                onPress={() => {
+                  setAddCategoryModalVisible(false);
+                  setNewCategory({ label: "", icon: "bookmark", color: "#6B7280" });
+                }}
+                data-testid="button-cancel-category"
+              >
+                <Text style={[styles.modalButtonText, { color: colors.text }]}>
+                  Cancel
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.modalButton,
+                  { backgroundColor: newCategory.color },
+                  !newCategory.label.trim() && { opacity: 0.5 },
+                ]}
+                onPress={() => {
+                  if (!newCategory.label.trim()) {
+                    Alert.alert("Error", "Please enter a category name");
+                    return;
+                  }
+                  const value = newCategory.label.toLowerCase().replace(/\s+/g, "_");
+                  setCustomCategories((prev) => [
+                    ...prev,
+                    {
+                      label: newCategory.label,
+                      value,
+                      icon: newCategory.icon,
+                      color: newCategory.color,
+                    },
+                  ]);
+                  setAddCategoryModalVisible(false);
+                  setNewCategory({ label: "", icon: "bookmark", color: "#6B7280" });
+                }}
+                disabled={!newCategory.label.trim()}
+                data-testid="button-save-category"
+              >
+                <Text style={[styles.modalButtonText, { color: "#FFFFFF" }]}>
+                  Add
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -1335,6 +1504,41 @@ const styles = StyleSheet.create({
   colorButtonActive: {
     borderColor: "#1F2937",
     borderWidth: 3,
+  },
+  iconGrid: {
+    flexDirection: "row",
+    gap: 10,
+    paddingVertical: 4,
+  },
+  iconButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    borderWidth: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  modalButtons: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 8,
+  },
+  modalButton: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  modalButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
   },
   colorHint: {
     fontSize: 12,
