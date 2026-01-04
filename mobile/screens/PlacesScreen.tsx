@@ -1173,40 +1173,62 @@ export default function PlacesScreen() {
         animationType="fade"
         onRequestClose={() => setAddCategoryModalVisible(false)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: colors.surface }]}>
-            <View style={styles.modalHeader}>
-              <Ionicons name="add-circle" size={24} color={colors.primary} />
-              <Text style={[styles.modalTitle, { color: colors.text }]}>
-                Add Category
-              </Text>
+        <Pressable 
+          style={styles.categoryModalOverlay}
+          onPress={() => setAddCategoryModalVisible(false)}
+        >
+          <Pressable 
+            style={[styles.categoryModalContent, { backgroundColor: colors.surface }]}
+            onPress={(e) => e.stopPropagation()}
+          >
+            <View style={[styles.categoryModalHeader, { borderBottomColor: colors.border }]}>
+              <View style={styles.categoryModalHeaderLeft}>
+                <View style={[styles.categoryModalIcon, { backgroundColor: colors.primary + "20" }]}>
+                  <Ionicons name="add" size={20} color={colors.primary} />
+                </View>
+                <Text style={[styles.categoryModalTitle, { color: colors.text }]}>
+                  Add Category
+                </Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => {
+                  setAddCategoryModalVisible(false);
+                  setNewCategory({ label: "", icon: "bookmark", color: "#6B7280" });
+                }}
+              >
+                <Ionicons name="close" size={24} color={colors.textSecondary} />
+              </TouchableOpacity>
             </View>
 
-            <View style={styles.formGroup}>
-              <Text style={[styles.label, { color: colors.text }]}>Name</Text>
-              <TextInput
-                style={[
-                  styles.input,
-                  {
-                    backgroundColor: colors.inputBackground,
-                    borderColor: colors.inputBorder,
-                    color: colors.text,
-                  },
-                ]}
-                placeholder="Category name"
-                placeholderTextColor={colors.textMuted}
-                value={newCategory.label}
-                onChangeText={(text) =>
-                  setNewCategory((prev) => ({ ...prev, label: text }))
-                }
-                data-testid="input-new-category-name"
-              />
-            </View>
+            <View style={styles.categoryModalBody}>
+              <View style={styles.formGroup}>
+                <Text style={[styles.label, { color: colors.text }]}>Name</Text>
+                <TextInput
+                  style={[
+                    styles.input,
+                    {
+                      backgroundColor: colors.inputBackground,
+                      borderColor: colors.inputBorder,
+                      color: colors.text,
+                    },
+                  ]}
+                  placeholder="Category name"
+                  placeholderTextColor={colors.textMuted}
+                  value={newCategory.label}
+                  onChangeText={(text) =>
+                    setNewCategory((prev) => ({ ...prev, label: text }))
+                  }
+                  data-testid="input-new-category-name"
+                />
+              </View>
 
-            <View style={styles.formGroup}>
-              <Text style={[styles.label, { color: colors.text }]}>Icon</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                <View style={styles.iconGrid}>
+              <View style={styles.formGroup}>
+                <Text style={[styles.label, { color: colors.text }]}>Icon</Text>
+                <ScrollView 
+                  horizontal 
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.iconScrollContent}
+                >
                   {["bookmark", "heart", "star", "flag", "cart", "cafe", "restaurant", "fitness", "medical", "airplane", "car", "bus"].map((iconName) => (
                     <TouchableOpacity
                       key={iconName}
@@ -1238,38 +1260,38 @@ export default function PlacesScreen() {
                       />
                     </TouchableOpacity>
                   ))}
-                </View>
-              </ScrollView>
-            </View>
+                </ScrollView>
+              </View>
 
-            <View style={styles.formGroup}>
-              <Text style={[styles.label, { color: colors.text }]}>Color</Text>
-              <View style={styles.colorGrid}>
-                {pinColors.map((color) => (
-                  <TouchableOpacity
-                    key={color.value}
-                    style={[
-                      styles.colorButton,
-                      { backgroundColor: color.value },
-                      newCategory.color === color.value && styles.colorButtonActive,
-                    ]}
-                    onPress={() =>
-                      setNewCategory((prev) => ({ ...prev, color: color.value }))
-                    }
-                    data-testid={`category-color-${color.name}`}
-                  >
-                    {newCategory.color === color.value && (
-                      <Ionicons name="checkmark" size={16} color="#FFFFFF" />
-                    )}
-                  </TouchableOpacity>
-                ))}
+              <View style={[styles.formGroup, { marginBottom: 0 }]}>
+                <Text style={[styles.label, { color: colors.text }]}>Color</Text>
+                <View style={styles.colorGrid}>
+                  {pinColors.map((color) => (
+                    <TouchableOpacity
+                      key={color.value}
+                      style={[
+                        styles.colorButton,
+                        { backgroundColor: color.value },
+                        newCategory.color === color.value && styles.colorButtonActive,
+                      ]}
+                      onPress={() =>
+                        setNewCategory((prev) => ({ ...prev, color: color.value }))
+                      }
+                      data-testid={`category-color-${color.name}`}
+                    >
+                      {newCategory.color === color.value && (
+                        <Ionicons name="checkmark" size={16} color="#FFFFFF" />
+                      )}
+                    </TouchableOpacity>
+                  ))}
+                </View>
               </View>
             </View>
 
-            <View style={styles.modalButtons}>
+            <View style={[styles.categoryModalFooter, { borderTopColor: colors.border }]}>
               <TouchableOpacity
                 style={[
-                  styles.modalButton,
+                  styles.categoryModalButton,
                   { backgroundColor: colors.surfaceSecondary },
                 ]}
                 onPress={() => {
@@ -1278,13 +1300,13 @@ export default function PlacesScreen() {
                 }}
                 data-testid="button-cancel-category"
               >
-                <Text style={[styles.modalButtonText, { color: colors.text }]}>
+                <Text style={[styles.categoryModalButtonText, { color: colors.text }]}>
                   Cancel
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[
-                  styles.modalButton,
+                  styles.categoryModalButton,
                   { backgroundColor: newCategory.color },
                   !newCategory.label.trim() && { opacity: 0.5 },
                 ]}
@@ -1309,13 +1331,13 @@ export default function PlacesScreen() {
                 disabled={!newCategory.label.trim()}
                 data-testid="button-save-category"
               >
-                <Text style={[styles.modalButtonText, { color: "#FFFFFF" }]}>
-                  Add
+                <Text style={[styles.categoryModalButtonText, { color: "#FFFFFF" }]}>
+                  Add Category
                 </Text>
               </TouchableOpacity>
             </View>
-          </View>
-        </View>
+          </Pressable>
+        </Pressable>
       </Modal>
     </View>
   );
@@ -1524,6 +1546,66 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
+  },
+  categoryModalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 24,
+  },
+  categoryModalContent: {
+    width: "100%",
+    maxWidth: 400,
+    borderRadius: 16,
+    overflow: "hidden",
+  },
+  categoryModalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 16,
+    borderBottomWidth: 1,
+  },
+  categoryModalHeaderLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  categoryModalIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  categoryModalTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+  },
+  categoryModalBody: {
+    padding: 20,
+  },
+  iconScrollContent: {
+    flexDirection: "row",
+    gap: 10,
+    paddingVertical: 4,
+  },
+  categoryModalFooter: {
+    flexDirection: "row",
+    padding: 16,
+    gap: 12,
+    borderTopWidth: 1,
+  },
+  categoryModalButton: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  categoryModalButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
   },
   modalButtons: {
     flexDirection: "row",
