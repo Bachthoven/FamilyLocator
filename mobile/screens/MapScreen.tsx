@@ -24,94 +24,6 @@ import AlertDialog from "../components/AlertDialog";
 import { useThemeColors, useIsDarkMode } from "../theme/colors";
 import { apiRequest } from "../src/lib/queryClient";
 
-// Dark mode map style for Google Maps (standard dark theme)
-const darkMapStyle = [
-  { elementType: "geometry", stylers: [{ color: "#212121" }] },
-  { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
-  { elementType: "labels.text.fill", stylers: [{ color: "#757575" }] },
-  { elementType: "labels.text.stroke", stylers: [{ color: "#212121" }] },
-  {
-    featureType: "administrative",
-    elementType: "geometry",
-    stylers: [{ color: "#757575" }],
-  },
-  {
-    featureType: "administrative.country",
-    elementType: "labels.text.fill",
-    stylers: [{ color: "#9e9e9e" }],
-  },
-  {
-    featureType: "administrative.locality",
-    elementType: "labels.text.fill",
-    stylers: [{ color: "#bdbdbd" }],
-  },
-  {
-    featureType: "poi",
-    elementType: "labels.text.fill",
-    stylers: [{ color: "#757575" }],
-  },
-  {
-    featureType: "poi.park",
-    elementType: "geometry",
-    stylers: [{ color: "#181818" }],
-  },
-  {
-    featureType: "poi.park",
-    elementType: "labels.text.fill",
-    stylers: [{ color: "#616161" }],
-  },
-  {
-    featureType: "poi.park",
-    elementType: "labels.text.stroke",
-    stylers: [{ color: "#1b1b1b" }],
-  },
-  {
-    featureType: "road",
-    elementType: "geometry.fill",
-    stylers: [{ color: "#2c2c2c" }],
-  },
-  {
-    featureType: "road",
-    elementType: "labels.text.fill",
-    stylers: [{ color: "#8a8a8a" }],
-  },
-  {
-    featureType: "road.arterial",
-    elementType: "geometry",
-    stylers: [{ color: "#373737" }],
-  },
-  {
-    featureType: "road.highway",
-    elementType: "geometry",
-    stylers: [{ color: "#3c3c3c" }],
-  },
-  {
-    featureType: "road.highway.controlled_access",
-    elementType: "geometry",
-    stylers: [{ color: "#4e4e4e" }],
-  },
-  {
-    featureType: "road.local",
-    elementType: "labels.text.fill",
-    stylers: [{ color: "#616161" }],
-  },
-  {
-    featureType: "transit",
-    elementType: "labels.text.fill",
-    stylers: [{ color: "#757575" }],
-  },
-  {
-    featureType: "water",
-    elementType: "geometry",
-    stylers: [{ color: "#000000" }],
-  },
-  {
-    featureType: "water",
-    elementType: "labels.text.fill",
-    stylers: [{ color: "#3d3d3d" }],
-  },
-];
-
 // Type definitions
 interface FamilyLocation {
   id: number;
@@ -838,7 +750,6 @@ export default function MapScreen({
         style={styles.map}
         provider={PROVIDER_GOOGLE}
         mapType={mapType}
-        customMapStyle={isDarkMode && mapType === "standard" ? darkMapStyle : undefined}
         initialRegion={initialRegion}
         onRegionChange={(region) => {
           // Update compass heading in real-time while rotating
@@ -1034,80 +945,10 @@ export default function MapScreen({
           style={styles.membersIndicatorBlur}
         >
           <View style={styles.membersIndicatorContent}>
-            {/* Member avatars */}
-            <View style={styles.memberAvatarsRow}>
-              {/* Current user avatar */}
-              {user && (
-                <View style={[styles.memberAvatar, { backgroundColor: "#0EA5E9", zIndex: 10 }]}>
-                  <Text style={styles.memberAvatarText}>
-                    {user.firstName && user.lastName
-                      ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
-                      : user.firstName
-                        ? user.firstName[0].toUpperCase()
-                        : user.email && user.email.length > 0
-                          ? user.email[0].toUpperCase()
-                          : "?"}
-                  </Text>
-                  <View style={styles.onlineIndicator} />
-                </View>
-              )}
-              {/* Online family members avatars (up to 3) */}
-              {familyLocationsData
-                .filter((loc) => {
-                  if (!loc.user.locationSharingEnabled || !loc.timestamp) return false;
-                  const now = new Date();
-                  const timestamp = new Date(loc.timestamp);
-                  const minutesAgo = Math.floor((now.getTime() - timestamp.getTime()) / (1000 * 60));
-                  return minutesAgo < 5;
-                })
-                .slice(0, 3)
-                .map((loc, index) => (
-                  <View 
-                    key={loc.user.id} 
-                    style={[
-                      styles.memberAvatar, 
-                      { 
-                        backgroundColor: ["#8B5CF6", "#10B981", "#F97316"][index % 3],
-                        marginLeft: -8,
-                        zIndex: 9 - index,
-                      }
-                    ]}
-                  >
-                    <Text style={styles.memberAvatarText}>
-                      {loc.user.firstName && loc.user.lastName
-                        ? `${loc.user.firstName[0]}${loc.user.lastName[0]}`.toUpperCase()
-                        : loc.user.firstName
-                          ? loc.user.firstName[0].toUpperCase()
-                          : loc.user.email && loc.user.email.length > 0
-                            ? loc.user.email[0].toUpperCase()
-                            : "?"}
-                    </Text>
-                    <View style={styles.onlineIndicator} />
-                  </View>
-                ))}
-              {/* Show +N if more than 3 online members */}
-              {familyLocationsData.filter((loc) => {
-                if (!loc.user.locationSharingEnabled || !loc.timestamp) return false;
-                const now = new Date();
-                const timestamp = new Date(loc.timestamp);
-                const minutesAgo = Math.floor((now.getTime() - timestamp.getTime()) / (1000 * 60));
-                return minutesAgo < 5;
-              }).length > 3 && (
-                <View style={[styles.memberAvatar, { backgroundColor: "#6B7280", marginLeft: -8, zIndex: 5 }]}>
-                  <Text style={styles.memberAvatarText}>
-                    +{familyLocationsData.filter((loc) => {
-                      if (!loc.user.locationSharingEnabled || !loc.timestamp) return false;
-                      const now = new Date();
-                      const timestamp = new Date(loc.timestamp);
-                      const minutesAgo = Math.floor((now.getTime() - timestamp.getTime()) / (1000 * 60));
-                      return minutesAgo < 5;
-                    }).length - 3}
-                  </Text>
-                </View>
-              )}
-            </View>
+            <View style={styles.statusDot} />
             <Text style={[styles.membersText, isDarkMode && { color: "#FFFFFF" }]}>
-              {onlineMembersCount} online
+              {onlineMembersCount} member
+              {onlineMembersCount !== 1 ? "s" : ""} online
             </Text>
           </View>
         </BlurView>
@@ -1734,35 +1575,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "500",
     color: "#1F2937",
-  },
-  memberAvatarsRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  memberAvatar: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 2,
-    borderColor: "#FFFFFF",
-  },
-  memberAvatarText: {
-    fontSize: 11,
-    fontWeight: "700",
-    color: "#FFFFFF",
-  },
-  onlineIndicator: {
-    position: "absolute",
-    bottom: -1,
-    right: -1,
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: "#22C55E",
-    borderWidth: 2,
-    borderColor: "#FFFFFF",
   },
 
   // Banner Styles
