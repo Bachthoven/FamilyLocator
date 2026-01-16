@@ -143,12 +143,10 @@ const FamilyMarker = ({
   initials: string;
   onPress?: () => void;
 }) => (
-  <Marker coordinate={{ latitude, longitude }} onPress={onPress} anchor={{ x: 0.5, y: 0.5 }}>
+  <Marker coordinate={{ latitude, longitude }} onPress={onPress} anchor={{ x: 0.5, y: 1 }}>
     <View style={styles.familyMarkerContainer}>
-      <View style={[styles.familyMarkerAvatar, !isRecent && styles.familyMarkerAvatarOld]}>
-        <Text style={styles.familyMarkerInitials}>{initials}</Text>
-      </View>
-      <View style={[styles.familyMarkerStatusDot, { backgroundColor: isRecent ? "#10B981" : "#EF4444" }]} />
+      <View style={[styles.familyMarker, !isRecent && styles.familyMarkerOld]} />
+      {isRecent && <View style={styles.familyMarkerPulse} />}
     </View>
   </Marker>
 );
@@ -822,9 +820,44 @@ export default function MapScreen({
       <View style={[styles.membersIndicator, { top: insets.top + 16 }]}>
         <BlurView intensity={80} tint={isDarkMode ? "dark" : "light"} style={styles.membersIndicatorBlur}>
           <View style={styles.membersIndicatorContent}>
-            <View style={styles.statusDot} />
+            <View style={styles.onlineAvatarsRow}>
+              {/* Current user avatar */}
+              <View style={styles.onlineAvatarContainer}>
+                <View style={[styles.onlineAvatar, { backgroundColor: colors.avatarBackground }]}>
+                  <Text style={styles.onlineAvatarText}>
+                    {user?.firstName && user?.lastName
+                      ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
+                      : user?.firstName
+                        ? user.firstName[0].toUpperCase()
+                        : user?.email && user.email.length > 0
+                          ? user.email[0].toUpperCase()
+                          : "?"}
+                  </Text>
+                </View>
+                <View style={styles.onlineAvatarDot} />
+              </View>
+              {/* Online family members */}
+              {familyLocations
+                .filter((loc) => loc.isRecent)
+                .slice(0, 3)
+                .map((loc) => (
+                  <View key={loc.id} style={styles.onlineAvatarContainer}>
+                    <View style={[styles.onlineAvatar, { backgroundColor: "#6366F1" }]}>
+                      <Text style={styles.onlineAvatarText}>{loc.initials}</Text>
+                    </View>
+                    <View style={styles.onlineAvatarDot} />
+                  </View>
+                ))}
+              {familyLocations.filter((loc) => loc.isRecent).length > 3 && (
+                <View style={[styles.onlineAvatar, { backgroundColor: colors.surfaceSecondary }]}>
+                  <Text style={[styles.onlineAvatarText, { color: colors.text, fontSize: 9 }]}>
+                    +{familyLocations.filter((loc) => loc.isRecent).length - 3}
+                  </Text>
+                </View>
+              )}
+            </View>
             <Text style={[styles.membersText, isDarkMode && { color: "#FFFFFF" }]}>
-              {onlineMembersCount} member{onlineMembersCount !== 1 ? "s" : ""} online
+              {onlineMembersCount} online
             </Text>
           </View>
         </BlurView>
@@ -1304,6 +1337,37 @@ const styles = StyleSheet.create({
     height: 8,
     borderRadius: 4,
     backgroundColor: "#22C55E",
+  },
+  onlineAvatarsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  onlineAvatarContainer: {
+    position: "relative",
+    marginRight: -6,
+  },
+  onlineAvatar: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2,
+    borderColor: "rgba(255, 255, 255, 0.8)",
+  },
+  onlineAvatarText: {
+    fontSize: 10,
+    fontWeight: "700",
+    color: "#FFFFFF",
+  },
+  onlineAvatarDot: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#10B981",
   },
   membersText: {
     fontSize: 14,
