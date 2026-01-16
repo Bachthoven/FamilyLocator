@@ -978,7 +978,7 @@ export default function SettingsScreen() {
         <View
           style={[
             styles.profileCard,
-            { backgroundColor: colors.cardBackground, borderColor: colors.controlButtonBorder },
+            { backgroundColor: colors.cardBackground, borderColor: colors.inputBorder },
           ]}
           data-testid="card-profile"
         >
@@ -1048,7 +1048,7 @@ export default function SettingsScreen() {
               key={item.label}
               style={[
                 styles.settingsItem,
-                { backgroundColor: colors.cardBackground, borderColor: colors.controlButtonBorder },
+                { backgroundColor: colors.cardBackground, borderColor: colors.inputBorder },
               ]}
               onPress={item.action}
               data-testid={`button-setting-${item.label.toLowerCase().replace(/\s+/g, "-")}`}

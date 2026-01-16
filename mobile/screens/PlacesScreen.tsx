@@ -457,7 +457,7 @@ export default function PlacesScreen() {
     return (
       <View
         key={place.id}
-        style={[styles.placeCard, { backgroundColor: colors.cardBackground, borderColor: colors.controlButtonBorder }]}
+        style={[styles.placeCard, { backgroundColor: colors.cardBackground, borderColor: colors.inputBorder }]}
         data-testid={`card-place-${place.id}`}
       >
         <View style={styles.placeCardContent}>

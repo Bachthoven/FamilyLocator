@@ -463,7 +463,7 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                     key={code.id}
                     style={[
                       styles.codeCard,
-                      { backgroundColor: colors.cardBackground, borderColor: colors.controlButtonBorder },
+                      { backgroundColor: colors.cardBackground, borderColor: colors.inputBorder },
                     ]}
                     data-testid={`card-code-${code.code}`}
                   >
@@ -532,7 +532,7 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                 <View
                   style={[
                     styles.memberCard,
-                    { backgroundColor: colors.cardBackground, borderColor: colors.controlButtonBorder },
+                    { backgroundColor: colors.cardBackground, borderColor: colors.inputBorder },
                   ]}
                   data-testid={`card-member-${user.id}`}
                 >
@@ -597,7 +597,7 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                     key={member.id}
                     style={[
                       styles.memberCard,
-                      { backgroundColor: colors.cardBackground, borderColor: colors.controlButtonBorder },
+                      { backgroundColor: colors.cardBackground, borderColor: colors.inputBorder },
                     ]}
                     data-testid={`card-member-${member.id}`}
                   >

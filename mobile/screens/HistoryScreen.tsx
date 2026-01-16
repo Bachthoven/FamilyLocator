@@ -446,7 +446,7 @@ export default function HistoryScreen() {
           </MapView>
 
           <View
-            style={[styles.legendCard, { backgroundColor: colors.surface, borderColor: colors.controlButtonBorder }]}
+            style={[styles.legendCard, { backgroundColor: colors.surface, borderColor: colors.inputBorder }]}
           >
             <Text style={[styles.legendTitle, { color: colors.text }]}>
               Legend
@@ -497,7 +497,7 @@ export default function HistoryScreen() {
                   key={userId}
                   style={[
                     styles.memberCard,
-                    { backgroundColor: colors.cardBackground, borderColor: colors.controlButtonBorder },
+                    { backgroundColor: colors.cardBackground, borderColor: colors.inputBorder },
                   ]}
                   data-testid={`card-member-${userId}`}
                 >
