@@ -962,7 +962,7 @@ const styles = StyleSheet.create({
   primaryButton: {
     backgroundColor: "#0EA5E9",
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.35)",
+    borderColor: "rgba(255, 255, 255, 0.5)",
   },
   secondaryButton: {
     backgroundColor: "transparent",
