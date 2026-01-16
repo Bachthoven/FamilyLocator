@@ -1289,7 +1289,7 @@ const styles = StyleSheet.create({
     marginTop: 24,
     gap: 8,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.2)",
+    borderColor: "rgba(255, 255, 255, 0.35)",
   },
   logoutButtonText: {
     color: "#FFFFFF",

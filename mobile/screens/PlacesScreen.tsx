@@ -1367,7 +1367,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     gap: 6,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.2)",
+    borderColor: "rgba(255, 255, 255, 0.35)",
   },
   addButtonText: {
     color: "#FFFFFF",
