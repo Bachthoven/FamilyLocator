@@ -1323,6 +1323,8 @@ const styles = StyleSheet.create({
   membersIndicatorBlur: {
     borderRadius: 999,
     overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.5)",
   },
   membersIndicatorContent: {
     flexDirection: "row",
@@ -1362,12 +1364,14 @@ const styles = StyleSheet.create({
   },
   onlineAvatarDot: {
     position: "absolute",
-    bottom: 0,
-    right: 0,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    bottom: -1,
+    right: -1,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
     backgroundColor: "#10B981",
+    borderWidth: 2,
+    borderColor: "#FFFFFF",
   },
   membersText: {
     fontSize: 14,
