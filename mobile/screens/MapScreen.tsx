@@ -1364,14 +1364,14 @@ const styles = StyleSheet.create({
   },
   onlineAvatarDot: {
     position: "absolute",
-    bottom: -1,
-    right: -1,
+    bottom: 1,
+    right: 1,
     width: 10,
     height: 10,
     borderRadius: 5,
     backgroundColor: "#10B981",
     borderWidth: 2,
-    borderColor: "#FFFFFF",
+    borderColor: "rgba(255, 255, 255, 0.8)",
   },
   membersText: {
     fontSize: 14,

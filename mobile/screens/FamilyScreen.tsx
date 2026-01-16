@@ -554,7 +554,7 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                                 : "?"}
                         </Text>
                       </View>
-                      <View style={[styles.avatarStatusDot, { backgroundColor: "#10B981" }]} />
+                      <View style={[styles.avatarStatusDot, { backgroundColor: "#10B981", borderColor: colors.cardBackground }]} />
                     </View>
                     <View style={styles.memberDetails}>
                       <View style={styles.memberNameRow}>
@@ -619,7 +619,7 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                                   : "?"}
                           </Text>
                         </View>
-                        <View style={[styles.avatarStatusDot, { backgroundColor: dotColor }]} />
+                        <View style={[styles.avatarStatusDot, { backgroundColor: dotColor, borderColor: colors.cardBackground }]} />
                       </View>
                       <View style={styles.memberDetails}>
                         <Text
@@ -1126,13 +1126,12 @@ const styles = StyleSheet.create({
   },
   avatarStatusDot: {
     position: "absolute",
-    bottom: 0,
-    right: 0,
-    width: 14,
-    height: 14,
-    borderRadius: 7,
+    bottom: 2,
+    right: 2,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
     borderWidth: 2,
-    borderColor: "#FFFFFF",
   },
   avatarText: {
     fontSize: 18,
