@@ -27,7 +27,7 @@ export default function Compass({ heading, onPress }: CompassProps) {
         styles.container,
         {
           backgroundColor: colors.compassBackground,
-          borderColor: colors.border,
+          borderColor: colors.controlButtonBorder,
         },
       ]}
       activeOpacity={0.7}

@@ -457,7 +457,7 @@ export default function PlacesScreen() {
     return (
       <View
         key={place.id}
-        style={[styles.placeCard, { backgroundColor: colors.cardBackground }]}
+        style={[styles.placeCard, { backgroundColor: colors.cardBackground, borderColor: colors.controlButtonBorder }]}
         data-testid={`card-place-${place.id}`}
       >
         <View style={styles.placeCardContent}>
@@ -1366,6 +1366,8 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 8,
     gap: 6,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
   },
   addButtonText: {
     color: "#FFFFFF",
@@ -1401,6 +1403,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 2,
     elevation: 1,
+    borderWidth: 1,
   },
   placeCardContent: {
     flexDirection: "row",

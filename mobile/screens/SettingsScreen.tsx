@@ -978,7 +978,7 @@ export default function SettingsScreen() {
         <View
           style={[
             styles.profileCard,
-            { backgroundColor: colors.cardBackground },
+            { backgroundColor: colors.cardBackground, borderColor: colors.controlButtonBorder },
           ]}
           data-testid="card-profile"
         >
@@ -1048,7 +1048,7 @@ export default function SettingsScreen() {
               key={item.label}
               style={[
                 styles.settingsItem,
-                { backgroundColor: colors.cardBackground },
+                { backgroundColor: colors.cardBackground, borderColor: colors.controlButtonBorder },
               ]}
               onPress={item.action}
               data-testid={`button-setting-${item.label.toLowerCase().replace(/\s+/g, "-")}`}
@@ -1087,7 +1087,7 @@ export default function SettingsScreen() {
           <TouchableOpacity
             style={[
               styles.settingsItem,
-              { backgroundColor: colors.cardBackground },
+              { backgroundColor: colors.cardBackground, borderColor: colors.controlButtonBorder },
             ]}
             onPress={() => setThemeModalVisible(true)}
             data-testid="button-setting-appearance"
@@ -1205,6 +1205,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 12,
     marginBottom: 16,
+    borderWidth: 1,
   },
   avatar: {
     width: 64,
@@ -1254,6 +1255,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 12,
     borderRadius: 12,
+    borderWidth: 1,
   },
   settingsItemIcon: {
     width: 40,
@@ -1286,6 +1288,8 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginTop: 24,
     gap: 8,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
   },
   logoutButtonText: {
     color: "#FFFFFF",

@@ -248,8 +248,10 @@ export default function HistoryScreen() {
             <TouchableOpacity
               style={[
                 styles.viewToggleButton,
+                { borderColor: colors.controlButtonBorder },
                 viewMode === "list" && {
                   backgroundColor: colors.primary,
+                  borderColor: colors.primary,
                 },
                 viewMode !== "list" && {
                   backgroundColor: colors.surfaceSecondary,
@@ -267,8 +269,10 @@ export default function HistoryScreen() {
             <TouchableOpacity
               style={[
                 styles.viewToggleButton,
+                { borderColor: colors.controlButtonBorder },
                 viewMode === "map" && {
                   backgroundColor: colors.primary,
+                  borderColor: colors.primary,
                 },
                 viewMode !== "map" && {
                   backgroundColor: colors.surfaceSecondary,
@@ -306,8 +310,10 @@ export default function HistoryScreen() {
             <TouchableOpacity
               style={[
                 styles.memberFilterButton,
+                { borderColor: colors.controlButtonBorder },
                 selectedMember === null && {
                   backgroundColor: colors.primary,
+                  borderColor: colors.primary,
                 },
                 selectedMember !== null && {
                   backgroundColor: colors.surfaceSecondary,
@@ -345,7 +351,8 @@ export default function HistoryScreen() {
                   key={userId}
                   style={[
                     styles.memberFilterButton,
-                    isSelected && { backgroundColor: userColor },
+                    { borderColor: colors.controlButtonBorder },
+                    isSelected && { backgroundColor: userColor, borderColor: userColor },
                     !isSelected && {
                       backgroundColor: colors.surfaceSecondary,
                       borderColor: colors.border,
@@ -439,7 +446,7 @@ export default function HistoryScreen() {
           </MapView>
 
           <View
-            style={[styles.legendCard, { backgroundColor: colors.surface }]}
+            style={[styles.legendCard, { backgroundColor: colors.surface, borderColor: colors.controlButtonBorder }]}
           >
             <Text style={[styles.legendTitle, { color: colors.text }]}>
               Legend
@@ -490,7 +497,7 @@ export default function HistoryScreen() {
                   key={userId}
                   style={[
                     styles.memberCard,
-                    { backgroundColor: colors.cardBackground },
+                    { backgroundColor: colors.cardBackground, borderColor: colors.controlButtonBorder },
                   ]}
                   data-testid={`card-member-${userId}`}
                 >
@@ -723,6 +730,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     justifyContent: "center",
     alignItems: "center",
+    borderWidth: 1,
   },
   statsRow: {
     flexDirection: "row",
@@ -749,6 +757,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 20,
     gap: 6,
+    borderWidth: 1,
   },
   memberColorDot: {
     width: 10,
@@ -804,6 +813,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+    borderWidth: 1,
   },
   legendTitle: {
     fontSize: 14,
@@ -838,6 +848,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
+    borderWidth: 1,
   },
   memberCardHeader: {
     marginBottom: 16,

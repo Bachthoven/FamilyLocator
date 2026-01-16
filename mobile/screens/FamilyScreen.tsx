@@ -463,7 +463,7 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                     key={code.id}
                     style={[
                       styles.codeCard,
-                      { backgroundColor: colors.cardBackground },
+                      { backgroundColor: colors.cardBackground, borderColor: colors.controlButtonBorder },
                     ]}
                     data-testid={`card-code-${code.code}`}
                   >
@@ -532,7 +532,7 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                 <View
                   style={[
                     styles.memberCard,
-                    { backgroundColor: colors.cardBackground },
+                    { backgroundColor: colors.cardBackground, borderColor: colors.controlButtonBorder },
                   ]}
                   data-testid={`card-member-${user.id}`}
                 >
@@ -597,7 +597,7 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                     key={member.id}
                     style={[
                       styles.memberCard,
-                      { backgroundColor: colors.cardBackground },
+                      { backgroundColor: colors.cardBackground, borderColor: colors.controlButtonBorder },
                     ]}
                     data-testid={`card-member-${member.id}`}
                   >
@@ -961,6 +961,8 @@ const styles = StyleSheet.create({
   },
   primaryButton: {
     backgroundColor: "#0EA5E9",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
   },
   secondaryButton: {
     backgroundColor: "transparent",
@@ -1003,6 +1005,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 2,
     elevation: 1,
+    borderWidth: 1,
   },
   codeCardContent: {
     flexDirection: "row",
@@ -1105,6 +1108,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 2,
     elevation: 1,
+    borderWidth: 1,
   },
   memberInfo: {
     flexDirection: "row",
@@ -1126,8 +1130,8 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 1,
     right: 1,
-    width: 12,
-    height: 12,
+    width: 10,
+    height: 10,
     borderRadius: 6,
   },
   avatarText: {
