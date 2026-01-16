@@ -1126,11 +1126,11 @@ const styles = StyleSheet.create({
   },
   avatarStatusDot: {
     position: "absolute",
-    bottom: 2,
-    right: 2,
-    width: 12,
-    height: 12,
-    borderRadius: 6,
+    bottom: -2,
+    right: -2,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
     borderWidth: 2,
   },
   avatarText: {
