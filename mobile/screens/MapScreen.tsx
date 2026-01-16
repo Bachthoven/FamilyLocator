@@ -1323,8 +1323,6 @@ const styles = StyleSheet.create({
   membersIndicatorBlur: {
     borderRadius: 999,
     overflow: "hidden",
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.5)",
   },
   membersIndicatorContent: {
     flexDirection: "row",

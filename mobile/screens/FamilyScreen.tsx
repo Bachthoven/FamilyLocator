@@ -691,7 +691,7 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
               <View
                 style={[
                   styles.statCard,
-                  { backgroundColor: colors.cardBackground },
+                  { backgroundColor: colors.cardBackground, borderColor: colors.inputBorder },
                 ]}
               >
                 <Text style={[styles.statNumber, { color: colors.primary }]}>
@@ -706,7 +706,7 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
               <View
                 style={[
                   styles.statCard,
-                  { backgroundColor: colors.cardBackground },
+                  { backgroundColor: colors.cardBackground, borderColor: colors.inputBorder },
                 ]}
               >
                 <Text style={styles.statNumberOnline}>
@@ -961,8 +961,6 @@ const styles = StyleSheet.create({
   },
   primaryButton: {
     backgroundColor: "#0EA5E9",
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.5)",
   },
   secondaryButton: {
     backgroundColor: "transparent",
@@ -1313,6 +1311,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 2,
     elevation: 1,
+    borderWidth: 1,
   },
   statNumber: {
     fontSize: 28,

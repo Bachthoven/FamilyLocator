@@ -1076,7 +1076,7 @@ export default function PlacesScreen() {
   const renderStatistics = () => (
     <View style={styles.statsContainer}>
       <View
-        style={[styles.statCard, { backgroundColor: colors.cardBackground }]}
+        style={[styles.statCard, { backgroundColor: colors.cardBackground, borderColor: colors.inputBorder }]}
         data-testid="stat-total-places"
       >
         <Text style={[styles.statNumber, { color: colors.primary }]}>
@@ -1087,7 +1087,7 @@ export default function PlacesScreen() {
         </Text>
       </View>
       <View
-        style={[styles.statCard, { backgroundColor: colors.cardBackground }]}
+        style={[styles.statCard, { backgroundColor: colors.cardBackground, borderColor: colors.inputBorder }]}
         data-testid="stat-categories"
       >
         <Text style={[styles.statNumber, { color: "#10B981" }]}>
@@ -1366,8 +1366,6 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 8,
     gap: 6,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.5)",
   },
   addButtonText: {
     color: "#FFFFFF",
@@ -1742,6 +1740,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 12,
     alignItems: "center",
+    borderWidth: 1,
   },
   statNumber: {
     fontSize: 28,

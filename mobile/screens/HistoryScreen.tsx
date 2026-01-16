@@ -248,7 +248,7 @@ export default function HistoryScreen() {
             <TouchableOpacity
               style={[
                 styles.viewToggleButton,
-                { borderColor: colors.controlButtonBorder },
+                { borderColor: colors.inputBorder },
                 viewMode === "list" && {
                   backgroundColor: colors.primary,
                   borderColor: colors.primary,
@@ -269,7 +269,7 @@ export default function HistoryScreen() {
             <TouchableOpacity
               style={[
                 styles.viewToggleButton,
-                { borderColor: colors.controlButtonBorder },
+                { borderColor: colors.inputBorder },
                 viewMode === "map" && {
                   backgroundColor: colors.primary,
                   borderColor: colors.primary,
@@ -310,7 +310,7 @@ export default function HistoryScreen() {
             <TouchableOpacity
               style={[
                 styles.memberFilterButton,
-                { borderColor: colors.controlButtonBorder },
+                { borderColor: colors.inputBorder },
                 selectedMember === null && {
                   backgroundColor: colors.primary,
                   borderColor: colors.primary,
@@ -351,7 +351,7 @@ export default function HistoryScreen() {
                   key={userId}
                   style={[
                     styles.memberFilterButton,
-                    { borderColor: colors.controlButtonBorder },
+                    { borderColor: colors.inputBorder },
                     isSelected && { backgroundColor: userColor, borderColor: userColor },
                     !isSelected && {
                       backgroundColor: colors.surfaceSecondary,
