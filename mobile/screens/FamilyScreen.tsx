@@ -537,21 +537,24 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                   data-testid={`card-member-${user.id}`}
                 >
                   <View style={styles.memberInfo}>
-                    <View
-                      style={[
-                        styles.avatar,
-                        { backgroundColor: colors.avatarBackground },
-                      ]}
-                    >
-                      <Text style={styles.avatarText}>
-                        {user.firstName && user.lastName
-                          ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
-                          : user.firstName
-                            ? user.firstName[0].toUpperCase()
-                            : user.email && user.email.length > 0
-                              ? user.email[0].toUpperCase()
-                              : "?"}
-                      </Text>
+                    <View style={styles.avatarContainer}>
+                      <View
+                        style={[
+                          styles.avatar,
+                          { backgroundColor: colors.avatarBackground },
+                        ]}
+                      >
+                        <Text style={styles.avatarText}>
+                          {user.firstName && user.lastName
+                            ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
+                            : user.firstName
+                              ? user.firstName[0].toUpperCase()
+                              : user.email && user.email.length > 0
+                                ? user.email[0].toUpperCase()
+                                : "?"}
+                        </Text>
+                      </View>
+                      <View style={[styles.avatarStatusDot, { backgroundColor: "#10B981" }]} />
                     </View>
                     <View style={styles.memberDetails}>
                       <View style={styles.memberNameRow}>
@@ -565,22 +568,6 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                         <View style={styles.youBadge}>
                           <Text style={styles.youBadgeText}>You</Text>
                         </View>
-                      </View>
-                      <View style={styles.statusRow}>
-                        <View
-                          style={[
-                            styles.statusDot,
-                            { backgroundColor: "#10B981" },
-                          ]}
-                        />
-                        <Text
-                          style={[
-                            styles.statusText,
-                            { color: colors.textSecondary },
-                          ]}
-                        >
-                          Currently active
-                        </Text>
                       </View>
                     </View>
                   </View>
@@ -602,6 +589,8 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                   member.firstName && member.lastName
                     ? `${member.firstName} ${member.lastName}`
                     : member.firstName || member.email;
+                const isOnline = statusInfo.status === "Active";
+                const dotColor = isOnline ? "#10B981" : "#EF4444";
 
                 return (
                   <View
@@ -613,21 +602,24 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                     data-testid={`card-member-${member.id}`}
                   >
                     <View style={styles.memberInfo}>
-                      <View
-                        style={[
-                          styles.avatar,
-                          { backgroundColor: colors.avatarBackground },
-                        ]}
-                      >
-                        <Text style={styles.avatarText}>
-                          {member.firstName && member.lastName
-                            ? `${member.firstName[0]}${member.lastName[0]}`.toUpperCase()
-                            : member.firstName
-                              ? member.firstName[0].toUpperCase()
-                              : member.email && member.email.length > 0
-                                ? member.email[0].toUpperCase()
-                                : "?"}
-                        </Text>
+                      <View style={styles.avatarContainer}>
+                        <View
+                          style={[
+                            styles.avatar,
+                            { backgroundColor: colors.avatarBackground },
+                          ]}
+                        >
+                          <Text style={styles.avatarText}>
+                            {member.firstName && member.lastName
+                              ? `${member.firstName[0]}${member.lastName[0]}`.toUpperCase()
+                              : member.firstName
+                                ? member.firstName[0].toUpperCase()
+                                : member.email && member.email.length > 0
+                                  ? member.email[0].toUpperCase()
+                                  : "?"}
+                          </Text>
+                        </View>
+                        <View style={[styles.avatarStatusDot, { backgroundColor: dotColor }]} />
                       </View>
                       <View style={styles.memberDetails}>
                         <Text
@@ -635,13 +627,7 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                         >
                           {memberName}
                         </Text>
-                        <View style={styles.statusRow}>
-                          <View
-                            style={[
-                              styles.statusDot,
-                              { backgroundColor: statusInfo.color },
-                            ]}
-                          />
+                        {!isOnline && statusInfo.status !== "Unknown" && (
                           <Text
                             style={[
                               styles.statusText,
@@ -650,7 +636,17 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                           >
                             {statusInfo.message}
                           </Text>
-                        </View>
+                        )}
+                        {statusInfo.status === "Unknown" && (
+                          <Text
+                            style={[
+                              styles.statusText,
+                              { color: colors.textSecondary },
+                            ]}
+                          >
+                            {statusInfo.message}
+                          </Text>
+                        )}
                       </View>
                     </View>
                     <View style={styles.memberActions}>
@@ -1115,6 +1111,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flex: 1,
   },
+  avatarContainer: {
+    position: "relative",
+  },
   avatar: {
     width: 48,
     height: 48,
@@ -1122,6 +1121,16 @@ const styles = StyleSheet.create({
     backgroundColor: "#9CA3AF",
     alignItems: "center",
     justifyContent: "center",
+  },
+  avatarStatusDot: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    borderWidth: 2,
+    borderColor: "#FFFFFF",
   },
   avatarText: {
     fontSize: 18,
