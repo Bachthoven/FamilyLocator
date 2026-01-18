@@ -52,7 +52,7 @@ const categoryColors = {
 };
 
 export default function Places() {
-  const { user } = useAuth();
+  const { user } = useAuth() as { user: User | null };
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [addPlaceDialogOpen, setAddPlaceDialogOpen] = useState(false);

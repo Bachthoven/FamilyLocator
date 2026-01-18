@@ -1,9 +1,8 @@
-import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
+import type { User } from "@shared/schema";
 import {
   Card,
   CardContent,
@@ -25,7 +24,7 @@ interface LoggingStatus {
 }
 
 export default function LocationLogger() {
-  const { user } = useAuth();
+  const { user } = useAuth() as { user: User | null };
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -38,8 +37,9 @@ export default function LocationLogger() {
   // Start logging mutation
   const startLogging = useMutation({
     mutationFn: () =>
-      apiRequest("/api/location-logging/start", {
+      fetch("/api/location-logging/start", {
         method: "POST",
+        credentials: "include",
       }),
     onSuccess: () => {
       toast({
@@ -64,8 +64,9 @@ export default function LocationLogger() {
   // Stop logging mutation
   const stopLogging = useMutation({
     mutationFn: () =>
-      apiRequest("/api/location-logging/stop", {
+      fetch("/api/location-logging/stop", {
         method: "POST",
+        credentials: "include",
       }),
     onSuccess: () => {
       toast({
@@ -89,10 +90,10 @@ export default function LocationLogger() {
   if (!user) return null;
 
   const isUserLoggingActive = status?.activeSessions?.some(
-    (session) => session.userId === user.id
+    (session) => session.userId === String(user?.id)
   );
   const userSession = status?.activeSessions?.find(
-    (session) => session.userId === user.id
+    (session) => session.userId === String(user?.id)
   );
 
   return (

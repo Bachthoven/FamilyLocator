@@ -191,7 +191,10 @@ export function NotificationManager({ children }: NotificationManagerProps) {
       <div className="fixed top-4 right-4 z-50 pointer-events-none">
         <div className="space-y-2 pointer-events-auto">
           {notifications.length > 0 &&
-            console.log("Rendering notifications:", notifications)}
+            (() => {
+              console.log("Rendering notifications:", notifications);
+              return null;
+            })()}
           {notifications.map((notification, index) => (
             <div
               key={notification.id}
