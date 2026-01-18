@@ -1,0 +1,165 @@
+## Core GitHub Actions you should run (high value, low controversy)
+
+* **CI: Lint + typecheck**
+
+  * Run on every pull request and push to main.
+  * Purpose: catch obvious defects before they ship (especially critical in location pipelines where “almost correct” is still wrong).
+
+* **CI: Unit tests**
+
+  * Run on every pull request.
+  * Include:
+
+    * Location ingestion and validation logic
+    * Authorization checks (family membership, sharing permissions)
+    * Rate limiting / anti abuse logic
+
+* **CI: Integration tests (service-level)**
+
+  * Run on pull requests, ideally with ephemeral dependencies.
+  * Typical setup:
+
+    * Spin up Postgres/Redis via `services:`
+    * Run migrations
+    * Hit API endpoints that process and retrieve location history
+
+* **Build verification**
+
+  * Run on pull requests.
+  * Ensures the app actually compiles and packages:
+
+    * **iOS/Android**: compile and run basic build steps
+    * **Backend**: build container image or compile server bundle
+    * **Web** (if any): `build` and `bundle size` checks
+
+---
+
+## Security Actions you should treat as mandatory for location apps
+
+* **CodeQL (static analysis)**
+
+  * Finds common injection, auth, and data-flow issues.
+  * Schedule: on PRs + nightly.
+
+* **Dependency Review**
+
+  * Blocks PRs that introduce vulnerable dependencies or risky license changes.
+  * Especially important if you use location SDKs, push notification SDKs, map SDKs.
+
+* **Secret scanning + push protection**
+
+  * Prevents accidental commits of:
+
+    * Map provider keys
+    * Push notification credentials
+    * Database URLs
+    * Cloud service credentials
+
+* **Supply chain hardening**
+
+  * Use:
+
+    * **Pinned action versions** (commit SHA, not tags)
+    * Least-privilege `permissions:`
+    * Avoid long-lived cloud keys; prefer OIDC to cloud providers
+
+---
+
+## Release and deployment workflows (typical for this product category)
+
+* **Backend deploy workflow**
+
+  * Triggers:
+
+    * merge to main
+    * tagged release (preferred for production)
+  * Steps:
+
+    * build and scan container (or build artifact)
+    * run migrations (carefully controlled)
+    * deploy to staging
+    * smoke test
+    * promote to production (manual approval gate recommended)
+
+* **Mobile release workflow**
+
+  * Triggers:
+
+    * tags like `ios-v*` / `android-v*` or a unified `v*`
+  * Steps:
+
+    * build signed binaries
+    * run minimal UI smoke tests (or at least install-and-launch)
+    * upload to TestFlight / Play Internal Testing
+    * optional: submit to stores (often manual gate)
+
+* **Environment separation**
+
+  * Use GitHub Environments: `dev`, `staging`, `production`
+  * Enforce:
+
+    * required reviewers for production
+    * environment-scoped secrets
+    * deployment protection rules
+
+---
+
+## Quality gates tailored to location tracking
+
+* **Schema + migration checks**
+
+  * Validate migrations are reversible or explicitly marked as irreversible.
+  * Run migration linting to avoid data loss.
+
+* **Load / rate-limit regression checks (lightweight)**
+
+  * Even a small scripted test on PRs can prevent accidental “battery-drain-by-API” style regressions.
+
+* **Privacy regression checks**
+
+  * Add automated tests to ensure:
+
+    * “Only approved family members can access this user’s location”
+    * Deleted users’ location history is not retrievable
+    * Export endpoints (if any) require re-authentication
+
+---
+
+## Concrete workflow set (by name)
+
+* **`ci.yml`**
+
+  * lint, typecheck, unit tests, build verification
+
+* **`integration.yml`**
+
+  * spins up DB/cache, runs migrations, runs API-level integration tests
+
+* **`codeql.yml`**
+
+  * CodeQL analysis (PR + nightly)
+
+* **`dependency-review.yml`**
+
+  * dependency review on PRs
+
+* **`release-backend.yml`**
+
+  * build, scan, deploy to staging, smoke test, promote
+
+* **`release-mobile.yml`**
+
+  * build and sign, upload to testing channels, optional store submission gate
+
+* **`scheduled-security.yml`**
+
+  * nightly dependency audit and basic vulnerability reporting (in addition to CodeQL)
+
+---
+
+## Non-negotiables for a family location app (practical and defensive)
+
+* **Treat CI failures as “stop the line.”**
+* **Use OIDC for cloud deploys instead of static cloud keys whenever possible.**
+* **Put production deploy behind an environment approval gate.**
+* **Lock down workflow permissions** (`permissions: read-all` by default; escalate only where needed).

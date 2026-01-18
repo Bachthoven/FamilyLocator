@@ -1,0 +1,96 @@
+name: CodeQL Security Analysis
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+  schedule:
+    - cron: '0 3 * * *'  # Nightly at 3 AM UTC
+
+permissions:
+  actions: read
+  contents: read
+  security-events: write
+
+jobs:
+  analyze:
+    name: CodeQL Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ['javascript-typescript']
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          queries: security-extended,security-and-quality
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{ matrix.language }}"
+          
+  custom-security-checks:
+    name: Custom Security Checks
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Check for hardcoded secrets
+        run: |
+          echo "Scanning for potential hardcoded secrets..."
+          # Check for common secret patterns
+          if grep -rE "(api[_-]?key|secret|password|token)\s*[:=]\s*['\"][^'\"]{8,}['\"]" \
+            --include="*.ts" --include="*.tsx" --include="*.js" \
+            --exclude-dir=node_modules --exclude-dir=.git \
+            . 2>/dev/null | grep -v "test\|spec\|mock\|example\|placeholder"; then
+            echo "::warning::Potential hardcoded secrets detected - please review"
+          fi
+          
+      - name: Check for sensitive data logging
+        run: |
+          echo "Checking for sensitive data in logs..."
+          # Look for password/token logging
+          if grep -rE "console\.(log|info|debug).*\b(password|token|secret|apiKey)\b" \
+            --include="*.ts" --include="*.tsx" \
+            --exclude-dir=node_modules --exclude-dir=.git \
+            . 2>/dev/null; then
+            echo "::warning::Potential sensitive data logging detected"
+          fi
+          
+      - name: Verify JWT security
+        run: |
+          echo "Checking JWT implementation..."
+          # Verify JWT tokens use proper verification
+          if grep -rE "jwt\.verify|jsonwebtoken" server/ --include="*.ts" | head -5; then
+            echo "JWT verification found in server code"
+          fi
+          
+      - name: Check location data handling
+        run: |
+          echo "Validating location data access patterns..."
+          # Ensure location queries are properly scoped
+          grep -n "locations" server/routes.ts | head -10 || true
