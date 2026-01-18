@@ -30,6 +30,8 @@ git commit -m "descriptive message"
 git push origin dev
 ```
 
+**Important**: Do NOT tell the user git commands at the end of responses - complete the work silently.
+
 ---
 
 **Note**: Full project documentation is maintained in `README.md`

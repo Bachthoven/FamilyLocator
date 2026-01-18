@@ -6,5 +6,6 @@
 .upm
 .tmp
 .git
+.local
 replit.nix
 .replit
