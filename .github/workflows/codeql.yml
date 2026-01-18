@@ -17,6 +17,8 @@ jobs:
   analyze:
     name: CodeQL Analysis
     runs-on: ubuntu-latest
+    # Only run on public repositories (CodeQL requires GitHub Advanced Security for private repos)
+    if: github.event.repository.visibility == 'public'
     timeout-minutes: 360
     
     strategy:
@@ -54,6 +56,7 @@ jobs:
   custom-security-checks:
     name: Custom Security Checks
     runs-on: ubuntu-latest
+    # This job runs on all repos since it doesn't require GitHub Advanced Security
     
     steps:
       - name: Checkout code
