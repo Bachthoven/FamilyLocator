@@ -189,18 +189,27 @@ export default function NotificationBell() {
           <View
             style={[
               styles.modalContainer,
-              { 
+              {
                 paddingBottom: insets.bottom + 16,
                 backgroundColor: colors.surface,
               },
             ]}
           >
             {/* Header */}
-            <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
+            <View
+              style={[styles.modalHeader, { borderBottomColor: colors.border }]}
+            >
               <View>
-                <Text style={[styles.modalTitle, { color: colors.text }]}>Notifications</Text>
+                <Text style={[styles.modalTitle, { color: colors.text }]}>
+                  Notifications
+                </Text>
                 {notifications.length > 0 && (
-                  <Text style={[styles.modalSubtitle, { color: colors.textSecondary }]}>
+                  <Text
+                    style={[
+                      styles.modalSubtitle,
+                      { color: colors.textSecondary },
+                    ]}
+                  >
                     {unreadCount > 0 ? `${unreadCount} new` : "All caught up"}
                   </Text>
                 )}
@@ -240,21 +249,38 @@ export default function NotificationBell() {
               {isLoading ? (
                 <View style={styles.loadingContainer}>
                   <ActivityIndicator size="large" color="#0EA5E9" />
-                  <Text style={[styles.loadingText, { color: colors.textSecondary }]}>
+                  <Text
+                    style={[
+                      styles.loadingText,
+                      { color: colors.textSecondary },
+                    ]}
+                  >
                     Loading notifications...
                   </Text>
                 </View>
               ) : notifications.length === 0 ? (
                 <View style={styles.emptyState}>
-                  <View style={[styles.emptyIconContainer, { backgroundColor: colors.surfaceSecondary }]}>
+                  <View
+                    style={[
+                      styles.emptyIconContainer,
+                      { backgroundColor: colors.surfaceSecondary },
+                    ]}
+                  >
                     <Ionicons
                       name="notifications-outline"
                       size={48}
                       color={colors.textMuted}
                     />
                   </View>
-                  <Text style={[styles.emptyTitle, { color: colors.text }]}>No notifications yet</Text>
-                  <Text style={[styles.emptyDescription, { color: colors.textSecondary }]}>
+                  <Text style={[styles.emptyTitle, { color: colors.text }]}>
+                    No notifications yet
+                  </Text>
+                  <Text
+                    style={[
+                      styles.emptyDescription,
+                      { color: colors.textSecondary },
+                    ]}
+                  >
                     You'll see location alerts and updates here
                   </Text>
                 </View>
@@ -275,8 +301,16 @@ export default function NotificationBell() {
                         }
                         style={[
                           styles.notificationItem,
-                          { backgroundColor: colors.surfaceSecondary, borderLeftColor: colors.border },
-                          isUnread && { backgroundColor: isDarkMode ? '#1E3A5F' : '#EBF5FF', borderLeftColor: '#0EA5E9', borderWidth: 1, borderColor: '#0EA5E9' },
+                          {
+                            backgroundColor: colors.surfaceSecondary,
+                            borderLeftColor: colors.border,
+                          },
+                          isUnread && {
+                            backgroundColor: isDarkMode ? "#1E3A5F" : "#EBF5FF",
+                            borderLeftColor: "#0EA5E9",
+                            borderWidth: 1,
+                            borderColor: "#0EA5E9",
+                          },
                         ]}
                         activeOpacity={0.7}
                         data-testid={`notification-item-${notification.id}`}
@@ -299,7 +333,10 @@ export default function NotificationBell() {
                             style={[
                               styles.notificationTitle,
                               { color: colors.textSecondary },
-                              isUnread && { color: colors.text, fontWeight: 'bold' },
+                              isUnread && {
+                                color: colors.text,
+                                fontWeight: "bold",
+                              },
                             ]}
                           >
                             {notification.title}
@@ -308,12 +345,20 @@ export default function NotificationBell() {
                             style={[
                               styles.notificationMessage,
                               { color: colors.textSecondary },
-                              isUnread && { color: colors.text, fontWeight: '500' },
+                              isUnread && {
+                                color: colors.text,
+                                fontWeight: "500",
+                              },
                             ]}
                           >
                             {notification.message}
                           </Text>
-                          <Text style={[styles.notificationTime, { color: colors.textMuted }]}>
+                          <Text
+                            style={[
+                              styles.notificationTime,
+                              { color: colors.textMuted },
+                            ]}
+                          >
                             {formatTime(
                               notification.createdAt || new Date().toISOString()
                             )}
@@ -329,7 +374,11 @@ export default function NotificationBell() {
                           style={styles.deleteNotificationButton}
                           activeOpacity={0.7}
                         >
-                          <Ionicons name="close" size={18} color={colors.textMuted} />
+                          <Ionicons
+                            name="close"
+                            size={18}
+                            color={colors.textMuted}
+                          />
                         </TouchableOpacity>
                       </TouchableOpacity>
                     );

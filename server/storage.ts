@@ -522,10 +522,7 @@ export class DatabaseStorage implements IStorage {
     await db
       .delete(invitationCodes)
       .where(
-        and(
-          eq(invitationCodes.id, codeId),
-          eq(invitationCodes.userId, userId)
-        )
+        and(eq(invitationCodes.id, codeId), eq(invitationCodes.userId, userId))
       );
   }
 
@@ -588,7 +585,10 @@ export class DatabaseStorage implements IStorage {
     await db.delete(notifications).where(eq(notifications.userId, userId));
   }
 
-  async deleteNotification(userId: number, notificationId: number): Promise<void> {
+  async deleteNotification(
+    userId: number,
+    notificationId: number
+  ): Promise<void> {
     await db
       .delete(notifications)
       .where(

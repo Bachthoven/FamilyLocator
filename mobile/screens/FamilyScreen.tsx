@@ -178,8 +178,10 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
       // Snapshot current codes
       const previousCodes = queryClient.getQueryData(["/api/family/codes"]);
       // Optimistically remove the code from cache immediately
-      queryClient.setQueryData(["/api/family/codes"], (old: any[] | undefined) =>
-        old ? old.filter((code: any) => code.id !== codeId) : []
+      queryClient.setQueryData(
+        ["/api/family/codes"],
+        (old: any[] | undefined) =>
+          old ? old.filter((code: any) => code.id !== codeId) : []
       );
       return { previousCodes };
     },
@@ -365,7 +367,9 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
       </View>
 
       {/* Content */}
-      <ScrollView style={[styles.content, { backgroundColor: colors.background }]}>
+      <ScrollView
+        style={[styles.content, { backgroundColor: colors.background }]}
+      >
         {familyLoading ? (
           // Loading skeletons
           <View style={styles.skeletonsContainer}>
@@ -463,7 +467,10 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                     key={code.id}
                     style={[
                       styles.codeCard,
-                      { backgroundColor: colors.cardBackground, borderColor: colors.inputBorder },
+                      {
+                        backgroundColor: colors.cardBackground,
+                        borderColor: colors.inputBorder,
+                      },
                     ]}
                     data-testid={`card-code-${code.code}`}
                   >
@@ -532,7 +539,10 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                 <View
                   style={[
                     styles.memberCard,
-                    { backgroundColor: colors.cardBackground, borderColor: colors.inputBorder },
+                    {
+                      backgroundColor: colors.cardBackground,
+                      borderColor: colors.inputBorder,
+                    },
                   ]}
                   data-testid={`card-member-${user.id}`}
                 >
@@ -554,7 +564,15 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                                 : "?"}
                         </Text>
                       </View>
-                      <View style={[styles.avatarStatusDot, { backgroundColor: "#10B981", borderColor: colors.cardBackground }]} />
+                      <View
+                        style={[
+                          styles.avatarStatusDot,
+                          {
+                            backgroundColor: "#10B981",
+                            borderColor: colors.cardBackground,
+                          },
+                        ]}
+                      />
                     </View>
                     <View style={styles.memberDetails}>
                       <View style={styles.memberNameRow}>
@@ -597,7 +615,10 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                     key={member.id}
                     style={[
                       styles.memberCard,
-                      { backgroundColor: colors.cardBackground, borderColor: colors.inputBorder },
+                      {
+                        backgroundColor: colors.cardBackground,
+                        borderColor: colors.inputBorder,
+                      },
                     ]}
                     data-testid={`card-member-${member.id}`}
                   >
@@ -619,7 +640,15 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                                   : "?"}
                           </Text>
                         </View>
-                        <View style={[styles.avatarStatusDot, { backgroundColor: dotColor, borderColor: colors.cardBackground }]} />
+                        <View
+                          style={[
+                            styles.avatarStatusDot,
+                            {
+                              backgroundColor: dotColor,
+                              borderColor: colors.cardBackground,
+                            },
+                          ]}
+                        />
                       </View>
                       <View style={styles.memberDetails}>
                         <Text
@@ -691,7 +720,10 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
               <View
                 style={[
                   styles.statCard,
-                  { backgroundColor: colors.cardBackground, borderColor: colors.inputBorder },
+                  {
+                    backgroundColor: colors.cardBackground,
+                    borderColor: colors.inputBorder,
+                  },
                 ]}
               >
                 <Text style={[styles.statNumber, { color: colors.primary }]}>
@@ -706,7 +738,10 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
               <View
                 style={[
                   styles.statCard,
-                  { backgroundColor: colors.cardBackground, borderColor: colors.inputBorder },
+                  {
+                    backgroundColor: colors.cardBackground,
+                    borderColor: colors.inputBorder,
+                  },
                 ]}
               >
                 <Text style={styles.statNumberOnline}>
@@ -863,7 +898,11 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                   data-testid="button-submit-join"
                 >
                   <Ionicons
-                    name={joinFamilyMutation.isPending ? "hourglass-outline" : "people"}
+                    name={
+                      joinFamilyMutation.isPending
+                        ? "hourglass-outline"
+                        : "people"
+                    }
                     size={18}
                     color="#FFFFFF"
                     style={{ marginRight: 6 }}

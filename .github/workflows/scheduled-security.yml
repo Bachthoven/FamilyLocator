@@ -2,7 +2,7 @@ name: Scheduled Security Audit
 
 on:
   schedule:
-    - cron: '0 2 * * *'  # Daily at 2 AM UTC
+    - cron: "0 2 * * *" # Daily at 2 AM UTC
   workflow_dispatch:
 
 permissions:
@@ -14,51 +14,51 @@ jobs:
   nightly-audit:
     name: Nightly Security Audit
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
-          cache: 'npm'
-          
+          node-version: "20.x"
+          cache: "npm"
+
       - name: Install dependencies
         run: npm ci
-        
+
       - name: Run comprehensive security audit
         id: audit
         run: |
           echo "Running npm audit..."
           npm audit --json > audit-report.json 2>&1 || true
-          
+
           CRITICAL=$(jq '.metadata.vulnerabilities.critical // 0' audit-report.json)
           HIGH=$(jq '.metadata.vulnerabilities.high // 0' audit-report.json)
           MODERATE=$(jq '.metadata.vulnerabilities.moderate // 0' audit-report.json)
           LOW=$(jq '.metadata.vulnerabilities.low // 0' audit-report.json)
-          
+
           echo "critical=$CRITICAL" >> $GITHUB_OUTPUT
           echo "high=$HIGH" >> $GITHUB_OUTPUT
           echo "moderate=$MODERATE" >> $GITHUB_OUTPUT
           echo "low=$LOW" >> $GITHUB_OUTPUT
-          
+
           echo "## Security Audit Summary" >> $GITHUB_STEP_SUMMARY
           echo "- Critical: $CRITICAL" >> $GITHUB_STEP_SUMMARY
           echo "- High: $HIGH" >> $GITHUB_STEP_SUMMARY
           echo "- Moderate: $MODERATE" >> $GITHUB_STEP_SUMMARY
           echo "- Low: $LOW" >> $GITHUB_STEP_SUMMARY
-          
+
       - name: Check for outdated packages
         run: |
           echo "Checking for outdated packages..."
           npm outdated --json > outdated-report.json 2>&1 || true
-          
+
           OUTDATED_COUNT=$(jq 'length' outdated-report.json 2>/dev/null || echo "0")
           echo "Outdated packages: $OUTDATED_COUNT"
           echo "## Outdated Packages: $OUTDATED_COUNT" >> $GITHUB_STEP_SUMMARY
-          
+
       - name: Upload audit report
         uses: actions/upload-artifact@v4
         with:
@@ -67,7 +67,7 @@ jobs:
             audit-report.json
             outdated-report.json
           retention-days: 30
-          
+
       - name: Alert on critical vulnerabilities
         if: steps.audit.outputs.critical > 0
         run: |
@@ -77,22 +77,22 @@ jobs:
   dependency-freshness:
     name: Dependency Freshness Check
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'
-          cache: 'npm'
-          
+          node-version: "20.x"
+          cache: "npm"
+
       - name: Check dependency age
         run: |
           echo "Checking dependency versions..."
           npm outdated 2>&1 || true
-          
+
       - name: Check for deprecated packages
         run: |
           echo "Checking for deprecated packages..."
@@ -101,28 +101,28 @@ jobs:
   privacy-compliance-check:
     name: Privacy Compliance Check
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
+
       - name: Check for PII handling patterns
         run: |
           echo "Scanning for PII handling patterns..."
-          
+
           # Check for proper encryption of sensitive data
           echo "Checking password hashing..."
           grep -r "bcrypt\|argon2\|scrypt" server/ --include="*.ts" || echo "::warning::No password hashing library detected"
-          
+
           # Check for location data retention policies
           echo "Checking location data handling..."
           grep -rn "locations\|latitude\|longitude" server/ --include="*.ts" | head -10
-          
+
       - name: Verify data deletion capabilities
         run: |
           echo "Checking for data deletion endpoints..."
           grep -rn "DELETE\|delete\|remove" server/routes.ts | head -10 || true
-          
+
       - name: Check for data export capabilities
         run: |
           echo "Checking for data export/portability..."

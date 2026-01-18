@@ -84,7 +84,9 @@ export default function AlertDialog({
             </Text>
           )}
           {message && (
-            <Text style={[styles.message, { color: colors.dialogTextSecondary }]}>
+            <Text
+              style={[styles.message, { color: colors.dialogTextSecondary }]}
+            >
               {message}
             </Text>
           )}
