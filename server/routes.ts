@@ -1020,7 +1020,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             .getUser(parseInt(data.userId))
             .then((user) => {
               if (user && user.locationHistoryEnabled) {
-                locationLogger.startHourlyLogging(parseInt(data.userId));
+                locationLogger.startHourlyLogging(data.userId.toString());
               }
             })
             .catch((error) => {
@@ -1044,7 +1044,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             `User ${userId} disconnected. Total clients: ${clients.size}`
           );
           // Stop hourly logging when user disconnects
-          locationLogger.stopHourlyLogging(parseInt(userId));
+          locationLogger.stopHourlyLogging(userId);
         }
       });
       console.log("WebSocket client disconnected");

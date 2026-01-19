@@ -352,10 +352,7 @@ export default function HistoryScreen() {
                   style={[
                     styles.memberFilterButton,
                     { borderColor: colors.inputBorder },
-                    isSelected && {
-                      backgroundColor: userColor,
-                      borderColor: userColor,
-                    },
+                    isSelected && { backgroundColor: userColor, borderColor: userColor },
                     !isSelected && {
                       backgroundColor: colors.surfaceSecondary,
                       borderColor: colors.border,
@@ -449,13 +446,7 @@ export default function HistoryScreen() {
           </MapView>
 
           <View
-            style={[
-              styles.legendCard,
-              {
-                backgroundColor: colors.surface,
-                borderColor: colors.inputBorder,
-              },
-            ]}
+            style={[styles.legendCard, { backgroundColor: colors.surface, borderColor: colors.inputBorder }]}
           >
             <Text style={[styles.legendTitle, { color: colors.text }]}>
               Legend
@@ -506,10 +497,7 @@ export default function HistoryScreen() {
                   key={userId}
                   style={[
                     styles.memberCard,
-                    {
-                      backgroundColor: colors.cardBackground,
-                      borderColor: colors.inputBorder,
-                    },
+                    { backgroundColor: colors.cardBackground, borderColor: colors.inputBorder },
                   ]}
                   data-testid={`card-member-${userId}`}
                 >

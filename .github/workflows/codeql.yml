@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [main, dev]
   schedule:
-    - cron: "0 3 * * *" # Nightly at 3 AM UTC
+    - cron: '0 3 * * *'  # Nightly at 3 AM UTC
 
 permissions:
   actions: read
@@ -20,11 +20,11 @@ jobs:
     # Only run on public repositories (CodeQL requires GitHub Advanced Security for private repos)
     if: github.event.repository.visibility == 'public'
     timeout-minutes: 360
-
+    
     strategy:
       fail-fast: false
       matrix:
-        language: ["javascript-typescript"]
+        language: ['javascript-typescript']
 
     steps:
       - name: Checkout repository
@@ -35,13 +35,13 @@ jobs:
         with:
           languages: ${{ matrix.language }}
           queries: security-extended,security-and-quality
-
+          
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20.x"
-          cache: "npm"
-
+          node-version: '20.x'
+          cache: 'npm'
+          
       - name: Install dependencies
         run: npm ci
 
@@ -52,16 +52,16 @@ jobs:
         uses: github/codeql-action/analyze@v3
         with:
           category: "/language:${{ matrix.language }}"
-
+          
   custom-security-checks:
     name: Custom Security Checks
     runs-on: ubuntu-latest
     # This job runs on all repos since it doesn't require GitHub Advanced Security
-
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
+        
       - name: Check for hardcoded secrets
         run: |
           echo "Scanning for potential hardcoded secrets..."
@@ -72,7 +72,7 @@ jobs:
             . 2>/dev/null | grep -v "test\|spec\|mock\|example\|placeholder"; then
             echo "::warning::Potential hardcoded secrets detected - please review"
           fi
-
+          
       - name: Check for sensitive data logging
         run: |
           echo "Checking for sensitive data in logs..."
@@ -83,7 +83,7 @@ jobs:
             . 2>/dev/null; then
             echo "::warning::Potential sensitive data logging detected"
           fi
-
+          
       - name: Verify JWT security
         run: |
           echo "Checking JWT implementation..."
@@ -91,7 +91,7 @@ jobs:
           if grep -rE "jwt\.verify|jsonwebtoken" server/ --include="*.ts" | head -5; then
             echo "JWT verification found in server code"
           fi
-
+          
       - name: Check location data handling
         run: |
           echo "Validating location data access patterns..."

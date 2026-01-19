@@ -9,14 +9,15 @@ import { User, InsertUser } from "@shared/schema";
 import MemoryStore from "memorystore";
 import jwt from "jsonwebtoken";
 
-const JWT_SECRET =
-  process.env.JWT_SECRET || "familylocator-jwt-secret-key-for-development-2024";
+const JWT_SECRET = process.env.JWT_SECRET || "familylocator-jwt-secret-key-for-development-2024";
 const JWT_EXPIRES_IN = "7d";
 
 function generateToken(user: User): string {
-  return jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, {
-    expiresIn: JWT_EXPIRES_IN,
-  });
+  return jwt.sign(
+    { userId: user.id, email: user.email },
+    JWT_SECRET,
+    { expiresIn: JWT_EXPIRES_IN }
+  );
 }
 
 function verifyToken(token: string): { userId: number; email: string } | null {
@@ -100,22 +101,19 @@ export function setupAuth(app: Express) {
         try {
           console.log("[Passport] Looking up user:", email);
           const user = await storage.getUserByEmail(email);
-
+          
           if (!user) {
             console.log("[Passport] User not found:", email);
             return done(null, false);
           }
-
+          
           console.log("[Passport] User found, comparing passwords...");
           console.log("[Passport] Supplied password length:", password.length);
-          console.log(
-            "[Passport] Stored password hash preview:",
-            user.password.substring(0, 20)
-          );
-
+          console.log("[Passport] Stored password hash preview:", user.password.substring(0, 20));
+          
           const passwordMatch = await comparePasswords(password, user.password);
           console.log("[Passport] Password match result:", passwordMatch);
-
+          
           if (!passwordMatch) {
             console.log("[Passport] Password mismatch for user:", email);
             return done(null, false);
@@ -192,7 +190,7 @@ export function setupAuth(app: Express) {
   app.post("/api/login", (req, res, next) => {
     // Debug logging
     console.log("[Login] Request body:", JSON.stringify(req.body, null, 2));
-
+    
     passport.authenticate("local", (err: any, user: any, info: any) => {
       if (err) {
         console.error("[Login] Error:", err);

@@ -75,6 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     gcTime: 1000 * 60 * 10, // 10 minutes (previously cacheTime)
   });
 
+
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginData) => {
       const res = await apiRequest("POST", "/api/login", credentials);

@@ -1,22 +1,6 @@
 // API Configuration for Mobile App
 import Constants from "expo-constants";
 
-declare const __DEV__: boolean;
-
-// Get the Expo host URL for LAN mode
-const getExpoHostUrl = () => {
-  // In development, Expo provides the debuggerHost which contains the local IP
-  const debuggerHost =
-    Constants.expoConfig?.hostUri || Constants.manifest?.debuggerHost;
-  if (debuggerHost) {
-    // Extract IP from format like "192.168.1.100:8081"
-    const ip = debuggerHost.split(":")[0];
-    // Use port 5000 for the backend server
-    return `http://${ip}:5000`;
-  }
-  return null;
-};
-
 // Get API URL from Expo config or use default
 const getApiUrl = () => {
   // Check if we have a custom API URL from Expo config
@@ -24,16 +8,15 @@ const getApiUrl = () => {
     return Constants.expoConfig.extra.API_URL;
   }
 
-  // Try to get LAN URL for local development (npx expo start without tunnel)
-  const lanUrl = getExpoHostUrl();
-  if (lanUrl) {
-    return lanUrl;
-  }
+  // IMPORTANT: For Expo Go on Replit, we need the actual Replit backend domain
+  // The Expo tunnel (exp.direct) is only for the Metro bundler, NOT the backend API
 
-  // Fallback: Use the Replit backend domain (HTTPS) for tunnel/production mode
+  // For Replit: Use the actual backend domain (HTTPS)
+  // You can set this in app.json under "extra.API_URL" or it will auto-detect from environment
   const replitDomain =
     "36067de9-4e94-4471-bf75-fa394b5267d0-00-1xeyu4xa0l9cp.spock.replit.dev";
 
+  // Return the Replit backend URL with HTTPS
   return `https://${replitDomain}`;
 };
 

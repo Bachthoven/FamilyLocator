@@ -56,17 +56,13 @@ function updateUserSession(
 }
 
 async function upsertUser(claims: any) {
-  // Check if user exists by email, if not create them
-  const existingUser = await storage.getUserByEmail(claims["email"]);
-  if (!existingUser) {
-    await storage.createUser({
-      email: claims["email"],
-      password: "", // OAuth users don't have a password
-      firstName: claims["first_name"],
-      lastName: claims["last_name"],
-      profileImageUrl: claims["profile_image_url"],
-    });
-  }
+  await storage.upsertUser({
+    id: claims["sub"],
+    email: claims["email"],
+    firstName: claims["first_name"],
+    lastName: claims["last_name"],
+    profileImageUrl: claims["profile_image_url"],
+  });
 }
 
 export async function setupAuth(app: Express) {
@@ -81,10 +77,10 @@ export async function setupAuth(app: Express) {
     tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers,
     verified: passport.AuthenticateCallback
   ) => {
-    const user: Record<string, any> = {};
+    const user = {};
     updateUserSession(user, tokens);
     await upsertUser(tokens.claims());
-    verified(null, user as Express.User);
+    verified(null, user);
   };
 
   for (const domain of process.env.REPLIT_DOMAINS!.split(",")) {

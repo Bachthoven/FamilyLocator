@@ -90,7 +90,7 @@ placeholders.forEach((placeholder) => {
   const filePath = path.join(__dirname, placeholder.name);
   fs.writeFileSync(filePath, bluePixelPNG);
   console.log(
-    `Created placeholder: ${placeholder.name} (${placeholder.description})`
+    `Created placeholder: ${placeholder.name} (${placeholder.description})`,
   );
 });
 

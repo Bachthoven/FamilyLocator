@@ -30,129 +30,46 @@ const DARK_MAP_STYLE = [
   // Base
   { elementType: "geometry", stylers: [{ color: "#151a22" }] },
   { elementType: "labels.text.fill", stylers: [{ color: "#e6edf7" }] },
-  {
-    elementType: "labels.text.stroke",
-    stylers: [{ color: "#151a22" }, { weight: 2 }],
-  },
+  { elementType: "labels.text.stroke", stylers: [{ color: "#151a22" }, { weight: 2 }] },
   { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
 
   // Administrative
-  {
-    featureType: "administrative",
-    elementType: "geometry.stroke",
-    stylers: [{ color: "#2a3342" }],
-  },
-  {
-    featureType: "administrative.country",
-    elementType: "labels.text.fill",
-    stylers: [{ color: "#dbe7ff" }],
-  },
-  {
-    featureType: "administrative.locality",
-    elementType: "labels.text.fill",
-    stylers: [{ color: "#dbe7ff" }],
-  },
+  { featureType: "administrative", elementType: "geometry.stroke", stylers: [{ color: "#2a3342" }] },
+  { featureType: "administrative.country", elementType: "labels.text.fill", stylers: [{ color: "#dbe7ff" }] },
+  { featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: "#dbe7ff" }] },
 
   // Land / natural
-  {
-    featureType: "landscape",
-    elementType: "geometry",
-    stylers: [{ color: "#141a16" }],
-  },
-  {
-    featureType: "landscape.natural",
-    elementType: "geometry",
-    stylers: [{ color: "#121a18" }],
-  },
+  { featureType: "landscape", elementType: "geometry", stylers: [{ color: "#141a16" }] },
+  { featureType: "landscape.natural", elementType: "geometry", stylers: [{ color: "#121a18" }] },
 
   // Parks (more saturated)
-  {
-    featureType: "poi.park",
-    elementType: "geometry",
-    stylers: [{ color: "#0f2a1d" }],
-  },
-  {
-    featureType: "poi.park",
-    elementType: "labels.text.fill",
-    stylers: [{ color: "#7ee2a8" }],
-  },
+  { featureType: "poi.park", elementType: "geometry", stylers: [{ color: "#0f2a1d" }] },
+  { featureType: "poi.park", elementType: "labels.text.fill", stylers: [{ color: "#7ee2a8" }] },
 
   // General POI labels
-  {
-    featureType: "poi",
-    elementType: "labels.text.fill",
-    stylers: [{ color: "#b9c7dd" }],
-  },
+  { featureType: "poi", elementType: "labels.text.fill", stylers: [{ color: "#b9c7dd" }] },
 
   // Water (more saturated)
-  {
-    featureType: "water",
-    elementType: "geometry",
-    stylers: [{ color: "#082a4a" }],
-  },
-  {
-    featureType: "water",
-    elementType: "labels.text.fill",
-    stylers: [{ color: "#7bb6ff" }],
-  },
+  { featureType: "water", elementType: "geometry", stylers: [{ color: "#082a4a" }] },
+  { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#7bb6ff" }] },
 
   // Roads (higher contrast + cool tint)
-  {
-    featureType: "road",
-    elementType: "geometry",
-    stylers: [{ color: "#263247" }],
-  },
-  {
-    featureType: "road",
-    elementType: "geometry.stroke",
-    stylers: [{ color: "#0f141d" }],
-  },
-  {
-    featureType: "road",
-    elementType: "labels.text.fill",
-    stylers: [{ color: "#d0ddf3" }],
-  },
+  { featureType: "road", elementType: "geometry", stylers: [{ color: "#263247" }] },
+  { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#0f141d" }] },
+  { featureType: "road", elementType: "labels.text.fill", stylers: [{ color: "#d0ddf3" }] },
 
   // Arterials
-  {
-    featureType: "road.arterial",
-    elementType: "geometry",
-    stylers: [{ color: "#2d3c56" }],
-  },
-  {
-    featureType: "road.arterial",
-    elementType: "labels.text.fill",
-    stylers: [{ color: "#d8e4fb" }],
-  },
+  { featureType: "road.arterial", elementType: "geometry", stylers: [{ color: "#2d3c56" }] },
+  { featureType: "road.arterial", elementType: "labels.text.fill", stylers: [{ color: "#d8e4fb" }] },
 
   // Highways (slightly warmer so they pop)
-  {
-    featureType: "road.highway",
-    elementType: "geometry",
-    stylers: [{ color: "#3a4e6d" }],
-  },
-  {
-    featureType: "road.highway",
-    elementType: "geometry.stroke",
-    stylers: [{ color: "#111826" }],
-  },
-  {
-    featureType: "road.highway",
-    elementType: "labels.text.fill",
-    stylers: [{ color: "#ffffff" }],
-  },
+  { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#3a4e6d" }] },
+  { featureType: "road.highway", elementType: "geometry.stroke", stylers: [{ color: "#111826" }] },
+  { featureType: "road.highway", elementType: "labels.text.fill", stylers: [{ color: "#ffffff" }] },
 
   // Transit
-  {
-    featureType: "transit",
-    elementType: "geometry",
-    stylers: [{ color: "#1c2533" }],
-  },
-  {
-    featureType: "transit.station",
-    elementType: "labels.text.fill",
-    stylers: [{ color: "#9fb2cc" }],
-  },
+  { featureType: "transit", elementType: "geometry", stylers: [{ color: "#1c2533" }] },
+  { featureType: "transit.station", elementType: "labels.text.fill", stylers: [{ color: "#9fb2cc" }] },
 ];
 
 const LIGHT_MAP_STYLE: any[] = [];
@@ -197,11 +114,7 @@ const UserMarker = ({
   name: string;
   onPress?: () => void;
 }) => (
-  <Marker
-    coordinate={{ latitude, longitude }}
-    onPress={onPress}
-    anchor={{ x: 0.5, y: 1 }}
-  >
+  <Marker coordinate={{ latitude, longitude }} onPress={onPress} anchor={{ x: 0.5, y: 1 }}>
     <View style={styles.userMarkerContainer}>
       <View style={styles.userMarker} />
       <View style={styles.userMarkerPulse} />
@@ -230,15 +143,9 @@ const FamilyMarker = ({
   initials: string;
   onPress?: () => void;
 }) => (
-  <Marker
-    coordinate={{ latitude, longitude }}
-    onPress={onPress}
-    anchor={{ x: 0.5, y: 1 }}
-  >
+  <Marker coordinate={{ latitude, longitude }} onPress={onPress} anchor={{ x: 0.5, y: 1 }}>
     <View style={styles.familyMarkerContainer}>
-      <View
-        style={[styles.familyMarker, !isRecent && styles.familyMarkerOld]}
-      />
+      <View style={[styles.familyMarker, !isRecent && styles.familyMarkerOld]} />
       {isRecent && <View style={styles.familyMarkerPulse} />}
     </View>
   </Marker>
@@ -271,11 +178,7 @@ const PlaceMarker = ({
   const markerColor = color || categoryColors[category || "other"] || "#F97316";
 
   return (
-    <Marker
-      coordinate={{ latitude, longitude }}
-      onPress={onPress}
-      anchor={{ x: 0.5, y: 0.5 }}
-    >
+    <Marker coordinate={{ latitude, longitude }} onPress={onPress} anchor={{ x: 0.5, y: 0.5 }}>
       <View style={[styles.placeMarker, { backgroundColor: markerColor }]}>
         <View style={styles.placeMarkerDot} />
       </View>
@@ -284,17 +187,10 @@ const PlaceMarker = ({
 };
 
 interface MapScreenProps {
-  focusLocation?: {
-    latitude: number;
-    longitude: number;
-    userId: number;
-  } | null;
+  focusLocation?: { latitude: number; longitude: number; userId: number } | null;
   onLocationFocused?: () => void;
   userLocation?: { latitude: number; longitude: number } | null;
-  onLocationUpdate?: (location: {
-    latitude: number;
-    longitude: number;
-  }) => void;
+  onLocationUpdate?: (location: { latitude: number; longitude: number }) => void;
   savedRegion?: {
     latitude: number;
     longitude: number;
@@ -331,9 +227,7 @@ export default function MapScreen({
   const hasInitializedLocation = useRef(false);
   const isProgrammaticMove = useRef(false);
 
-  const [localMapType, setLocalMapType] = useState<"standard" | "hybrid">(
-    "standard"
-  );
+  const [localMapType, setLocalMapType] = useState<"standard" | "hybrid">("standard");
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const [mapHeading, setMapHeading] = useState(0);
   const [currentRegion, setCurrentRegion] = useState(
@@ -389,12 +283,7 @@ export default function MapScreen({
 
   // Fetch family locations
   const { data: familyLocationsData = [] } = useQuery<
-    Array<{
-      user: User;
-      latitude: number;
-      longitude: number;
-      timestamp: Date | null;
-    }>
+    Array<{ user: User; latitude: number; longitude: number; timestamp: Date | null }>
   >({
     queryKey: ["/api/locations/family"],
     enabled: !!user && isActive,
@@ -429,12 +318,9 @@ export default function MapScreen({
   };
 
   const getStatusInfo = (minutesAgo: number) => {
-    if (minutesAgo < 5)
-      return { color: "#10B981", message: "Currently active" };
-    if (minutesAgo < 15)
-      return { color: "#F59E0B", message: `${minutesAgo} min ago` };
-    if (minutesAgo < 60)
-      return { color: "#F97316", message: `Inactive for ${minutesAgo} min` };
+    if (minutesAgo < 5) return { color: "#10B981", message: "Currently active" };
+    if (minutesAgo < 15) return { color: "#F59E0B", message: `${minutesAgo} min ago` };
+    if (minutesAgo < 60) return { color: "#F97316", message: `Inactive for ${minutesAgo} min` };
     if (minutesAgo < 1440) {
       const hours = Math.floor(minutesAgo / 60);
       return { color: "#EF4444", message: `Offline for ${hours}h` };
@@ -443,28 +329,22 @@ export default function MapScreen({
     return { color: "#6B7280", message: `Offline for ${days}d` };
   };
 
-  const familyLocations: (FamilyLocation & {
-    statusColor: string;
-    statusMessage: string;
-    initials: string;
-  })[] = familyLocationsData
-    .filter((loc) => loc.user.locationSharingEnabled && loc.timestamp)
-    .map((loc) => {
-      const now = new Date();
-      const timestamp = loc.timestamp ? new Date(loc.timestamp) : new Date(0);
-      const minutesAgo = Math.floor(
-        (now.getTime() - timestamp.getTime()) / (1000 * 60)
-      );
-      const isRecent = minutesAgo < 15;
-      const statusInfo = getStatusInfo(minutesAgo);
+  const familyLocations: (FamilyLocation & { statusColor: string; statusMessage: string; initials: string })[] =
+    familyLocationsData
+      .filter((loc) => loc.user.locationSharingEnabled && loc.timestamp)
+      .map((loc) => {
+        const now = new Date();
+        const timestamp = loc.timestamp ? new Date(loc.timestamp) : new Date(0);
+        const minutesAgo = Math.floor((now.getTime() - timestamp.getTime()) / (1000 * 60));
+        const isRecent = minutesAgo < 15;
+        const statusInfo = getStatusInfo(minutesAgo);
 
-      const fullName =
-        loc.user.firstName && loc.user.lastName
-          ? `${loc.user.firstName} ${loc.user.lastName}`
-          : loc.user.firstName || loc.user.email;
+        const fullName =
+          loc.user.firstName && loc.user.lastName
+            ? `${loc.user.firstName} ${loc.user.lastName}`
+            : loc.user.firstName || loc.user.email;
 
-      const initials =
-        loc.user.firstName && loc.user.lastName
+        const initials = loc.user.firstName && loc.user.lastName
           ? `${loc.user.firstName[0]}${loc.user.lastName[0]}`.toUpperCase()
           : loc.user.firstName
             ? loc.user.firstName[0].toUpperCase()
@@ -472,26 +352,24 @@ export default function MapScreen({
               ? loc.user.email[0].toUpperCase()
               : "?";
 
-      return {
-        id: loc.user.id,
-        latitude: loc.latitude,
-        longitude: loc.longitude,
-        name: fullName,
-        address: `Last seen ${formatTimeAgo(minutesAgo)}`,
-        isRecent,
-        statusColor: statusInfo.color,
-        statusMessage: statusInfo.message,
-        initials,
-      };
-    });
+        return {
+          id: loc.user.id,
+          latitude: loc.latitude,
+          longitude: loc.longitude,
+          name: fullName,
+          address: `Last seen ${formatTimeAgo(minutesAgo)}`,
+          isRecent,
+          statusColor: statusInfo.color,
+          statusMessage: statusInfo.message,
+          initials,
+        };
+      });
 
   const familyMembersOnline = familyLocationsData.filter((loc) => {
     if (!loc.user.locationSharingEnabled || !loc.timestamp) return false;
     const now = new Date();
     const timestamp = new Date(loc.timestamp);
-    const minutesAgo = Math.floor(
-      (now.getTime() - timestamp.getTime()) / (1000 * 60)
-    );
+    const minutesAgo = Math.floor((now.getTime() - timestamp.getTime()) / (1000 * 60));
     return minutesAgo < 5;
   }).length;
 
@@ -506,19 +384,8 @@ export default function MapScreen({
   const places: Place[] = placesData;
 
   const updatePlaceMutation = useMutation({
-    mutationFn: async ({
-      id,
-      latitude,
-      longitude,
-    }: {
-      id: number;
-      latitude: number;
-      longitude: number;
-    }) => {
-      const response = await apiRequest("PATCH", `/api/places/${id}/location`, {
-        latitude,
-        longitude,
-      });
+    mutationFn: async ({ id, latitude, longitude }: { id: number; latitude: number; longitude: number }) => {
+      const response = await apiRequest("PATCH", `/api/places/${id}/location`, { latitude, longitude });
       return response.json();
     },
     onSuccess: () => {
@@ -548,25 +415,19 @@ export default function MapScreen({
   // Proximity alerts
   const sentProximityAlerts = useRef<Set<string>>(new Set());
 
-  const calculateDistance = useCallback(
-    (lat1: number, lon1: number, lat2: number, lon2: number): number => {
-      const R = 6371e3;
-      const phi1 = (lat1 * Math.PI) / 180;
-      const phi2 = (lat2 * Math.PI) / 180;
-      const deltaPhi = ((lat2 - lat1) * Math.PI) / 180;
-      const deltaLambda = ((lon2 - lon1) * Math.PI) / 180;
+  const calculateDistance = useCallback((lat1: number, lon1: number, lat2: number, lon2: number): number => {
+    const R = 6371e3;
+    const phi1 = (lat1 * Math.PI) / 180;
+    const phi2 = (lat2 * Math.PI) / 180;
+    const deltaPhi = ((lat2 - lat1) * Math.PI) / 180;
+    const deltaLambda = ((lon2 - lon1) * Math.PI) / 180;
 
-      const a =
-        Math.sin(deltaPhi / 2) * Math.sin(deltaPhi / 2) +
-        Math.cos(phi1) *
-          Math.cos(phi2) *
-          Math.sin(deltaLambda / 2) *
-          Math.sin(deltaLambda / 2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      return R * c;
-    },
-    []
-  );
+    const a =
+      Math.sin(deltaPhi / 2) * Math.sin(deltaPhi / 2) +
+      Math.cos(phi1) * Math.cos(phi2) * Math.sin(deltaLambda / 2) * Math.sin(deltaLambda / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }, []);
 
   const [proximityAlert, setProximityAlert] = useState<{
     visible: boolean;
@@ -574,16 +435,10 @@ export default function MapScreen({
     placeName: string;
   }>({ visible: false, memberName: "", placeName: "" });
 
-  const showProximityAlert = useCallback(
-    (memberName: string, placeName: string) => {
-      setProximityAlert({ visible: true, memberName, placeName });
-      setTimeout(
-        () => setProximityAlert((prev) => ({ ...prev, visible: false })),
-        4000
-      );
-    },
-    []
-  );
+  const showProximityAlert = useCallback((memberName: string, placeName: string) => {
+    setProximityAlert({ visible: true, memberName, placeName });
+    setTimeout(() => setProximityAlert((prev) => ({ ...prev, visible: false })), 4000);
+  }, []);
 
   useEffect(() => {
     if (!familyLocationsData.length || !places.length) return;
@@ -591,8 +446,7 @@ export default function MapScreen({
     const PROXIMITY_RADIUS = 20;
 
     familyLocationsData.forEach((familyLoc) => {
-      if (!familyLoc.user.locationSharingEnabled || !familyLoc.timestamp)
-        return;
+      if (!familyLoc.user.locationSharingEnabled || !familyLoc.timestamp) return;
 
       const memberName =
         familyLoc.user.firstName && familyLoc.user.lastName
@@ -600,12 +454,7 @@ export default function MapScreen({
           : familyLoc.user.firstName || familyLoc.user.email;
 
       places.forEach((place) => {
-        const distance = calculateDistance(
-          familyLoc.latitude,
-          familyLoc.longitude,
-          place.latitude,
-          place.longitude
-        );
+        const distance = calculateDistance(familyLoc.latitude, familyLoc.longitude, place.latitude, place.longitude);
         const alertKey = `${familyLoc.user.id}-${place.id}`;
         const wasNearby = sentProximityAlerts.current.has(alertKey);
 
@@ -637,28 +486,20 @@ export default function MapScreen({
         setAlertConfig({
           visible: true,
           title: "Permission Required",
-          message:
-            "Please enable location permissions to see yourself on the map.",
+          message: "Please enable location permissions to see yourself on the map.",
           icon: "location",
           iconColor: "#FF3B30",
         });
         return;
       }
 
-      const lastKnown = await Location.getLastKnownPositionAsync({
-        maxAge: 60000,
-      });
+      const lastKnown = await Location.getLastKnownPositionAsync({ maxAge: 60000 });
 
       if (lastKnown) {
         const { latitude, longitude } = lastKnown.coords;
         onLocationUpdate?.({ latitude, longitude });
 
-        const newRegion = {
-          latitude,
-          longitude,
-          latitudeDelta: 0.01,
-          longitudeDelta: 0.01,
-        };
+        const newRegion = { latitude, longitude, latitudeDelta: 0.01, longitudeDelta: 0.01 };
         mapRef.current?.animateToRegion(newRegion, 300);
         onRegionChange?.(newRegion);
       }
@@ -678,22 +519,12 @@ export default function MapScreen({
           ) * 111000;
 
         if (distance > 50) {
-          const newRegion = {
-            latitude,
-            longitude,
-            latitudeDelta: 0.01,
-            longitudeDelta: 0.01,
-          };
+          const newRegion = { latitude, longitude, latitudeDelta: 0.01, longitudeDelta: 0.01 };
           mapRef.current?.animateToRegion(newRegion, 500);
           onRegionChange?.(newRegion);
         }
       } else {
-        const newRegion = {
-          latitude,
-          longitude,
-          latitudeDelta: 0.01,
-          longitudeDelta: 0.01,
-        };
+        const newRegion = { latitude, longitude, latitudeDelta: 0.01, longitudeDelta: 0.01 };
         mapRef.current?.animateToRegion(newRegion, 500);
         onRegionChange?.(newRegion);
       }
@@ -729,8 +560,7 @@ export default function MapScreen({
         setAlertConfig({
           visible: true,
           title: "Permission Required",
-          message:
-            "Please enable location permissions to see yourself on the map.",
+          message: "Please enable location permissions to see yourself on the map.",
           icon: "location",
           iconColor: "#FF3B30",
         });
@@ -745,12 +575,7 @@ export default function MapScreen({
 
       onLocationUpdate?.({ latitude, longitude });
 
-      const newRegion = {
-        latitude,
-        longitude,
-        latitudeDelta: 0.01,
-        longitudeDelta: 0.01,
-      };
+      const newRegion = { latitude, longitude, latitudeDelta: 0.01, longitudeDelta: 0.01 };
 
       setIsLoadingLocation(false);
 
@@ -762,8 +587,7 @@ export default function MapScreen({
       setAlertConfig({
         visible: true,
         title: "Location Error",
-        message:
-          "Unable to get your location. Please check your device settings.",
+        message: "Unable to get your location. Please check your device settings.",
         icon: "alert-circle",
         iconColor: "#FF3B30",
       });
@@ -790,10 +614,7 @@ export default function MapScreen({
     if (dragState) return;
     mapRef.current?.getCamera().then((camera) => {
       if (camera.zoom !== undefined) {
-        mapRef.current?.animateCamera(
-          { zoom: camera.zoom + 1 },
-          { duration: 300 }
-        );
+        mapRef.current?.animateCamera({ zoom: camera.zoom + 1 }, { duration: 300 });
       }
     });
   };
@@ -802,10 +623,7 @@ export default function MapScreen({
     if (dragState) return;
     mapRef.current?.getCamera().then((camera) => {
       if (camera.zoom !== undefined) {
-        mapRef.current?.animateCamera(
-          { zoom: camera.zoom - 1 },
-          { duration: 300 }
-        );
+        mapRef.current?.animateCamera({ zoom: camera.zoom - 1 }, { duration: 300 });
       }
     });
   };
@@ -833,11 +651,8 @@ export default function MapScreen({
         customMapStyle={isDarkMode ? DARK_MAP_STYLE : LIGHT_MAP_STYLE}
         initialRegion={initialRegion}
         onRegionChange={() => {
-          mapRef.current
-            ?.getCamera()
-            .then((camera) => setMapHeading(camera.heading || 0));
-          if (selectedMarker && !isProgrammaticMove.current && !dragState)
-            setSelectedMarker(null);
+          mapRef.current?.getCamera().then((camera) => setMapHeading(camera.heading || 0));
+          if (selectedMarker && !isProgrammaticMove.current && !dragState) setSelectedMarker(null);
         }}
         onRegionChangeComplete={(region) => {
           setCurrentRegion(region);
@@ -850,10 +665,7 @@ export default function MapScreen({
               prev
                 ? {
                     ...prev,
-                    currentCoordinate: {
-                      latitude: region.latitude,
-                      longitude: region.longitude,
-                    },
+                    currentCoordinate: { latitude: region.latitude, longitude: region.longitude },
                   }
                 : null
             );
@@ -891,10 +703,7 @@ export default function MapScreen({
                 type: "user",
                 name: "You",
                 statusMessage: "Current location",
-                coordinate: {
-                  latitude: currentLocation.latitude,
-                  longitude: currentLocation.longitude,
-                },
+                coordinate: { latitude: currentLocation.latitude, longitude: currentLocation.longitude },
               });
             }}
           />
@@ -929,10 +738,7 @@ export default function MapScreen({
                 name: location.name,
                 statusMessage: location.statusMessage,
                 address: location.address,
-                coordinate: {
-                  latitude: location.latitude,
-                  longitude: location.longitude,
-                },
+                coordinate: { latitude: location.latitude, longitude: location.longitude },
               });
             }}
           />
@@ -971,10 +777,7 @@ export default function MapScreen({
                     : "Saved Place",
                   address: place.address,
                   category: place.category,
-                  coordinate: {
-                    latitude: place.latitude,
-                    longitude: place.longitude,
-                  },
+                  coordinate: { latitude: place.latitude, longitude: place.longitude },
                 });
               }}
             />
@@ -1015,21 +818,12 @@ export default function MapScreen({
 
       {/* Members Indicator */}
       <View style={[styles.membersIndicator, { top: insets.top + 16 }]}>
-        <BlurView
-          intensity={80}
-          tint={isDarkMode ? "dark" : "light"}
-          style={styles.membersIndicatorBlur}
-        >
+        <BlurView intensity={80} tint={isDarkMode ? "dark" : "light"} style={styles.membersIndicatorBlur}>
           <View style={styles.membersIndicatorContent}>
             <View style={styles.onlineAvatarsRow}>
               {/* Current user avatar */}
               <View style={styles.onlineAvatarContainer}>
-                <View
-                  style={[
-                    styles.onlineAvatar,
-                    { backgroundColor: colors.avatarBackground },
-                  ]}
-                >
+                <View style={[styles.onlineAvatar, { backgroundColor: colors.avatarBackground }]}>
                   <Text style={styles.onlineAvatarText}>
                     {user?.firstName && user?.lastName
                       ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
@@ -1048,40 +842,21 @@ export default function MapScreen({
                 .slice(0, 3)
                 .map((loc) => (
                   <View key={loc.id} style={styles.onlineAvatarContainer}>
-                    <View
-                      style={[
-                        styles.onlineAvatar,
-                        { backgroundColor: "#6366F1" },
-                      ]}
-                    >
-                      <Text style={styles.onlineAvatarText}>
-                        {loc.initials}
-                      </Text>
+                    <View style={[styles.onlineAvatar, { backgroundColor: "#6366F1" }]}>
+                      <Text style={styles.onlineAvatarText}>{loc.initials}</Text>
                     </View>
                     <View style={styles.onlineAvatarDot} />
                   </View>
                 ))}
               {familyLocations.filter((loc) => loc.isRecent).length > 3 && (
-                <View
-                  style={[
-                    styles.onlineAvatar,
-                    { backgroundColor: colors.surfaceSecondary },
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.onlineAvatarText,
-                      { color: colors.text, fontSize: 9 },
-                    ]}
-                  >
+                <View style={[styles.onlineAvatar, { backgroundColor: colors.surfaceSecondary }]}>
+                  <Text style={[styles.onlineAvatarText, { color: colors.text, fontSize: 9 }]}>
                     +{familyLocations.filter((loc) => loc.isRecent).length - 3}
                   </Text>
                 </View>
               )}
             </View>
-            <Text
-              style={[styles.membersText, isDarkMode && { color: "#FFFFFF" }]}
-            >
+            <Text style={[styles.membersText, isDarkMode && { color: "#FFFFFF" }]}>
               {onlineMembersCount} online
             </Text>
           </View>
@@ -1094,15 +869,9 @@ export default function MapScreen({
           <View style={styles.bannerContent}>
             <View style={styles.bannerTextContainer}>
               <Text style={styles.bannerTitle}>Location not detected</Text>
-              <Text style={styles.bannerDescription}>
-                Enable location to see yourself on the map
-              </Text>
+              <Text style={styles.bannerDescription}>Enable location to see yourself on the map</Text>
             </View>
-            <TouchableOpacity
-              onPress={getCurrentLocation}
-              style={styles.bannerButton}
-              activeOpacity={0.7}
-            >
+            <TouchableOpacity onPress={getCurrentLocation} style={styles.bannerButton} activeOpacity={0.7}>
               <Text style={styles.bannerButtonText}>Get Location</Text>
             </TouchableOpacity>
           </View>
@@ -1123,10 +892,7 @@ export default function MapScreen({
           onPress={toggleMapType}
           style={[
             styles.controlButton,
-            {
-              backgroundColor: colors.controlButtonBackground,
-              borderColor: colors.controlButtonBorder,
-            },
+            { backgroundColor: colors.controlButtonBackground, borderColor: colors.controlButtonBorder },
           ]}
           activeOpacity={0.7}
         >
@@ -1141,10 +907,7 @@ export default function MapScreen({
           onPress={zoomIn}
           style={[
             styles.controlButton,
-            {
-              backgroundColor: colors.controlButtonBackground,
-              borderColor: colors.controlButtonBorder,
-            },
+            { backgroundColor: colors.controlButtonBackground, borderColor: colors.controlButtonBorder },
           ]}
           activeOpacity={0.7}
         >
@@ -1155,10 +918,7 @@ export default function MapScreen({
           onPress={zoomOut}
           style={[
             styles.controlButton,
-            {
-              backgroundColor: colors.controlButtonBackground,
-              borderColor: colors.controlButtonBorder,
-            },
+            { backgroundColor: colors.controlButtonBackground, borderColor: colors.controlButtonBorder },
           ]}
           activeOpacity={0.7}
         >
@@ -1180,20 +940,14 @@ export default function MapScreen({
 
       {/* Slide-Down Dialog */}
       <Animated.View
-        style={[
-          styles.slideDownContainer,
-          { transform: [{ translateY: slideAnim }], top: insets.top },
-        ]}
+        style={[styles.slideDownContainer, { transform: [{ translateY: slideAnim }], top: insets.top }]}
         pointerEvents={selectedMarker ? "auto" : "none"}
       >
         {selectedMarker && (
           <View
             style={[
               styles.slideDownDialog,
-              {
-                backgroundColor: colors.dialogBackground,
-                borderColor: colors.dialogBorder,
-              },
+              { backgroundColor: colors.dialogBackground, borderColor: colors.dialogBorder },
             ]}
           >
             <View style={styles.slideDownHeader}>
@@ -1210,38 +964,20 @@ export default function MapScreen({
                   color="#fff"
                 />
               </View>
-              <Text
-                style={[styles.slideDownName, { color: colors.dialogText }]}
-              >
-                {selectedMarker.name}
-              </Text>
+              <Text style={[styles.slideDownName, { color: colors.dialogText }]}>{selectedMarker.name}</Text>
               <TouchableOpacity
                 onPress={() => setSelectedMarker(null)}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 style={styles.slideDownCloseButton}
               >
-                <Ionicons
-                  name="close-circle"
-                  size={24}
-                  color={colors.dialogTextMuted}
-                />
+                <Ionicons name="close-circle" size={24} color={colors.dialogTextMuted} />
               </TouchableOpacity>
             </View>
 
             {selectedMarker.statusMessage && (
               <View style={styles.slideDownStatusRow}>
-                <View
-                  style={[
-                    styles.slideDownStatusDot,
-                    { backgroundColor: "#10B981" },
-                  ]}
-                />
-                <Text
-                  style={[
-                    styles.slideDownStatus,
-                    { color: colors.dialogTextSecondary },
-                  ]}
-                >
+                <View style={[styles.slideDownStatusDot, { backgroundColor: "#10B981" }]} />
+                <Text style={[styles.slideDownStatus, { color: colors.dialogTextSecondary }]}>
                   {selectedMarker.statusMessage}
                 </Text>
               </View>
@@ -1249,17 +985,8 @@ export default function MapScreen({
 
             {selectedMarker.address && (
               <View style={styles.slideDownAddressRow}>
-                <Ionicons
-                  name="location-outline"
-                  size={14}
-                  color={colors.dialogTextMuted}
-                />
-                <Text
-                  style={[
-                    styles.slideDownAddress,
-                    { color: colors.dialogTextMuted },
-                  ]}
-                >
+                <Ionicons name="location-outline" size={14} color={colors.dialogTextMuted} />
+                <Text style={[styles.slideDownAddress, { color: colors.dialogTextMuted }]}>
                   {selectedMarker.address}
                 </Text>
               </View>
@@ -1291,9 +1018,7 @@ export default function MapScreen({
                 activeOpacity={0.7}
               >
                 <Ionicons name="locate" size={18} color="#fff" />
-                <Text style={styles.enableDragButtonText}>
-                  Reposition Place
-                </Text>
+                <Text style={styles.enableDragButtonText}>Reposition Place</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -1324,17 +1049,8 @@ export default function MapScreen({
                 <Ionicons name="locate" size={20} color="#fff" />
               </View>
               <View style={styles.dragModeTextContainer}>
-                <Text
-                  style={[styles.dragModeTitle, { color: colors.dialogText }]}
-                >
-                  Reposition Mode
-                </Text>
-                <Text
-                  style={[
-                    styles.dragModeSubtitle,
-                    { color: colors.dialogTextSecondary },
-                  ]}
-                >
+                <Text style={[styles.dragModeTitle, { color: colors.dialogText }]}>Reposition Mode</Text>
+                <Text style={[styles.dragModeSubtitle, { color: colors.dialogTextSecondary }]}>
                   Pan the map to move the crosshair
                 </Text>
               </View>
@@ -1342,31 +1058,20 @@ export default function MapScreen({
 
             <View style={styles.dragModeButtons}>
               <TouchableOpacity
-                style={[
-                  styles.dragModeCancelButton,
-                  { backgroundColor: colors.surfaceSecondary },
-                ]}
+                style={[styles.dragModeCancelButton, { backgroundColor: colors.surfaceSecondary }]}
                 onPress={() => {
                   setDragState(null);
                   isProgrammaticMove.current = false;
                 }}
                 activeOpacity={0.7}
               >
-                <Text
-                  style={[
-                    styles.dragModeCancelText,
-                    { color: colors.textSecondary },
-                  ]}
-                >
-                  Cancel
-                </Text>
+                <Text style={[styles.dragModeCancelText, { color: colors.textSecondary }]}>Cancel</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 style={[
                   styles.dragModeSaveButton,
-                  updatePlaceMutation.isPending &&
-                    styles.dragModeSaveButtonDisabled,
+                  updatePlaceMutation.isPending && styles.dragModeSaveButtonDisabled,
                 ]}
                 onPress={() => {
                   if (dragState) {
@@ -1414,27 +1119,15 @@ export default function MapScreen({
               <Ionicons name="location" size={20} color="#FFFFFF" />
             </View>
             <View style={styles.proximityAlertText}>
-              <Text
-                style={[
-                  styles.proximityAlertTitle,
-                  { color: colors.dialogText },
-                ]}
-              >
+              <Text style={[styles.proximityAlertTitle, { color: colors.dialogText }]}>
                 📍 {proximityAlert.memberName} arrived
               </Text>
-              <Text
-                style={[
-                  styles.proximityAlertBody,
-                  { color: colors.dialogTextSecondary },
-                ]}
-              >
+              <Text style={[styles.proximityAlertBody, { color: colors.dialogTextSecondary }]}>
                 Now at {proximityAlert.placeName}
               </Text>
             </View>
             <TouchableOpacity
-              onPress={() =>
-                setProximityAlert((prev) => ({ ...prev, visible: false }))
-              }
+              onPress={() => setProximityAlert((prev) => ({ ...prev, visible: false }))}
               style={styles.proximityAlertClose}
             >
               <Ionicons name="close" size={18} color={colors.dialogTextMuted} />
@@ -1511,7 +1204,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   },
-  familyMarkerAvatarOld: {
+  familyMarkerAvatarOld: { 
     opacity: 0.6,
     backgroundColor: "#9CA3AF",
   },
@@ -1788,18 +1481,10 @@ const styles = StyleSheet.create({
   },
   slideDownName: { fontSize: 18, fontWeight: "600", flex: 1 },
   slideDownCloseButton: { padding: 4 },
-  slideDownStatusRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 12,
-  },
+  slideDownStatusRow: { flexDirection: "row", alignItems: "center", marginTop: 12 },
   slideDownStatusDot: { width: 8, height: 8, borderRadius: 4, marginRight: 8 },
   slideDownStatus: { fontSize: 14 },
-  slideDownAddressRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 8,
-  },
+  slideDownAddressRow: { flexDirection: "row", alignItems: "center", marginTop: 8 },
   slideDownAddress: { fontSize: 13, marginLeft: 6, flex: 1 },
 
   // Enable Drag Button
@@ -1818,15 +1503,8 @@ const styles = StyleSheet.create({
 
   // Drag Mode Panel
   dragModePanel: { position: "absolute", left: 16, right: 16, zIndex: 150 },
-  dragModePanelContent: {
-    padding: 16,
-    backgroundColor: "rgba(255, 255, 255, 0.95)",
-  },
-  dragModeInfo: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 12,
-  },
+  dragModePanelContent: { padding: 16, backgroundColor: "rgba(255, 255, 255, 0.95)" },
+  dragModeInfo: { flexDirection: "row", alignItems: "center", marginBottom: 12 },
   dragModeIconContainer: {
     width: 40,
     height: 40,
@@ -1837,12 +1515,7 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   dragModeTextContainer: { flex: 1 },
-  dragModeTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#1F2937",
-    marginBottom: 2,
-  },
+  dragModeTitle: { fontSize: 16, fontWeight: "600", color: "#1F2937", marginBottom: 2 },
   dragModeSubtitle: { fontSize: 13, color: "#6B7280" },
   dragModeButtons: { flexDirection: "row", gap: 12 },
   dragModeCancelButton: {
@@ -1866,12 +1539,7 @@ const styles = StyleSheet.create({
   dragModeSaveText: { fontSize: 14, fontWeight: "600", color: "#fff" },
 
   // Proximity Alert Banner
-  proximityAlertBanner: {
-    position: "absolute",
-    left: 16,
-    right: 16,
-    zIndex: 200,
-  },
+  proximityAlertBanner: { position: "absolute", left: 16, right: 16, zIndex: 200 },
   proximityAlertContent: {
     flexDirection: "row",
     alignItems: "center",
@@ -1888,12 +1556,7 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   proximityAlertText: { flex: 1 },
-  proximityAlertTitle: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#1F2937",
-    marginBottom: 2,
-  },
+  proximityAlertTitle: { fontSize: 15, fontWeight: "600", color: "#1F2937", marginBottom: 2 },
   proximityAlertBody: { fontSize: 13, color: "#6B7280" },
   proximityAlertClose: { padding: 4 },
 });

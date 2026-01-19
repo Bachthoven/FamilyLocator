@@ -141,8 +141,8 @@ export function Toaster() {
         variant,
         ...props
       }) {
-        const icon = getToastIcon(title, variant ?? undefined);
-        const colors = getToastColors(title, variant ?? undefined);
+        const icon = getToastIcon(title, variant);
+        const colors = getToastColors(title, variant);
 
         return (
           <Toast key={id} {...props} className={`${colors} shadow-lg`}>

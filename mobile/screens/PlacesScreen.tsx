@@ -67,24 +67,9 @@ const pinColors = [
 
 const defaultCategories = [
   { label: "Home", value: "home", icon: "home" as const, color: "#3B82F6" },
-  {
-    label: "Work",
-    value: "work",
-    icon: "briefcase" as const,
-    color: "#10B981",
-  },
-  {
-    label: "School",
-    value: "school",
-    icon: "school" as const,
-    color: "#8B5CF6",
-  },
-  {
-    label: "Other",
-    value: "other",
-    icon: "location" as const,
-    color: "#F97316",
-  },
+  { label: "Work", value: "work", icon: "briefcase" as const, color: "#10B981" },
+  { label: "School", value: "school", icon: "school" as const, color: "#8B5CF6" },
+  { label: "Other", value: "other", icon: "location" as const, color: "#F97316" },
 ];
 
 export default function PlacesScreen() {
@@ -110,31 +95,25 @@ export default function PlacesScreen() {
   const [isGettingLocation, setIsGettingLocation] = useState(false);
 
   // Autocomplete state
-  const [addressSuggestions, setAddressSuggestions] = useState<
-    Array<{
-      name: string;
-      address: string;
-      latitude: number;
-      longitude: number;
-    }>
-  >([]);
+  const [addressSuggestions, setAddressSuggestions] = useState<Array<{
+    name: string;
+    address: string;
+    latitude: number;
+    longitude: number;
+  }>>([]);
   const [isSearchingAddress, setIsSearchingAddress] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const addressInputRef = useRef<TextInput>(null);
-  const [addressSelection, setAddressSelection] = useState<
-    { start: number; end: number } | undefined
-  >(undefined);
+  const [addressSelection, setAddressSelection] = useState<{ start: number; end: number } | undefined>(undefined);
 
   // Custom categories state
-  const [customCategories, setCustomCategories] = useState<
-    Array<{
-      label: string;
-      value: string;
-      icon: keyof typeof Ionicons.glyphMap;
-      color: string;
-    }>
-  >([]);
+  const [customCategories, setCustomCategories] = useState<Array<{
+    label: string;
+    value: string;
+    icon: keyof typeof Ionicons.glyphMap;
+    color: string;
+  }>>([]);
   const [addCategoryModalVisible, setAddCategoryModalVisible] = useState(false);
   const [newCategory, setNewCategory] = useState({
     label: "",
@@ -159,30 +138,29 @@ export default function PlacesScreen() {
       const response = await fetch(url);
       const data = await response.json();
 
-      const suggestions =
-        data.features?.map((feature: any) => {
-          const props = feature.properties;
-          const coords = feature.geometry.coordinates;
+      const suggestions = data.features?.map((feature: any) => {
+        const props = feature.properties;
+        const coords = feature.geometry.coordinates;
+        
+        // Build a readable address from properties
+        const parts: string[] = [];
+        if (props.name) parts.push(props.name);
+        if (props.housenumber && props.street) {
+          parts.push(`${props.housenumber} ${props.street}`);
+        } else if (props.street) {
+          parts.push(props.street);
+        }
+        if (props.city) parts.push(props.city);
+        if (props.state) parts.push(props.state);
+        if (props.country) parts.push(props.country);
 
-          // Build a readable address from properties
-          const parts: string[] = [];
-          if (props.name) parts.push(props.name);
-          if (props.housenumber && props.street) {
-            parts.push(`${props.housenumber} ${props.street}`);
-          } else if (props.street) {
-            parts.push(props.street);
-          }
-          if (props.city) parts.push(props.city);
-          if (props.state) parts.push(props.state);
-          if (props.country) parts.push(props.country);
-
-          return {
-            name: props.name || props.street || "Unknown",
-            address: parts.join(", "),
-            latitude: coords[1], // GeoJSON is [lon, lat]
-            longitude: coords[0],
-          };
-        }) || [];
+        return {
+          name: props.name || props.street || "Unknown",
+          address: parts.join(", "),
+          latitude: coords[1], // GeoJSON is [lon, lat]
+          longitude: coords[0],
+        };
+      }) || [];
 
       setAddressSuggestions(suggestions);
       setShowSuggestions(suggestions.length > 0);
@@ -195,55 +173,49 @@ export default function PlacesScreen() {
   }, []);
 
   // Debounced address search
-  const handleAddressChange = useCallback(
-    (text: string) => {
-      setNewPlace((prev) => ({ ...prev, address: text }));
+  const handleAddressChange = useCallback((text: string) => {
+    setNewPlace((prev) => ({ ...prev, address: text }));
+    
+    // Clear previous timeout
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
 
-      // Clear previous timeout
-      if (searchTimeoutRef.current) {
-        clearTimeout(searchTimeoutRef.current);
-      }
-
-      // Debounce the search
-      searchTimeoutRef.current = setTimeout(() => {
-        searchAddress(text);
-      }, 300);
-    },
-    [searchAddress]
-  );
+    // Debounce the search
+    searchTimeoutRef.current = setTimeout(() => {
+      searchAddress(text);
+    }, 300);
+  }, [searchAddress]);
 
   // Select a suggestion
-  const selectSuggestion = useCallback(
-    (suggestion: {
-      name: string;
-      address: string;
-      latitude: number;
-      longitude: number;
-    }) => {
-      setNewPlace((prev) => ({
-        ...prev,
-        address: suggestion.address,
-        latitude: suggestion.latitude,
-        longitude: suggestion.longitude,
-      }));
-      setShowSuggestions(false);
-      setAddressSuggestions([]);
-      Keyboard.dismiss();
+  const selectSuggestion = useCallback((suggestion: {
+    name: string;
+    address: string;
+    latitude: number;
+    longitude: number;
+  }) => {
+    setNewPlace((prev) => ({
+      ...prev,
+      address: suggestion.address,
+      latitude: suggestion.latitude,
+      longitude: suggestion.longitude,
+    }));
+    setShowSuggestions(false);
+    setAddressSuggestions([]);
+    Keyboard.dismiss();
 
-      // Reset scroll to start so user sees beginning of address
-      setTimeout(() => {
-        if (addressInputRef.current) {
-          addressInputRef.current.focus();
-          setAddressSelection({ start: 0, end: 0 });
-          setTimeout(() => {
-            addressInputRef.current?.blur();
-            setAddressSelection(undefined);
-          }, 50);
-        }
-      }, 100);
-    },
-    []
-  );
+    // Reset scroll to start so user sees beginning of address
+    setTimeout(() => {
+      if (addressInputRef.current) {
+        addressInputRef.current.focus();
+        setAddressSelection({ start: 0, end: 0 });
+        setTimeout(() => {
+          addressInputRef.current?.blur();
+          setAddressSelection(undefined);
+        }, 50);
+      }
+    }, 100);
+  }, []);
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -485,13 +457,7 @@ export default function PlacesScreen() {
     return (
       <View
         key={place.id}
-        style={[
-          styles.placeCard,
-          {
-            backgroundColor: colors.cardBackground,
-            borderColor: colors.inputBorder,
-          },
-        ]}
+        style={[styles.placeCard, { backgroundColor: colors.cardBackground, borderColor: colors.inputBorder }]}
         data-testid={`card-place-${place.id}`}
       >
         <View style={styles.placeCardContent}>
@@ -556,12 +522,7 @@ export default function PlacesScreen() {
           style={[styles.modalContent, { backgroundColor: colors.surface }]}
           onPress={(e) => e.stopPropagation()}
         >
-          <View
-            style={[
-              styles.modalHeader,
-              { borderBottomWidth: 1, borderBottomColor: colors.border },
-            ]}
-          >
+          <View style={[styles.modalHeader, { borderBottomWidth: 1, borderBottomColor: colors.border }]}>
             <Text style={[styles.modalTitle, { color: colors.text }]}>
               Add New Place
             </Text>
@@ -672,23 +633,14 @@ export default function PlacesScreen() {
                   <TouchableOpacity
                     style={styles.clearAddressButton}
                     onPress={() => {
-                      setNewPlace((prev) => ({
-                        ...prev,
-                        address: "",
-                        latitude: 0,
-                        longitude: 0,
-                      }));
+                      setNewPlace((prev) => ({ ...prev, address: "", latitude: 0, longitude: 0 }));
                       setUseCurrentLocation(false);
                       setAddressSuggestions([]);
                       setShowSuggestions(false);
                     }}
                     data-testid="button-clear-address"
                   >
-                    <Ionicons
-                      name="close-circle"
-                      size={20}
-                      color={colors.textMuted}
-                    />
+                    <Ionicons name="close-circle" size={20} color={colors.textMuted} />
                   </TouchableOpacity>
                 )}
                 {isSearchingAddress && (
@@ -700,51 +652,23 @@ export default function PlacesScreen() {
 
               {/* Address Suggestions Dropdown */}
               {showSuggestions && addressSuggestions.length > 0 && (
-                <View
-                  style={[
-                    styles.suggestionsContainer,
-                    {
-                      backgroundColor: colors.surface,
-                      borderColor: colors.border,
-                    },
-                  ]}
-                >
+                <View style={[styles.suggestionsContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}>
                   {addressSuggestions.map((suggestion, index) => (
                     <TouchableOpacity
                       key={index}
                       style={[
                         styles.suggestionItem,
-                        index < addressSuggestions.length - 1 && {
-                          borderBottomWidth: 1,
-                          borderBottomColor: colors.border,
-                        },
+                        index < addressSuggestions.length - 1 && { borderBottomWidth: 1, borderBottomColor: colors.border },
                       ]}
                       onPress={() => selectSuggestion(suggestion)}
                       data-testid={`suggestion-${index}`}
                     >
-                      <Ionicons
-                        name="location-outline"
-                        size={16}
-                        color={colors.primary}
-                        style={styles.suggestionIcon}
-                      />
+                      <Ionicons name="location-outline" size={16} color={colors.primary} style={styles.suggestionIcon} />
                       <View style={styles.suggestionText}>
-                        <Text
-                          style={[
-                            styles.suggestionName,
-                            { color: colors.text },
-                          ]}
-                          numberOfLines={1}
-                        >
+                        <Text style={[styles.suggestionName, { color: colors.text }]} numberOfLines={1}>
                           {suggestion.name}
                         </Text>
-                        <Text
-                          style={[
-                            styles.suggestionAddress,
-                            { color: colors.textSecondary },
-                          ]}
-                          numberOfLines={1}
-                        >
+                        <Text style={[styles.suggestionAddress, { color: colors.textSecondary }]} numberOfLines={1}>
                           {suggestion.address}
                         </Text>
                       </View>
@@ -817,12 +741,7 @@ export default function PlacesScreen() {
                   data-testid="button-add-category"
                 >
                   <Ionicons name="add" size={18} color={colors.textSecondary} />
-                  <Text
-                    style={[
-                      styles.categoryButtonText,
-                      { color: colors.textSecondary },
-                    ]}
-                  >
+                  <Text style={[styles.categoryButtonText, { color: colors.textSecondary }]}>
                     Add
                   </Text>
                 </TouchableOpacity>
@@ -906,12 +825,7 @@ export default function PlacesScreen() {
           style={[styles.modalContent, { backgroundColor: colors.surface }]}
           onPress={(e) => e.stopPropagation()}
         >
-          <View
-            style={[
-              styles.modalHeader,
-              { borderBottomWidth: 1, borderBottomColor: colors.border },
-            ]}
-          >
+          <View style={[styles.modalHeader, { borderBottomWidth: 1, borderBottomColor: colors.border }]}>
             <Text style={[styles.modalTitle, { color: colors.text }]}>
               Edit Place
             </Text>
@@ -1017,17 +931,8 @@ export default function PlacesScreen() {
                     onPress={() => setAddCategoryModalVisible(true)}
                     data-testid="button-add-category-edit"
                   >
-                    <Ionicons
-                      name="add"
-                      size={18}
-                      color={colors.textSecondary}
-                    />
-                    <Text
-                      style={[
-                        styles.categoryButtonText,
-                        { color: colors.textSecondary },
-                      ]}
-                    >
+                    <Ionicons name="add" size={18} color={colors.textSecondary} />
+                    <Text style={[styles.categoryButtonText, { color: colors.textSecondary }]}>
                       Add
                     </Text>
                   </TouchableOpacity>
@@ -1171,13 +1076,7 @@ export default function PlacesScreen() {
   const renderStatistics = () => (
     <View style={styles.statsContainer}>
       <View
-        style={[
-          styles.statCard,
-          {
-            backgroundColor: colors.cardBackground,
-            borderColor: colors.inputBorder,
-          },
-        ]}
+        style={[styles.statCard, { backgroundColor: colors.cardBackground, borderColor: colors.inputBorder }]}
         data-testid="stat-total-places"
       >
         <Text style={[styles.statNumber, { color: colors.primary }]}>
@@ -1188,13 +1087,7 @@ export default function PlacesScreen() {
         </Text>
       </View>
       <View
-        style={[
-          styles.statCard,
-          {
-            backgroundColor: colors.cardBackground,
-            borderColor: colors.inputBorder,
-          },
-        ]}
+        style={[styles.statCard, { backgroundColor: colors.cardBackground, borderColor: colors.inputBorder }]}
         data-testid="stat-categories"
       >
         <Text style={[styles.statNumber, { color: "#10B981" }]}>
@@ -1280,46 +1173,27 @@ export default function PlacesScreen() {
         animationType="fade"
         onRequestClose={() => setAddCategoryModalVisible(false)}
       >
-        <Pressable
+        <Pressable 
           style={styles.categoryModalOverlay}
           onPress={() => setAddCategoryModalVisible(false)}
         >
-          <Pressable
-            style={[
-              styles.categoryModalContent,
-              { backgroundColor: colors.surface },
-            ]}
+          <Pressable 
+            style={[styles.categoryModalContent, { backgroundColor: colors.surface }]}
             onPress={(e) => e.stopPropagation()}
           >
-            <View
-              style={[
-                styles.categoryModalHeader,
-                { borderBottomColor: colors.border },
-              ]}
-            >
+            <View style={[styles.categoryModalHeader, { borderBottomColor: colors.border }]}>
               <View style={styles.categoryModalHeaderLeft}>
-                <View
-                  style={[
-                    styles.categoryModalIcon,
-                    { backgroundColor: colors.primary + "20" },
-                  ]}
-                >
+                <View style={[styles.categoryModalIcon, { backgroundColor: colors.primary + "20" }]}>
                   <Ionicons name="add" size={20} color={colors.primary} />
                 </View>
-                <Text
-                  style={[styles.categoryModalTitle, { color: colors.text }]}
-                >
+                <Text style={[styles.categoryModalTitle, { color: colors.text }]}>
                   Add Category
                 </Text>
               </View>
               <TouchableOpacity
                 onPress={() => {
                   setAddCategoryModalVisible(false);
-                  setNewCategory({
-                    label: "",
-                    icon: "bookmark",
-                    color: "#6B7280",
-                  });
+                  setNewCategory({ label: "", icon: "bookmark", color: "#6B7280" });
                 }}
               >
                 <Ionicons name="close" size={24} color={colors.textSecondary} />
@@ -1350,25 +1224,12 @@ export default function PlacesScreen() {
 
               <View style={styles.formGroup}>
                 <Text style={[styles.label, { color: colors.text }]}>Icon</Text>
-                <ScrollView
-                  horizontal
+                <ScrollView 
+                  horizontal 
                   showsHorizontalScrollIndicator={false}
                   contentContainerStyle={styles.iconScrollContent}
                 >
-                  {[
-                    "bookmark",
-                    "heart",
-                    "star",
-                    "flag",
-                    "cart",
-                    "cafe",
-                    "restaurant",
-                    "fitness",
-                    "medical",
-                    "airplane",
-                    "car",
-                    "bus",
-                  ].map((iconName) => (
+                  {["bookmark", "heart", "star", "flag", "cart", "cafe", "restaurant", "fitness", "medical", "airplane", "car", "bus"].map((iconName) => (
                     <TouchableOpacity
                       key={iconName}
                       style={[
@@ -1395,11 +1256,7 @@ export default function PlacesScreen() {
                       <Ionicons
                         name={iconName as keyof typeof Ionicons.glyphMap}
                         size={20}
-                        color={
-                          newCategory.icon === iconName
-                            ? "#FFFFFF"
-                            : colors.textSecondary
-                        }
+                        color={newCategory.icon === iconName ? "#FFFFFF" : colors.textSecondary}
                       />
                     </TouchableOpacity>
                   ))}
@@ -1407,9 +1264,7 @@ export default function PlacesScreen() {
               </View>
 
               <View style={[styles.formGroup, { marginBottom: 0 }]}>
-                <Text style={[styles.label, { color: colors.text }]}>
-                  Color
-                </Text>
+                <Text style={[styles.label, { color: colors.text }]}>Color</Text>
                 <View style={styles.colorGrid}>
                   {pinColors.map((color) => (
                     <TouchableOpacity
@@ -1417,14 +1272,10 @@ export default function PlacesScreen() {
                       style={[
                         styles.colorButton,
                         { backgroundColor: color.value },
-                        newCategory.color === color.value &&
-                          styles.colorButtonActive,
+                        newCategory.color === color.value && styles.colorButtonActive,
                       ]}
                       onPress={() =>
-                        setNewCategory((prev) => ({
-                          ...prev,
-                          color: color.value,
-                        }))
+                        setNewCategory((prev) => ({ ...prev, color: color.value }))
                       }
                       data-testid={`category-color-${color.name}`}
                     >
@@ -1437,12 +1288,7 @@ export default function PlacesScreen() {
               </View>
             </View>
 
-            <View
-              style={[
-                styles.categoryModalFooter,
-                { borderTopColor: colors.border },
-              ]}
-            >
+            <View style={[styles.categoryModalFooter, { borderTopColor: colors.border }]}>
               <TouchableOpacity
                 style={[
                   styles.categoryModalButton,
@@ -1450,20 +1296,11 @@ export default function PlacesScreen() {
                 ]}
                 onPress={() => {
                   setAddCategoryModalVisible(false);
-                  setNewCategory({
-                    label: "",
-                    icon: "bookmark",
-                    color: "#6B7280",
-                  });
+                  setNewCategory({ label: "", icon: "bookmark", color: "#6B7280" });
                 }}
                 data-testid="button-cancel-category"
               >
-                <Text
-                  style={[
-                    styles.categoryModalButtonText,
-                    { color: colors.text },
-                  ]}
-                >
+                <Text style={[styles.categoryModalButtonText, { color: colors.text }]}>
                   Cancel
                 </Text>
               </TouchableOpacity>
@@ -1478,9 +1315,7 @@ export default function PlacesScreen() {
                     Alert.alert("Error", "Please enter a category name");
                     return;
                   }
-                  const value = newCategory.label
-                    .toLowerCase()
-                    .replace(/\s+/g, "_");
+                  const value = newCategory.label.toLowerCase().replace(/\s+/g, "_");
                   setCustomCategories((prev) => [
                     ...prev,
                     {
@@ -1491,18 +1326,12 @@ export default function PlacesScreen() {
                     },
                   ]);
                   setAddCategoryModalVisible(false);
-                  setNewCategory({
-                    label: "",
-                    icon: "bookmark",
-                    color: "#6B7280",
-                  });
+                  setNewCategory({ label: "", icon: "bookmark", color: "#6B7280" });
                 }}
                 disabled={!newCategory.label.trim()}
                 data-testid="button-save-category"
               >
-                <Text
-                  style={[styles.categoryModalButtonText, { color: "#FFFFFF" }]}
-                >
+                <Text style={[styles.categoryModalButtonText, { color: "#FFFFFF" }]}>
                   Add Category
                 </Text>
               </TouchableOpacity>

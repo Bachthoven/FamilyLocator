@@ -4,9 +4,9 @@ on:
   pull_request:
     branches: [main, dev]
     paths:
-      - "server/**"
-      - "shared/**"
-      - "drizzle.config.ts"
+      - 'server/**'
+      - 'shared/**'
+      - 'drizzle.config.ts'
   workflow_dispatch:
 
 permissions:
@@ -26,7 +26,7 @@ jobs:
   integration-tests:
     name: API Integration Tests
     runs-on: ubuntu-latest
-
+    
     services:
       postgres:
         image: postgres:16
@@ -45,45 +45,45 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
+        
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20.x"
-          cache: "npm"
-
+          node-version: '20.x'
+          cache: 'npm'
+          
       - name: Install dependencies
         run: npm ci
-
+        
       - name: Wait for PostgreSQL
         run: |
           until pg_isready -h localhost -p 5432 -U postgres; do
             echo "Waiting for postgres..."
             sleep 2
           done
-
+          
       - name: Run database migrations
         run: npx drizzle-kit push --force
-
+        
       - name: Verify database schema
         run: |
           PGPASSWORD=postgres psql -h localhost -U postgres -d familylocator_test -c "\dt"
-
+          
       - name: Run integration tests
         run: |
           # Run API integration tests
           npx vitest run server/__tests__/ --reporter=verbose
-
+          
       - name: Test API endpoints
         run: |
           # Start server in background
           npm run dev &
           SERVER_PID=$!
           sleep 5
-
+          
           # Health check
           curl -f http://localhost:5000/api/health || exit 1
-
+          
           # Clean up
           kill $SERVER_PID 2>/dev/null || true
 
@@ -91,7 +91,7 @@ jobs:
     name: Privacy & Authorization Tests
     runs-on: ubuntu-latest
     needs: integration-tests
-
+    
     services:
       postgres:
         image: postgres:16
@@ -110,24 +110,24 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
+        
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20.x"
-          cache: "npm"
-
+          node-version: '20.x'
+          cache: 'npm'
+          
       - name: Install dependencies
         run: npm ci
-
+        
       - name: Run database migrations
         run: npx drizzle-kit push --force
-
+        
       - name: Run privacy/authorization tests
         run: |
           echo "Running privacy and authorization validation tests..."
           npx vitest run --grep "authorization|privacy|permission" --passWithNoTests
-
+          
       - name: Verify location data access controls
         run: |
           echo "Validating location data access patterns in code..."

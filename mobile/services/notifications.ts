@@ -2,7 +2,7 @@ const API_URL = "https://app.nativenotify.com/api";
 
 // Native Notify credentials (from docs: https://app.nativenotify.com/in-app)
 const NATIVE_NOTIFY_APP_ID = 32894;
-const NATIVE_NOTIFY_APP_TOKEN = "kmj1gPUDYhaAKAZm1ep1vV";
+const NATIVE_NOTIFY_APP_TOKEN = 'kmj1gPUDYhaAKAZm1ep1vV';
 
 interface MassNotificationParams {
   appId?: number;
@@ -116,11 +116,7 @@ export async function registerIndieUser(
   appToken?: string
 ): Promise<void> {
   const { registerIndieID } = await import("native-notify");
-  registerIndieID(
-    subID,
-    appId || NATIVE_NOTIFY_APP_ID,
-    appToken || NATIVE_NOTIFY_APP_TOKEN
-  );
+  registerIndieID(subID, appId || NATIVE_NOTIFY_APP_ID, appToken || NATIVE_NOTIFY_APP_TOKEN);
 }
 
 export async function unregisterIndieUser(
@@ -129,11 +125,7 @@ export async function unregisterIndieUser(
   appToken?: string
 ): Promise<void> {
   const { unregisterIndieDevice } = await import("native-notify");
-  unregisterIndieDevice(
-    subID,
-    appId || NATIVE_NOTIFY_APP_ID,
-    appToken || NATIVE_NOTIFY_APP_TOKEN
-  );
+  unregisterIndieDevice(subID, appId || NATIVE_NOTIFY_APP_ID, appToken || NATIVE_NOTIFY_APP_TOKEN);
 }
 
 // Export credentials for use elsewhere

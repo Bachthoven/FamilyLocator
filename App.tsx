@@ -77,9 +77,7 @@ function AppContent() {
 
   // Show main app if logged in
   return (
-    <View
-      style={[styles.container, { backgroundColor: colors.headerBackground }]}
-    >
+    <View style={[styles.container, { backgroundColor: colors.headerBackground }]}>
       {/* Keep all screens mounted but hide inactive ones to preserve state */}
       <View style={activeTab === "Map" ? styles.screen : styles.hiddenScreen}>
         <MapScreen
