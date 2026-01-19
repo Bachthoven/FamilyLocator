@@ -46,7 +46,7 @@ export default function AddressAutocomplete({
     lat: number;
     lon: number;
   } | null>(null);
-  const timeoutRef = useRef<NodeJS.Timeout>();
+  const timeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Get user's current location for biasing results

@@ -56,13 +56,29 @@ function updateUserSession(
 }
 
 async function upsertUser(claims: any) {
-  await storage.upsertUser({
-    id: claims["sub"],
-    email: claims["email"],
-    firstName: claims["first_name"],
-    lastName: claims["last_name"],
-    profileImageUrl: claims["profile_image_url"],
-  });
+  const email = claims["email"];
+  if (!email) return;
+
+  // Check if user exists
+  const existingUser = await storage.getUserByEmail(email);
+  if (!existingUser) {
+    // Create new user with Replit auth data
+    await storage.createUser({
+      email,
+      password: "", // Replit auth users don't have passwords
+      firstName: claims["first_name"] || null,
+      lastName: claims["last_name"] || null,
+      profileImageUrl: claims["profile_image_url"] || null,
+    });
+  } else {
+    // Update existing user's profile
+    await storage.updateUserProfile(existingUser.id, {
+      firstName: claims["first_name"] || existingUser.firstName,
+      lastName: claims["last_name"] || existingUser.lastName,
+      profileImageUrl:
+        claims["profile_image_url"] || existingUser.profileImageUrl,
+    });
+  }
 }
 
 export async function setupAuth(app: Express) {
@@ -77,10 +93,10 @@ export async function setupAuth(app: Express) {
     tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers,
     verified: passport.AuthenticateCallback
   ) => {
-    const user = {};
+    const user: Record<string, unknown> = {};
     updateUserSession(user, tokens);
     await upsertUser(tokens.claims());
-    verified(null, user);
+    verified(null, user as unknown as Express.User);
   };
 
   for (const domain of process.env.REPLIT_DOMAINS!.split(",")) {

@@ -51,8 +51,13 @@ const categoryColors = {
   other: "text-orange-500",
 };
 
+interface AuthUser {
+  id: number;
+  email: string;
+}
+
 export default function Places() {
-  const { user } = useAuth();
+  const { user } = useAuth() as { user: AuthUser | null };
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [addPlaceDialogOpen, setAddPlaceDialogOpen] = useState(false);

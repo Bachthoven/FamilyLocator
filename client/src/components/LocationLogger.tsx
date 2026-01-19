@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -14,6 +13,12 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Clock, Play, Square, Activity } from "lucide-react";
 
+interface AuthUser {
+  id: number;
+  email: string;
+  locationHistoryEnabled?: boolean;
+}
+
 interface LoggingSession {
   userId: string;
   lastLogTime: string;
@@ -25,7 +30,7 @@ interface LoggingStatus {
 }
 
 export default function LocationLogger() {
-  const { user } = useAuth();
+  const { user } = useAuth() as { user: AuthUser | null };
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -37,10 +42,7 @@ export default function LocationLogger() {
 
   // Start logging mutation
   const startLogging = useMutation({
-    mutationFn: () =>
-      apiRequest("/api/location-logging/start", {
-        method: "POST",
-      }),
+    mutationFn: () => apiRequest("POST", "/api/location-logging/start"),
     onSuccess: () => {
       toast({
         title: "Location Logging Started",
@@ -63,10 +65,7 @@ export default function LocationLogger() {
 
   // Stop logging mutation
   const stopLogging = useMutation({
-    mutationFn: () =>
-      apiRequest("/api/location-logging/stop", {
-        method: "POST",
-      }),
+    mutationFn: () => apiRequest("POST", "/api/location-logging/stop"),
     onSuccess: () => {
       toast({
         title: "Location Logging Stopped",
@@ -89,10 +88,10 @@ export default function LocationLogger() {
   if (!user) return null;
 
   const isUserLoggingActive = status?.activeSessions?.some(
-    (session) => session.userId === user.id
+    (session) => session.userId === String(user?.id)
   );
   const userSession = status?.activeSessions?.find(
-    (session) => session.userId === user.id
+    (session) => session.userId === String(user?.id)
   );
 
   return (
@@ -131,7 +130,7 @@ export default function LocationLogger() {
             <Button
               size="sm"
               onClick={() => startLogging.mutate()}
-              disabled={startLogging.isPending || !user.locationHistoryEnabled}
+              disabled={startLogging.isPending || !user?.locationHistoryEnabled}
             >
               <Play className="w-4 h-4 mr-2" />
               Start Logging
@@ -139,7 +138,7 @@ export default function LocationLogger() {
           )}
         </div>
 
-        {!user.locationHistoryEnabled && (
+        {!user?.locationHistoryEnabled && (
           <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
             <p className="text-sm text-yellow-800 dark:text-yellow-200">
               Location history is disabled in your settings. Enable it to use

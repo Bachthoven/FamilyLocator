@@ -17,7 +17,10 @@ import {
   Shield,
 } from "lucide-react";
 
-const getToastIcon = (title?: React.ReactNode, variant?: string) => {
+const getToastIcon = (
+  title?: React.ReactNode,
+  variant?: "default" | "destructive" | null | undefined
+) => {
   const titleStr = typeof title === "string" ? title.toLowerCase() : "";
 
   // Geofence notifications
@@ -74,7 +77,10 @@ const getToastIcon = (title?: React.ReactNode, variant?: string) => {
   return <Info className="w-5 h-5 text-blue-500" />;
 };
 
-const getToastColors = (title?: React.ReactNode, variant?: string) => {
+const getToastColors = (
+  title?: React.ReactNode,
+  variant?: "default" | "destructive" | null | undefined
+) => {
   const titleStr = typeof title === "string" ? title.toLowerCase() : "";
 
   // Geofence notifications - special styling

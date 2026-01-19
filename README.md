@@ -552,6 +552,17 @@ This is a personal/family project. If you have suggestions or find bugs, please 
   - `release-mobile.yml` - iOS/Android builds via Expo EAS
   - Security features: location data validation, JWT checks, secret scanning, SDK audits
 
+- **TypeScript CI Error Fixes**: Fixed multiple TypeScript errors across the codebase
+  - `AddressAutocomplete.tsx` - Fixed useRef type annotation
+  - `LocationLogger.tsx` - Fixed apiRequest function call signature and user type annotations
+  - `NotificationToast.tsx` - Removed console.log in JSX render (returns void, not ReactNode)
+  - `toaster.tsx` - Fixed variant type to match Toast component types
+  - `Places.tsx` - Added AuthUser interface for proper user typing
+  - `server/locationLogger.ts` - Changed userId from string to number, fixed timestamp null check
+  - `server/routes.ts` - Fixed locationLogger calls with proper number type
+  - `server/replitAuth.ts` - Replaced upsertUser with createUser/updateUserProfile, fixed type casting
+  - Updated CI workflow to handle known Vite config type issue
+
 ### 2025-10-26
 
 - **Theme Color Update**: Updated primary theme color to darker deep sky blue (#0EA5E9)

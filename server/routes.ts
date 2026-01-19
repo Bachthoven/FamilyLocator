@@ -1016,11 +1016,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           );
 
           // Auto-start hourly location logging for users with location history enabled
+          const userIdNum = parseInt(data.userId);
           storage
-            .getUser(parseInt(data.userId))
+            .getUser(userIdNum)
             .then((user) => {
               if (user && user.locationHistoryEnabled) {
-                locationLogger.startHourlyLogging(data.userId.toString());
+                locationLogger.startHourlyLogging(userIdNum);
               }
             })
             .catch((error) => {
@@ -1037,14 +1038,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
     ws.on("close", () => {
       // Remove client from map and stop location logging
-      clients.forEach((client, userId) => {
+      clients.forEach((client, visitorId) => {
         if (client === ws) {
-          clients.delete(userId);
+          clients.delete(visitorId);
           console.log(
-            `User ${userId} disconnected. Total clients: ${clients.size}`
+            `User ${visitorId} disconnected. Total clients: ${clients.size}`
           );
           // Stop hourly logging when user disconnects
-          locationLogger.stopHourlyLogging(userId);
+          locationLogger.stopHourlyLogging(parseInt(visitorId));
         }
       });
       console.log("WebSocket client disconnected");
