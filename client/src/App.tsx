@@ -14,7 +14,6 @@ import Places from "@/pages/Places";
 import History from "./pages/History";
 import Settings from "@/pages/Settings";
 import NotFound from "@/pages/not-found";
-import registerNNPushToken from "native-notify";
 
 function Router() {
   const { user, isLoading } = useAuth();

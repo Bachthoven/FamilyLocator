@@ -521,6 +521,11 @@ This is a personal/family project. If you have suggestions or find bugs, please 
 
 ### 2025-01-19
 
+- **Web App Loading Fix**: Removed `native-notify` import from web app
+  - `native-notify` is a React Native package that was causing the web app to fail loading
+  - The import was incorrectly added to `client/src/App.tsx`
+  - Native Notify should only be used in the mobile app (`mobile/App.tsx`)
+
 - **TypeScript Error Fixes**: Fixed 20+ TypeScript errors across client and server
   - `AddressAutocomplete.tsx` - Fixed `NodeJS.Timeout` ref type using proper type assertion
   - `LocationLogger.tsx` - Fixed `apiRequest` usage and added proper `User` type import
