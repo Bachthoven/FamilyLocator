@@ -974,11 +974,17 @@ export default function SettingsScreen() {
         </Text>
       </View>
 
-      <ScrollView style={[styles.content, { backgroundColor: colors.background }]} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={[styles.content, { backgroundColor: colors.background }]}
+        showsVerticalScrollIndicator={false}
+      >
         <View
           style={[
             styles.profileCard,
-            { backgroundColor: colors.cardBackground, borderColor: colors.inputBorder },
+            {
+              backgroundColor: colors.cardBackground,
+              borderColor: colors.inputBorder,
+            },
           ]}
           data-testid="card-profile"
         >
@@ -1048,7 +1054,10 @@ export default function SettingsScreen() {
               key={item.label}
               style={[
                 styles.settingsItem,
-                { backgroundColor: colors.cardBackground, borderColor: colors.inputBorder },
+                {
+                  backgroundColor: colors.cardBackground,
+                  borderColor: colors.inputBorder,
+                },
               ]}
               onPress={item.action}
               data-testid={`button-setting-${item.label.toLowerCase().replace(/\s+/g, "-")}`}
@@ -1087,7 +1096,10 @@ export default function SettingsScreen() {
           <TouchableOpacity
             style={[
               styles.settingsItem,
-              { backgroundColor: colors.cardBackground, borderColor: colors.controlButtonBorder },
+              {
+                backgroundColor: colors.cardBackground,
+                borderColor: colors.controlButtonBorder,
+              },
             ]}
             onPress={() => setThemeModalVisible(true)}
             data-testid="button-setting-appearance"

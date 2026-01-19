@@ -224,16 +224,49 @@ npx prettier --check .
 
 ### GitHub Actions CI/CD Pipeline
 
-**Workflow File**: `.github/workflows/ci.yml`
+**Workflow Files** (located in `.github/workflows/`):
 
-**Triggers**: Pull requests from `dev` → `main` branch
+| Workflow           | File                     | Triggers                                 | Purpose                                             |
+| ------------------ | ------------------------ | ---------------------------------------- | --------------------------------------------------- |
+| CI Pipeline        | `ci.yml`                 | Push/PR to main, dev                     | Lint, typecheck, unit tests, build, security audit  |
+| Integration Tests  | `integration.yml`        | PR to main, dev (server changes)         | Database tests, API integration, privacy validation |
+| CodeQL Analysis    | `codeql.yml`             | Push/PR + nightly (public repos only)    | Static security analysis, custom secret scanning    |
+| Dependency Review  | `dependency-review.yml`  | PRs                                      | Block vulnerable deps, license compliance           |
+| Scheduled Security | `scheduled-security.yml` | Daily at 2 AM UTC                        | Nightly audits, outdated packages, privacy checks   |
+| Backend Release    | `release-backend.yml`    | Tags `v*`                                | Build, scan, deploy staging → production            |
+| Mobile Release     | `release-mobile.yml`     | Tags `mobile-v*`, `ios-v*`, `android-v*` | iOS/Android builds via Expo EAS                     |
 
-**Jobs**:
+**CI Pipeline Jobs** (`ci.yml`):
 
-1. **Test Job**: Prettier formatting, TypeScript check, unit tests, coverage upload to Codecov
-2. **Lint Job**: Code formatting verification
-3. **Build Job**: Production build verification
-4. **Security Job**: npm security audit
+1. **Lint & Type Check**: Prettier formatting, TypeScript compilation
+2. **Unit Tests**: Vitest tests with coverage upload to Codecov
+3. **Build Verification**: Production build, artifact verification
+4. **Security Audit**: npm audit for high/critical vulnerabilities
+
+**Security Features for Location Apps**:
+
+- Location data access pattern validation
+- JWT security verification
+- Hardcoded secrets scanning
+- Sensitive data logging detection
+- Family member authorization testing
+- SDK security checks for map/notification libraries
+
+**GitHub Repository Setup**:
+
+To use all workflows, configure these in your GitHub repository:
+
+1. **Secrets** (Settings → Secrets and variables → Actions):
+   - `CODECOV_TOKEN` - For coverage reports (optional)
+   - `EXPO_TOKEN` - For mobile builds via EAS (required for mobile releases)
+
+2. **Environments** (Settings → Environments):
+   - Create `staging` and `production` environments
+   - Add required reviewers for production deployments
+
+3. **Code Scanning** (for CodeQL):
+   - Only runs on public repositories
+   - For private repos, CodeQL requires GitHub Advanced Security
 
 ### Test Improvement Roadmap
 
@@ -501,6 +534,23 @@ This is a personal/family project. If you have suggestions or find bugs, please 
 ---
 
 ## 📋 Changelog
+
+### 2026-01-19
+
+- **Status Dot Positioning (Mobile)**: Updated profile picture status dots positioning
+  - Status dots now positioned at `bottom: -2, right: -2` so about half overlaps the avatar edge
+  - Border color matches the card background color for theme-aware display
+  - Applied to both FamilyScreen member cards and MapScreen member indicator
+
+- **Comprehensive GitHub Actions Workflows**: Created 7 workflow files for CI/CD and security
+  - `ci.yml` - Main CI pipeline (lint, typecheck, tests, build, security audit)
+  - `integration.yml` - Database integration tests with PostgreSQL, privacy tests
+  - `codeql.yml` - Static security analysis (public repos only)
+  - `dependency-review.yml` - Blocks PRs with vulnerable dependencies
+  - `scheduled-security.yml` - Nightly security audits and compliance checks
+  - `release-backend.yml` - Backend deployment with staging → production flow
+  - `release-mobile.yml` - iOS/Android builds via Expo EAS
+  - Security features: location data validation, JWT checks, secret scanning, SDK audits
 
 ### 2025-10-26
 
