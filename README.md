@@ -70,8 +70,19 @@ The application will be available at the Replit development URL.
 
 ### Running the Mobile App
 
+**Option 1: LAN Mode (Faster - Same Network Required)**
+
 ```bash
-# Start Expo in tunnel mode (recommended for Replit)
+# Start Expo in LAN mode (mobile device must be on same network as computer)
+npx expo start
+```
+
+The mobile app auto-detects the LAN IP from Expo's debug configuration.
+
+**Option 2: Tunnel Mode (Works Anywhere)**
+
+```bash
+# Start Expo in tunnel mode (recommended for Replit or different networks)
 npx expo start --tunnel
 ```
 
@@ -79,6 +90,12 @@ Scan the QR code with:
 
 - **iOS**: Camera app
 - **Android**: Expo Go app
+
+**Network Notes:**
+
+- LAN mode is faster but requires your phone and computer on the same WiFi network
+- Tunnel mode works from anywhere but may have slightly higher latency
+- The mobile app automatically detects which mode you're using and configures the API URL accordingly
 
 ### Running Tests
 
@@ -501,6 +518,33 @@ This is a personal/family project. If you have suggestions or find bugs, please 
 ---
 
 ## 📋 Changelog
+
+### 2025-01-19
+
+- **TypeScript Error Fixes**: Fixed 20+ TypeScript errors across client and server
+  - `AddressAutocomplete.tsx` - Fixed `NodeJS.Timeout` ref type using proper type assertion
+  - `LocationLogger.tsx` - Fixed `apiRequest` usage and added proper `User` type import
+  - `NotificationToast.tsx` - Fixed console.log returning void in JSX by using IIFE
+  - `toaster.tsx` - Fixed null variant being passed to toast functions
+  - `Places.tsx` - Added proper `User` type for auth context
+  - `server/locationLogger.ts` - Changed `userId` from string to number, fixed null timestamp check
+  - `server/replitAuth.ts` - Fixed `upsertUser` to use existing storage methods (`getUserByUsername`, `createUser`, `updateUser`)
+  - `server/routes.ts` - Fixed `parseInt` for userId parameters in WebSocket handlers
+
+- **CI/CD Pipeline Improvements**: Enhanced GitHub Actions workflow reliability
+  - Updated TypeScript check to filter out known `server/vite.ts` configuration error (protected system file)
+  - Added `server/vite.ts` to tsconfig.json exclude list
+  - CI now properly passes for all editable files
+
+- **Status Indicators Refinement**: Updated profile status dots positioning
+  - Positioned at bottom: -2, right: -2 (half inside, half outside profile pictures)
+  - Theme-aware borders matching card background color
+  - Works correctly in both light and dark modes
+
+- **Mobile API Configuration**: Auto-detect LAN mode for Expo development
+  - Mobile app now detects local IP from Expo's hostUri/debuggerHost
+  - Enables `npx expo start` without tunnel flag when on same network
+  - Falls back to Replit domain for tunnel mode
 
 ### 2025-10-26
 
