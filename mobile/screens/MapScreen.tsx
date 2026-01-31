@@ -1661,8 +1661,8 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 3,
-    borderColor: "rgba(255, 255, 255, 0.9)",
+    borderWidth: 2,
+    borderColor: "rgba(255, 255, 255, 0.8)",
   },
   onlineAvatarText: {
     fontSize: 10,

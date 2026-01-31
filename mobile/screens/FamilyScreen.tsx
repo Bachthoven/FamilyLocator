@@ -569,7 +569,6 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                           styles.avatarStatusDot,
                           {
                             backgroundColor: "#10B981",
-                            borderColor: colors.cardBackground,
                           },
                         ]}
                       />
@@ -608,7 +607,7 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                     ? `${member.firstName} ${member.lastName}`
                     : member.firstName || member.email;
                 const isOnline = statusInfo.status === "Active";
-                const dotColor = isOnline ? "#10B981" : "#EF4444";
+                const dotColor = isOnline ? "#10B981" : "#9CA3AF";
 
                 return (
                   <View
@@ -645,7 +644,6 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                             styles.avatarStatusDot,
                             {
                               backgroundColor: dotColor,
-                              borderColor: colors.cardBackground,
                             },
                           ]}
                         />
