@@ -440,7 +440,7 @@ export default function MapScreen({
       return { color: "#EF4444", message: `Offline for ${hours}h` };
     }
     const days = Math.floor(minutesAgo / 1440);
-    return { color: "#6B7280", message: `Offline for ${days}d` };
+    return { color: "#EF4444", message: `Offline for ${days}d` };
   };
 
   const familyLocations: (FamilyLocation & {
