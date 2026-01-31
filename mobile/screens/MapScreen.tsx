@@ -1638,7 +1638,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     paddingVertical: 12,
     height: 44,
-    gap: 8,
+    gap: 14,
   },
   statusDot: {
     width: 8,
