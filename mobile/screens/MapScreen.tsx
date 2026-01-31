@@ -360,6 +360,7 @@ export default function MapScreen({
     id?: number;
     name: string;
     statusMessage?: string;
+    statusColor?: string;
     address?: string;
     category?: string;
     coordinate: { latitude: number; longitude: number };
@@ -929,6 +930,7 @@ export default function MapScreen({
                 type: "family",
                 name: location.name,
                 statusMessage: location.statusMessage,
+                statusColor: location.statusColor,
                 address: location.address,
                 coordinate: {
                   latitude: location.latitude,
@@ -1234,7 +1236,7 @@ export default function MapScreen({
                 <View
                   style={[
                     styles.slideDownStatusDot,
-                    { backgroundColor: "#10B981" },
+                    { backgroundColor: selectedMarker.statusColor || "#10B981" },
                   ]}
                 />
                 <Text
