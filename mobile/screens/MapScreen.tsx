@@ -236,15 +236,9 @@ const FamilyMarker = ({
   >
     <View style={styles.familyMarkerContainer}>
       <View
-        style={[
-          styles.familyMarker,
-          { backgroundColor: statusColor },
-          !isRecent && styles.familyMarkerOld,
-        ]}
+        style={[styles.familyMarker, !isRecent && styles.familyMarkerOld]}
       />
-      {isRecent && (
-        <View style={[styles.familyMarkerPulse, { backgroundColor: statusColor }]} />
-      )}
+      {isRecent && <View style={styles.familyMarkerPulse} />}
     </View>
   </Marker>
 );
