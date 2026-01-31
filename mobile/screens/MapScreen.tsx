@@ -1674,8 +1674,8 @@ const styles = StyleSheet.create({
   },
   onlineAvatarDot: {
     position: "absolute",
-    bottom: -2,
-    right: -2,
+    bottom: 0,
+    right: 0,
     width: 10,
     height: 10,
     borderRadius: 5,
