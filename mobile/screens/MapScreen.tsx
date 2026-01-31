@@ -1639,7 +1639,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     paddingVertical: 12,
     height: 44,
-    gap: 8,
+    gap: 14,
   },
   statusDot: {
     width: 8,
@@ -1671,8 +1671,8 @@ const styles = StyleSheet.create({
   },
   onlineAvatarDot: {
     position: "absolute",
-    bottom: -2,
-    right: -2,
+    bottom: 0,
+    right: 0,
     width: 10,
     height: 10,
     borderRadius: 5,
