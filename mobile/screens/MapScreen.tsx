@@ -26,6 +26,7 @@ import { apiRequest } from "../src/lib/queryClient";
  * Vibrant dark-mode style for Google Maps via react-native-maps (PROVIDER_GOOGLE).
  * Goal: keep dark background but restore "colorfulness" (water/parks/roads/labels).
  */
+
 const DARK_MAP_STYLE = [
   // Base
   { elementType: "geometry", stylers: [{ color: "#151a22" }] },
@@ -34,7 +35,6 @@ const DARK_MAP_STYLE = [
     elementType: "labels.text.stroke",
     stylers: [{ color: "#151a22" }, { weight: 2 }],
   },
-  { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
 
   // Administrative
   {
@@ -154,7 +154,6 @@ const DARK_MAP_STYLE = [
     stylers: [{ color: "#9fb2cc" }],
   },
 ];
-
 const LIGHT_MAP_STYLE: any[] = [];
 
 // Type definitions
@@ -252,6 +251,7 @@ const PlaceMarker = ({
   address,
   color,
   onPress,
+  isDarkMode,
 }: {
   latitude: number;
   longitude: number;
@@ -260,6 +260,7 @@ const PlaceMarker = ({
   address?: string;
   color?: string;
   onPress?: () => void;
+  isDarkMode?: boolean;
 }) => {
   const categoryColors: Record<string, string> = {
     home: "#3B82F6",
@@ -269,6 +270,8 @@ const PlaceMarker = ({
   };
 
   const markerColor = color || categoryColors[category || "other"] || "#F97316";
+  const borderColor = isDarkMode ? "#1F2937" : "#fff";
+  const dotColor = isDarkMode ? "#E5E7EB" : "#fff";
 
   return (
     <Marker
@@ -276,8 +279,13 @@ const PlaceMarker = ({
       onPress={onPress}
       anchor={{ x: 0.5, y: 0.5 }}
     >
-      <View style={[styles.placeMarker, { backgroundColor: markerColor }]}>
-        <View style={styles.placeMarkerDot} />
+      <View
+        style={[
+          styles.placeMarker,
+          { backgroundColor: markerColor, borderColor: borderColor },
+        ]}
+      >
+        <View style={[styles.placeMarkerDot, { backgroundColor: dotColor }]} />
       </View>
     </Marker>
   );
@@ -950,6 +958,7 @@ export default function MapScreen({
               category={place.category}
               address={place.address}
               color={place.color}
+              isDarkMode={isDarkMode}
               onPress={() => {
                 if (dragState) return;
                 isProgrammaticMove.current = true;
@@ -1571,7 +1580,6 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: "#fff",
   },
 
   // Reposition marker for repositioning mode

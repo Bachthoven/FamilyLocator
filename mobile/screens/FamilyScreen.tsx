@@ -569,7 +569,7 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                           styles.avatarStatusDot,
                           {
                             backgroundColor: "#10B981",
-                            borderColor: colors.cardBackground,
+                            borderColor: "rgba(255, 255, 255, 0.8)",
                           },
                         ]}
                       />
@@ -645,7 +645,7 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                             styles.avatarStatusDot,
                             {
                               backgroundColor: dotColor,
-                              borderColor: colors.cardBackground,
+                              borderColor: "rgba(255, 255, 255, 0.8)",
                             },
                           ]}
                         />
