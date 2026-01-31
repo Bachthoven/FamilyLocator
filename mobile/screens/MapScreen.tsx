@@ -403,24 +403,10 @@ export default function MapScreen({
 
   // Map type control
   const mapType = mapTypeProp !== undefined ? mapTypeProp : localMapType;
-  const prevMapTypeRef = useRef(mapType);
   const setMapType = (type: "standard" | "hybrid") => {
     if (onMapTypeChange) onMapTypeChange(type);
     else setLocalMapType(type);
   };
-
-  // Restore region after map type change (map remounts with new key)
-  useEffect(() => {
-    if (prevMapTypeRef.current !== mapType) {
-      prevMapTypeRef.current = mapType;
-      // Small delay to ensure map is mounted before animating
-      setTimeout(() => {
-        if (mapRef.current && currentRegionRef.current) {
-          mapRef.current.animateToRegion(currentRegionRef.current, 0);
-        }
-      }, 100);
-    }
-  }, [mapType]);
 
   const currentLocation = userLocationProp;
 
@@ -838,8 +824,8 @@ export default function MapScreen({
       <StatusBar style={colors.statusBarStyle} />
 
       <MapView
-        // Remount on theme/mapType change so style applies reliably on Android
-        key={`map-${isDarkMode ? "dark" : "light"}-${mapType}`}
+        // Remount on theme change so style applies reliably on Android
+        key={`map-${isDarkMode ? "dark" : "light"}`}
         ref={mapRef}
         style={styles.map}
         provider={PROVIDER_GOOGLE}
