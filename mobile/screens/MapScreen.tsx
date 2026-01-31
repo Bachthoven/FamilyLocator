@@ -1661,8 +1661,8 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 2,
-    borderColor: "rgba(255, 255, 255, 0.8)",
+    borderWidth: 3,
+    borderColor: "rgba(255, 255, 255, 0.9)",
   },
   onlineAvatarText: {
     fontSize: 10,
@@ -1671,14 +1671,14 @@ const styles = StyleSheet.create({
   },
   onlineAvatarDot: {
     position: "absolute",
-    bottom: 0,
-    right: 0,
+    bottom: 1,
+    right: 1,
     width: 10,
     height: 10,
     borderRadius: 5,
     backgroundColor: "#10B981",
     borderWidth: 2,
-    borderColor: "rgba(255, 255, 255, 0.8)",
+    borderColor: "rgba(255, 255, 255, 0.9)",
   },
   membersText: {
     fontSize: 14,
