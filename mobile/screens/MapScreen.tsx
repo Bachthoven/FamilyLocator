@@ -251,7 +251,6 @@ const PlaceMarker = ({
   address,
   color,
   onPress,
-  isDarkMode,
 }: {
   latitude: number;
   longitude: number;
@@ -260,7 +259,6 @@ const PlaceMarker = ({
   address?: string;
   color?: string;
   onPress?: () => void;
-  isDarkMode?: boolean;
 }) => {
   const categoryColors: Record<string, string> = {
     home: "#3B82F6",
@@ -270,8 +268,6 @@ const PlaceMarker = ({
   };
 
   const markerColor = color || categoryColors[category || "other"] || "#F97316";
-  const borderColor = isDarkMode ? "#1F2937" : "#fff";
-  const dotColor = isDarkMode ? "#E5E7EB" : "#fff";
 
   return (
     <Marker
@@ -279,13 +275,8 @@ const PlaceMarker = ({
       onPress={onPress}
       anchor={{ x: 0.5, y: 0.5 }}
     >
-      <View
-        style={[
-          styles.placeMarker,
-          { backgroundColor: markerColor, borderColor: borderColor },
-        ]}
-      >
-        <View style={[styles.placeMarkerDot, { backgroundColor: dotColor }]} />
+      <View style={[styles.placeMarker, { backgroundColor: markerColor }]}>
+        <View style={styles.placeMarkerDot} />
       </View>
     </Marker>
   );
@@ -958,7 +949,6 @@ export default function MapScreen({
               category={place.category}
               address={place.address}
               color={place.color}
-              isDarkMode={isDarkMode}
               onPress={() => {
                 if (dragState) return;
                 isProgrammaticMove.current = true;
@@ -1580,6 +1570,7 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
+    backgroundColor: "#fff",
   },
 
   // Reposition marker for repositioning mode
@@ -1647,7 +1638,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     paddingVertical: 12,
     height: 44,
-    gap: 14,
+    gap: 8,
   },
   statusDot: {
     width: 8,
@@ -1679,8 +1670,8 @@ const styles = StyleSheet.create({
   },
   onlineAvatarDot: {
     position: "absolute",
-    bottom: 0,
-    right: 0,
+    bottom: -2,
+    right: -2,
     width: 10,
     height: 10,
     borderRadius: 5,
