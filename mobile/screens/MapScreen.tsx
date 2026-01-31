@@ -477,7 +477,7 @@ export default function MapScreen({
         latitude: loc.latitude,
         longitude: loc.longitude,
         name: fullName,
-        address: `Last seen ${formatTimeAgo(minutesAgo)}`,
+        address: undefined,
         isRecent,
         statusColor: statusInfo.color,
         statusMessage: statusInfo.message,
