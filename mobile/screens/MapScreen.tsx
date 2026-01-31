@@ -343,6 +343,7 @@ export default function MapScreen({
       longitudeDelta: 0.0421,
     }
   );
+  const currentRegionRef = useRef(currentRegion);
 
   const { user } = useAuth();
 
@@ -830,7 +831,7 @@ export default function MapScreen({
         provider={PROVIDER_GOOGLE}
         mapType={mapType}
         customMapStyle={isDarkMode ? DARK_MAP_STYLE : LIGHT_MAP_STYLE}
-        initialRegion={currentRegion}
+        initialRegion={currentRegionRef.current}
         onRegionChange={() => {
           mapRef.current
             ?.getCamera()
@@ -840,6 +841,7 @@ export default function MapScreen({
         }}
         onRegionChangeComplete={(region) => {
           setCurrentRegion(region);
+          currentRegionRef.current = region;
           isProgrammaticMove.current = false;
 
           if (isActive) onRegionChange?.(region);
