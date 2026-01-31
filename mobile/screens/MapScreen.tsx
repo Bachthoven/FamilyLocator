@@ -830,7 +830,7 @@ export default function MapScreen({
         provider={PROVIDER_GOOGLE}
         mapType={mapType}
         customMapStyle={isDarkMode ? DARK_MAP_STYLE : LIGHT_MAP_STYLE}
-        initialRegion={initialRegion}
+        initialRegion={currentRegion}
         onRegionChange={() => {
           mapRef.current
             ?.getCamera()
