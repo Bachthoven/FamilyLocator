@@ -1162,7 +1162,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#9CA3AF",
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 2,
+    borderWidth: 3,
     borderColor: "rgba(255, 255, 255, 0.8)",
   },
   avatarStatusDot: {
@@ -1172,7 +1172,7 @@ const styles = StyleSheet.create({
     width: 14,
     height: 14,
     borderRadius: 7,
-    borderWidth: 2,
+    borderWidth: 3,
   },
   avatarText: {
     fontSize: 18,
