@@ -1276,16 +1276,6 @@ export default function MapScreen({
                 style={styles.enableDragButton}
                 onPress={() => {
                   isProgrammaticMove.current = true;
-                  const placeData = places.find((p) => p.id === selectedMarker.id);
-                  const dragData = {
-                    placeId: selectedMarker.id!,
-                    placeName: selectedMarker.name,
-                    placeCategory: selectedMarker.category,
-                    placeColor: placeData?.color,
-                    originalCoordinate: selectedMarker.coordinate,
-                    currentCoordinate: selectedMarker.coordinate,
-                  };
-                  setSelectedMarker(null);
                   mapRef.current?.animateToRegion(
                     {
                       latitude: selectedMarker.coordinate.latitude,
@@ -1295,9 +1285,16 @@ export default function MapScreen({
                     },
                     300
                   );
-                  setTimeout(() => {
-                    setDragState(dragData);
-                  }, 350);
+                  const placeData = places.find((p) => p.id === selectedMarker.id);
+                  setDragState({
+                    placeId: selectedMarker.id!,
+                    placeName: selectedMarker.name,
+                    placeCategory: selectedMarker.category,
+                    placeColor: placeData?.color,
+                    originalCoordinate: selectedMarker.coordinate,
+                    currentCoordinate: selectedMarker.coordinate,
+                  });
+                  setSelectedMarker(null);
                 }}
                 activeOpacity={0.7}
               >
