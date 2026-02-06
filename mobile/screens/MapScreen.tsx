@@ -1285,26 +1285,19 @@ export default function MapScreen({
               <TouchableOpacity
                 style={styles.enableDragButton}
                 onPress={() => {
-                  isProgrammaticMove.current = true;
                   const placeData = places.find((p) => p.id === selectedMarker.id);
-                  pendingDragState.current = {
+                  setDragState({
                     placeId: selectedMarker.id!,
                     placeName: selectedMarker.name,
                     placeCategory: selectedMarker.category,
                     placeColor: placeData?.color,
                     originalCoordinate: selectedMarker.coordinate,
-                    currentCoordinate: selectedMarker.coordinate,
-                  };
-                  setSelectedMarker(null);
-                  mapRef.current?.animateToRegion(
-                    {
-                      latitude: selectedMarker.coordinate.latitude,
-                      longitude: selectedMarker.coordinate.longitude,
-                      latitudeDelta: currentRegion.latitudeDelta,
-                      longitudeDelta: currentRegion.longitudeDelta,
+                    currentCoordinate: {
+                      latitude: currentRegion.latitude,
+                      longitude: currentRegion.longitude,
                     },
-                    300
-                  );
+                  });
+                  setSelectedMarker(null);
                 }}
                 activeOpacity={0.7}
               >
