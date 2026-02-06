@@ -1588,7 +1588,7 @@ const styles = StyleSheet.create({
   placeMarker: {
     width: 24,
     height: 24,
-    borderRadius: 4,
+    borderRadius: 8,
     borderWidth: 2,
     borderColor: "#fff",
     alignItems: "center",
@@ -1619,7 +1619,7 @@ const styles = StyleSheet.create({
   repositionMarker: {
     width: 24,
     height: 24,
-    borderRadius: 4,
+    borderRadius: 8,
     borderWidth: 2,
     borderColor: "#0EA5E9",
     backgroundColor: "#6B7280",
