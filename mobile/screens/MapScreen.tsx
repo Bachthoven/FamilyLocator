@@ -368,7 +368,8 @@ export default function MapScreen({
   } | null>(null);
 
   const [dragState, setDragState] = useState<DragState | null>(null);
-  const pendingDragState = useRef<DragState | null>(null);
+  const mapLayout = useRef({ width: 0, height: 0 });
+  const [repositionOffset, setRepositionOffset] = useState({ x: 0, y: 0 });
   const queryClient = useQueryClient();
 
   const slideAnim = useRef(new Animated.Value(-200)).current;
@@ -527,6 +528,7 @@ export default function MapScreen({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/places"] });
       setDragState(null);
+      setRepositionOffset({ x: 0, y: 0 });
       isProgrammaticMove.current = false;
       setSelectedMarker(null);
       setAlertConfig({
@@ -832,6 +834,12 @@ export default function MapScreen({
         ref={mapRef}
         style={styles.map}
         provider={PROVIDER_GOOGLE}
+        onLayout={(e) => {
+          mapLayout.current = {
+            width: e.nativeEvent.layout.width,
+            height: e.nativeEvent.layout.height,
+          };
+        }}
         mapType={mapType}
         customMapStyle={isDarkMode ? DARK_MAP_STYLE : LIGHT_MAP_STYLE}
         initialRegion={currentRegionRef.current}
@@ -849,16 +857,7 @@ export default function MapScreen({
 
           if (isActive) onRegionChange?.(region);
 
-          if (pendingDragState.current) {
-            setDragState({
-              ...pendingDragState.current,
-              currentCoordinate: {
-                latitude: region.latitude,
-                longitude: region.longitude,
-              },
-            });
-            pendingDragState.current = null;
-          } else if (dragState) {
+          if (dragState) {
             setDragState((prev) =>
               prev
                 ? {
@@ -1011,6 +1010,10 @@ export default function MapScreen({
                     other: "#F97316",
                   }[dragState.placeCategory || "other"] ||
                   "#F97316",
+                transform: [
+                  { translateX: repositionOffset.x },
+                  { translateY: repositionOffset.y },
+                ],
               },
             ]}
           >
@@ -1284,14 +1287,31 @@ export default function MapScreen({
             {selectedMarker.type === "place" && selectedMarker.id && (
               <TouchableOpacity
                 style={styles.enableDragButton}
-                onPress={() => {
-                  const placeData = places.find((p) => p.id === selectedMarker.id);
+                onPress={async () => {
+                  const markerId = selectedMarker.id!;
+                  const markerName = selectedMarker.name;
+                  const markerCategory = selectedMarker.category;
+                  const markerCoordinate = selectedMarker.coordinate;
+                  const placeData = places.find((p) => p.id === markerId);
+
+                  let offset = { x: 0, y: 0 };
+                  try {
+                    const point = await mapRef.current?.pointForCoordinate(markerCoordinate);
+                    if (point && mapLayout.current.width > 0) {
+                      offset = {
+                        x: point.x - mapLayout.current.width / 2,
+                        y: point.y - mapLayout.current.height / 2,
+                      };
+                    }
+                  } catch {}
+                  setRepositionOffset(offset);
+
                   setDragState({
-                    placeId: selectedMarker.id!,
-                    placeName: selectedMarker.name,
-                    placeCategory: selectedMarker.category,
+                    placeId: markerId,
+                    placeName: markerName,
+                    placeCategory: markerCategory,
                     placeColor: placeData?.color,
-                    originalCoordinate: selectedMarker.coordinate,
+                    originalCoordinate: markerCoordinate,
                     currentCoordinate: {
                       latitude: currentRegion.latitude,
                       longitude: currentRegion.longitude,
@@ -1359,6 +1379,7 @@ export default function MapScreen({
                 ]}
                 onPress={() => {
                   setDragState(null);
+                  setRepositionOffset({ x: 0, y: 0 });
                   isProgrammaticMove.current = false;
                 }}
                 activeOpacity={0.7}
