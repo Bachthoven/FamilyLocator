@@ -180,6 +180,7 @@ interface DragState {
   placeId: number;
   placeName: string;
   placeCategory?: string;
+  placeColor?: string;
   originalCoordinate: { latitude: number; longitude: number };
   currentCoordinate: { latitude: number; longitude: number };
 }
@@ -992,12 +993,14 @@ export default function MapScreen({
               styles.repositionMarker,
               {
                 backgroundColor:
+                  dragState.placeColor ||
                   {
                     home: "#3B82F6",
                     work: "#10B981",
                     school: "#8B5CF6",
                     other: "#F97316",
-                  }[dragState.placeCategory || "other"] || "#F97316",
+                  }[dragState.placeCategory || "other"] ||
+                  "#F97316",
               },
             ]}
           >
@@ -1282,10 +1285,12 @@ export default function MapScreen({
                     },
                     300
                   );
+                  const placeData = places.find((p) => p.id === selectedMarker.id);
                   setDragState({
                     placeId: selectedMarker.id!,
                     placeName: selectedMarker.name,
                     placeCategory: selectedMarker.category,
+                    placeColor: placeData?.color,
                     originalCoordinate: selectedMarker.coordinate,
                     currentCoordinate: selectedMarker.coordinate,
                   });
