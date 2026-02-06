@@ -1333,7 +1333,7 @@ export default function MapScreen({
 
       {/* Drag Mode Panel */}
       {dragState && (
-        <View style={[styles.dragModePanel, { top: insets.top + 60 }]}>
+        <View style={[styles.dragModePanel, { top: insets.top }]}>
           <View
             style={[
               styles.dragModePanelContent,
