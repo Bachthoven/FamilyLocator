@@ -1336,27 +1336,20 @@ export default function MapScreen({
         <View style={[styles.dragModePanel, { top: insets.top }]}>
           <View
             style={[
-              styles.dragModePanelContent,
+              styles.slideDownDialog,
               {
                 backgroundColor: colors.dialogBackground,
                 borderColor: colors.dialogBorder,
-                borderWidth: 1,
-                borderRadius: 16,
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.3,
-                shadowRadius: 12,
-                elevation: 8,
               },
             ]}
           >
-            <View style={styles.dragModeInfo}>
-              <View style={styles.dragModeIconContainer}>
+            <View style={styles.slideDownHeader}>
+              <View style={styles.slideDownIconContainer}>
                 <Ionicons name="locate" size={20} color="#fff" />
               </View>
-              <View style={styles.dragModeTextContainer}>
+              <View style={{ flex: 1 }}>
                 <Text
-                  style={[styles.dragModeTitle, { color: colors.dialogText }]}
+                  style={[styles.slideDownName, { color: colors.dialogText }]}
                 >
                   Reposition Mode
                 </Text>
@@ -1371,29 +1364,7 @@ export default function MapScreen({
               </View>
             </View>
 
-            <View style={styles.dragModeButtons}>
-              <TouchableOpacity
-                style={[
-                  styles.dragModeCancelButton,
-                  { backgroundColor: colors.surfaceSecondary },
-                ]}
-                onPress={() => {
-                  setDragState(null);
-                  setRepositionOffset({ x: 0, y: 0 });
-                  isProgrammaticMove.current = false;
-                }}
-                activeOpacity={0.7}
-              >
-                <Text
-                  style={[
-                    styles.dragModeCancelText,
-                    { color: colors.textSecondary },
-                  ]}
-                >
-                  Cancel
-                </Text>
-              </TouchableOpacity>
-
+            <View style={[styles.dragModeButtons, { marginTop: 16 }]}>
               <TouchableOpacity
                 style={[
                   styles.dragModeSaveButton,
@@ -1415,8 +1386,24 @@ export default function MapScreen({
                 {updatePlaceMutation.isPending ? (
                   <ActivityIndicator size="small" color="#fff" />
                 ) : (
-                  <Text style={styles.dragModeSaveText}>Save Location</Text>
+                  <>
+                    <Ionicons name="save" size={16} color="#fff" style={{ marginRight: 6 }} />
+                    <Text style={styles.dragModeSaveText}>Save Location</Text>
+                  </>
                 )}
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.dragModeCancelButton}
+                onPress={() => {
+                  setDragState(null);
+                  setRepositionOffset({ x: 0, y: 0 });
+                  isProgrammaticMove.current = false;
+                }}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="close-circle-outline" size={16} color="#0EA5E9" style={{ marginRight: 6 }} />
+                <Text style={styles.dragModeCancelText}>Cancel</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -1850,52 +1837,31 @@ const styles = StyleSheet.create({
 
   // Drag Mode Panel
   dragModePanel: { position: "absolute", left: 16, right: 16, zIndex: 150 },
-  dragModePanelContent: {
-    padding: 16,
-    backgroundColor: "rgba(255, 255, 255, 0.95)",
-  },
-  dragModeInfo: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  dragModeIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#0EA5E9",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 12,
-  },
-  dragModeTextContainer: { flex: 1 },
-  dragModeTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#1F2937",
-    marginBottom: 2,
-  },
-  dragModeSubtitle: { fontSize: 13, color: "#6B7280" },
+  dragModeSubtitle: { fontSize: 13, color: "#6B7280", marginTop: 2 },
   dragModeButtons: { flexDirection: "row", gap: 12 },
-  dragModeCancelButton: {
-    flex: 1,
-    paddingVertical: 12,
-    borderRadius: 10,
-    backgroundColor: "#F3F4F6",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  dragModeCancelText: { fontSize: 14, fontWeight: "600", color: "#6B7280" },
   dragModeSaveButton: {
     flex: 1,
+    flexDirection: "row",
     paddingVertical: 12,
     borderRadius: 10,
-    backgroundColor: "#10B981",
+    backgroundColor: "#0EA5E9",
     alignItems: "center",
     justifyContent: "center",
   },
   dragModeSaveButtonDisabled: { backgroundColor: "#9CA3AF" },
   dragModeSaveText: { fontSize: 14, fontWeight: "600", color: "#fff" },
+  dragModeCancelButton: {
+    flex: 1,
+    flexDirection: "row",
+    paddingVertical: 12,
+    borderRadius: 10,
+    backgroundColor: "transparent",
+    borderWidth: 1.5,
+    borderColor: "#0EA5E9",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  dragModeCancelText: { fontSize: 14, fontWeight: "600", color: "#0EA5E9" },
 
   // Proximity Alert Banner
   proximityAlertBanner: {
