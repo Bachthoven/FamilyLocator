@@ -115,6 +115,13 @@ export default function AlertDialog({
                     style={{ marginTop: 1 }}
                   />
                 )}
+                {button.style === "destructive" && (
+                  <Ionicons
+                    name="trash-outline"
+                    size={18}
+                    color="#fff"
+                  />
+                )}
                 <Text
                   style={[
                     styles.buttonText,
