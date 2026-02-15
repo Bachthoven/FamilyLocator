@@ -535,6 +535,20 @@ This is a personal/family project. If you have suggestions or find bugs, please 
 
 ## 📋 Changelog
 
+### 2026-02-15
+
+- **Current User "View" Button Fix (Family Screen)**: Fixed the "View" button on the current user's card not working — it now fetches the user's own location separately via `/api/locations/current` instead of looking in the family members list
+- **Delete Invitation Code Confirmation**: Added a confirmation dialog ("Delete Code? Are you sure you want to delete this code?") before deleting an invitation code, with Cancel and Delete buttons
+- **Alert Dialog Button Icons**: Added trash icon to destructive (Delete) buttons and vertically centered the X icon in Cancel buttons across all alert dialogs
+- **Toast Delete Icon**: Changed the delete toast notification icon from an X circle to a trash can for visual consistency with the delete action
+- **Add New Place Dark Backdrop**: Added dark tinted background overlay (`rgba(0,0,0,0.7)`) to the "Add New Place" modal, matching other modals in the app
+- **Improved Current Location Accuracy**: Upgraded the "Use Current Location" button in the Add New Place dialog:
+  - GPS accuracy changed from `Balanced` to `Highest`
+  - Always fetches a fresh position instead of using a potentially stale cached one
+  - Switched reverse geocoding from Photon API to Nominatim with building-level precision (`zoom=18`)
+  - Returns full address with house number, street, city, state, and zip code
+- **Post-Prompt Checks Skill**: Created an automated skill that runs code formatting (Prettier), lint checks, and README changelog updates after each completed prompt
+
 ### 2026-01-19
 
 - **Status Dot Positioning (Mobile)**: Updated profile picture status dots positioning
