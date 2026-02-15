@@ -113,6 +113,16 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
     enabled: !!user,
   });
 
+  // Fetch current user's own location
+  const { data: myLocation } = useQuery<{
+    latitude: number;
+    longitude: number;
+    timestamp: Date | null;
+  }>({
+    queryKey: ["/api/locations/current"],
+    enabled: !!user,
+  });
+
   // Generate invitation code mutation
   const generateCodeMutation = useMutation({
     mutationFn: async () => {
@@ -610,17 +620,12 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                     <TouchableOpacity
                       style={styles.actionButton}
                       onPress={() => {
-                        if (onNavigateToMap && user) {
-                          const myLocation = familyLocations.find(
-                            (loc: any) => loc.user?.id === user.id
-                          );
-                          if (myLocation) {
-                            onNavigateToMap({
-                              latitude: myLocation.latitude,
-                              longitude: myLocation.longitude,
-                              userId: user.id,
-                            });
-                          }
+                        if (onNavigateToMap && user && myLocation) {
+                          onNavigateToMap({
+                            latitude: myLocation.latitude,
+                            longitude: myLocation.longitude,
+                            userId: user.id,
+                          });
                         }
                       }}
                     >
