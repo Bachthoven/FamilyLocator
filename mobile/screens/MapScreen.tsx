@@ -391,7 +391,19 @@ export default function MapScreen({
     }
   }, [selectedMarker, slideAnim]);
 
+  const toastTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const dismissToast = () => {
+    if (toastTimeout.current) clearTimeout(toastTimeout.current);
+    Animated.timing(toastAnim, {
+      toValue: -100,
+      duration: 250,
+      useNativeDriver: true,
+    }).start(() => setToast((t) => ({ ...t, visible: false })));
+  };
+
   const showToast = (message: string, type: "success" | "error" = "success") => {
+    if (toastTimeout.current) clearTimeout(toastTimeout.current);
     setToast({ visible: true, message, type });
     toastAnim.setValue(-100);
     Animated.spring(toastAnim, {
@@ -400,12 +412,8 @@ export default function MapScreen({
       tension: 80,
       friction: 10,
     }).start();
-    setTimeout(() => {
-      Animated.timing(toastAnim, {
-        toValue: -100,
-        duration: 250,
-        useNativeDriver: true,
-      }).start(() => setToast((t) => ({ ...t, visible: false })));
+    toastTimeout.current = setTimeout(() => {
+      dismissToast();
     }, 2500);
   };
 
@@ -1035,9 +1043,12 @@ export default function MapScreen({
             size={18}
             color={toast.type === "success" ? "#10B981" : "#EF4444"}
           />
-          <Text style={[styles.toastText, { color: colors.dialogText }]}>
+          <Text style={[styles.toastText, { color: colors.dialogText, flex: 1 }]}>
             {toast.message}
           </Text>
+          <TouchableOpacity onPress={dismissToast} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+            <Ionicons name="close" size={18} color={colors.textSecondary} />
+          </TouchableOpacity>
         </Animated.View>
       )}
 

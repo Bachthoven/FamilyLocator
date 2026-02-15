@@ -56,8 +56,19 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
 
   const [toast, setToast] = useState<{ visible: boolean; message: string; type: "success" | "error" }>({ visible: false, message: "", type: "success" });
   const toastAnim = useRef(new Animated.Value(-100)).current;
+  const toastTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const dismissToast = () => {
+    if (toastTimeout.current) clearTimeout(toastTimeout.current);
+    Animated.timing(toastAnim, {
+      toValue: -100,
+      duration: 250,
+      useNativeDriver: true,
+    }).start(() => setToast((t) => ({ ...t, visible: false })));
+  };
 
   const showToast = (message: string, type: "success" | "error" = "success") => {
+    if (toastTimeout.current) clearTimeout(toastTimeout.current);
     setToast({ visible: true, message, type });
     toastAnim.setValue(-100);
     Animated.spring(toastAnim, {
@@ -66,12 +77,8 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
       tension: 80,
       friction: 10,
     }).start();
-    setTimeout(() => {
-      Animated.timing(toastAnim, {
-        toValue: -100,
-        duration: 250,
-        useNativeDriver: true,
-      }).start(() => setToast((t) => ({ ...t, visible: false })));
+    toastTimeout.current = setTimeout(() => {
+      dismissToast();
     }, 2500);
   };
 
@@ -875,9 +882,12 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
               }}
             >
               <Ionicons name={toast.type === "success" ? "checkmark-circle" : "close-circle"} size={18} color={toast.type === "success" ? "#10B981" : "#EF4444"} />
-              <Text style={{ fontSize: 14, fontWeight: "600", color: colors.dialogText }}>
+              <Text style={{ fontSize: 14, fontWeight: "600", color: colors.dialogText, flex: 1 }}>
                 {toast.message}
               </Text>
+              <TouchableOpacity onPress={dismissToast} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                <Ionicons name="close" size={18} color={colors.textSecondary} />
+              </TouchableOpacity>
             </Animated.View>
           )}
         </View>
@@ -1015,9 +1025,12 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
           }}
         >
           <Ionicons name={toast.type === "success" ? "checkmark-circle" : "close-circle"} size={18} color={toast.type === "success" ? "#10B981" : "#EF4444"} />
-          <Text style={{ fontSize: 14, fontWeight: "600", color: colors.dialogText }}>
+          <Text style={{ fontSize: 14, fontWeight: "600", color: colors.dialogText, flex: 1 }}>
             {toast.message}
           </Text>
+          <TouchableOpacity onPress={dismissToast} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+            <Ionicons name="close" size={18} color={colors.textSecondary} />
+          </TouchableOpacity>
         </Animated.View>
       )}
     </View>
