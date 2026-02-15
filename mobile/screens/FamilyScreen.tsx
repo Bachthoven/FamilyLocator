@@ -531,7 +531,32 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                         </TouchableOpacity>
                         <TouchableOpacity
                           style={styles.deleteCodeButton}
-                          onPress={() => deleteCodeMutation.mutate(code.id)}
+                          onPress={() =>
+                            setAlertConfig({
+                              visible: true,
+                              title: "Delete Code?",
+                              message:
+                                "Are you sure you want to delete this code?",
+                              icon: "trash-outline",
+                              iconColor: "#EF4444",
+                              buttons: [
+                                {
+                                  text: "Cancel",
+                                  style: "cancel",
+                                  onPress: () =>
+                                    setAlertConfig({ visible: false }),
+                                },
+                                {
+                                  text: "Delete",
+                                  style: "destructive",
+                                  onPress: () => {
+                                    setAlertConfig({ visible: false });
+                                    deleteCodeMutation.mutate(code.id);
+                                  },
+                                },
+                              ],
+                            })
+                          }
                           data-testid={`button-delete-${code.code}`}
                         >
                           <Ionicons
