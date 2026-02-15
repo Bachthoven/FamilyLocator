@@ -342,26 +342,12 @@ export default function PlacesScreen() {
         return;
       }
 
-      // Try last known position first for speed
-      let latitude: number;
-      let longitude: number;
-
-      const lastKnown = await Location.getLastKnownPositionAsync({
-        maxAge: 60000,
+      const location = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.Highest,
       });
+      const latitude = location.coords.latitude;
+      const longitude = location.coords.longitude;
 
-      if (lastKnown) {
-        latitude = lastKnown.coords.latitude;
-        longitude = lastKnown.coords.longitude;
-      } else {
-        const location = await Location.getCurrentPositionAsync({
-          accuracy: Location.Accuracy.Balanced,
-        });
-        latitude = location.coords.latitude;
-        longitude = location.coords.longitude;
-      }
-
-      // Set coordinates and address immediately
       const coordsAddress = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
       setNewPlace((prev) => ({
         ...prev,
@@ -372,7 +358,6 @@ export default function PlacesScreen() {
       setUseCurrentLocation(true);
       setIsGettingLocation(false);
 
-      // Reset scroll to start so user sees beginning of address
       setTimeout(() => {
         if (addressInputRef.current) {
           addressInputRef.current.focus();
@@ -384,22 +369,40 @@ export default function PlacesScreen() {
         }
       }, 100);
 
-      // Try reverse geocoding in background (don't block UI)
-      fetch(`https://photon.komoot.io/reverse?lat=${latitude}&lon=${longitude}`)
+      fetch(
+        `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&addressdetails=1&zoom=18`,
+        {
+          headers: {
+            "User-Agent": "FamilyLocator/1.0",
+          },
+        }
+      )
         .then((response) => response.json())
         .then((data) => {
-          if (data.features && data.features.length > 0) {
-            const props = data.features[0].properties;
+          if (data && data.address) {
+            const addr = data.address;
             const parts: string[] = [];
-            if (props.housenumber && props.street) {
-              parts.push(`${props.housenumber} ${props.street}`);
-            } else if (props.street) {
-              parts.push(props.street);
-            } else if (props.name) {
-              parts.push(props.name);
+            const houseNumber = addr.house_number || "";
+            const road =
+              addr.road || addr.pedestrian || addr.footway || addr.path || "";
+            if (houseNumber && road) {
+              parts.push(`${houseNumber} ${road}`);
+            } else if (road) {
+              parts.push(road);
+            } else if (data.display_name) {
+              const displayParts = data.display_name.split(", ");
+              parts.push(displayParts.slice(0, 3).join(", "));
             }
-            if (props.city) parts.push(props.city);
-            if (props.state) parts.push(props.state);
+            const city =
+              addr.city ||
+              addr.town ||
+              addr.village ||
+              addr.hamlet ||
+              addr.suburb ||
+              "";
+            if (city) parts.push(city);
+            if (addr.state) parts.push(addr.state);
+            if (addr.postcode) parts.push(addr.postcode);
 
             if (parts.length > 0) {
               setNewPlace((prev) => ({
@@ -409,9 +412,7 @@ export default function PlacesScreen() {
             }
           }
         })
-        .catch(() => {
-          // Keep coordinates as address on error
-        });
+        .catch(() => {});
     } catch (error) {
       Alert.alert("Error", "Could not get your current location");
       setUseCurrentLocation(false);
