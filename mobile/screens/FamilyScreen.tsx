@@ -928,7 +928,7 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                 transform: [{ translateY: toastAnim }],
               }}
             >
-              <Ionicons name={toast.type === "success" ? "checkmark-circle" : "close-circle"} size={18} color={toast.type === "success" ? "#10B981" : "#EF4444"} />
+              <Ionicons name={toast.type === "success" ? "checkmark-circle" : "trash"} size={18} color={toast.type === "success" ? "#10B981" : "#EF4444"} />
               <Text style={{ fontSize: 14, fontWeight: "600", color: colors.dialogText, flex: 1 }}>
                 {toast.message}
               </Text>
@@ -1071,7 +1071,7 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
             transform: [{ translateY: toastAnim }],
           }}
         >
-          <Ionicons name={toast.type === "success" ? "checkmark-circle" : "close-circle"} size={18} color={toast.type === "success" ? "#10B981" : "#EF4444"} />
+          <Ionicons name={toast.type === "success" ? "checkmark-circle" : "trash"} size={18} color={toast.type === "success" ? "#10B981" : "#EF4444"} />
           <Text style={{ fontSize: 14, fontWeight: "600", color: colors.dialogText, flex: 1 }}>
             {toast.message}
           </Text>
