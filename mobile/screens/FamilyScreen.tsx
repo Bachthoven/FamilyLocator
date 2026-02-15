@@ -896,7 +896,7 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
         onRequestClose={() => setJoinDialogOpen(false)}
       >
         <View style={styles.modalOverlay}>
-          <BlurView intensity={100} style={styles.modalBlur}>
+          <BlurView intensity={100} tint="dark" style={styles.modalBlur}>
             <View
               style={[styles.modalContent, { backgroundColor: colors.surface }]}
             >
