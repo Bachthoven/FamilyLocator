@@ -967,36 +967,28 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
           style={{
             position: "absolute",
             top: insets.top + 8,
-            left: 20,
-            right: 20,
-            backgroundColor: "white",
-            borderRadius: 12,
-            padding: 14,
+            left: 16,
+            right: 16,
+            zIndex: 200,
             flexDirection: "row",
             alignItems: "center",
+            paddingHorizontal: 16,
+            paddingVertical: 12,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: "#10B981",
+            backgroundColor: colors.dialogBackground,
             shadowColor: "#000",
-            shadowOffset: { width: 0, height: 4 },
+            shadowOffset: { width: 0, height: 2 },
             shadowOpacity: 0.15,
-            shadowRadius: 12,
-            elevation: 8,
-            zIndex: 9999,
+            shadowRadius: 6,
+            elevation: 6,
+            gap: 10,
             transform: [{ translateY: toastAnim }],
           }}
         >
-          <View
-            style={{
-              width: 32,
-              height: 32,
-              borderRadius: 16,
-              backgroundColor: "#DBEAFE",
-              justifyContent: "center",
-              alignItems: "center",
-              marginRight: 10,
-            }}
-          >
-            <Ionicons name="clipboard" size={16} color="#0EA5E9" />
-          </View>
-          <Text style={{ fontSize: 14, fontWeight: "600", color: "#1F2937", flex: 1 }}>
+          <Ionicons name="checkmark-circle" size={18} color="#10B981" />
+          <Text style={{ fontSize: 14, fontWeight: "600", color: colors.dialogText }}>
             {toast.message}
           </Text>
         </Animated.View>
