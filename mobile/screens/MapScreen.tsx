@@ -368,6 +368,8 @@ export default function MapScreen({
   } | null>(null);
 
   const [dragState, setDragState] = useState<DragState | null>(null);
+  const [toast, setToast] = useState<{ visible: boolean; message: string; type: "success" | "error" }>({ visible: false, message: "", type: "success" });
+  const toastAnim = useRef(new Animated.Value(-100)).current;
   const queryClient = useQueryClient();
 
   const slideAnim = useRef(new Animated.Value(-200)).current;
@@ -388,6 +390,24 @@ export default function MapScreen({
       }).start();
     }
   }, [selectedMarker, slideAnim]);
+
+  const showToast = (message: string, type: "success" | "error" = "success") => {
+    setToast({ visible: true, message, type });
+    toastAnim.setValue(-100);
+    Animated.spring(toastAnim, {
+      toValue: 0,
+      useNativeDriver: true,
+      tension: 80,
+      friction: 10,
+    }).start();
+    setTimeout(() => {
+      Animated.timing(toastAnim, {
+        toValue: -100,
+        duration: 250,
+        useNativeDriver: true,
+      }).start(() => setToast((t) => ({ ...t, visible: false })));
+    }, 2500);
+  };
 
   // Fetch family locations
   const { data: familyLocationsData = [] } = useQuery<
@@ -528,22 +548,10 @@ export default function MapScreen({
       setDragState(null);
       isProgrammaticMove.current = false;
       setSelectedMarker(null);
-      setAlertConfig({
-        visible: true,
-        title: "Location Updated",
-        message: "The place location has been saved.",
-        icon: "checkmark-circle",
-        iconColor: "#10B981",
-      });
+      showToast("Location saved");
     },
     onError: () => {
-      setAlertConfig({
-        visible: true,
-        title: "Update Failed",
-        message: "Could not save the new location. Please try again.",
-        icon: "alert-circle",
-        iconColor: "#EF4444",
-      });
+      showToast("Could not save location", "error");
     },
   });
 
@@ -1007,6 +1015,30 @@ export default function MapScreen({
             <View style={styles.repositionMarkerDot} />
           </View>
         </View>
+      )}
+
+      {/* Toast */}
+      {toast.visible && (
+        <Animated.View
+          style={[
+            styles.toastContainer,
+            {
+              top: insets.top + 8,
+              backgroundColor: toast.type === "success" ? colors.dialogBackground : colors.dialogBackground,
+              borderColor: toast.type === "success" ? "#10B981" : "#EF4444",
+              transform: [{ translateY: toastAnim }],
+            },
+          ]}
+        >
+          <Ionicons
+            name={toast.type === "success" ? "checkmark-circle" : "alert-circle"}
+            size={18}
+            color={toast.type === "success" ? "#10B981" : "#EF4444"}
+          />
+          <Text style={[styles.toastText, { color: colors.dialogText }]}>
+            {toast.message}
+          </Text>
+        </Animated.View>
       )}
 
       {/* Notification Bell */}
@@ -1845,6 +1877,30 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   dragModeCancelText: { fontSize: 14, fontWeight: "600", color: "#0EA5E9" },
+
+  // Toast
+  toastContainer: {
+    position: "absolute",
+    left: 16,
+    right: 16,
+    zIndex: 200,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 6,
+    gap: 10,
+  },
+  toastText: {
+    fontSize: 14,
+    fontWeight: "600",
+  },
 
   // Proximity Alert Banner
   proximityAlertBanner: {
