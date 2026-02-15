@@ -54,11 +54,11 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
     }>;
   }>({ visible: false });
 
-  const [toast, setToast] = useState<{ visible: boolean; message: string }>({ visible: false, message: "" });
+  const [toast, setToast] = useState<{ visible: boolean; message: string; type: "success" | "error" }>({ visible: false, message: "", type: "success" });
   const toastAnim = useRef(new Animated.Value(-100)).current;
 
-  const showToast = (message: string) => {
-    setToast({ visible: true, message });
+  const showToast = (message: string, type: "success" | "error" = "success") => {
+    setToast({ visible: true, message, type });
     toastAnim.setValue(-100);
     Animated.spring(toastAnim, {
       toValue: 0,
@@ -166,14 +166,7 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
       await apiRequest("DELETE", `/api/family/${memberId}`);
     },
     onSuccess: () => {
-      setAlertConfig({
-        visible: true,
-        title: "Member removed",
-        message: "Family member has been removed successfully",
-        icon: "checkmark-circle",
-        iconColor: "#10B981",
-        buttons: [{ text: "OK" }],
-      });
+      showToast("Family member removed", "error");
       queryClient.invalidateQueries({ queryKey: ["/api/family"] });
       queryClient.invalidateQueries({ queryKey: ["/api/locations/family"] });
     },
@@ -221,8 +214,10 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
         buttons: [{ text: "OK" }],
       });
     },
+    onSuccess: () => {
+      showToast("Invitation code deleted", "error");
+    },
     onSettled: () => {
-      // Refetch to ensure server state sync
       queryClient.invalidateQueries({ queryKey: ["/api/family/codes"] });
     },
   });
@@ -868,7 +863,7 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                 paddingVertical: 12,
                 borderRadius: 12,
                 borderWidth: 1,
-                borderColor: "#10B981",
+                borderColor: toast.type === "success" ? "#10B981" : "#EF4444",
                 backgroundColor: colors.dialogBackground,
                 shadowColor: "#000",
                 shadowOffset: { width: 0, height: 2 },
@@ -879,7 +874,7 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                 transform: [{ translateY: toastAnim }],
               }}
             >
-              <Ionicons name="checkmark-circle" size={18} color="#10B981" />
+              <Ionicons name={toast.type === "success" ? "checkmark-circle" : "close-circle"} size={18} color={toast.type === "success" ? "#10B981" : "#EF4444"} />
               <Text style={{ fontSize: 14, fontWeight: "600", color: colors.dialogText }}>
                 {toast.message}
               </Text>
@@ -1008,7 +1003,7 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
             paddingVertical: 12,
             borderRadius: 12,
             borderWidth: 1,
-            borderColor: "#10B981",
+            borderColor: toast.type === "success" ? "#10B981" : "#EF4444",
             backgroundColor: colors.dialogBackground,
             shadowColor: "#000",
             shadowOffset: { width: 0, height: 2 },
@@ -1019,7 +1014,7 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
             transform: [{ translateY: toastAnim }],
           }}
         >
-          <Ionicons name="checkmark-circle" size={18} color="#10B981" />
+          <Ionicons name={toast.type === "success" ? "checkmark-circle" : "close-circle"} size={18} color={toast.type === "success" ? "#10B981" : "#EF4444"} />
           <Text style={{ fontSize: 14, fontWeight: "600", color: colors.dialogText }}>
             {toast.message}
           </Text>
