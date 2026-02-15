@@ -886,7 +886,7 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                 {toast.message}
               </Text>
               <TouchableOpacity onPress={dismissToast} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-                <Ionicons name="close" size={18} color={colors.textSecondary} />
+                <Ionicons name="close-circle" size={20} color={colors.dialogTextMuted} />
               </TouchableOpacity>
             </Animated.View>
           )}
@@ -1029,7 +1029,7 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
             {toast.message}
           </Text>
           <TouchableOpacity onPress={dismissToast} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-            <Ionicons name="close" size={18} color={colors.textSecondary} />
+            <Ionicons name="close-circle" size={20} color={colors.dialogTextMuted} />
           </TouchableOpacity>
         </Animated.View>
       )}
