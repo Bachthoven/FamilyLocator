@@ -54,7 +54,11 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
     }>;
   }>({ visible: false });
 
-  const [toast, setToast] = useState<{ visible: boolean; message: string; type: "success" | "error" }>({ visible: false, message: "", type: "success" });
+  const [toast, setToast] = useState<{
+    visible: boolean;
+    message: string;
+    type: "success" | "error";
+  }>({ visible: false, message: "", type: "success" });
   const toastAnim = useRef(new Animated.Value(-100)).current;
   const toastTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -67,7 +71,10 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
     }).start(() => setToast((t) => ({ ...t, visible: false })));
   };
 
-  const showToast = (message: string, type: "success" | "error" = "success") => {
+  const showToast = (
+    message: string,
+    type: "success" | "error" = "success"
+  ) => {
     if (toastTimeout.current) clearTimeout(toastTimeout.current);
     setToast({ visible: true, message, type });
     toastAnim.setValue(-100);
@@ -928,12 +935,30 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                 transform: [{ translateY: toastAnim }],
               }}
             >
-              <Ionicons name={toast.type === "success" ? "checkmark-circle" : "trash"} size={18} color={toast.type === "success" ? "#10B981" : "#EF4444"} />
-              <Text style={{ fontSize: 14, fontWeight: "600", color: colors.dialogText, flex: 1 }}>
+              <Ionicons
+                name={toast.type === "success" ? "checkmark-circle" : "trash"}
+                size={18}
+                color={toast.type === "success" ? "#10B981" : "#EF4444"}
+              />
+              <Text
+                style={{
+                  fontSize: 14,
+                  fontWeight: "600",
+                  color: colors.dialogText,
+                  flex: 1,
+                }}
+              >
                 {toast.message}
               </Text>
-              <TouchableOpacity onPress={dismissToast} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-                <Ionicons name="close-circle" size={20} color={colors.dialogTextMuted} />
+              <TouchableOpacity
+                onPress={dismissToast}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <Ionicons
+                  name="close-circle"
+                  size={20}
+                  color={colors.dialogTextMuted}
+                />
               </TouchableOpacity>
             </Animated.View>
           )}
@@ -1071,12 +1096,30 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
             transform: [{ translateY: toastAnim }],
           }}
         >
-          <Ionicons name={toast.type === "success" ? "checkmark-circle" : "trash"} size={18} color={toast.type === "success" ? "#10B981" : "#EF4444"} />
-          <Text style={{ fontSize: 14, fontWeight: "600", color: colors.dialogText, flex: 1 }}>
+          <Ionicons
+            name={toast.type === "success" ? "checkmark-circle" : "trash"}
+            size={18}
+            color={toast.type === "success" ? "#10B981" : "#EF4444"}
+          />
+          <Text
+            style={{
+              fontSize: 14,
+              fontWeight: "600",
+              color: colors.dialogText,
+              flex: 1,
+            }}
+          >
             {toast.message}
           </Text>
-          <TouchableOpacity onPress={dismissToast} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-            <Ionicons name="close-circle" size={20} color={colors.dialogTextMuted} />
+          <TouchableOpacity
+            onPress={dismissToast}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <Ionicons
+              name="close-circle"
+              size={20}
+              color={colors.dialogTextMuted}
+            />
           </TouchableOpacity>
         </Animated.View>
       )}

@@ -116,11 +116,7 @@ export default function AlertDialog({
                   />
                 )}
                 {button.style === "destructive" && (
-                  <Ionicons
-                    name="trash-outline"
-                    size={18}
-                    color="#fff"
-                  />
+                  <Ionicons name="trash-outline" size={18} color="#fff" />
                 )}
                 <Text
                   style={[

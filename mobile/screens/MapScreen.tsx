@@ -368,7 +368,11 @@ export default function MapScreen({
   } | null>(null);
 
   const [dragState, setDragState] = useState<DragState | null>(null);
-  const [toast, setToast] = useState<{ visible: boolean; message: string; type: "success" | "error" }>({ visible: false, message: "", type: "success" });
+  const [toast, setToast] = useState<{
+    visible: boolean;
+    message: string;
+    type: "success" | "error";
+  }>({ visible: false, message: "", type: "success" });
   const toastAnim = useRef(new Animated.Value(-100)).current;
   const queryClient = useQueryClient();
 
@@ -402,7 +406,10 @@ export default function MapScreen({
     }).start(() => setToast((t) => ({ ...t, visible: false })));
   };
 
-  const showToast = (message: string, type: "success" | "error" = "success") => {
+  const showToast = (
+    message: string,
+    type: "success" | "error" = "success"
+  ) => {
     if (toastTimeout.current) clearTimeout(toastTimeout.current);
     setToast({ visible: true, message, type });
     toastAnim.setValue(-100);
@@ -1032,22 +1039,36 @@ export default function MapScreen({
             styles.toastContainer,
             {
               top: insets.top + 8,
-              backgroundColor: toast.type === "success" ? colors.dialogBackground : colors.dialogBackground,
+              backgroundColor:
+                toast.type === "success"
+                  ? colors.dialogBackground
+                  : colors.dialogBackground,
               borderColor: toast.type === "success" ? "#10B981" : "#EF4444",
               transform: [{ translateY: toastAnim }],
             },
           ]}
         >
           <Ionicons
-            name={toast.type === "success" ? "checkmark-circle" : "alert-circle"}
+            name={
+              toast.type === "success" ? "checkmark-circle" : "alert-circle"
+            }
             size={18}
             color={toast.type === "success" ? "#10B981" : "#EF4444"}
           />
-          <Text style={[styles.toastText, { color: colors.dialogText, flex: 1 }]}>
+          <Text
+            style={[styles.toastText, { color: colors.dialogText, flex: 1 }]}
+          >
             {toast.message}
           </Text>
-          <TouchableOpacity onPress={dismissToast} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-            <Ionicons name="close-circle" size={20} color={colors.dialogTextMuted} />
+          <TouchableOpacity
+            onPress={dismissToast}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <Ionicons
+              name="close-circle"
+              size={20}
+              color={colors.dialogTextMuted}
+            />
           </TouchableOpacity>
         </Animated.View>
       )}
@@ -1282,7 +1303,9 @@ export default function MapScreen({
                 <View
                   style={[
                     styles.slideDownStatusDot,
-                    { backgroundColor: selectedMarker.statusColor || "#10B981" },
+                    {
+                      backgroundColor: selectedMarker.statusColor || "#10B981",
+                    },
                   ]}
                 />
                 <Text
@@ -1331,7 +1354,7 @@ export default function MapScreen({
                       latitudeDelta: currentRegion.latitudeDelta,
                       longitudeDelta: currentRegion.longitudeDelta,
                     },
-                    300,
+                    300
                   );
 
                   setTimeout(() => {
@@ -1414,7 +1437,12 @@ export default function MapScreen({
                   <ActivityIndicator size="small" color="#fff" />
                 ) : (
                   <>
-                    <Ionicons name="save" size={16} color="#fff" style={{ marginRight: 6 }} />
+                    <Ionicons
+                      name="save"
+                      size={16}
+                      color="#fff"
+                      style={{ marginRight: 6 }}
+                    />
                     <Text style={styles.dragModeSaveText}>Save Location</Text>
                   </>
                 )}
@@ -1428,7 +1456,12 @@ export default function MapScreen({
                 }}
                 activeOpacity={0.7}
               >
-                <Ionicons name="close-circle-outline" size={16} color="#0EA5E9" style={{ marginRight: 6 }} />
+                <Ionicons
+                  name="close-circle-outline"
+                  size={16}
+                  color="#0EA5E9"
+                  style={{ marginRight: 6 }}
+                />
                 <Text style={styles.dragModeCancelText}>Cancel</Text>
               </TouchableOpacity>
             </View>
