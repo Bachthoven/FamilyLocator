@@ -112,6 +112,7 @@ export default function AlertDialog({
                     name="close-circle-outline"
                     size={18}
                     color={colors.textSecondary}
+                    style={{ marginTop: 1 }}
                   />
                 )}
                 <Text
