@@ -607,9 +607,26 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
                     </View>
                   </View>
                   <View style={styles.memberActions}>
-                    <View style={styles.actionButtonDisabled}>
-                      <Text style={styles.actionButtonTextDisabled}>You</Text>
-                    </View>
+                    <TouchableOpacity
+                      style={styles.actionButton}
+                      onPress={() => {
+                        if (onNavigateToMap && user) {
+                          const myLocation = familyLocations.find(
+                            (loc: any) => loc.user?.id === user.id
+                          );
+                          if (myLocation) {
+                            onNavigateToMap({
+                              latitude: myLocation.latitude,
+                              longitude: myLocation.longitude,
+                              userId: user.id,
+                            });
+                          }
+                        }
+                      }}
+                    >
+                      <Ionicons name="location" size={20} color="#0EA5E9" />
+                      <Text style={styles.actionButtonText}>View</Text>
+                    </TouchableOpacity>
                   </View>
                 </View>
               )}
