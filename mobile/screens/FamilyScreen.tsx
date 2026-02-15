@@ -791,7 +791,7 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
         onRequestClose={() => setCodeDialogOpen(false)}
       >
         <View style={styles.modalOverlay}>
-          <BlurView intensity={100} style={styles.modalBlur}>
+          <BlurView intensity={100} tint="dark" style={styles.modalBlur}>
             <View
               style={[styles.modalContent, { backgroundColor: colors.surface }]}
             >
@@ -853,6 +853,38 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
               </View>
             </View>
           </BlurView>
+
+          {toast.visible && (
+            <Animated.View
+              style={{
+                position: "absolute",
+                top: insets.top + 8,
+                left: 16,
+                right: 16,
+                zIndex: 200,
+                flexDirection: "row",
+                alignItems: "center",
+                paddingHorizontal: 16,
+                paddingVertical: 12,
+                borderRadius: 12,
+                borderWidth: 1,
+                borderColor: "#10B981",
+                backgroundColor: colors.dialogBackground,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.15,
+                shadowRadius: 6,
+                elevation: 6,
+                gap: 10,
+                transform: [{ translateY: toastAnim }],
+              }}
+            >
+              <Ionicons name="checkmark-circle" size={18} color="#10B981" />
+              <Text style={{ fontSize: 14, fontWeight: "600", color: colors.dialogText }}>
+                {toast.message}
+              </Text>
+            </Animated.View>
+          )}
         </View>
       </Modal>
 
