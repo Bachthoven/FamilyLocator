@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   TextInput,
   Clipboard,
   Platform,
+  Animated,
 } from "react-native";
 import { BlurView } from "expo-blur";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -52,6 +53,27 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
       style?: "default" | "cancel" | "destructive";
     }>;
   }>({ visible: false });
+
+  const [toast, setToast] = useState<{ visible: boolean; message: string }>({ visible: false, message: "" });
+  const toastAnim = useRef(new Animated.Value(-100)).current;
+
+  const showToast = (message: string) => {
+    setToast({ visible: true, message });
+    toastAnim.setValue(-100);
+    Animated.spring(toastAnim, {
+      toValue: 0,
+      useNativeDriver: true,
+      tension: 80,
+      friction: 10,
+    }).start();
+    setTimeout(() => {
+      Animated.timing(toastAnim, {
+        toValue: -100,
+        duration: 250,
+        useNativeDriver: true,
+      }).start(() => setToast((t) => ({ ...t, visible: false })));
+    }, 2500);
+  };
 
   // Fetch family members
   const { data: familyMembers = [], isLoading: familyLoading } = useQuery<
@@ -207,14 +229,7 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
 
   const copyToClipboard = (code: string) => {
     Clipboard.setString(code);
-    setAlertConfig({
-      visible: true,
-      title: "Copied!",
-      message: "Invitation code copied to clipboard",
-      icon: "clipboard",
-      iconColor: "#0EA5E9",
-      buttons: [{ text: "OK" }],
-    });
+    showToast("Invitation code copied to clipboard");
   };
 
   const handleRemove = (memberId: string, memberName: string) => {
@@ -946,6 +961,46 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
         buttons={alertConfig.buttons}
         onDismiss={() => setAlertConfig({ visible: false })}
       />
+
+      {toast.visible && (
+        <Animated.View
+          style={{
+            position: "absolute",
+            top: insets.top + 8,
+            left: 20,
+            right: 20,
+            backgroundColor: "white",
+            borderRadius: 12,
+            padding: 14,
+            flexDirection: "row",
+            alignItems: "center",
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.15,
+            shadowRadius: 12,
+            elevation: 8,
+            zIndex: 9999,
+            transform: [{ translateY: toastAnim }],
+          }}
+        >
+          <View
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: 16,
+              backgroundColor: "#DBEAFE",
+              justifyContent: "center",
+              alignItems: "center",
+              marginRight: 10,
+            }}
+          >
+            <Ionicons name="clipboard" size={16} color="#0EA5E9" />
+          </View>
+          <Text style={{ fontSize: 14, fontWeight: "600", color: "#1F2937", flex: 1 }}>
+            {toast.message}
+          </Text>
+        </Animated.View>
+      )}
     </View>
   );
 }
