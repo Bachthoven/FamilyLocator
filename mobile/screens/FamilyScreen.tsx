@@ -858,7 +858,7 @@ export default function FamilyScreen({ onNavigateToMap }: FamilyScreenProps) {
             <Animated.View
               style={{
                 position: "absolute",
-                top: insets.top,
+                top: 8,
                 left: 16,
                 right: 16,
                 zIndex: 200,
