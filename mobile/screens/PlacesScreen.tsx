@@ -95,11 +95,11 @@ export default function PlacesScreen() {
   const { user } = useAuth();
 
   const [addModalVisible, setAddModalVisible] = useState(false);
-  const backdropOpacity = useRef(new Animated.Value(0)).current;
+  const addModalAnim = useRef(new Animated.Value(0)).current;
 
   const openAddModal = () => {
     setAddModalVisible(true);
-    Animated.timing(backdropOpacity, {
+    Animated.timing(addModalAnim, {
       toValue: 1,
       duration: 300,
       useNativeDriver: true,
@@ -107,7 +107,7 @@ export default function PlacesScreen() {
   };
 
   const closeAddModal = () => {
-    Animated.timing(backdropOpacity, {
+    Animated.timing(addModalAnim, {
       toValue: 0,
       duration: 250,
       useNativeDriver: true,
@@ -567,15 +567,27 @@ export default function PlacesScreen() {
     <Modal
       visible={addModalVisible}
       transparent
-      animationType="slide"
+      animationType="none"
       onRequestClose={closeAddModal}
     >
-      <Animated.View
-        style={[styles.modalBackdrop, { opacity: backdropOpacity }]}
-      >
+      <Animated.View style={[styles.modalBackdrop, { opacity: addModalAnim }]}>
         <Pressable style={StyleSheet.absoluteFill} onPress={closeAddModal} />
       </Animated.View>
-      <View style={styles.modalSlideContainer}>
+      <Animated.View
+        style={[
+          styles.modalSlideContainer,
+          {
+            transform: [
+              {
+                translateY: addModalAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [600, 0],
+                }),
+              },
+            ],
+          },
+        ]}
+      >
         <Pressable
           style={[styles.modalContent, { backgroundColor: colors.surface }]}
           onPress={(e) => e.stopPropagation()}
@@ -911,7 +923,7 @@ export default function PlacesScreen() {
             </TouchableOpacity>
           </View>
         </Pressable>
-      </View>
+      </Animated.View>
     </Modal>
   );
 
