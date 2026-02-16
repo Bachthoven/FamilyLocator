@@ -542,6 +542,7 @@ This is a personal/family project. If you have suggestions or find bugs, please 
 - **Alert Dialog Button Icons**: Added trash icon to destructive (Delete) buttons and vertically centered the X icon in Cancel buttons across all alert dialogs
 - **Toast Delete Icon**: Changed the delete toast notification icon from an X circle to a trash can for visual consistency with the delete action
 - **Add New Place Dark Backdrop**: Added dark tinted background overlay (`rgba(0,0,0,0.7)`) to the "Add New Place" modal, matching other modals in the app
+- **Smooth Backdrop Dismiss Animation**: The dark tint on the "Add New Place" modal now fades out smoothly (250ms) when closing, independent of the dialog slide animation
 - **Improved Current Location Accuracy**: Upgraded the "Use Current Location" button in the Add New Place dialog:
   - GPS accuracy changed from `Balanced` to `Highest`
   - Always fetches a fresh position instead of using a potentially stale cached one

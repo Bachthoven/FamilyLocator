@@ -12,6 +12,7 @@ import {
   Alert,
   RefreshControl,
   Keyboard,
+  Animated,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -94,6 +95,26 @@ export default function PlacesScreen() {
   const { user } = useAuth();
 
   const [addModalVisible, setAddModalVisible] = useState(false);
+  const backdropOpacity = useRef(new Animated.Value(0)).current;
+
+  const openAddModal = () => {
+    setAddModalVisible(true);
+    Animated.timing(backdropOpacity, {
+      toValue: 1,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const closeAddModal = () => {
+    Animated.timing(backdropOpacity, {
+      toValue: 0,
+      duration: 250,
+      useNativeDriver: true,
+    }).start(() => {
+      setAddModalVisible(false);
+    });
+  };
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [editingPlace, setEditingPlace] = useState<Place | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -270,7 +291,7 @@ export default function PlacesScreen() {
     },
     onSuccess: () => {
       Alert.alert("Success", "Place saved successfully!");
-      setAddModalVisible(false);
+      closeAddModal();
       resetNewPlace();
       queryClient.invalidateQueries({ queryKey: ["/api/places"] });
     },
@@ -547,12 +568,14 @@ export default function PlacesScreen() {
       visible={addModalVisible}
       transparent
       animationType="slide"
-      onRequestClose={() => setAddModalVisible(false)}
+      onRequestClose={closeAddModal}
     >
-      <Pressable
-        style={styles.modalBackdrop}
-        onPress={() => setAddModalVisible(false)}
+      <Animated.View
+        style={[styles.modalBackdrop, { opacity: backdropOpacity }]}
       >
+        <Pressable style={StyleSheet.absoluteFill} onPress={closeAddModal} />
+      </Animated.View>
+      <View style={styles.modalSlideContainer}>
         <Pressable
           style={[styles.modalContent, { backgroundColor: colors.surface }]}
           onPress={(e) => e.stopPropagation()}
@@ -567,7 +590,7 @@ export default function PlacesScreen() {
               Add New Place
             </Text>
             <TouchableOpacity
-              onPress={() => setAddModalVisible(false)}
+              onPress={closeAddModal}
               data-testid="button-close-add-modal"
             >
               <Ionicons name="close" size={24} color={colors.textSecondary} />
@@ -863,7 +886,7 @@ export default function PlacesScreen() {
                 styles.cancelButton,
                 { backgroundColor: colors.surfaceSecondary },
               ]}
-              onPress={() => setAddModalVisible(false)}
+              onPress={closeAddModal}
               data-testid="button-cancel-add"
             >
               <Text style={[styles.cancelButtonText, { color: colors.text }]}>
@@ -888,7 +911,7 @@ export default function PlacesScreen() {
             </TouchableOpacity>
           </View>
         </Pressable>
-      </Pressable>
+      </View>
     </Modal>
   );
 
@@ -1115,7 +1138,7 @@ export default function PlacesScreen() {
       </Text>
       <TouchableOpacity
         style={[styles.emptyButton, { backgroundColor: colors.primary }]}
-        onPress={() => setAddModalVisible(true)}
+        onPress={openAddModal}
         data-testid="button-add-first-place"
       >
         <Ionicons name="add" size={20} color="#FFFFFF" />
@@ -1227,7 +1250,7 @@ export default function PlacesScreen() {
         <Text style={[styles.headerText, { color: colors.text }]}>Places</Text>
         <TouchableOpacity
           style={[styles.addButton, { backgroundColor: colors.primary }]}
-          onPress={() => setAddModalVisible(true)}
+          onPress={openAddModal}
           data-testid="button-add-place"
         >
           <Ionicons name="add" size={20} color="#FFFFFF" />
@@ -1611,8 +1634,11 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   modalBackdrop: {
-    flex: 1,
+    ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(0, 0, 0, 0.7)",
+  },
+  modalSlideContainer: {
+    flex: 1,
     justifyContent: "flex-end",
   },
   modalContent: {
