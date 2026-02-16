@@ -119,15 +119,18 @@ export default function PlacesScreen() {
     Animated.parallel([
       Animated.timing(addBackdropAnim, {
         toValue: 0,
-        duration: 250,
+        duration: 150,
         useNativeDriver: true,
       }),
       Animated.timing(addSlideAnim, {
-        toValue: 300,
-        duration: 250,
+        toValue: 800,
+        duration: 150,
         useNativeDriver: true,
       }),
-    ]).start(() => setAddModalVisible(false));
+    ]).start(() => {
+      setAddModalVisible(false);
+      addSlideAnim.setValue(300);
+    });
   };
 
   const [editModalVisible, setEditModalVisible] = useState(false);
