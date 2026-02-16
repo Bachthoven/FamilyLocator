@@ -95,41 +95,13 @@ export default function PlacesScreen() {
   const { user } = useAuth();
 
   const [addModalVisible, setAddModalVisible] = useState(false);
-  const addBackdropAnim = useRef(new Animated.Value(0)).current;
-  const addSlideAnim = useRef(new Animated.Value(300)).current;
 
   const openAddModal = () => {
     setAddModalVisible(true);
-    Animated.parallel([
-      Animated.timing(addBackdropAnim, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-      Animated.spring(addSlideAnim, {
-        toValue: 0,
-        useNativeDriver: true,
-        tension: 65,
-        friction: 11,
-      }),
-    ]).start();
   };
 
   const closeAddModal = () => {
-    Animated.parallel([
-      Animated.timing(addBackdropAnim, {
-        toValue: 0,
-        duration: 250,
-        useNativeDriver: true,
-      }),
-      Animated.timing(addSlideAnim, {
-        toValue: 300,
-        duration: 250,
-        useNativeDriver: true,
-      }),
-    ]).start(() => {
-      setAddModalVisible(false);
-    });
+    setAddModalVisible(false);
   };
 
   const [editModalVisible, setEditModalVisible] = useState(false);
@@ -580,367 +552,359 @@ export default function PlacesScreen() {
     );
   };
 
-  const renderAddModal = () => {
-    if (!addModalVisible) return null;
-    return (
-      <View style={styles.fullScreenOverlay}>
-        <Animated.View
-          style={[styles.modalBackdrop, { opacity: addBackdropAnim }]}
+  const renderAddModal = () => (
+    <Modal
+      visible={addModalVisible}
+      animationType="slide"
+      transparent={true}
+      onRequestClose={closeAddModal}
+    >
+      <View style={styles.addModalOverlay}>
+        <TouchableOpacity
+          style={styles.addCloseOverlay}
+          activeOpacity={1}
+          onPress={closeAddModal}
+        />
+        <View
+          style={[styles.modalContent, { backgroundColor: colors.surface }]}
         >
-          <Pressable style={StyleSheet.absoluteFill} onPress={closeAddModal} />
-        </Animated.View>
-        <Animated.View
-          style={[
-            styles.modalSlideContainer,
-            { transform: [{ translateY: addSlideAnim }] },
-          ]}
-        >
-          <Pressable
-            style={[styles.modalContent, { backgroundColor: colors.surface }]}
-            onPress={(e) => e.stopPropagation()}
+          <View
+            style={[
+              styles.modalHeader,
+              { borderBottomWidth: 1, borderBottomColor: colors.border },
+            ]}
           >
-            <View
-              style={[
-                styles.modalHeader,
-                { borderBottomWidth: 1, borderBottomColor: colors.border },
-              ]}
+            <Text style={[styles.modalTitle, { color: colors.text }]}>
+              Add New Place
+            </Text>
+            <TouchableOpacity
+              onPress={closeAddModal}
+              data-testid="button-close-add-modal"
             >
-              <Text style={[styles.modalTitle, { color: colors.text }]}>
-                Add New Place
+              <Ionicons name="close" size={24} color={colors.textSecondary} />
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView
+            style={styles.modalScroll}
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={styles.formGroup}>
+              <Text style={[styles.label, { color: colors.text }]}>
+                Place Name *
               </Text>
-              <TouchableOpacity
-                onPress={closeAddModal}
-                data-testid="button-close-add-modal"
-              >
-                <Ionicons name="close" size={24} color={colors.textSecondary} />
-              </TouchableOpacity>
+              <TextInput
+                style={[
+                  styles.input,
+                  {
+                    backgroundColor: colors.inputBackground,
+                    borderColor: colors.inputBorder,
+                    color: colors.text,
+                  },
+                ]}
+                placeholder="e.g. Home, Office, School"
+                placeholderTextColor={colors.textMuted}
+                value={newPlace.name}
+                onChangeText={(text) =>
+                  setNewPlace((prev) => ({ ...prev, name: text }))
+                }
+                data-testid="input-place-name"
+              />
             </View>
 
-            <ScrollView
-              style={styles.modalScroll}
-              showsVerticalScrollIndicator={false}
-            >
-              <View style={styles.formGroup}>
+            <View style={styles.formGroup}>
+              <View style={styles.labelRow}>
                 <Text style={[styles.label, { color: colors.text }]}>
-                  Place Name *
+                  Address *
                 </Text>
+                <TouchableOpacity
+                  style={[
+                    styles.locationButton,
+                    { borderColor: colors.primary },
+                  ]}
+                  onPress={getCurrentLocation}
+                  disabled={isGettingLocation}
+                  data-testid="button-use-current-location"
+                >
+                  {isGettingLocation ? (
+                    <ActivityIndicator size="small" color={colors.primary} />
+                  ) : (
+                    <>
+                      <Ionicons
+                        name="location"
+                        size={14}
+                        color={colors.primary}
+                      />
+                      <Text
+                        style={[
+                          styles.locationButtonText,
+                          { color: colors.primary },
+                        ]}
+                      >
+                        Use Current Location
+                      </Text>
+                    </>
+                  )}
+                </TouchableOpacity>
+              </View>
+              <View style={styles.addressInputContainer}>
                 <TextInput
+                  ref={addressInputRef}
                   style={[
                     styles.input,
+                    styles.addressInputWithClear,
                     {
-                      backgroundColor: colors.inputBackground,
-                      borderColor: colors.inputBorder,
+                      backgroundColor: useCurrentLocation
+                        ? colors.surfaceSecondary
+                        : colors.inputBackground,
+                      borderColor: useCurrentLocation
+                        ? colors.primary
+                        : colors.inputBorder,
                       color: colors.text,
                     },
                   ]}
-                  placeholder="e.g. Home, Office, School"
+                  placeholder="Start typing an address..."
                   placeholderTextColor={colors.textMuted}
-                  value={newPlace.name}
-                  onChangeText={(text) =>
-                    setNewPlace((prev) => ({ ...prev, name: text }))
-                  }
-                  data-testid="input-place-name"
+                  value={newPlace.address}
+                  onChangeText={(text) => {
+                    setUseCurrentLocation(false);
+                    handleAddressChange(text);
+                  }}
+                  multiline={false}
+                  scrollEnabled={true}
+                  selection={addressSelection}
+                  onSelectionChange={() => {
+                    if (addressSelection) {
+                      setAddressSelection(undefined);
+                    }
+                  }}
+                  data-testid="input-place-address"
                 />
-              </View>
-
-              <View style={styles.formGroup}>
-                <View style={styles.labelRow}>
-                  <Text style={[styles.label, { color: colors.text }]}>
-                    Address *
-                  </Text>
+                {newPlace.address.length > 0 && (
                   <TouchableOpacity
-                    style={[
-                      styles.locationButton,
-                      { borderColor: colors.primary },
-                    ]}
-                    onPress={getCurrentLocation}
-                    disabled={isGettingLocation}
-                    data-testid="button-use-current-location"
-                  >
-                    {isGettingLocation ? (
-                      <ActivityIndicator size="small" color={colors.primary} />
-                    ) : (
-                      <>
-                        <Ionicons
-                          name="location"
-                          size={14}
-                          color={colors.primary}
-                        />
-                        <Text
-                          style={[
-                            styles.locationButtonText,
-                            { color: colors.primary },
-                          ]}
-                        >
-                          Use Current Location
-                        </Text>
-                      </>
-                    )}
-                  </TouchableOpacity>
-                </View>
-                <View style={styles.addressInputContainer}>
-                  <TextInput
-                    ref={addressInputRef}
-                    style={[
-                      styles.input,
-                      styles.addressInputWithClear,
-                      {
-                        backgroundColor: useCurrentLocation
-                          ? colors.surfaceSecondary
-                          : colors.inputBackground,
-                        borderColor: useCurrentLocation
-                          ? colors.primary
-                          : colors.inputBorder,
-                        color: colors.text,
-                      },
-                    ]}
-                    placeholder="Start typing an address..."
-                    placeholderTextColor={colors.textMuted}
-                    value={newPlace.address}
-                    onChangeText={(text) => {
+                    style={styles.clearAddressButton}
+                    onPress={() => {
+                      setNewPlace((prev) => ({
+                        ...prev,
+                        address: "",
+                        latitude: 0,
+                        longitude: 0,
+                      }));
                       setUseCurrentLocation(false);
-                      handleAddressChange(text);
+                      setAddressSuggestions([]);
+                      setShowSuggestions(false);
                     }}
-                    multiline={false}
-                    scrollEnabled={true}
-                    selection={addressSelection}
-                    onSelectionChange={() => {
-                      if (addressSelection) {
-                        setAddressSelection(undefined);
-                      }
-                    }}
-                    data-testid="input-place-address"
-                  />
-                  {newPlace.address.length > 0 && (
-                    <TouchableOpacity
-                      style={styles.clearAddressButton}
-                      onPress={() => {
-                        setNewPlace((prev) => ({
-                          ...prev,
-                          address: "",
-                          latitude: 0,
-                          longitude: 0,
-                        }));
-                        setUseCurrentLocation(false);
-                        setAddressSuggestions([]);
-                        setShowSuggestions(false);
-                      }}
-                      data-testid="button-clear-address"
-                    >
-                      <Ionicons
-                        name="close-circle"
-                        size={20}
-                        color={colors.textMuted}
-                      />
-                    </TouchableOpacity>
-                  )}
-                  {isSearchingAddress && (
-                    <View style={styles.searchingIndicator}>
-                      <ActivityIndicator size="small" color={colors.primary} />
-                    </View>
-                  )}
-                </View>
-
-                {/* Address Suggestions Dropdown */}
-                {showSuggestions && addressSuggestions.length > 0 && (
-                  <View
-                    style={[
-                      styles.suggestionsContainer,
-                      {
-                        backgroundColor: colors.surface,
-                        borderColor: colors.border,
-                      },
-                    ]}
+                    data-testid="button-clear-address"
                   >
-                    {addressSuggestions.map((suggestion, index) => (
-                      <TouchableOpacity
-                        key={index}
-                        style={[
-                          styles.suggestionItem,
-                          index < addressSuggestions.length - 1 && {
-                            borderBottomWidth: 1,
-                            borderBottomColor: colors.border,
-                          },
-                        ]}
-                        onPress={() => selectSuggestion(suggestion)}
-                        data-testid={`suggestion-${index}`}
-                      >
-                        <Ionicons
-                          name="location-outline"
-                          size={16}
-                          color={colors.primary}
-                          style={styles.suggestionIcon}
-                        />
-                        <View style={styles.suggestionText}>
-                          <Text
-                            style={[
-                              styles.suggestionName,
-                              { color: colors.text },
-                            ]}
-                            numberOfLines={1}
-                          >
-                            {suggestion.name}
-                          </Text>
-                          <Text
-                            style={[
-                              styles.suggestionAddress,
-                              { color: colors.textSecondary },
-                            ]}
-                            numberOfLines={1}
-                          >
-                            {suggestion.address}
-                          </Text>
-                        </View>
-                      </TouchableOpacity>
-                    ))}
+                    <Ionicons
+                      name="close-circle"
+                      size={20}
+                      color={colors.textMuted}
+                    />
+                  </TouchableOpacity>
+                )}
+                {isSearchingAddress && (
+                  <View style={styles.searchingIndicator}>
+                    <ActivityIndicator size="small" color={colors.primary} />
                   </View>
                 )}
               </View>
 
-              <View style={styles.formGroup}>
-                <Text style={[styles.label, { color: colors.text }]}>
-                  Category
-                </Text>
-                <View style={styles.categoryGrid}>
-                  {categories.map((cat) => (
+              {/* Address Suggestions Dropdown */}
+              {showSuggestions && addressSuggestions.length > 0 && (
+                <View
+                  style={[
+                    styles.suggestionsContainer,
+                    {
+                      backgroundColor: colors.surface,
+                      borderColor: colors.border,
+                    },
+                  ]}
+                >
+                  {addressSuggestions.map((suggestion, index) => (
                     <TouchableOpacity
-                      key={cat.value}
+                      key={index}
                       style={[
-                        styles.categoryButton,
-                        {
-                          backgroundColor:
-                            newPlace.category === cat.value
-                              ? cat.color
-                              : colors.surfaceSecondary,
-                          borderColor:
-                            newPlace.category === cat.value
-                              ? cat.color
-                              : colors.border,
+                        styles.suggestionItem,
+                        index < addressSuggestions.length - 1 && {
+                          borderBottomWidth: 1,
+                          borderBottomColor: colors.border,
                         },
                       ]}
-                      onPress={() =>
-                        setNewPlace((prev) => ({
-                          ...prev,
-                          category: cat.value,
-                        }))
-                      }
-                      data-testid={`button-category-${cat.value}`}
+                      onPress={() => selectSuggestion(suggestion)}
+                      data-testid={`suggestion-${index}`}
                     >
                       <Ionicons
-                        name={cat.icon}
-                        size={18}
-                        color={
-                          newPlace.category === cat.value
-                            ? "#FFFFFF"
-                            : colors.textSecondary
-                        }
+                        name="location-outline"
+                        size={16}
+                        color={colors.primary}
+                        style={styles.suggestionIcon}
                       />
-                      <Text
-                        style={[
-                          styles.categoryButtonText,
-                          {
-                            color:
-                              newPlace.category === cat.value
-                                ? "#FFFFFF"
-                                : colors.text,
-                          },
-                        ]}
-                      >
-                        {cat.label}
-                      </Text>
+                      <View style={styles.suggestionText}>
+                        <Text
+                          style={[
+                            styles.suggestionName,
+                            { color: colors.text },
+                          ]}
+                          numberOfLines={1}
+                        >
+                          {suggestion.name}
+                        </Text>
+                        <Text
+                          style={[
+                            styles.suggestionAddress,
+                            { color: colors.textSecondary },
+                          ]}
+                          numberOfLines={1}
+                        >
+                          {suggestion.address}
+                        </Text>
+                      </View>
                     </TouchableOpacity>
                   ))}
+                </View>
+              )}
+            </View>
+
+            <View style={styles.formGroup}>
+              <Text style={[styles.label, { color: colors.text }]}>
+                Category
+              </Text>
+              <View style={styles.categoryGrid}>
+                {categories.map((cat) => (
                   <TouchableOpacity
+                    key={cat.value}
                     style={[
                       styles.categoryButton,
                       {
-                        backgroundColor: colors.surfaceSecondary,
-                        borderColor: colors.border,
-                        borderStyle: "dashed",
+                        backgroundColor:
+                          newPlace.category === cat.value
+                            ? cat.color
+                            : colors.surfaceSecondary,
+                        borderColor:
+                          newPlace.category === cat.value
+                            ? cat.color
+                            : colors.border,
                       },
                     ]}
-                    onPress={() => setAddCategoryModalVisible(true)}
-                    data-testid="button-add-category"
+                    onPress={() =>
+                      setNewPlace((prev) => ({
+                        ...prev,
+                        category: cat.value,
+                      }))
+                    }
+                    data-testid={`button-category-${cat.value}`}
                   >
                     <Ionicons
-                      name="add"
+                      name={cat.icon}
                       size={18}
-                      color={colors.textSecondary}
+                      color={
+                        newPlace.category === cat.value
+                          ? "#FFFFFF"
+                          : colors.textSecondary
+                      }
                     />
                     <Text
                       style={[
                         styles.categoryButtonText,
-                        { color: colors.textSecondary },
+                        {
+                          color:
+                            newPlace.category === cat.value
+                              ? "#FFFFFF"
+                              : colors.text,
+                        },
                       ]}
                     >
-                      Add
+                      {cat.label}
                     </Text>
                   </TouchableOpacity>
-                </View>
+                ))}
+                <TouchableOpacity
+                  style={[
+                    styles.categoryButton,
+                    {
+                      backgroundColor: colors.surfaceSecondary,
+                      borderColor: colors.border,
+                      borderStyle: "dashed",
+                    },
+                  ]}
+                  onPress={() => setAddCategoryModalVisible(true)}
+                  data-testid="button-add-category"
+                >
+                  <Ionicons name="add" size={18} color={colors.textSecondary} />
+                  <Text
+                    style={[
+                      styles.categoryButtonText,
+                      { color: colors.textSecondary },
+                    ]}
+                  >
+                    Add
+                  </Text>
+                </TouchableOpacity>
               </View>
-
-              <View style={styles.formGroup}>
-                <Text style={[styles.label, { color: colors.text }]}>
-                  Pin Color
-                </Text>
-                <View style={styles.colorGrid}>
-                  {pinColors.map((color) => (
-                    <TouchableOpacity
-                      key={color.value}
-                      style={[
-                        styles.colorButton,
-                        { backgroundColor: color.value },
-                        newPlace.color === color.value &&
-                          styles.colorButtonActive,
-                      ]}
-                      onPress={() =>
-                        setNewPlace((prev) => ({ ...prev, color: color.value }))
-                      }
-                      data-testid={`button-color-${color.name.toLowerCase()}`}
-                    />
-                  ))}
-                </View>
-                <Text style={[styles.colorHint, { color: colors.textMuted }]}>
-                  Choose a color for your place pin on the map
-                </Text>
-              </View>
-            </ScrollView>
-
-            <View style={styles.modalFooter}>
-              <TouchableOpacity
-                style={[
-                  styles.cancelButton,
-                  { backgroundColor: colors.surfaceSecondary },
-                ]}
-                onPress={closeAddModal}
-                data-testid="button-cancel-add"
-              >
-                <Text style={[styles.cancelButtonText, { color: colors.text }]}>
-                  Cancel
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[
-                  styles.saveButton,
-                  { backgroundColor: colors.primary },
-                  addPlaceMutation.isPending && styles.buttonDisabled,
-                ]}
-                onPress={handleAddPlace}
-                disabled={addPlaceMutation.isPending}
-                data-testid="button-save-place"
-              >
-                {addPlaceMutation.isPending ? (
-                  <ActivityIndicator size="small" color="#FFFFFF" />
-                ) : (
-                  <Text style={styles.saveButtonText}>Save Place</Text>
-                )}
-              </TouchableOpacity>
             </View>
-          </Pressable>
-        </Animated.View>
+
+            <View style={styles.formGroup}>
+              <Text style={[styles.label, { color: colors.text }]}>
+                Pin Color
+              </Text>
+              <View style={styles.colorGrid}>
+                {pinColors.map((color) => (
+                  <TouchableOpacity
+                    key={color.value}
+                    style={[
+                      styles.colorButton,
+                      { backgroundColor: color.value },
+                      newPlace.color === color.value &&
+                        styles.colorButtonActive,
+                    ]}
+                    onPress={() =>
+                      setNewPlace((prev) => ({ ...prev, color: color.value }))
+                    }
+                    data-testid={`button-color-${color.name.toLowerCase()}`}
+                  />
+                ))}
+              </View>
+              <Text style={[styles.colorHint, { color: colors.textMuted }]}>
+                Choose a color for your place pin on the map
+              </Text>
+            </View>
+          </ScrollView>
+
+          <View style={styles.modalFooter}>
+            <TouchableOpacity
+              style={[
+                styles.cancelButton,
+                { backgroundColor: colors.surfaceSecondary },
+              ]}
+              onPress={closeAddModal}
+              data-testid="button-cancel-add"
+            >
+              <Text style={[styles.cancelButtonText, { color: colors.text }]}>
+                Cancel
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.saveButton,
+                { backgroundColor: colors.primary },
+                addPlaceMutation.isPending && styles.buttonDisabled,
+              ]}
+              onPress={handleAddPlace}
+              disabled={addPlaceMutation.isPending}
+              data-testid="button-save-place"
+            >
+              {addPlaceMutation.isPending ? (
+                <ActivityIndicator size="small" color="#FFFFFF" />
+              ) : (
+                <Text style={styles.saveButtonText}>Save Place</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        </View>
       </View>
-    );
-  };
+    </Modal>
+  );
 
   const renderEditModal = () => (
     <Modal
@@ -1767,13 +1731,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  fullScreenOverlay: {
-    position: "absolute" as const,
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    zIndex: 1000,
+  addModalOverlay: {
+    flex: 1,
+  },
+  addCloseOverlay: {
+    flex: 1,
   },
   modalOverlay: {
     flex: 1,
