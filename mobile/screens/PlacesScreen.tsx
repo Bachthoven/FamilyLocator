@@ -119,17 +119,16 @@ export default function PlacesScreen() {
     Animated.parallel([
       Animated.timing(addBackdropAnim, {
         toValue: 0,
-        duration: 150,
+        duration: 250,
         useNativeDriver: true,
       }),
       Animated.timing(addSlideAnim, {
-        toValue: 800,
-        duration: 150,
+        toValue: 300,
+        duration: 250,
         useNativeDriver: true,
       }),
     ]).start(() => {
       setAddModalVisible(false);
-      addSlideAnim.setValue(300);
     });
   };
 
