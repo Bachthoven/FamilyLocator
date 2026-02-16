@@ -12,7 +12,6 @@ import {
   Alert,
   RefreshControl,
   Keyboard,
-  Animated,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -95,15 +94,6 @@ export default function PlacesScreen() {
   const { user } = useAuth();
 
   const [addModalVisible, setAddModalVisible] = useState(false);
-
-  const openAddModal = () => {
-    setAddModalVisible(true);
-  };
-
-  const closeAddModal = () => {
-    setAddModalVisible(false);
-  };
-
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [editingPlace, setEditingPlace] = useState<Place | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -280,7 +270,7 @@ export default function PlacesScreen() {
     },
     onSuccess: () => {
       Alert.alert("Success", "Place saved successfully!");
-      closeAddModal();
+      setAddModalVisible(false);
       resetNewPlace();
       queryClient.invalidateQueries({ queryKey: ["/api/places"] });
     },
@@ -555,18 +545,17 @@ export default function PlacesScreen() {
   const renderAddModal = () => (
     <Modal
       visible={addModalVisible}
+      transparent
       animationType="slide"
-      transparent={true}
-      onRequestClose={closeAddModal}
+      onRequestClose={() => setAddModalVisible(false)}
     >
-      <View style={styles.addModalOverlay}>
-        <TouchableOpacity
-          style={styles.addCloseOverlay}
-          activeOpacity={1}
-          onPress={closeAddModal}
-        />
-        <View
+      <Pressable
+        style={styles.modalBackdrop}
+        onPress={() => setAddModalVisible(false)}
+      >
+        <Pressable
           style={[styles.modalContent, { backgroundColor: colors.surface }]}
+          onPress={(e) => e.stopPropagation()}
         >
           <View
             style={[
@@ -578,7 +567,7 @@ export default function PlacesScreen() {
               Add New Place
             </Text>
             <TouchableOpacity
-              onPress={closeAddModal}
+              onPress={() => setAddModalVisible(false)}
               data-testid="button-close-add-modal"
             >
               <Ionicons name="close" size={24} color={colors.textSecondary} />
@@ -788,10 +777,7 @@ export default function PlacesScreen() {
                       },
                     ]}
                     onPress={() =>
-                      setNewPlace((prev) => ({
-                        ...prev,
-                        category: cat.value,
-                      }))
+                      setNewPlace((prev) => ({ ...prev, category: cat.value }))
                     }
                     data-testid={`button-category-${cat.value}`}
                   >
@@ -877,7 +863,7 @@ export default function PlacesScreen() {
                 styles.cancelButton,
                 { backgroundColor: colors.surfaceSecondary },
               ]}
-              onPress={closeAddModal}
+              onPress={() => setAddModalVisible(false)}
               data-testid="button-cancel-add"
             >
               <Text style={[styles.cancelButtonText, { color: colors.text }]}>
@@ -901,8 +887,8 @@ export default function PlacesScreen() {
               )}
             </TouchableOpacity>
           </View>
-        </View>
-      </View>
+        </Pressable>
+      </Pressable>
     </Modal>
   );
 
@@ -913,9 +899,8 @@ export default function PlacesScreen() {
       animationType="slide"
       onRequestClose={() => setEditModalVisible(false)}
     >
-      <View style={styles.modalBackdrop} />
       <Pressable
-        style={styles.modalSlideContainer}
+        style={styles.modalBackdrop}
         onPress={() => setEditModalVisible(false)}
       >
         <Pressable
@@ -1130,7 +1115,7 @@ export default function PlacesScreen() {
       </Text>
       <TouchableOpacity
         style={[styles.emptyButton, { backgroundColor: colors.primary }]}
-        onPress={openAddModal}
+        onPress={() => setAddModalVisible(true)}
         data-testid="button-add-first-place"
       >
         <Ionicons name="add" size={20} color="#FFFFFF" />
@@ -1242,7 +1227,7 @@ export default function PlacesScreen() {
         <Text style={[styles.headerText, { color: colors.text }]}>Places</Text>
         <TouchableOpacity
           style={[styles.addButton, { backgroundColor: colors.primary }]}
-          onPress={openAddModal}
+          onPress={() => setAddModalVisible(true)}
           data-testid="button-add-place"
         >
           <Ionicons name="add" size={20} color="#FFFFFF" />
@@ -1626,11 +1611,8 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   modalBackdrop: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
-  },
-  modalSlideContainer: {
     flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
     justifyContent: "flex-end",
   },
   modalContent: {
@@ -1730,12 +1712,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     justifyContent: "center",
     alignItems: "center",
-  },
-  addModalOverlay: {
-    flex: 1,
-  },
-  addCloseOverlay: {
-    flex: 1,
   },
   modalOverlay: {
     flex: 1,

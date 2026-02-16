@@ -535,10 +535,6 @@ This is a personal/family project. If you have suggestions or find bugs, please 
 
 ## 📋 Changelog
 
-### 2026-02-16
-
-- **Smooth Add Place Modal Animation**: Replaced the abrupt backdrop appear/disappear with a custom animated transition — dark tint fades in/out smoothly (300ms) while the content slides up with a spring animation and slides down on close
-
 ### 2026-02-15
 
 - **Current User "View" Button Fix (Family Screen)**: Fixed the "View" button on the current user's card not working — it now fetches the user's own location separately via `/api/locations/current` instead of looking in the family members list
